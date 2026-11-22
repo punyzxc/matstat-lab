@@ -14,4 +14,3 @@ Open [the local workspace](http://127.0.0.1:4175/). Use Histogram, ECDF, or ASCI
 This is a standalone Discovery spike. It tests the visual direction and browser interaction. The production architecture, worker contract, and final chart stack are decided through Discovery and the reviewed PRD.
 
 [Findings and screen preview](../../docs/research/visual-foundation.md)
-

@@ -26,4 +26,3 @@ export function Slider({ id, label, value, display, min, max, step, onChange }: 
 export function Stat({ label, actual, theoretical, id, referenceLabel = 'Theory' }: { label: string; actual: string; theoretical: string; id?: string; referenceLabel?: string }) {
   return <div className="stat"><dt>{label}</dt><dd className="stat-value" data-testid={id}>{actual}</dd><dd className="stat-reference">{referenceLabel} <b>{theoretical}</b></dd></div>;
 }
-

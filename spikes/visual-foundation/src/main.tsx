@@ -251,4 +251,3 @@ function Workspace() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode><MotionConfig reducedMotion="user"><Workspace /></MotionConfig></StrictMode>,
 );
-

@@ -123,4 +123,3 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
   return <canvas className="plot-canvas" ref={canvas} role="img"
     aria-label={mode === 'ecdf' ? 'Empirical cumulative distribution, P(X ≤ x)' : 'Histogram of observations, normalized as density'} />;
 }
-

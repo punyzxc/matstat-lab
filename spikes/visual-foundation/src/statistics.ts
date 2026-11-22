@@ -107,4 +107,3 @@ export function asciiHistogram(counts: number[], rows = 12, peak = Math.max(1, .
     }).join(' ');
   }).join('\n') + '\n' + '─'.repeat(counts.length * 2 - 1);
 }
-

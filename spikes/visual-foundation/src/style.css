@@ -214,4 +214,3 @@ details summary { cursor: pointer; color: var(--accent-strong); font-weight: 500
 @media(prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0s !important; animation-duration: 0s !important; }
 }
-
