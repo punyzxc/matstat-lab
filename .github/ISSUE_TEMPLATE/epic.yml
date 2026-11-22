@@ -1,0 +1,22 @@
+name: Epic
+description: A large user scenario that is sliced into tasks.
+labels: ["epic"]
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: User scenario
+      description: What the user can do once the epic is done.
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      description: Links to tasks (#N). Vertical slices, not layers.
+      value: |
+        - [ ] #
+  - type: textarea
+    id: demo
+    attributes:
+      label: How to demo

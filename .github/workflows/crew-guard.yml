@@ -1,0 +1,46 @@
+# PR rules without a human "approve" button (crew guard). Sets the crew-guard commit status -
+# a required check in main's protection (crew github setup).
+#
+# Why pull_request_target and issue_comment: both events take THIS file and crew.config.json from main,
+# not from the PR branch, so a PR cannot weaken the check for itself. PR code is not run here -
+# only the file list and comments are read via the GitHub API, so write permissions are safe.
+#
+#   failure - the PR touches agent/CI rules or someone else's acceptance tests, or the reviewer asks for changes;
+#   pending - waiting for an agent review (crew pr review); success - can be merged (auto-merge will do it).
+name: crew-guard
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+  issue_comment:
+    types: [created, edited] # crew pr review writes a comment → recompute the status
+  workflow_dispatch:
+    inputs:
+      pr: { description: "PR number", required: true }
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+  statuses: write # the crew-guard commit status
+
+jobs:
+  guard:
+    if: github.event_name != 'issue_comment' || (github.event.issue.pull_request && (contains(github.event.comment.body, 'crew:review') || contains(github.event.comment.body, 'crew:waive')))
+    runs-on: ubuntu-latest
+    concurrency:
+      group: crew-guard-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr }}
+      cancel-in-progress: true
+    steps:
+      # checkout without ref → main (base). We do not take the PR branch: its code is not needed here and must not be executed.
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Install agent-crew (npm, pinned version)
+        run: npm install -g "${{ vars.CREW_HARNESS }}"
+      - name: crew guard
+        env:
+          GH_TOKEN: "${{ github.token }}"
+          PR: "${{ github.event.pull_request.number || github.event.issue.number || inputs.pr }}"
+          CREW_HARNESS: "${{ vars.CREW_HARNESS }}" # PRs opened with an older crew fail (outdated_crew)
+        run: crew guard --pr "$PR" --report --json

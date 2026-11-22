@@ -1,0 +1,62 @@
+name: Task
+description: One task for one agent. Without acceptance criteria an agent will not take it.
+labels: ["status:needs-spec"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: One sentence - why this task exists.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Given / When / Then. Every item must be verifiable by a test.
+      value: |
+        - [ ] Given ... When ... Then ...
+    validations:
+      required: true
+  - type: input
+    id: contract
+    attributes:
+      label: Contract
+      description: A link to a part of the contract, e.g. contracts/api.yaml#/paths/~1auth
+  - type: input
+    id: paths
+    attributes:
+      label: Allowed paths
+      description: For example web/src/features/auth/**
+  - type: input
+    id: after
+    attributes:
+      label: Dependencies
+      description: "After #N, #M - until they are closed the task stays in status:waiting (crew task promote moves it to ready)"
+  - type: input
+    id: req
+    attributes:
+      label: Brief requirements
+      description: Requirement IDs from docs/brief-analysis.md, e.g. R1, R3
+  - type: textarea
+    id: changes_acceptance
+    attributes:
+      label: Changes acceptance
+      description: "Only if the task changes EXISTING acceptance tests (e.g. because of feedback). One path per line: tests/acceptance/test_12_login.py. The task's PR cannot change any other existing tests (crew-guard)."
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk
+      options: ["low", "med", "high"]
+  - type: textarea
+    id: tests
+    attributes:
+      label: Required tests
+      value: |
+        - [ ] unit
+        - [ ] contract
+        - [ ] e2e (if it touches the demo path)

@@ -1,0 +1,13 @@
+{
+  "name": "matstat-lab",
+  "rules_url": "",
+  "start": "",
+  "end": "",
+  "ai_allowed": true,
+  "ai_disclosure_required": true,
+  "prebuilt_code": "tooling_only",
+  "team_members": [
+    "punyzxc",
+    "GredesCerber"
+  ]
+}

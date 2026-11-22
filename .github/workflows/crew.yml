@@ -1,0 +1,124 @@
+# Code checks: linter, types, tests from crew.config.json. They work the same for Claude, Codex, and humans.
+# PR rules (protected files, acceptance tests, agent review) live in crew-guard.yml, which runs from main.
+# Requires the variable CREW_HARNESS (Settings → Variables), e.g. @gredescerber/agent-crew@0.6.0
+# (installed from the public npm registry at a pinned version; no token).
+# Main's protection, the variable, and the labels are set up by `crew github setup --apply`.
+name: crew
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/15 * * * *" # return expired task leases
+  # closing an issue → tasks that were waiting for it (status:waiting) move to ready (job promote)
+  issues:
+    types: [closed]
+  workflow_dispatch:
+
+# Minimal permissions by default: the check job runs code from the PR (tests), so it needs no write access.
+# issues: write is only for sweep (returning expired leases) and promote (waiting → ready).
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  # The job name `check` is the required-check context in main's protection (crew github setup).
+  check:
+    if: github.event_name != 'schedule' && github.event_name != 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: astral-sh/setup-uv@v6
+      - name: Install agent-crew (npm, pinned version)
+        run: npm install -g "${{ vars.CREW_HARNESS }}"
+      - name: Generated configs are up to date
+        run: crew adapters build --check --json
+      # On PRs the checks come from the base commit: an agent cannot "go green" by replacing check in crew.config.json with true.
+      # On push to main there is no base - crew.config.json from the commit itself is used.
+      - name: crew.config.json from the base commit (PR only)
+        if: github.event_name == 'pull_request'
+        env: { BASE_SHA: "${{ github.event.pull_request.base.sha }}" }
+        run: |
+          if git cat-file -e "$BASE_SHA:crew.config.json" 2>/dev/null; then
+            git show "$BASE_SHA:crew.config.json" > crew.config.json
+            echo "crew.config.json taken from base $BASE_SHA"
+          else
+            echo "::warning::The base commit has no crew.config.json - using the version from the PR"
+          fi
+      # Clean runner: without node_modules the lint/tsc/test steps from crew.config.json fail on every PR.
+      # Python dependencies are installed by `uv run` itself (it syncs the api/ environment before running).
+      - name: Product dependencies (web/, api/)
+        run: |
+          for d in web api; do
+            if [ -f "$d/package-lock.json" ]; then npm --prefix "$d" ci --no-audit --no-fund
+            elif [ -f "$d/package.json" ]; then npm --prefix "$d" install --no-audit --no-fund
+            fi
+          done
+      - name: crew check
+        run: crew check --json
+      - name: Event-mode compliance check (no-op unless event mode is configured)
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: crew compliance check --json
+
+  sweep:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # crew merge-ready merges ready PRs
+      issues: write # change status labels and write release markers
+      pull-requests: write # recompute crew-guard and merge ready PRs
+      statuses: write # the crew-guard commit status
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Install agent-crew (npm, pinned version)
+        run: npm install -g "${{ vars.CREW_HARNESS }}"
+      - env: { GH_TOKEN: "${{ github.token }}" }
+        run: crew task sweep --json
+      # A same-vendor review is counted via fallback_minutes, but the status will not recompute without an event.
+      # Every 15 minutes we recompute crew-guard for open PRs (code and config come from main, PR code is not executed).
+      - name: Recompute crew-guard for open PRs
+        env: { GH_TOKEN: "${{ github.token }}", CREW_HARNESS: "${{ vars.CREW_HARNESS }}" }
+        run: |
+          for n in $(gh pr list --state open --json number --jq '.[].number'); do
+            crew guard --pr "$n" --report --json > /dev/null || true
+          done
+
+      # Merge PRs that are ready but not auto-merged (risk:high, or auto-merge off): no agent session needed.
+      - name: Merge ready PRs
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: crew merge-ready --json
+
+      # Merges made with GITHUB_TOKEN trigger no workflows, so the "issue closed → promote" job never runs for them.
+      # Promote here: tasks waiting on what was just merged become ready now, not on the next tick.
+      - name: Promote tasks unblocked by these merges
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: crew task promote --json
+
+      # Team status in one pinned issue (no LLM): who waits for a human, stale leases, PRs, idle members.
+      - name: Update crew digest
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: crew digest --post --json
+
+  # An issue was closed → waiting tasks whose crew:after are all closed become ready.
+  promote:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    concurrency: { group: crew-promote, cancel-in-progress: false }
+    permissions:
+      contents: read
+      issues: write # change status labels and write a comment
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Install agent-crew (npm, pinned version)
+        run: npm install -g "${{ vars.CREW_HARNESS }}"
+      - env: { GH_TOKEN: "${{ github.token }}" }
+        run: crew task promote --json

@@ -1,0 +1,36 @@
+name: Feedback
+description: Tested the running app - what is wrong or what to improve. The product lead regularly turns feedback into tasks.
+labels: ["feedback"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is it
+      options: ["Bug", "Design / UX", "Functionality", "Idea"]
+    validations:
+      required: true
+  - type: textarea
+    id: did
+    attributes:
+      label: What you did
+      description: Steps to reproduce. A link to the page of the running app.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What you saw
+      description: You can paste a screenshot (Ctrl+V).
+  - type: dropdown
+    id: severity
+    attributes:
+      label: How important
+      options: ["Breaks the demo", "Noticeable to stakeholders", "Minor"]
+    validations:
+      required: true
