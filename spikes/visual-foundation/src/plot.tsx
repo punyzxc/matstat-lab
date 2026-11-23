@@ -48,13 +48,13 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
 
       ctx.font = '10px "IBM Plex Mono", monospace';
       ctx.lineWidth = 1;
-      ctx.fillStyle = '#9a9ab1';
+      ctx.fillStyle = '#aaa';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       for (let i = 0; i <= 4; i++) {
         const fraction = i / 4;
         const y = py(top * fraction);
-        ctx.strokeStyle = i === 0 ? '#454459' : '#252437';
+        ctx.strokeStyle = i === 0 ? '#555' : '#292929';
         line(margin.left, y, width - margin.right, y);
         ctx.fillText((top * fraction).toFixed(2), margin.left - 9, y);
       }
@@ -63,7 +63,7 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
       for (let i = 0; i <= ticks; i++) {
         const value = min + (max - min) * i / ticks;
         const x = px(value);
-        ctx.strokeStyle = '#252437';
+        ctx.strokeStyle = '#292929';
         line(x, margin.top, x, baseline);
         ctx.fillText(Number(value.toFixed(2)).toString(), x, baseline + 15);
       }
@@ -73,15 +73,15 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
       ctx.clip();
       if (sample.length && !cdf) {
         const fill = ctx.createLinearGradient(0, margin.top, 0, baseline);
-        fill.addColorStop(0, '#af9dff');
-        fill.addColorStop(1, '#3b2879');
+        fill.addColorStop(0, '#dedede');
+        fill.addColorStop(1, '#494949');
         hist.density.forEach((value, i) => {
           if (!value) return;
           const x = margin.left + i * plotWidth / hist.density.length;
           const w = plotWidth / hist.density.length - 2;
           ctx.fillStyle = fill;
           ctx.fillRect(x + 1, py(value), w, baseline - py(value));
-          ctx.fillStyle = '#c8baff';
+          ctx.fillStyle = '#f3f3f3';
           ctx.fillRect(x + 1, py(value), w, 1);
         });
       }
@@ -96,7 +96,7 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
           ctx.lineTo(px(sorted[rank]), py((rank + 1) / sorted.length));
         }
         ctx.lineTo(px(max), py(rank / sorted.length));
-        ctx.strokeStyle = '#b8aaff';
+        ctx.strokeStyle = '#ddd';
         ctx.lineWidth = 2;
         ctx.stroke();
       }
@@ -106,7 +106,7 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
           if (index === 0) ctx.moveTo(px(x), py(y));
           else ctx.lineTo(px(x), py(y));
         }
-        ctx.strokeStyle = '#f2edff';
+        ctx.strokeStyle = '#ebe589';
         ctx.lineWidth = 1.7;
         ctx.setLineDash([5, 4]);
         ctx.stroke();

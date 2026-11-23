@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('replays a seed and provides keyboard-accessible ASCII data', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
+  await page.goto('/#module/distribution');
   await expect(page.getByRole('heading', { name: 'Distribution Explorer', exact: true })).toBeVisible();
   const firstMean = await page.getByTestId('sample-mean').textContent();
   await page.getByRole('button', { name: 'Run simulation' }).click();
@@ -21,7 +21,7 @@ test('replays a seed and provides keyboard-accessible ASCII data', async ({ page
 test('updates model settings, exports data and fits a narrow viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
+  await page.goto('/#module/distribution');
   await page.getByLabel('Distribution', { exact: true }).selectOption('exponential');
   await expect(page.getByText('Parameters changed')).toBeVisible();
   await page.getByRole('button', { name: 'Run simulation' }).click();
@@ -36,7 +36,7 @@ test('updates model settings, exports data and fits a narrow viewport', async ({
 
 test('pause holds a partial sample and resume completes the same run', async ({ page }) => {
   await page.clock.install();
-  await page.goto('/');
+  await page.goto('/#module/distribution');
   await page.getByRole('button', { name: 'Run simulation' }).click();
   await page.clock.runFor(215);
   await page.getByRole('button', { name: 'Pause simulation' }).click();

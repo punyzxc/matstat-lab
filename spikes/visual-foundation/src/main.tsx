@@ -5,11 +5,16 @@ import './style.css';
 import { StrictMode, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Tabs from '@radix-ui/react-tabs';
-import { MotionConfig, motion, useReducedMotion } from 'motion/react';
+import { MotionConfig, motion } from 'motion/react';
 import {
-  Activity, ArrowDownToLine, Atom, ChartColumn, ChevronDown, ChevronRight, CircleHelp,
-  FlaskConical, Maximize, Minimize, Pause, Play, RotateCcw, ScanLine, Sigma, SlidersHorizontal, Waves,
+  Activity, ArrowDownToLine, ArrowLeft, ChevronDown, CircleHelp,
+  Maximize, Minimize, Pause, Play, RotateCcw, SlidersHorizontal,
 } from 'lucide-react';
+import { Observatory, MethodPreview } from './observatory';
+import { useStationReducedMotion } from './motion-preference';
+import { modules, type ModuleId } from './modules';
+import { LabHeader, LabFooter } from './lab-shell';
+import { PlateGlyph } from './plate-glyph';
 import { Plot } from './plot.tsx';
 import { asciiHistogram, collect, histogram, initialSettings, moments, sources, type Distribution, type RunSettings } from './statistics.ts';
 import { Button, Panel, PanelHeading, Slider, Stat } from './ui.tsx';
@@ -29,11 +34,11 @@ const guide = {
   ASCII: 'Relative bin counts · @ marks occupied levels',
 };
 
-function Workspace() {
-  const reduced = useReducedMotion();
-  const [run, setRun] = useState(() => newRun(initialSettings, true));
-  const [draft, setDraft] = useState(initialSettings);
-  const [seedText, setSeedText] = useState(String(initialSettings.seed));
+function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete: (value: RunSettings) => void }) {
+  const reduced = useStationReducedMotion();
+  const [run, setRun] = useState(() => newRun(settings, true));
+  const [draft, setDraft] = useState(settings);
+  const [seedText, setSeedText] = useState(String(settings.seed));
   const [projector, setProjector] = useState(false);
   const [theory, setTheory] = useState(true);
   const [mode, setMode] = useState<(typeof modes)[number]>('Histogram');
@@ -50,6 +55,10 @@ function Workspace() {
   const densityPeak = Math.max(...finalBins.density);
   const summary = moments(sample);
   const [theoreticalMean, theoreticalVariance] = model.theory(run.settings.scale);
+
+  useEffect(() => {
+    if (run.phase === 'complete') onComplete(run.settings);
+  }, [onComplete, run.phase, run.settings]);
 
   useEffect(() => {
     if (!busy) return;
@@ -102,49 +111,15 @@ function Workspace() {
   const actionText = busy ? 'Pause simulation' : run.phase === 'paused' ? 'Resume simulation' : 'Run simulation';
 
   return <div className={projector ? 'app app--projector' : 'app'}>
-    <a className="skip" href="#workspace">Skip to experiment</a>
-    <header className="topbar">
-      <a className="brand" href="#workspace" aria-label="STATUM LAB workspace">
-        <span className="brand-icon"><Atom size={21} aria-hidden /></span>
-        <span>STATUM<span className="wordmark-muted"> LAB</span></span>
-      </a>
-      <div className="top-path" aria-label="Workspace location">Laboratory <ChevronRight aria-hidden size={14} /> <span>Distribution Explorer</span></div>
-      <div className="top-actions">
-        <span className="local"><i /> LOCAL SESSION</span>
-        <Button variant="ghost" aria-pressed={projector} onClick={() => setProjector(!projector)}
-          aria-label="Projector" title={projector ? 'Leave projector mode' : 'Enter projector mode'}>
-          {projector ? <Minimize size={15} aria-hidden /> : <Maximize size={15} aria-hidden />}
-          <span>Projector</span>
-        </Button>
-      </div>
-    </header>
-
+    <a className="skip" href="#workspace" onClick={e=>{e.preventDefault();document.getElementById('workspace')?.focus();}}>Skip to experiment</a>
+    <LabHeader action={<Button variant="ghost" aria-pressed={projector} onClick={()=>setProjector(!projector)} aria-label="Projector" title="Toggle projector mode">
+      {projector ? <Minimize size={14}/> : <Maximize size={14}/>}<span>Projector</span></Button>}/>
     <div className="shell">
-      <aside className="sidebar" aria-label="Laboratory modules">
-        <p className="nav-label">EXPERIMENTS</p>
-        <nav aria-label="Experiments">
-          <a className="nav-item nav-active" href="#workspace" aria-current="page" aria-label="Distribution Explorer"><ChartColumn size={16} aria-hidden /><span>Distribution Explorer</span></a>
-          <div className="nav-item nav-future"><Waves size={16} aria-hidden /><span>Convergence</span></div>
-          <div className="nav-item nav-future"><Sigma size={16} aria-hidden /><span>Estimation</span></div>
-          <div className="nav-item nav-future"><Activity size={16} aria-hidden /><span>Confidence Intervals</span></div>
-        </nav>
-        <div className="nav-footer"><span className="nav-foot-symbol"><FlaskConical size={15} aria-hidden /></span><span>Monte Carlo Lab<small>VISUAL PROTOTYPE</small></span></div>
-      </aside>
-
-      <main id="workspace" tabIndex={-1} className="main">
-        <motion.section className="hero" aria-labelledby="hero-title" initial={reduced ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24, ease: 'easeOut' }}>
-          <div className="hero-art" aria-hidden />
-          <div className="hero-grid" aria-hidden />
-          <div className="hero-corner hero-corner-top" aria-hidden />
-          <div className="hero-corner hero-corner-bottom" aria-hidden />
-          <div className="hero-body">
-            <p className="eyebrow"><span /> MONTE CARLO LABORATORY</p>
-            <h1 id="hero-title">Distribution<br />Explorer</h1>
-            <p className="hero-copy">Draw a random sample and see how it compares with the theoretical distribution.</p>
-          </div>
-          <span className="scene-label" aria-hidden><ScanLine size={13} /> PROBABILITY FIELD</span>
-        </motion.section>
+      <main id="workspace" tabIndex={-1} className="lab-spread">
+        <a href="#observatory" className="backlink"><ArrowLeft size={14}/>Probability atlas</a>
+        <div className="method-intro"><div><div className="edition"><i/> EXPERIMENT 01</div>
+          <h1>Distribution Explorer</h1><p>Draw a random sample and compare it with the theoretical distribution.</p></div>
+          <PlateGlyph id="distribution"/></div>
 
         <div className="workspace-title">
           <h2>Experiment workspace</h2>
@@ -244,10 +219,46 @@ function Workspace() {
           </div>
         </Panel>
       </main>
-    </div>
+    </div><LabFooter/>
   </div>;
 }
 
+function readModuleRoute(): ModuleId | null {
+  const hash = window.location.hash;
+  if (hash === '#workspace') return 'distribution';
+  return modules.find(m => hash === '#module/' + m.id)?.id ?? null;
+}
+
+function StationApp() {
+  const [route, setRoute] = useState(readModuleRoute);
+  const [selected, setSelected] = useState<ModuleId>(() => readModuleRoute() ?? 'distribution');
+  const [settings, setSettings] = useState(initialSettings);
+  useEffect(() => {
+    const navigate = () => {
+      const next = readModuleRoute();
+      setRoute(next);
+      if (next) setSelected(next);
+      requestAnimationFrame(() => {
+        const index = window.location.hash === '#experiments';
+        const heading = document.querySelector<HTMLElement>(index ? '#index-title' : 'main h1');
+        if (!heading) return;
+        heading.tabIndex = -1;
+        heading.focus({ preventScroll: true });
+        if (index) heading.scrollIntoView({ block: 'start' });
+        else window.scrollTo(0,0);
+      });
+    };
+    window.addEventListener('hashchange', navigate);
+    return () => window.removeEventListener('hashchange', navigate);
+  }, []);
+  useEffect(() => {
+    document.title = (modules.find(m => m.id === route)?.name ?? 'Probability atlas') + ' · STATUM LAB';
+  }, [route]);
+  if (route === 'distribution') return <Workspace settings={settings} onComplete={setSettings}/>;
+  if (route) return <MethodPreview key={route} id={route} settings={settings}/>;
+  return <Observatory settings={settings} initialModule={selected} onSelect={setSelected} onSample={setSettings}/>;
+}
+
 createRoot(document.getElementById('root')!).render(
-  <StrictMode><MotionConfig reducedMotion="user"><Workspace /></MotionConfig></StrictMode>,
+  <StrictMode><MotionConfig reducedMotion="user"><StationApp /></MotionConfig></StrictMode>,
 );

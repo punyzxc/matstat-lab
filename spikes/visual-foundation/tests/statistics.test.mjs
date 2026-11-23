@@ -31,3 +31,20 @@ test('model distributions expose matching density, CDF and moments', () => {
   assert.ok(Math.abs(sources.exponential.cdf(1, 1) - (1 - Math.exp(-1))) < 1e-12);
   assert.deepEqual(sources.exponential.theory(2), [2, 4]);
 });
+
+import { moduleReadout } from '../src/method-readouts.ts';
+
+test('method previews agree with hand-computed mean, error and interval', () => {
+  const sample = [1,2,3,4];
+  assert.equal(moduleReadout('convergence', sample, run).value, '2.5000');
+  assert.equal(moduleReadout('estimation', sample, run).value, (Math.sqrt(5/3)/2).toFixed(4));
+  const r = Math.sqrt(5);
+  assert.equal(moduleReadout('confidence', sample, run).value, `[${(2.5-r).toFixed(4)}, ${(2.5+r).toFixed(4)}]`);
+});
+
+test('sign and run previews handle ties, both tails and draw order', () => {
+  assert.equal(moduleReadout('testing', [0,1,2,3,4], run).value, '0.1250');
+  assert.equal(moduleReadout('testing', [-1,-2,3,4], run).value, '1.0000');
+  assert.equal(moduleReadout('testing', [-1,-2,-3,4], run).value, '0.6250');
+  assert.equal(moduleReadout('randomness', [-1,0,2,-3,4], run).value, '4');
+});
