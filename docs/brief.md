@@ -20,3 +20,7 @@ Scientific quality requires documented formulas and parameter domains, seeded de
 The six-person team uses the existing public GitHub repository and agent-crew in team Discovery mode. The native queue, host adapters, worktrees, PR checks, independent review, and main protection govern implementation. The initial bootstrap includes the project brief, research questions, tooling and onboarding. The captain approves the PRD revision after Discovery and before foundation work.
 
 Source material for this brief is the project bootstrap and product description supplied by the project owner. Primary course lecture PDFs are pending.
+
+## Functional kickoff confirmed by the owner
+
+The development team owns numerical methods, chart series, simulation, inference, research data and testing. The captain owns the visual implementation. The statistical scope includes Normal, Uniform, Bernoulli, Binomial, Poisson and Exponential. The chart pipeline provides empirical and theoretical data, assumptions and provenance through reusable contracts. Save, rename, delete, reload and export runs locally. Prioritize Distribution Explorer as the first integrated slice and add Convergence, Estimation and Confidence Intervals. Expand to a bounded hypothesis-testing study after the core rollout.

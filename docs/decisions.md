@@ -14,3 +14,9 @@ When a proposal is accepted, record the approver, date, supporting research and 
 ## 2026-11-23 — Use a neutral monochrome palette and a restrained yellow signal
 
 The project owner set black, white, neutral greys and minimal yellow as the required art direction. The previous violet instrument shell and green-tinted station study were considered during visual exploration. The team will review the Probability Atlas composition and prototype separately. This decision records the palette and the educational purpose. The prototype and the PRD still require their respective approvals.
+
+## 2026-11-23 — Separate the functional build from owner-managed visual work
+
+The project owner retains the interface, motion, graphic composition and design assets. The functional team delivers computation, prepared chart data, state, storage and tests through typed contracts. The owner requested populated Statistical Engine, Monte Carlo, Inference, Research Data, and QA streams. The approach is a static browser application with local persistence. Hypothesis Testing follows the core estimation and interval labs.
+
+The protected area map and static scaffold are pending maintainer review. Role choices for inference, data and QA remain provisional until the team accepts repository access and confirms ownership. Distribution tolerances, replay scope, interval eligibility, caps and retention remain Discovery decisions. The functional PRD still requires independent review and human approval.

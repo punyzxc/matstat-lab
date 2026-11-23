@@ -19,7 +19,7 @@ Prepare two independently generated, versioned fixture records for the presentat
 | R5 | Must | Show running means and sampling distributions in Convergence Laboratory. | “law of large numbers” |
 | R6 | Must | Compare variance estimators and report bias, variability and MSE. | “divisors n and n−1” |
 | R7 | Must | Make lessons guided and assumptions explicit. Distinguish quantities and approximations. | “interpretation questions” |
-| R8 | Must | Support keyboard, reduced motion, both themes, a responsive layout and projector mode. | “projector layouts” |
+| R8 | Must | Support keyboard, reduced motion, a responsive layout and projector mode in the owner-managed interface. | “projector layouts” |
 | R9 | Must | Back results with mathematical contracts, reference fixtures and edge-case tests. | “independent NumPy/SciPy reference fixtures” |
 | R10 | Must | Measure interval coverage and describe each interval method's assumptions. | “observed coverage” |
 | R11 | Must | Coordinate six humans through native agent-crew, independent PR review and protected main. | “team Discovery mode” |
@@ -37,17 +37,16 @@ Prepare two independently generated, versioned fixture records for the presentat
 
 ## Open questions and risks
 
-| Question | Owner by discipline | Working assumption |
+| Question | Discovery owner | Evidence |
 | --- | --- | --- |
-| Which initial distributions and parameter limits fit the curriculum? | Statistical Core and Pedagogy | Normal, uniform and exponential are candidates. Validate against available lectures before committing scope. |
-| What is the reproducibility guarantee across browsers and releases? | Statistical Core and Simulation | Stable draw order and exact discrete results for a pinned engine. Quantify allowed floating-point error for continuous values. |
-| What laptop, sample caps and browser targets are appropriate? | Simulation and Platform | Use measured worker latency and memory on a representative classroom laptop. Set limits during Discovery. |
-| What export and language conventions does the course need? | Pedagogy and Visualization | Versioned JSON for replay, CSV for data exchange, and locale-aware presentation. Confirm lesson language and CSV expectations. |
-| Which chart and projector defaults communicate uncertainty? | Visualization and Design | Common scales where comparable, labeled units, shape or line style in addition to color. |
-| How should frontend-only checks and code ownership be configured? | Platform and repo owner | Retain the web-node preset and align scaffold, checks and actual paths through the maintainer process before foundation. |
-| Which four accounts complete the roster and who owns which area? | Captain | Functional area IDs are provisional until collaborators and availability are confirmed. |
+| What domains, parameterizations, tolerances and chart semantics define the six distributions? | Statistical Engine, #13 | Independent formula and SciPy fixtures, including discrete endpoints. |
+| What reproducibility, cancellation and retention guarantees fit the browser worker? | Monte Carlo and Simulation, #14 | Measured budgets and pinned replay across chunk sizes on named hardware. |
+| Which inference methods meet their assumptions and nominal coverage? | Statistical Inference, #15 | Analytical interval bounds, predeclared Monte Carlo coverage bands, applicability warnings. |
+| How should replay, retention and exports survive schema and engine version changes? | Research Data, #4 | Encoded fixture snapshots, reload, migration, rename/delete and export contracts. |
+| What test and CI budget can catch scientific and lifecycle regressions? | Scientific QA, #6 | Independent fixture plan, Vitest, Worker and Playwright checks, acceptance author separation. |
+| Can five owners work in independent directories under the current broad web area? | Captain and harness maintainer | Maintainer-reviewed area mapping and sanitized static scaffold. |
 
-The major risks are misleading finite-sample conclusions, nondeterministic worker scheduling, UI stalls, invalid chart comparisons, missing course materials, loss of browser data, and GitHub authentication or protection gaps. Use method contracts, deterministic order, bounded chunks, shared chart units, documented course assumptions, versioned export and a protected PR smoke run.
+The main risks are unstable tail probabilities, finite-sample overclaims, incorrect coverage, cross-engine floating point, worker event races, retained-data growth, local storage failure and blocked protected checks. Version the sampler and result encoding. Fix tolerances before running seeded fixtures. Label assumptions and bound chunks and retained arrays. Verify a protected PR once CI is restored. Primary course PDFs are still pending.
 
 ## MVP boundary
 
@@ -55,4 +54,4 @@ Release scope ends at the four core laboratories. Hypothesis testing, Bertrand's
 
 ## Stack
 
-The web-node preset supplies the React/Vite base. The project needs a browser Web Worker, TypeScript contracts, ECharts, KaTeX, Tailwind, shadcn/ui and local IndexedDB. Baseline CI uses strict TypeScript, ESLint, Vitest and Playwright. Python with pinned NumPy/SciPy is used for offline reference generation. Vercel serves the static build. The preset's Fastify generator, API checks and areas need review by the harness maintainer before the skeleton task. [web-node preset](https://github.com/GredesCerber/agent-crew/blob/main/templates/stacks/web-node.json)
+The web-node preset currently includes a server scaffold. The proposal uses the frontend part with TypeScript, a browser Web Worker, IndexedDB for local history, Vitest and Playwright. Build and deploy the static application after the maintainer aligns scaffold, checks and paths. The chart payloads feed the existing visuals through the typed adapter. Use pinned NumPy/SciPy fixtures for reference cases. [Functional area proposal](functional-areas.md) · [Shared contract draft](functional-contract-draft.md)

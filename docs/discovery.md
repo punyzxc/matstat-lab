@@ -1,102 +1,53 @@
-# Discovery plan
+# Functional Discovery
 
-The repository is in Discovery. Research results live under docs/research and prototype code lives under spikes. The reviewed PRD and captain approval govern the build.
+The product owner assigned visual design to the captain on 2026-11-23. Functional research is browser-only, type-safe and independent of the visual implementation. Workers, chart data and the local journal share the result contract.
 
-## Integration and references
+## Current investigation queue
 
-```crew-research
-id: visual-foundation
-question: Can a keyboard-accessible sci-fi shell make a seeded distribution and its ASCII data readable?
-area: web
-owner: punyzxc
-budget_hours: 3
-```
+The five investigations have independent deliverables and can use fixtures. The production tasks and epics are specified in [the draft PRD](prd.md). Existing prototype and reference review stay in PR #9 and PR #8. The earlier design-only investigations are out of the functional queue. Preserve the claimant's handoff for #12.
 
 ```crew-research
-id: design-references
-question: Can the team review the full visual reference set alongside the initial project brief and design direction?
+id: statistical-engine
+question: Which distribution parameterizations, errors and fixtures give a verifiable statistical core?
 area: research
-owner: punyzxc
-budget_hours: 1
-```
-
-## Orbital workspace
-
-The latest brief centres the home interface on Earth. The existing prototype in [PR #9](https://github.com/punyzxc/matstat-lab/pull/9) demonstrates the integrated experience. These seven research tasks produce independent evidence for the build plan. Each has its own document and may use a standalone spike. Work does not wait for another research issue to close.
-
-| Area | Focus | Evidence |
-| --- | --- | --- |
-| design | visual-theme | A window anatomy and state matrix, two viewport stencils, and evidence for keyboard and pointer activation. |
-| web | visual-motion | A motion token table, interruption demo, and a reduced-motion comparison. |
-| contracts | explorer-chart | A typed last-result/preview proposal, deterministic fixtures for six modules, and a preview encoding matrix. |
-| design | ascii-art | Two monochrome scene studies, three legible glyph assets, and rules for labels, contrast and motion. |
-| e2e | visual-accessibility | Reproducible checks and a browser evidence matrix for desktop, narrow, projector and expanded registries. |
-| web | orbital-composition | A responsive layout spike and deterministic fixtures for orbital projection, occlusion and keep-out geometry.
-| web | orbital-atmosphere | A compositing spike for ASCII artwork, stars, beacons and satellites using fixture trajectories. |
-
-```crew-research
-id: visual-theme
-question: Which reusable orbital window makes a laboratory and its last result easy to identify and open?
-area: design
-budget_hours: 2
-```
-
-```crew-research
-id: visual-motion
-question: Which shared motion policy keeps the globe, data links and result transitions responsive and readable?
-area: web
-budget_hours: 2
-```
-
-```crew-research
-id: explorer-chart
-question: Which snapshot contract and scientific encodings preserve the last result across all six module previews?
-area: contracts
-budget_hours: 3
-```
-
-```crew-research
-id: ascii-art
-question: Which monochrome ASCII illustrations and HUD treatments add atmosphere while preserving scientific readability?
-area: design
-budget_hours: 2
-```
-
-```crew-research
-id: visual-accessibility
-question: Can the orbital workspace scale while preserving keyboard operation, motion preferences and performance?
-area: e2e
-budget_hours: 2
-```
-
-```crew-research
-id: orbital-composition
-question: How should the Earth scene, slot registry and trajectories scale into one coherent laboratory interface?
-area: web
 owner: GredesCerber
 budget_hours: 3
 ```
 
 ```crew-research
-id: orbital-atmosphere
-question: How should ASCII artwork, stars, beacons and satellites be composited into the globe scene while remaining legible and lightweight?
+id: simulation-engine
+question: Which worker protocol, replay rules and measured budgets support independent Monte Carlo experiments?
 area: web
 owner: Jumalinova
 budget_hours: 3
 ```
 
-The atmosphere renderer can use synthetic projected points while the composition workstream validates projection and occlusion. The ASCII art workstream owns the glyph catalog and hierarchy. Prototype assets and the renderer are evaluated independently.
+```crew-research
+id: inference-methods
+question: Which estimators and confidence intervals are valid for the initial experiments and how should they be validated?
+area: research
+budget_hours: 3
+```
 
-The initial integration and the reference archive remain in issues [#1](https://github.com/punyzxc/matstat-lab/issues/1) and [#7](https://github.com/punyzxc/matstat-lab/issues/7). Collaborators claim available work through `crew task next` and `crew task claim <issue>`.
+```crew-research
+id: explorer-chart
+question: Which versioned snapshot preserves experiments, last results, chart data and replay across storage migrations?
+area: contracts
+budget_hours: 3
+```
 
-## Remaining scientific questions
-
-Agree on the initial distributions and reference tolerances, worker and replay contract, export and local retention, classroom terminology and projector settings, and the maintainer-reviewed frontend-only setup. See [brief analysis](brief-analysis.md).
+```crew-research
+id: visual-accessibility
+question: Which independent reference checks and worker budgets gate scientific and integration correctness?
+area: e2e
+output: docs/research/visual-accessibility.md
+budget_hours: 3
+```
 
 ## Exit criteria
 
-- [ ] Document the visual choices and verify keyboard, responsive, and reduced-motion behavior.
-- [ ] Resolve or record all scientific questions and operational risks.
-- [ ] Confirm functional ownership of the six areas and the frontend-only stack.
-- [ ] Close research tasks and resolve human questions.
-- [ ] Review the final PRD with an agent of another vendor before captain approval.
+- [ ] Record resolved or explicitly deferred scientific decisions, including replay bounds and interval eligibility.
+- [x] Record the reproducible demo scenario and functional ownership boundary in the brief analysis.
+- [ ] Verify a frontend-only scaffold and review the required path and check changes through the maintainer workflow.
+- [ ] Confirm all functional owners as repository members and complete independent reviews of the research.
+- [ ] Land the final PRD on main through a reviewed PR.
