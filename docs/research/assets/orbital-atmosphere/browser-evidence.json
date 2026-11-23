@@ -1,0 +1,156 @@
+{
+  "capturedAt": "2026-11-23T09:37:55.198Z",
+  "browser": "157.0.8103.79",
+  "platform": "win32",
+  "profiling": "6 seconds per viewport; browser automation, not a low-end device benchmark",
+  "results": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "checks": {
+        "seededScene": true,
+        "distinctCraft": true,
+        "transparentGlyphs": "unit test",
+        "paused": true,
+        "reducedMotionChange": true,
+        "simulatedHidden": true,
+        "manualGlobe": true,
+        "keyboardResample": true,
+        "allSixRoutes": true,
+        "noHorizontalOverflow": true,
+        "noExternalRequests": true,
+        "noPageErrors": true,
+        "noDomGrowth": true,
+        "clearance": {
+          "valid": true,
+          "examined": 6728,
+          "snapshots": 65
+        }
+      },
+      "staticCounts": {
+        "stars": 98,
+        "satellites": 2,
+        "illustrations": 2,
+        "beacons": 2
+      },
+      "metrics": {
+        "paused": false,
+        "reduced": false,
+        "hidden": false,
+        "active": true,
+        "pendingFrame": true,
+        "time": 11.99909999999998,
+        "callbackCount": 361,
+        "seed": 2048,
+        "baseline": false,
+        "width": 1344,
+        "height": 600,
+        "dpr": 1,
+        "yaw": 0,
+        "zoom": 1,
+        "renderCount": 183,
+        "drawCalls": 123,
+        "errors": [],
+        "counts": {
+          "stars": 98,
+          "satellites": 2,
+          "illustrations": 2,
+          "beacons": 2
+        },
+        "satelliteKinds": [
+          "array",
+          "relay"
+        ],
+        "cpuMs": {
+          "samples": 174,
+          "median": 0.5999984741210938,
+          "p95": 1.3000011444091797,
+          "max": 2.299999237060547
+        },
+        "cadenceMs": {
+          "samples": 172,
+          "median": 33.400001525878906,
+          "p95": 49.20000076293945
+        },
+        "domNodes": 64
+      }
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "checks": {
+        "seededScene": true,
+        "distinctCraft": true,
+        "transparentGlyphs": "unit test",
+        "paused": true,
+        "reducedMotionChange": true,
+        "simulatedHidden": true,
+        "manualGlobe": true,
+        "keyboardResample": true,
+        "allSixRoutes": true,
+        "noHorizontalOverflow": true,
+        "noExternalRequests": true,
+        "noPageErrors": true,
+        "noDomGrowth": true,
+        "clearance": {
+          "valid": true,
+          "examined": 1974,
+          "snapshots": 65
+        }
+      },
+      "staticCounts": {
+        "stars": 25,
+        "satellites": 2,
+        "illustrations": 2,
+        "beacons": 2
+      },
+      "metrics": {
+        "paused": false,
+        "reduced": false,
+        "hidden": false,
+        "active": true,
+        "pendingFrame": true,
+        "time": 12.016,
+        "callbackCount": 362,
+        "seed": 2048,
+        "baseline": false,
+        "width": 354,
+        "height": 787,
+        "dpr": 1,
+        "yaw": 0,
+        "zoom": 1,
+        "renderCount": 188,
+        "drawCalls": 50,
+        "errors": [],
+        "counts": {
+          "stars": 25,
+          "satellites": 2,
+          "illustrations": 2,
+          "beacons": 2
+        },
+        "satelliteKinds": [
+          "array",
+          "relay"
+        ],
+        "cpuMs": {
+          "samples": 179,
+          "median": 0.39999961853027344,
+          "p95": 1.1000003814697266,
+          "max": 2.200000762939453
+        },
+        "cadenceMs": {
+          "samples": 177,
+          "median": 33.39999961853027,
+          "p95": 47.20000076293945
+        },
+        "domNodes": 64
+      }
+    }
+  ]
+}

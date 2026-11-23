@@ -1,34 +1,53 @@
-# Discovery: what we research before the plan
+# Functional Discovery
 
-The project starts in the **discovery phase** (`crew.config.json` → `"phase": "discovery"`): no product code yet, only research under `docs/`, throwaway experiments under `spikes/`, and `README.md` / `JOIN.md`. crew-guard enforces it. `crew kickoff --apply` ends the phase once the exit criteria below are met.
+The product owner assigned visual design to the captain on 2026-11-23. Functional research is browser-only, type-safe and independent of the visual implementation. Workers, chart data and the local journal share the result contract.
 
-How it works:
-1. The captain's agent analyzes the brief (skill `crew-brief-analysis`) and lists the open questions here as `crew-research` blocks: one question, one owner (by area), a time budget in hours.
-2. `crew discover plan --apply` (captain) turns them into research tasks; the area owners' agents take them from `crew task next`.
-3. Each task ends with a document `docs/research/<id>.md`: facts with sources, assumptions marked as such, and a short **position** (what we propose and why).
-4. Disagreements go through PR comments and `crew ask <area>`; questions only the organizers or the client can answer go to the captain with `crew ask <area> --human`. Agreed decisions are written to `docs/decisions.md`.
-5. The captain's agent writes `docs/prd.md` from the research and the decisions, as a PR: an agent of another vendor reviews it, and every area checks that its research is reflected.
-6. When `crew discover status` says done, `crew kickoff --apply` creates the tasks and switches the phase to `build`.
+## Current investigation queue
 
-A big new feature later can get a small discovery of its own: add a block here, `crew discover plan --apply`, the rest of the team keeps building.
-
-## Research questions
-
-Replace the example. Keys: `id` (lowercase, dashes), `question`, `area` (from crew.config.json), `owner` (GitHub login), `budget_hours`, optionally `output` (default `docs/research/<id>.md`).
+The five investigations have independent deliverables and can use fixtures. The production tasks and epics are specified in [the draft PRD](prd.md). Existing prototype and reference review stay in PR #9 and PR #8. The earlier design-only investigations are out of the functional queue. Preserve the claimant's handoff for #12.
 
 ```crew-research
-id: competitors
-question: What do similar products do, and where do they fall short for our users?
+id: statistical-engine
+question: Which distribution parameterizations, errors and fixtures give a verifiable statistical core?
 area: research
-owner: <login>
-budget_hours: 2
+owner: GredesCerber
+budget_hours: 3
+```
+
+```crew-research
+id: simulation-engine
+question: Which worker protocol, replay rules and measured budgets support independent Monte Carlo experiments?
+area: web
+owner: Jumalinova
+budget_hours: 3
+```
+
+```crew-research
+id: inference-methods
+question: Which estimators and confidence intervals are valid for the initial experiments and how should they be validated?
+area: research
+budget_hours: 3
+```
+
+```crew-research
+id: explorer-chart
+question: Which versioned snapshot preserves experiments, last results, chart data and replay across storage migrations?
+area: contracts
+budget_hours: 3
+```
+
+```crew-research
+id: visual-accessibility
+question: Which independent reference checks and worker budgets gate scientific and integration correctness?
+area: e2e
+output: docs/research/visual-accessibility.md
+budget_hours: 3
 ```
 
 ## Exit criteria
 
-Check each item (`- [x]`) when it is true. `crew discover status` also checks by itself: all research tasks closed, no question waiting for a human, at least one decision in `docs/decisions.md`, the PRD on main through a reviewed PR.
-
-- [ ] Every open question from `docs/brief-analysis.md` is answered, decided, or explicitly postponed (with a line in decisions.md)
-- [ ] The demo scenario is written down
-- [ ] The stack is chosen
-- [ ] The main risks are listed, each with what we do about it
+- [ ] Record resolved or explicitly deferred scientific decisions, including replay bounds and interval eligibility.
+- [x] Record the reproducible demo scenario and functional ownership boundary in the brief analysis.
+- [ ] Verify a frontend-only scaffold and review the required path and check changes through the maintainer workflow.
+- [ ] Confirm all functional owners as repository members and complete independent reviews of the research.
+- [ ] Land the final PRD on main through a reviewed PR.
