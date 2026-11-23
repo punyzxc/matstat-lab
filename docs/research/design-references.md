@@ -1,8 +1,7 @@
 # Reference set and visual direction
 
-The project owner supplied seven image references and named the direction as sci-fi, ASCII data and motion graphics. The files are indexed locally with their original names and copied without conversions. The reference set suggests contrast, spatial depth, restrained accents, thin scientific frames and point-matrix forms.
+**Fact.** The seven source PNGs are archived unmodified in the [reference index](../references/README.md). The set includes technical dashboard lines, monochrome data illustrations, typographic grids, luminous nodes and distinct geometric studies.
 
-The initial direction gives measured data three equivalent views. The project should use original atmospheric art in the shell and preserve clear distinction between that artwork and the experiment's numerical data. Validate the treatment through the six parallel Discovery tasks before incorporating it into the approved PRD.
+**Fact.** The integrated candidate is tracked in [PR #9](https://github.com/punyzxc/matstat-lab/pull/9). The six [Discovery workstreams](../discovery.md#orbital-workspace) own composition, windows, preview contracts, motion, scientific HUD, and validation as separate outputs.
 
-[Reference index](../references/README.md) · [Design direction](../design-direction.md)
-
+**Position.** Use the planet as the reference frame for navigation, as specified in the [current design direction](../design-direction.md). Each module shows its own completed result or a labeled demonstration. The visual grammar uses thin contours and restrained signals. Maintain readable names, geography-independent keyboard order and clear distinction between measured scientific marks and decoration. The science contract and layout research should determine which signals and right-sized previews move into the build plan.

@@ -1,8 +1,8 @@
 # Discovery plan
 
-The visual iteration tests six independent parts of the scientific workspace. The repository is in Discovery. Prototype code goes under `spikes/<id>/`; the protected build workflow applies after reviewed research and PRD approval.
+The repository is in Discovery. Research results live under docs/research and prototype code lives under spikes. The reviewed PRD and captain approval govern the build.
 
-## Visual iteration
+## Integration and references
 
 ```crew-research
 id: visual-foundation
@@ -13,41 +13,6 @@ budget_hours: 3
 ```
 
 ```crew-research
-id: visual-theme
-question: Which design tokens support a high-contrast black-and-white research workspace with one spectral accent?
-area: design
-budget_hours: 2
-```
-
-```crew-research
-id: visual-motion
-question: Which short, interruptible transitions clarify parameter changes, data updates and reduced-motion states?
-area: web
-budget_hours: 2
-```
-
-```crew-research
-id: explorer-chart
-question: Which histogram, ECDF and ASCII encodings best preserve scale and teach the theory comparison?
-area: contracts
-budget_hours: 3
-```
-
-```crew-research
-id: ascii-art
-question: Which original ASCII and point-cloud motifs support the research workspace and keep measured data legible?
-area: design
-budget_hours: 2
-```
-
-```crew-research
-id: visual-accessibility
-question: Does the workspace remain usable with keyboard input, reduced motion, a narrow screen and projector scaling?
-area: e2e
-budget_hours: 2
-```
-
-```crew-research
 id: design-references
 question: Can the team review the full visual reference set alongside the initial project brief and design direction?
 area: research
@@ -55,7 +20,63 @@ owner: punyzxc
 budget_hours: 1
 ```
 
-The first six questions can run in parallel. Each contributor writes the research result in their own output document. A shared reference index connects the files to design decisions. Once known, collaborators may claim any available work via the normal queue.
+## Orbital workspace
+
+The latest brief centres the home interface on Earth. The existing prototype in [PR #9](https://github.com/punyzxc/matstat-lab/pull/9) demonstrates the integrated experience. These six research tasks produce independent evidence for the build plan. Each has its own document and may use a standalone spike. Work does not wait for another research issue to close.
+
+| Area | Focus | Evidence |
+| --- | --- | --- |
+| design | visual-theme | A window anatomy and state matrix, two viewport stencils, and evidence for keyboard and pointer activation. |
+| web | visual-motion | A motion token table, interruption demo, and a reduced-motion comparison. |
+| contracts | explorer-chart | A typed last-result/preview proposal, deterministic fixtures for six modules, and a preview encoding matrix. |
+| design | ascii-art | Two neutral monochrome studies with frame fragments, annotation rules and a measured ASCII example. |
+| e2e | visual-accessibility | Reproducible checks and a browser evidence matrix for desktop, narrow, projector and expanded registries. |
+| web | orbital-composition | A diagram of normalized anchor geometry and a responsive composition spike with placeholder window footprints. |
+
+```crew-research
+id: visual-theme
+question: Which reusable orbital window makes a laboratory and its last result easy to identify and open?
+area: design
+budget_hours: 2
+```
+
+```crew-research
+id: visual-motion
+question: Which shared motion policy keeps the globe, data links and result transitions responsive and readable?
+area: web
+budget_hours: 2
+```
+
+```crew-research
+id: explorer-chart
+question: Which snapshot contract and scientific encodings preserve the last result across all six module previews?
+area: contracts
+budget_hours: 3
+```
+
+```crew-research
+id: ascii-art
+question: Which scientific HUD and ASCII details make orbital connections legible without adding visual noise?
+area: design
+budget_hours: 2
+```
+
+```crew-research
+id: visual-accessibility
+question: Can the orbital workspace scale while preserving keyboard operation, motion preferences and performance?
+area: e2e
+budget_hours: 2
+```
+
+```crew-research
+id: orbital-composition
+question: How should the Earth scene, slot registry and trajectories scale into one coherent laboratory interface?
+area: web
+owner: GredesCerber
+budget_hours: 3
+```
+
+The initial integration and the reference archive remain in issues [#1](https://github.com/punyzxc/matstat-lab/issues/1) and [#7](https://github.com/punyzxc/matstat-lab/issues/7). Collaborators claim available work through `crew task next` and `crew task claim <issue>`.
 
 ## Remaining scientific questions
 

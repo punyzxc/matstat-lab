@@ -2,9 +2,39 @@
 
 ## Workspace
 
-The entry atlas pairs a seeded model selector with an interactive geometric specimen. The six-method index uses compact illustrated tabs. A session record shows the sample trace, ASCII histogram and summary statistics. Distribution Explorer puts parameters alongside a chart on large screens and in one column on small screens. Projector mode increases chart area. Annotate partial runs and preserve scale during progressive updates.
+Distribution Explorer puts parameters alongside a chart on large screens and in one column on small screens. Projector mode increases chart area. Annotate partial runs and preserve scale as the experiment progresses. Encode empirical observations with solid marks and theoretical curves with dashed lines. Preserve axis values and provide accessible numeric alternatives. The shared type system uses Space Grotesk, Instrument Serif italic and IBM Plex Mono. [Current design direction](design-direction.md) · [Prototype and visual review](https://github.com/punyzxc/matstat-lab/pull/9)
 
-The current visual requirement is neutral black, white and grey, with a restrained yellow signal. Encode the empirical series with solid marks and the theoretical curve with a dashed line. Use visible focus, direct labels, sample counts and an accessible numeric alternative. The shared type system uses Space Grotesk, Instrument Serif italic and IBM Plex Mono. The prototype uses shared tokens and lifecycle controls across experiments. [Design direction](design-direction.md) · [Prototype and visual review](https://github.com/punyzxc/matstat-lab/pull/9)
+## Orbital home
+
+The point-cloud Earth is the central scene. Each visible module links a declared globe or orbit anchor to a window in the layout. Links and HUD accents use neutral grey, with pale yellow reserved for focus and current signals. A static SVG layer provides structure when motion is paused. Use fragment frames, measured coordinates, and optional scientific annotations in the same vocabulary as the archived references.
+
+A module window is one semantic link. Its name, summary, provenance and destination are readable at rest, including keyboard focus. Promote saved results as the latest use and label a deterministic default as an example. A preview displays the state from that module's completed run. A model change, draft, or background animation does not save a result. Resume the saved settings when the user opens a module. Compact view keeps Earth first, follows with the same logical link order, and simplifies routes to a readable spine.
+
+### Interfaces and ownership
+
+| Primitive | Responsibility |
+| --- | --- |
+| Module registry | Stable ID, route, title, scientific preview kind and anchor slot. Adding an entry does not modify the window renderer or persistence logic. |
+| Layout and link layer | Derive routes from screen coordinates and registered anchors. Own static traces, active connection and fallback position. Keep decorative SVG out of keyboard navigation. |
+| Window presentation | Semantic link, label, accessible summary, state affordances and miniature chart viewport. Render a typed preview without computing a simulation. |
+| Result snapshot | Completed settings, module ID and method parameters such as the analyzed prefix. Resolve personal, demo or unavailable independently for each module. |
+| Preview adapter | Compute exact values and stable series from a snapshot before rendering. Supply an accessible summary and mark theoretical references separately. |
+| Motion policy | Shared rotation, signal, graph reveal and numeric transition timing. Pause or stop decoration when hidden and honor reduced motion. |
+
+For the browser-only build, keep a versioned local schema. Validate model, seed, sample count, scenario settings and schema version before replaying. Scope records by module so unrelated runs cannot overwrite each other. Store bounded parameters or bounded aggregates, rather than saving every animated frame. An unsupported or corrupt saved record falls back to a clearly labeled example. Decide versioning of the simulation algorithm before promising that seeds replay across releases.
+
+### Scientific previews
+
+| Module | Evidence visible before entry |
+| --- | --- |
+| Distribution Explorer | Binned result and sample size with an explicit histogram encoding. |
+| Convergence | Running mean against observation count with theoretical mean as reference. |
+| Estimation | Estimate and the explicitly named standard error or estimator quantity. |
+| Confidence Intervals | Interval endpoints, method, nominal coverage and observed center. |
+| Hypothesis Testing | Test statistic or p-value, test model, threshold and the corresponding decision. |
+| Randomness | Sign or run sequence for the recorded sample and its run count. |
+
+The prototype can demonstrate all six module windows using documented demo inputs. Under the current release brief, Distribution Explorer is the first fully supported laboratory. Confirm the later milestones in the PRD. Check end-to-end navigation and result persistence before integrating motion refinements. Validate the larger registry against real labels, narrow touch targets and classroom projector sizes before making additional nodes visible by default.
 
 ## Components
 

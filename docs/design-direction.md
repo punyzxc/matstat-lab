@@ -1,25 +1,24 @@
 # STATUM LAB design direction
 
-**Monochrome scientific atlas with generative geometry, measured ASCII output and a working sample.** The project owner specified neutral black, white and grey with minimal yellow. The proposed entry composition pairs a model control with a sculptural trefoil. Each inspected observation places a yellow band at its model CDF along the knot. The index brings six experiments within reach. Distribution Explorer supports the complete sampling and export loop. Five interactive method previews use the same completed sample.
+**A monochrome statistical observatory centred on Earth.** Each module window is a route to an experiment and a preview of its latest completed result. Curved trajectories, anchor points and local signals join the windows to the planet. The paths carry orientation and focus feedback. A new session shows clearly identified examples, and personal snapshots update as experiments complete.
 
 ## Design system
 
-Use black as continuous space, with white for primary text and grey for structure. Reserve pale yellow for selected signals, the measured coordinate, keyboard focus and the dashed reference series. Use thin rules, precisely placed captions and object-specific illustrations. Combine proportional grotesque lettering with an italic serif for the atlas title and tabular monospace measurements. On narrow screens place the working controls above the specimen and arrange the index in two columns.
+Use black as continuous space, white for primary text, and neutral grey for structure. Reserve pale yellow for active traces, focus and important signals. Thin rule fragments, directional labels and measured ASCII draw on the reference archive. Combine proportional grotesque titles, the existing serif treatment for an editorial counterpoint, and tabular monospace measurements. Narrow screens keep the planet prominent and give every destination a readable hit target in logical order.
 
-Keep sampling code independent of the renderer. Share a drawing lifecycle between the trefoil and Earth, with manual pause, immediate reduced-motion response, keyboard rotation, viewport suspension and a 2D fallback. The experimental workspace exposes bin counts, axes, settings and raw CSV alongside the visualizations.
+Use one motion policy for the globe, connections and result transitions. Manual pause and reduced motion keep navigation and all values available. Treat background pauses as presentation state. Tie updates to completed scientific results so an interrupted animation still settles on the stored value.
 
 ## Current iteration
 
-The prototype and rendered review are in [PR #9](https://github.com/punyzxc/matstat-lab/pull/9). The captain can assess the latest candidate with the desktop and mobile screenshots, a motion recording and the live local experiment. Formal PRD approval follows the Discovery exit criteria and independent review.
+[PR #9](https://github.com/punyzxc/matstat-lab/pull/9) carries the integrated prototype. Research in the six issue workstreams can proceed independently using fixture data and separate deliverables. The design specification describes the interface boundaries. The build phase follows reviewed Discovery evidence and PRD approval.
 
-| Issue | Parallel research |
-| --- | --- |
-| [#1](https://github.com/punyzxc/matstat-lab/issues/1) | Shell and runnable workspace |
-| [#2](https://github.com/punyzxc/matstat-lab/issues/2) | Tokens, theme and visual states |
-| [#3](https://github.com/punyzxc/matstat-lab/issues/3) | Motion patterns and reduced motion |
-| [#4](https://github.com/punyzxc/matstat-lab/issues/4) | Distribution Explorer scientific encoding |
-| [#5](https://github.com/punyzxc/matstat-lab/issues/5) | ASCII and particle art |
-| [#6](https://github.com/punyzxc/matstat-lab/issues/6) | Keyboard, projector and responsive verification |
+| Issue | Research output | Area |
+| --- | --- | --- |
+| [#11](https://github.com/punyzxc/matstat-lab/issues/11) | Earth composition, slots and trajectories | web · GredesCerber |
+| [#2](https://github.com/punyzxc/matstat-lab/issues/2) | Reusable module windows and entry states | design |
+| [#4](https://github.com/punyzxc/matstat-lab/issues/4) | Result snapshot and scientific preview encodings | contracts |
+| [#3](https://github.com/punyzxc/matstat-lab/issues/3) | Motion language and interruption rules | web |
+| [#5](https://github.com/punyzxc/matstat-lab/issues/5) | Scientific graphics, HUD and ASCII | design |
+| [#6](https://github.com/punyzxc/matstat-lab/issues/6) | Scale, usability, accessibility and performance | e2e |
 
-[Reference set](references/README.md) · [Project brief](brief.md) · [Discovery plan](discovery.md) · [Initial PRD draft](prd.md)
-
+[Design specification](design-spec.md) · [Reference set](references/README.md) · [Project brief](brief.md) · [Discovery plan](discovery.md) · [Initial PRD draft](prd.md)
