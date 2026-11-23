@@ -46,9 +46,9 @@ For a sample of size n, an estimator's output in the snapshot should carry its d
 
 - R = 20 000 replicates
 - a fixed seed for each case (20261123 for Normal, 20261124 for Exponential)
-- acceptance when the observed bias is within 4 Monte Carlo standard errors, √(Var(θ̂)/R), of the oracle bias
+- acceptance when each of three quantities is within 4 Monte Carlo standard errors of its oracle: the bias (SE √(Var(θ̂)/R)), the variance of θ̂ (SE √((m₄ − v²)/R), with m₄ the empirical fourth central moment of θ̂), and the MSE (SE of the mean of (θ̂ − θ)²)
 
-The spike passes this check for Normal(μ = 1, σ² = 4) and Exponential(1), both at n = 5.
+The spike passes this check for Normal(μ = 1, σ² = 4) and Exponential(1), both at n = 5. The Exponential case is the one that exercises the κ term in Var(s²).
 
 ## Confidence methods for the mean of Normal data
 
@@ -57,7 +57,7 @@ The spike passes this check for Normal(μ = 1, σ² = 4) and Exponential(1), bot
 | `z-known-sigma` | x̄ ± z₁₋α/₂ · σ/√n | 1 | `sigma-not-positive` (also when σ is missing), `level-out-of-range`, `non-finite-data`, `n-too-small` (n = 0), `non-finite-result` (overflow) |
 | `t-unknown-sigma` | x̄ ± t₁₋α/₂,ₙ₋₁ · s/√n | 2 | `n-too-small` (n < 2), `zero-sample-variance` (s = 0), `level-out-of-range`, `non-finite-data`, `non-finite-result` (overflow) |
 
-Each result lists its assumptions: `iid` and `normal`, plus `sigma-known` for z. When the data come from a non-Normal model, the result is still computed, but the UI must show a structured applicability warning. One example is the under-coverage of skewed data at small n described above. The interval is never silently withheld. *Assumption:* the module chooses this "warn, don't refuse" behavior for non-Normal models. Refusing would make the teaching case for skewed data impossible.
+Each result lists its assumptions: `iid` and `normal` for t, and `iid`, `normal-or-large-n` and `sigma-known` for z. When the data come from a non-Normal model, the result is still computed, but the UI must show a structured applicability warning. One example is the under-coverage of skewed data at small n described above. The interval is never silently withheld. *Assumption:* the module chooses this "warn, don't refuse" behavior for non-Normal models. Refusing would make the teaching case for skewed data impossible.
 
 ## Validating a coverage experiment
 

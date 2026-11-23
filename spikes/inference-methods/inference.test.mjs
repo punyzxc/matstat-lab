@@ -60,6 +60,14 @@ function mcCheck(draw, sigma2, kappa, n, seed) {
   for (const k of Object.keys(est)) {
     const bias = mean(est[k]) - truth[k];
     near(bias, o[k].bias, 4 * Math.sqrt(o[k].variance / R), `${k} bias`);
+    // Variance of the estimator: SE of a sample variance is sqrt((m4 - v^2) / R),
+    // with the fourth central moment m4 estimated from the same replicates.
+    const m = mean(est[k]), dev = est[k].map(e => (e - m) ** 2);
+    const v = mean(dev), m4 = mean(dev.map(d => d * d));
+    near(v, o[k].variance, 4 * Math.sqrt((m4 - v * v) / R), `${k} variance`);
+    // MSE = mean squared error around the known target, same predeclared band.
+    const se2 = est[k].map(e => (e - truth[k]) ** 2), mse = mean(se2);
+    near(mse, o[k].mse, 4 * Math.sqrt(variance(se2, 'n') / R), `${k} MSE`);
   }
 }
 test('Monte Carlo bias agrees with the Normal oracle (fixed seed)', () => {
