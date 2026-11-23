@@ -10,3 +10,7 @@
 | Open | Final area ownership and supported integration path for project Skills and CI configuration. | Captain confirms the roster. Harness maintainer and owner agree and execute protected changes. |
 
 When a proposal is accepted, record the approver, date, supporting research and the alternatives considered. [Discovery skill](https://github.com/GredesCerber/agent-crew/blob/main/skills/crew-discovery/SKILL.md)
+
+## 2026-11-23 — Use a neutral monochrome palette and a restrained yellow signal
+
+The project owner set black, white, neutral greys and minimal yellow as the required art direction. The previous violet instrument shell and green-tinted station study were considered during visual exploration. The team will review the Probability Atlas composition and prototype separately. This decision records the palette and the educational purpose. The prototype and the PRD still require their respective approvals.

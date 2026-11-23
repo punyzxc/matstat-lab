@@ -2,9 +2,9 @@
 
 ## Workspace
 
-On laptop and larger viewports, use a compact lab navigation rail, a parameter panel and a data workspace. The data workspace starts with the experiment title, run state and comparison controls. Chart panels share the result revision, with a compact summary table beneath. Put lesson prompts and research notes in an adjacent tab or drawer. On narrow screens use one column with chart panels above their data tables and keep run actions reachable. For projector mode, increase chart labels and contrast, enlarge numerical summaries and collapse secondary navigation.
+The entry atlas pairs a seeded model selector with an interactive geometric specimen. The six-method index uses compact illustrated tabs. A session record shows the sample trace, ASCII histogram and summary statistics. Distribution Explorer puts parameters alongside a chart on large screens and in one column on small screens. Projector mode increases chart area. Annotate partial runs and preserve scale during progressive updates.
 
-Use a neutral light theme with cool off-white surfaces and a neutral dark theme with deep blue-gray surfaces. Reserve series colors for data. Use a solid empirical series and a contrasting dashed theory series, with direct labels. Comparison runs have distinct marks and labels in both themes. Start with Inter for interface text and tabular figures for measurements. Define shared tokens for surface, border, text, focus, series roles, type scale, spacing and motion. Validate text contrast, chart differentiation and projected legibility in both themes during Discovery.
+The current visual requirement is neutral black, white and grey, with a restrained yellow signal. Encode the empirical series with solid marks and the theoretical curve with a dashed line. Use visible focus, direct labels, sample counts and an accessible numeric alternative. The shared type system uses Space Grotesk, Instrument Serif italic and IBM Plex Mono. The prototype uses shared tokens and lifecycle controls across experiments. [Design direction](design-direction.md) · [Prototype and visual review](https://github.com/punyzxc/matstat-lab/pull/9)
 
 ## Components
 

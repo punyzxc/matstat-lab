@@ -1,18 +1,16 @@
 # STATUM LAB design direction
 
-**Sci-fi instrumentation, ASCII data, and purposeful motion.** The first view opens directly into a statistical workspace. The participant can choose a distribution, set a seed, run an experiment and read the empirical results against theory.
+**Monochrome scientific atlas with generative geometry, measured ASCII output and a working sample.** The project owner specified neutral black, white and grey with minimal yellow. The proposed entry composition pairs a model control with a sculptural trefoil. Each inspected observation places a yellow band at its model CDF along the knot. The index brings six experiments within reach. Distribution Explorer supports the complete sampling and export loop. Five interactive method previews use the same completed sample.
 
 ## Design system
 
-Use near-black for the shell, charcoal for instruments, and silver for secondary text. Reserve one icy-violet accent for selected controls and sampled data. White and dashed marks distinguish the theoretical series independently of color. Use a clear proportional face for reading and a monospace face with tabular numbers for seed, parameters, axes and telemetry. Thin rules and corner accents establish the compact scientific grid.
+Use black as continuous space, with white for primary text and grey for structure. Reserve pale yellow for selected signals, the measured coordinate, keyboard focus and the dashed reference series. Use thin rules, precisely placed captions and object-specific illustrations. Combine proportional grotesque lettering with an italic serif for the atlas title and tabular monospace measurements. On narrow screens place the working controls above the specimen and arrange the index in two columns.
 
-Separate focal roles. The entry scene uses an original particle lattice or ASCII field to suggest a density surface. The actual experiment presents a histogram, a step ECDF, and a character-based view derived from identical bin counts. Show meaningful axis units, binning and any observations beyond the visible range. Retain a textual or tabular alternative.
-
-Use a short reveal on entry and a small change in opacity or position when swapping data views. Preserve the axis and focus while the values change. Avoid unattended, indefinite animation. Under reduced motion, render updates immediately. Keep the parameter panel and result view keyboard-operable. Narrow screens stack controls and charts. Projector mode prioritizes legibility.
+Keep sampling code independent of the renderer. Share a drawing lifecycle between the trefoil and Earth, with manual pause, immediate reduced-motion response, keyboard rotation, viewport suspension and a 2D fallback. The experimental workspace exposes bin counts, axes, settings and raw CSV alongside the visualizations.
 
 ## Current iteration
 
-The first validation covers the experiment shell, reusable surfaces and controls, two numeric chart views, ASCII output, and a single seed-based research loop. Future labs are shown as upcoming within the shell. The prototype informs the final build after Discovery and the reviewed PRD.
+The prototype and rendered review are in [PR #9](https://github.com/punyzxc/matstat-lab/pull/9). The captain can assess the latest candidate with the desktop and mobile screenshots, a motion recording and the live local experiment. Formal PRD approval follows the Discovery exit criteria and independent review.
 
 | Issue | Parallel research |
 | --- | --- |
