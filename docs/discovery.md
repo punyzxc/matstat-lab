@@ -44,6 +44,27 @@ output: docs/research/visual-accessibility.md
 budget_hours: 3
 ```
 
+
+## Demo and handoff investigations
+
+These investigations use the current preview and fixtures. They can run independently of each other. Complete the assigned scientific engine and simulation investigations first when time is limited.
+
+```crew-research
+id: teaching-comparison
+question: Which controlled sample-size comparison and fixed seeds teach students to distinguish experimental variation from estimator error?
+area: research
+owner: GredesCerber
+budget_hours: 2
+```
+
+```crew-research
+id: preview-reproduction
+question: Can a teammate reproduce both Discovery previews from a clean clone without local paths, credentials or running services?
+area: research
+owner: Jumalinova
+budget_hours: 1
+```
+
 ## Exit criteria
 
 - [ ] Record resolved or explicitly deferred scientific decisions, including replay bounds and interval eligibility.
