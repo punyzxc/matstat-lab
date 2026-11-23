@@ -6,7 +6,7 @@ Distribution Explorer puts parameters alongside a chart on large screens and in 
 
 ## Orbital home
 
-The point-cloud Earth is the central scene. Each visible module links a declared globe or orbit anchor to a window in the layout. Links and HUD accents use neutral grey, with pale yellow reserved for focus and current signals. A static SVG layer provides structure when motion is paused. Use fragment frames, measured coordinates, and optional scientific annotations in the same vocabulary as the archived references.
+The point-cloud Earth is the central scene. Each visible module links a declared globe or orbit anchor to a window in the layout. Links and HUD accents use neutral grey. Use varied monochrome ASCII figures in the surrounding scene and small star, beacon and satellite layers. Document where a simulated object may travel, and keep interactive windows, the globe controls, and scientific readouts clear in all viewport modes. A static SVG layer provides structure when motion is paused. Use fragment frames, measured coordinates, and optional scientific annotations in the same vocabulary as the archived references.
 
 A module window is one semantic link. Its name, summary, provenance and destination are readable at rest, including keyboard focus. Promote saved results as the latest use and label a deterministic default as an example. A preview displays the state from that module's completed run. A model change, draft, or background animation does not save a result. Resume the saved settings when the user opens a module. Compact view keeps Earth first, follows with the same logical link order, and simplifies routes to a readable spine.
 
@@ -20,6 +20,7 @@ A module window is one semantic link. Its name, summary, provenance and destinat
 | Result snapshot | Completed settings, module ID and method parameters such as the analyzed prefix. Resolve personal, demo or unavailable independently for each module. |
 | Preview adapter | Compute exact values and stable series from a snapshot before rendering. Supply an accessible summary and mark theoretical references separately. |
 | Motion policy | Shared rotation, signal, graph reveal and numeric transition timing. Pause or stop decoration when hidden and honor reduced motion. |
+| Atmosphere renderer | Composite projected decor and ASCII assets with shared pause and visibility rules. Keep variants, density and layering adjustable without changing scene geometry. |
 
 For the browser-only build, keep a versioned local schema. Validate model, seed, sample count, scenario settings and schema version before replaying. Scope records by module so unrelated runs cannot overwrite each other. Store bounded parameters or bounded aggregates, rather than saving every animated frame. An unsupported or corrupt saved record falls back to a clearly labeled example. Decide versioning of the simulation algorithm before promising that seeds replay across releases.
 

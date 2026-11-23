@@ -22,16 +22,17 @@ budget_hours: 1
 
 ## Orbital workspace
 
-The latest brief centres the home interface on Earth. The existing prototype in [PR #9](https://github.com/punyzxc/matstat-lab/pull/9) demonstrates the integrated experience. These six research tasks produce independent evidence for the build plan. Each has its own document and may use a standalone spike. Work does not wait for another research issue to close.
+The latest brief centres the home interface on Earth. The existing prototype in [PR #9](https://github.com/punyzxc/matstat-lab/pull/9) demonstrates the integrated experience. These seven research tasks produce independent evidence for the build plan. Each has its own document and may use a standalone spike. Work does not wait for another research issue to close.
 
 | Area | Focus | Evidence |
 | --- | --- | --- |
 | design | visual-theme | A window anatomy and state matrix, two viewport stencils, and evidence for keyboard and pointer activation. |
 | web | visual-motion | A motion token table, interruption demo, and a reduced-motion comparison. |
 | contracts | explorer-chart | A typed last-result/preview proposal, deterministic fixtures for six modules, and a preview encoding matrix. |
-| design | ascii-art | Two neutral monochrome studies with frame fragments, annotation rules and a measured ASCII example. |
+| design | ascii-art | Two monochrome scene studies, three legible glyph assets, and rules for labels, contrast and motion. |
 | e2e | visual-accessibility | Reproducible checks and a browser evidence matrix for desktop, narrow, projector and expanded registries. |
-| web | orbital-composition | A diagram of normalized anchor geometry and a responsive composition spike with placeholder window footprints. |
+| web | orbital-composition | A responsive layout spike and deterministic fixtures for orbital projection, occlusion and keep-out geometry.
+| web | orbital-atmosphere | A compositing spike for ASCII artwork, stars, beacons and satellites using fixture trajectories. |
 
 ```crew-research
 id: visual-theme
@@ -56,7 +57,7 @@ budget_hours: 3
 
 ```crew-research
 id: ascii-art
-question: Which scientific HUD and ASCII details make orbital connections legible without adding visual noise?
+question: Which monochrome ASCII illustrations and HUD treatments add atmosphere while preserving scientific readability?
 area: design
 budget_hours: 2
 ```
@@ -75,6 +76,16 @@ area: web
 owner: GredesCerber
 budget_hours: 3
 ```
+
+```crew-research
+id: orbital-atmosphere
+question: How should ASCII artwork, stars, beacons and satellites be composited into the globe scene while remaining legible and lightweight?
+area: web
+owner: Jumalinova
+budget_hours: 3
+```
+
+The atmosphere renderer can use synthetic projected points while the composition workstream validates projection and occlusion. The ASCII art workstream owns the glyph catalog and hierarchy. Prototype assets and the renderer are evaluated independently.
 
 The initial integration and the reference archive remain in issues [#1](https://github.com/punyzxc/matstat-lab/issues/1) and [#7](https://github.com/punyzxc/matstat-lab/issues/7). Collaborators claim available work through `crew task next` and `crew task claim <issue>`.
 
