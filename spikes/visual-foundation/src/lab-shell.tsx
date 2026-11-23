@@ -48,7 +48,8 @@ function Notes({ close }: { close: () => void }) {
           The trefoil winds twice around a torus and three times through its hole. The yellow cross-section
           sits at the probability coordinate F(x) of the inspected draw. Choose the draw readout to advance
           through the sample. Drag it horizontally or use the left and right arrow keys to turn it. The Earth
-          study projects Natural Earth land data onto a rotating sphere. Its links are simulated.
+          study projects Natural Earth land data onto a rotating sphere. The ASCII satellites, starfield and
+          links are simulated.
         </p>
         <h3>Reading the sample</h3>
         <p>

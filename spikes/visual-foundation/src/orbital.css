@@ -650,3 +650,78 @@
     inset: auto;
   }
 }
+.orbital-beacons {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font: 13px var(--mono);
+  color: #aaa;
+}
+.orbital-beacons i {
+  position: absolute;
+  font-style: normal;
+  opacity: 0.5;
+}
+.orbital-beacons i:nth-child(1) {
+  left: 27%;
+  top: 13%;
+}
+.orbital-beacons i:nth-child(2) {
+  left: 32%;
+  top: 5%;
+}
+.orbital-beacons i:nth-child(3) {
+  right: 28%;
+  top: 19%;
+}
+.orbital-beacons i:nth-child(4) {
+  left: 18%;
+  top: 34%;
+}
+.orbital-beacons i:nth-child(5) {
+  right: 20%;
+  top: 62%;
+}
+.orbital-beacons i:nth-child(6) {
+  left: 28%;
+  bottom: 13%;
+}
+.orbital-beacons i:nth-child(7) {
+  right: 33%;
+  bottom: 5%;
+}
+.orbital-beacons i:nth-child(8) {
+  right: 13%;
+  top: 38%;
+}
+.orbital-field[data-playing='true'] .orbital-beacons i {
+  animation: orbit-star 5.8s ease-in-out infinite alternate;
+}
+.orbital-field[data-playing='true'] .orbital-beacons i:nth-child(2n) {
+  animation-delay: -3.1s;
+}
+.orbital-field[data-playing='true'] .orbital-beacons i:nth-child(3n) {
+  animation-delay: -1.6s;
+}
+@keyframes orbit-star {
+  from {
+    opacity: 0.27;
+  }
+  to {
+    opacity: 0.84;
+  }
+}
+@media (max-width: 760px) {
+  .orbital-beacons i:nth-child(1) {
+    left: 6%;
+  }
+  .orbital-beacons i:nth-child(3) {
+    right: 6%;
+  }
+  .orbital-beacons i:nth-child(4) {
+    left: 3%;
+  }
+  .orbital-beacons i:nth-child(5) {
+    right: 3%;
+  }
+}

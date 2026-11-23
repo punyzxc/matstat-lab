@@ -91,6 +91,16 @@ export function Observatory({
           </h2>
           <div ref={field} className="orbital-field" data-playing={animating}>
             <div className="orbital-engine">
+              <div className="orbital-beacons" aria-hidden="true">
+                <i>+</i>
+                <i>*</i>
+                <i>+</i>
+                <i>*</i>
+                <i>+</i>
+                <i>*</i>
+                <i>+</i>
+                <i>*</i>
+              </div>
               <div className="orbital-reticle" aria-hidden="true">
                 <i />
                 <i />
@@ -100,7 +110,7 @@ export function Observatory({
               <div className="orbital-disc">
                 <PlateCanvas
                   create={earthPlate}
-                  label="Earth point cloud with simulated orbital links"
+                  label="Earth point cloud with simulated orbital links and ASCII satellites"
                   playing={animating}
                   mesh={mesh}
                   cue={0}

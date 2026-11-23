@@ -1,9 +1,10 @@
 import type { RendererFactory } from './plate-canvas';
 import { globeRadius } from './orbit-links';
+import { drawSatellites, drawStars } from './orbital-atmosphere';
 import landRows from './land-runs.json';
 
 type Vector = { x: number; y: number; z: number };
-type LandPoint = Vector & { tone: number; heat: number; east?: LandPoint; north?: LandPoint };
+type LandPoint = Vector & { tone: number; east?: LandPoint; north?: LandPoint };
 export type Surface = 'points' | 'mesh';
 const rad = Math.PI / 180;
 const tau = Math.PI * 2;
@@ -18,8 +19,6 @@ function unit(lat: number, lon: number): Vector {
 // Longitude crossings, in hundredths of a degree, from Natural Earth 1:110m land.
 function buildLand() {
   const points: LandPoint[] = [];
-  const highlights = [unit(51.5, -0.1), unit(40.7, -74), unit(-1.3, 36.8)];
-  const dot = (a: Vector, b: Vector) => a.x * b.x + a.y * b.y + a.z * b.z;
   let previous: (LandPoint | undefined)[] = [];
   landRows.forEach((edges, row) => {
     const lat = -89.55 + row * 0.9;
@@ -30,10 +29,7 @@ function buildLand() {
       const lon = -180 + ((j + (row % 2) * 0.5) * 360) / n;
       while (edge < edges.length && edges[edge] <= lon * 100) edge++;
       if (edge % 2 === 0) continue;
-      const location = unit(lat, lon);
-      const proximity = Math.max(...highlights.map((p) => dot(location, p)));
-      const heat = Math.max(0, (proximity - 0.987) / 0.013);
-      const point: LandPoint = { ...location, heat, tone: ((j * 31 + row * 17) % 23) / 23 };
+      const point: LandPoint = { ...unit(lat, lon), tone: ((j * 31 + row * 17) % 23) / 23 };
       current[j] = point;
       if (j > 0 && current[j - 1]) current[j - 1]!.east = point;
       point.north = previous[Math.floor((j / n) * previous.length)];
@@ -78,12 +74,6 @@ const links = [
   [4, 5],
 ].map(([a, b]) => link(stations[a].p, stations[b].p));
 const tones = ['#505050', '#656565', '#7d7d7d', '#949494', '#a9a9a9', '#bfbfbf', '#d5d5d5', '#dddddd'];
-const warmTones = ['#827d5c', '#95916e', '#b0ac80', '#c3bd7d', '#d7d18c', '#e3dc8c', '#f1ec9d', '#faf6bd'];
-const dust = Array.from({ length: 155 }, (_, i) => ({
-  x: ((i * 173 + 91) % 997) / 997,
-  y: ((i * i * 31 + i * 73 + 19) % 991) / 991,
-}));
-
 function paint(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -138,21 +128,9 @@ function paint(
   glow.addColorStop(1, 'rgba(128,128,128,0)');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = '#757575';
-  for (const star of dust) ctx.fillRect(star.x * w, star.y * h, 0.9, 0.9);
-  function orbit(front: boolean) {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(-0.31);
-    ctx.beginPath();
-    ctx.ellipse(0, 0, r * 1.29, r * 0.295, 0, front ? 0 : Math.PI, front ? Math.PI : tau);
-    ctx.setLineDash(front ? [] : [2, 5]);
-    ctx.lineWidth = 0.72;
-    ctx.strokeStyle = front ? 'rgba(188,188,188,.49)' : 'rgba(155,155,155,.53)';
-    ctx.stroke();
-    ctx.restore();
-  }
-  orbit(false);
+  const scene = { x: cx, y: cy, radius: r, width: w, height: h, time: seconds };
+  drawStars(ctx, scene);
+  drawSatellites(ctx, scene, false);
   const ocean = ctx.createRadialGradient(
     cx - r * 0.37,
     cy - r * 0.47,
@@ -196,11 +174,9 @@ function paint(
       const light =
         0.34 + ((cx - q.x) / r) * 0.12 + ((cy - q.y) / r) * 0.22 + q.z * 0.42 + p.tone * 0.27 + breath * 0.2;
       const level = Math.min(7, Math.max(0, Math.floor(light * 7)));
-      const warm = p.heat * (0.78 + breath + p.tone * 0.48) > 0.3;
-      const pigment = level + (warm ? 8 : 0);
-      if (pigment !== last) {
-        ctx.fillStyle = warm ? warmTones[level] : tones[level];
-        last = pigment;
+      if (level !== last) {
+        ctx.fillStyle = tones[level];
+        last = level;
       }
       const side = size * (0.6 + 0.52 * q.z);
       ctx.fillRect(q.x - side / 2, q.y - side / 2, side, side);
@@ -211,12 +187,11 @@ function paint(
   ctx.strokeStyle = 'rgba(211,211,211,.59)';
   ctx.lineWidth = 0.82;
   ctx.stroke();
-  orbit(true);
   links.forEach((line, i) => {
-    path(line, i === 0 ? 'rgba(239,232,127,.84)' : 'rgba(239,232,127,.59)', 0.95);
+    path(line, i === 0 ? 'rgba(210,210,210,.45)' : 'rgba(190,190,190,.31)', 0.95);
     const p = project(line[Math.floor(((seconds * 0.085 + i * 0.27) % 1) * (line.length - 1))]);
     if (p.z > 0) {
-      circle(p.x, p.y, 3, 'rgba(239,232,127,.24)');
+      circle(p.x, p.y, 3, 'rgba(239,239,239,.21)');
       circle(p.x, p.y, 1.35, '#cdcdcd');
     }
   });
@@ -225,13 +200,13 @@ function paint(
     if (p.z < 0.09) return;
     const pulse = (seconds * 0.3 + i * 0.22) % 1;
     const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 10);
-    halo.addColorStop(0, 'rgba(239,232,127,.62)');
-    halo.addColorStop(1, 'rgba(239,232,127,0)');
+    halo.addColorStop(0, 'rgba(245,245,245,.32)');
+    halo.addColorStop(1, 'rgba(245,245,245,0)');
     circle(p.x, p.y, 10, halo);
     ctx.beginPath();
     ctx.arc(p.x, p.y, 3.1 + 5 * pulse, 0, tau);
     ctx.lineWidth = 0.7;
-    ctx.strokeStyle = `rgba(239,232,127,${0.74 * (1 - pulse)})`;
+    ctx.strokeStyle = `rgba(245,245,245,${0.74 * (1 - pulse)})`;
     ctx.stroke();
     circle(p.x, p.y, 2.1, '#cfcfcf');
     if (r > 105 && i < 4) {
@@ -240,6 +215,7 @@ function paint(
       ctx.fillText(station.code, p.x + 7, p.y - 5);
     }
   });
+  drawSatellites(ctx, scene, true);
 }
 
 export const earthPlate: RendererFactory = (canvas) => {

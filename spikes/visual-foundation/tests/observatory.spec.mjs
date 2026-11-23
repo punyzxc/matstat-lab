@@ -8,6 +8,16 @@ test('globe, module links and preview motion share the pause control', async ({ 
   const frame = () => globe.evaluate((node) => node.toDataURL());
   const first = await frame();
   await expect.poll(frame).not.toBe(first);
+  const tintedPixels = await globe.evaluate((canvas) => {
+    const { data } = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+    let tinted = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] > 0 && (Math.abs(data[i] - data[i + 1]) > 2 || Math.abs(data[i + 1] - data[i + 2]) > 2))
+        tinted++;
+    }
+    return tinted;
+  });
+  expect(tintedPixels).toBe(0);
   await expect(page.locator('.orbit-link-trace')).toHaveCount(6);
   await expect(page.locator('.orbit-link-focal')).toHaveCount(1);
   await page.getByRole('button', { name: 'Pause motion' }).click();
