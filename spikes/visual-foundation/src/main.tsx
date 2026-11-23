@@ -2,7 +2,7 @@ import '@fontsource-variable/space-grotesk';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import './style.css';
-import { StrictMode, useEffect, useMemo, useState } from 'react';
+import { StrictMode, useCallback, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Tabs from '@radix-ui/react-tabs';
 import { MotionConfig, motion } from 'motion/react';
@@ -10,7 +10,9 @@ import {
   Activity, ArrowDownToLine, ArrowLeft, ChevronDown, CircleHelp,
   Maximize, Minimize, Pause, Play, RotateCcw, SlidersHorizontal,
 } from 'lucide-react';
-import { Observatory, MethodPreview } from './observatory';
+import { Observatory } from './observatory';
+import { MethodPreview } from './method-preview';
+import { historyPrefix, readLastResults, readLastVisited, writeLastResult, writeLastVisited, type LastResult } from './last-results';
 import { useStationReducedMotion } from './motion-preference';
 import { modules, type ModuleId } from './modules';
 import { LabHeader, LabFooter } from './lab-shell';
@@ -20,9 +22,9 @@ import { asciiHistogram, collect, histogram, initialSettings, moments, sources, 
 import { Button, Panel, PanelHeading, Slider, Stat } from './ui.tsx';
 
 type Phase = 'running' | 'paused' | 'complete';
-type Run = { settings: RunSettings; all: number[]; shown: number; phase: Phase };
-const newRun = (settings: RunSettings, immediate: boolean): Run => ({
-  settings, all: collect(settings), shown: immediate ? settings.count : 0, phase: immediate ? 'complete' : 'running',
+type Run = { settings: RunSettings; all: number[]; shown: number; phase: Phase; record: boolean };
+const newRun = (settings: RunSettings, immediate: boolean, record = false): Run => ({
+  record, settings, all: collect(settings), shown: immediate ? settings.count : 0, phase: immediate ? 'complete' : 'running',
 });
 
 const number = new Intl.NumberFormat('en-US');
@@ -57,8 +59,8 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
   const [theoreticalMean, theoreticalVariance] = model.theory(run.settings.scale);
 
   useEffect(() => {
-    if (run.phase === 'complete') onComplete(run.settings);
-  }, [onComplete, run.phase, run.settings]);
+    if (run.record && run.phase === 'complete') onComplete(run.settings);
+  }, [onComplete, run.record, run.phase, run.settings]);
 
   useEffect(() => {
     if (!busy) return;
@@ -84,14 +86,14 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
     } else if (run.phase === 'paused') {
       setRun(current => ({ ...current, phase: 'running' }));
     } else if (validSeed) {
-      setRun(newRun({ ...draft, seed: Number(seedText) }, reduced === true));
+      setRun(newRun({ ...draft, seed: Number(seedText) }, reduced === true, true));
     }
   }
 
   function reset() {
     setDraft(initialSettings);
     setSeedText(String(initialSettings.seed));
-    setRun(newRun(initialSettings, true));
+    setRun(newRun(initialSettings, true, true));
   }
 
   function download() {
@@ -116,7 +118,7 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
       {projector ? <Minimize size={14}/> : <Maximize size={14}/>}<span>Projector</span></Button>}/>
     <div className="shell">
       <main id="workspace" tabIndex={-1} className="lab-spread">
-        <a href="#observatory" className="backlink"><ArrowLeft size={14}/>Probability atlas</a>
+        <a href="#observatory" className="backlink"><ArrowLeft size={14}/>Orbital laboratory</a>
         <div className="method-intro"><div><div className="edition"><i/> EXPERIMENT 01</div>
           <h1>Distribution Explorer</h1><p>Draw a random sample and compare it with the theoretical distribution.</p></div>
           <PlateGlyph id="distribution"/></div>
@@ -231,8 +233,36 @@ function readModuleRoute(): ModuleId | null {
 
 function StationApp() {
   const [route, setRoute] = useState(readModuleRoute);
-  const [selected, setSelected] = useState<ModuleId>(() => readModuleRoute() ?? 'distribution');
-  const [settings, setSettings] = useState(initialSettings);
+  const [selected, setSelected] = useState<ModuleId>(() => readModuleRoute() ?? readLastVisited() ?? 'distribution');
+  const [results, setResults] = useState(readLastResults);
+  const [lastVisited, setLastVisited] = useState(readLastVisited);
+  const settings = results.distribution?.settings ?? initialSettings;
+
+  const complete = useCallback((id: ModuleId, result: LastResult) => {
+    setResults(current => ({ ...current, [id]: result }));
+    writeLastResult(id, result);
+  }, []);
+  const completeDistribution = useCallback((resultSettings: RunSettings) => {
+    complete('distribution', { settings: resultSettings, size: resultSettings.count });
+  }, [complete]);
+
+  useEffect(() => {
+    if (!route) return;
+    setLastVisited(route);
+    writeLastVisited(route);
+  }, [route]);
+
+  useEffect(() => {
+    function synchronize(event: StorageEvent) {
+      if (event.key === null || event.key.startsWith(historyPrefix)) {
+        setResults(readLastResults());
+        setLastVisited(readLastVisited());
+      }
+    }
+    window.addEventListener('storage', synchronize);
+    return () => window.removeEventListener('storage', synchronize);
+  }, []);
+
   useEffect(() => {
     const navigate = () => {
       const next = readModuleRoute();
@@ -252,11 +282,13 @@ function StationApp() {
     return () => window.removeEventListener('hashchange', navigate);
   }, []);
   useEffect(() => {
-    document.title = (modules.find(m => m.id === route)?.name ?? 'Probability atlas') + ' · STATUM LAB';
+    document.title = (modules.find(m => m.id === route)?.name ?? 'Orbital laboratory') + ' · STATUM LAB';
   }, [route]);
-  if (route === 'distribution') return <Workspace settings={settings} onComplete={setSettings}/>;
-  if (route) return <MethodPreview key={route} id={route} settings={settings}/>;
-  return <Observatory settings={settings} initialModule={selected} onSelect={setSelected} onSample={setSettings}/>;
+  if (route === 'distribution') return <Workspace settings={settings} onComplete={completeDistribution}/>;
+  if (route) return <MethodPreview key={route} id={route} activeSettings={settings} lastResult={results[route]}
+    onComplete={result => complete(route, result)}/>;
+  return <Observatory settings={settings} results={results} lastVisited={lastVisited} initialModule={selected}
+    onSelect={setSelected} onSample={completeDistribution}/>;
 }
 
 createRoot(document.getElementById('root')!).render(

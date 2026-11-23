@@ -1,14 +1,16 @@
-# Probability Atlas prototype
+# Orbital Laboratory
 
-Run the Discovery spike with Node.js 22.18 or later and Google Chrome for browser tests.
+Run the Discovery prototype with Node.js 22.18+ and installed Chrome for browser tests.
 
 ~~~powershell
 npm ci
 npm run dev -- --host 127.0.0.1 --port 4175
 ~~~
 
-Open the [atlas](http://127.0.0.1:4175/). Choose a model, step through observations with the draw readout on the trefoil and compare the marker with the CDF value. Rotate the specimen by dragging or with the left and right arrow keys while it has focus. The scene controls switch between the knot and Earth, change rendering style, and pause motion.
+Open [the orbital laboratory](http://127.0.0.1:4175/). The six windows open the corresponding experiments. Hover or focus a window to trace its connection to Earth. Rotate Earth by dragging or with the arrow keys while the globe has focus. The scene pause control also pauses links and result previews.
 
-Launch Distribution Explorer from the index or go directly to [the experiment](http://127.0.0.1:4175/#module/distribution). Run the simulation, inspect histogram, ECDF or ASCII output and export the raw observations. Return to the atlas to use the completed settings in the five numerical method previews.
+A window shows the most recent result saved for that module in this browser. A window without a saved result shows a labeled example computed from the active sample. Choose a model or resample to produce a new Distribution Explorer result. In the other instruments, change the sample prefix or select **Save result** to save the displayed analysis. **Use active sample** switches a saved instrument to the current Distribution Explorer sample when they differ.
 
-Run `npm test`, `npm run build` and `npm run e2e` from this directory. [Design specification, evidence and previews](../../docs/research/visual-foundation.md)
+[Distribution Explorer](http://127.0.0.1:4175/#module/distribution) provides seeded runs, histogram, ECDF, ASCII rendering, a bin table, and raw CSV. The secondary trefoil study is available below the sample record.
+
+Run `npm test`, `npm run build` and `npm run e2e` here. [Design rationale and captures](../../docs/research/visual-foundation.md)

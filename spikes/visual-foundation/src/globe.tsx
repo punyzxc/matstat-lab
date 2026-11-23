@@ -1,4 +1,5 @@
 import type { RendererFactory } from './plate-canvas';
+import { globeRadius } from './orbit-links';
 import landRows from './land-runs.json';
 
 type Vector = { x: number; y: number; z: number };
@@ -94,8 +95,8 @@ function paint(
   ctx.clearRect(0, 0, w, h);
   const cx = w * 0.5,
     cy = h * 0.5;
-  const r = Math.min(w * 0.365, h * 0.432);
-  const camera = (-11 + seconds * 1.6) * rad + yaw;
+  const r = globeRadius(w, h);
+  const camera = (-18 + seconds * 1.6) * rad + yaw;
   const c = Math.cos(camera),
     s = Math.sin(camera);
   const cp = Math.cos(pitch),
@@ -160,16 +161,16 @@ function paint(
     cy + r * 0.24,
     r * 1.24,
   );
-  ocean.addColorStop(0, '#2b2b2b');
-  ocean.addColorStop(0.43, '#1b1b1b');
-  ocean.addColorStop(0.82, '#0e0e0e');
-  ocean.addColorStop(1, '#313131');
+  ocean.addColorStop(0, '#141414');
+  ocean.addColorStop(0.43, '#101010');
+  ocean.addColorStop(0.82, '#080808');
+  ocean.addColorStop(1, '#242424');
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, tau);
   ctx.fillStyle = ocean;
   ctx.fill();
   for (const row of graticule) path(row, 'rgba(172,172,172,.33)', 0.58);
-  const size = Math.max(0.85, r / 108);
+  const size = Math.max(0.69, r / 156);
   const breath = 0.1 * Math.sin(seconds * 0.65);
   if (surface === 'mesh') {
     ctx.beginPath();

@@ -57,8 +57,9 @@ function Notes({ close }: { close: () => void }) {
         </p>
         <h3>Experiment index</h3>
         <p>
-          Select a study and open its instrument. Distribution Explorer generates and exports samples. The
-          other five studies explore prefixes of the same completed run.
+          Open an instrument directly from its orbital preview. Each preview shows its most recent saved
+          result or a labeled example. Distribution Explorer generates and exports samples. The other five
+          studies explore prefixes of the same completed run.
         </p>
         <a
           href="https://www.naturalearthdata.com/downloads/110m-physical-vectors/110m-land/"
@@ -91,7 +92,7 @@ export function LabHeader({ home = false, action }: { home?: boolean; action?: R
         </div>
         <nav aria-label="Laboratory navigation">
           <a href="#observatory" aria-current={home ? 'page' : undefined}>
-            Atlas
+            Observatory
           </a>
           <a href="#experiments">Experiments</a>
           <button ref={trigger} onClick={() => setOpen(true)} aria-haspopup="dialog">
@@ -113,7 +114,8 @@ export function LabHeader({ home = false, action }: { home?: boolean; action?: R
 export function FigureCaption({ number, children }: { number: string; children: ReactNode }) {
   return (
     <span className="fig-caption">
-      <span className="fig-cross" aria-hidden="true" /><span className="fig-id">FIG. {number}</span>
+      <span className="fig-cross" aria-hidden="true" />
+      <span className="fig-id">FIG. {number}</span>
       <i />
       {children}
     </span>

@@ -1,31 +1,25 @@
-# Probability Atlas
+# Orbital Laboratory
+
+![Orbital Laboratory on desktop](assets/orbital-laboratory-desktop.png)
+
+[Motion recording](assets/orbital-laboratory-motion.webm) · [Mobile](assets/orbital-laboratory-mobile.png) · [Reference set and design specification](https://github.com/punyzxc/matstat-lab/pull/8)
 
 ## Discovery result
 
-The prototype opens on a working Monte Carlo sample. Changing the model immediately regenerates the sample with the same seed. Selecting the draw readout advances to the next observation. Its yellow cross-section follows the model CDF along a parametric trefoil. The ring parameter is a probability in [0, 1]. Distance along the curve has no statistical units. Dragging and arrow keys turn the specimen. The second specimen is an orthographic Earth with simulated links.
+The Earth point cloud anchors six experiment links. Each trajectory begins on the visible globe rim and ends at the measured edge of a module window. Keyboard focus and pointer hover highlight the corresponding path. The last opened module provides the resting focus of the scene. Mobile layouts keep the globe at the top and route the connections down a shared spine. Geographic arcs on the globe illustrate simulated station links.
 
-The session record draws its trace, 34-bin ASCII histogram and sample statistics from the active sample. Resample advances the seed by one. Distribution Explorer provides parameter editing, pause, resume, reset, a histogram, an ECDF, ASCII output, underlying bin counts and a raw CSV. The five method previews compute results on a user-selected prefix. Reset and replay were checked against numerical fixtures.
+A window opens its experiment directly and shows a result based on the settings and sample prefix associated with that module. The six charts use histogram counts, running mean, estimate and standard error, nested Chebyshev intervals, observed sign share and its exact test probability, and signs in draw order. Gray geometry encodes the data. A yellow signal marks focus or the scan position. The final value and provenance remain available throughout any visual interpolation.
 
-![Probability Atlas on desktop](assets/probability-atlas-desktop.png)
+The browser stores a versioned entry per module and records the last opened module independently. A result consists of its distribution, scale, seed, sample size and analyzed prefix. The deterministic sampler replays that result. If storage is unavailable, the session works in memory. If no valid entry exists for a module, the window labels its current sample as a seeded preview. Drafts, partial reveals and paused runs preserve the previous Distribution Explorer result.
 
-[Motion study](assets/probability-atlas-motion.webm) · [Mobile](assets/probability-atlas-mobile.png) · [Distribution Explorer](assets/probability-atlas-experiment.png) · [ASCII experiment output](assets/probability-atlas-ascii.png)
+## Extension and motion
 
-## Design specification for this prototype
+- Register module metadata, render its window through the common link, and provide its numerical preview mapping. The layout and diagram share measured anchors.
+- Use the common pause and reduced-motion state for the globe, link pulses, chart sweeps and numeric interpolation. The globe caps pixel density and reduces redraw cadence on slower devices. The diagram suspends outside the viewport. Manual globe rotation works while paused.
+- Retain the trace and ASCII bins beneath the stage. Distribution Explorer still has ECDF, exact bin counts, reset and CSV. The secondary trefoil retains its CDF probe and Canvas fallback.
 
-- **Composition.** One free-standing specimen occupies the larger half of a double-page spread. The model control and launch action sit next to it. The experiment index uses six engraved thumbnails. The working record follows under one horizontal rule. On a narrow screen the specimen follows the controls and the index uses two columns.
-- **Type and colour.** Space Grotesk carries controls and titles, Instrument Serif italic names the atlas, and IBM Plex Mono sets measurements. Neutral black, white and grey define the surface. Pale yellow marks the probability coordinate, selected signals, keyboard focus and the dashed theory series. The empirical series uses solid marks.
-- **Motion.** A shared drawing loop controls both specimens, holds the last frame while paused, stops outside the viewport and observes changes to reduced motion. Pointer and keyboard rotation remain available on a stationary frame. Pixel density and frame cadence are bounded. The GPU uploads geometry once per mount and releases buffers on exit. A Canvas 2D engraving takes over if WebGL is unavailable or the context is lost.
-- **Extension.** The registry supplies module IDs and navigation. Each study supplies a thumbnail and a numerical readout. Shell, captions, type and colour tokens, scene controls, and rendering lifecycle are shared. The numerical core stays independent of the renderer.
-- **Scientific encoding.** The current model supplies the CDF. Frequency density uses count divided by sample size and bin width. During progressive reveal the histogram uses the target count and labels this explicitly. The ECDF uses the observations drawn so far. Out-of-range observations remain in the statistics and CSV.
+## Verification and next decision
 
-## Rendered review
+The TypeScript/Vite build, six numerical tests and twelve browser tests passed locally. The browser cases cover six direct routes, snapshot validation, persistence after reload, last-opened state, pause, live reduced-motion changes and fallback behavior. Rendered layouts were measured from 320 to 1440 pixels. Frame cadence on classroom hardware and physical projection remain field checks.
 
-The first engraving used circular cross-sections and evenly weighted ribs. The second introduced woven filaments, a particle sheath and the CDF marker. The third flattened and twisted the tube cross-section, changed the lighting and improved clearance above and below the object. Narrow-screen review exposed an overflowing title at 320 px. Its type scale now fits the viewport. The mobile and desktop captures show the final arrangement.
-
-The TypeScript/Vite build, six numerical tests and eleven Chrome browser tests passed locally. The tests exercised replay, export, module routes, keyboard control, pause, reduced motion, model selection, the probability probe and the 2D fallback. Manual browser automation also forced a live WebGL context loss and verified recovery on a new canvas. Layout checks covered widths of 320, 360, 390, 768, 1024 and 1440 pixels. Projector mode has browser coverage. Physical projection remains a field check.
-
-The geographic renderer uses longitude crossings derived from the Natural Earth land polygons at a latitude interval of 0.9 degrees. The trefoil, particle field and six index engravings are generated in code. [Natural Earth land source at the pinned revision](https://github.com/nvkelso/natural-earth-vector/blob/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_110m_land.geojson)
-
-## Position
-
-Adopt the atlas as the candidate design for captain and independent review. The sample controls, probability coordinate and shared run demonstrate the primary teaching interaction. Performance on classroom hardware and the broader Discovery questions remain open. [Run the prototype](../../spikes/visual-foundation/README.md) · [Reference set and PRD draft](https://github.com/punyzxc/matstat-lab/pull/8)
+The design discussion covers the six parallel research tracks in [PR #8](https://github.com/punyzxc/matstat-lab/pull/8). Incorporate the approved composition and storage contract into the reviewed PRD before starting the production build. [Prototype instructions](../../spikes/visual-foundation/README.md)
