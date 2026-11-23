@@ -65,6 +65,24 @@ owner: Jumalinova
 budget_hours: 1
 ```
 
+
+## Independent evidence for result consumers
+
+```crew-research
+id: chart-fixture-audit
+question: Can an independent fixture audit detect incorrect bins, ECDF steps and data rounding in saved chart payloads?
+area: e2e
+owner: adekin06
+budget_hours: 2
+```
+
+```crew-research
+id: comparison-compatibility
+question: Which scientific metadata makes two saved experiments comparable before plotting them on common axes?
+area: research
+budget_hours: 2
+```
+
 ## Exit criteria
 
 - [ ] Record resolved or explicitly deferred scientific decisions, including replay bounds and interval eligibility.
