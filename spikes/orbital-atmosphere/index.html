@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Orbital atmosphere — STATUM LAB study 12</title>
+  <link rel="stylesheet" href="./study.css">
+  <script type="module" src="./study.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#instruments">Skip to laboratory instruments</a>
+  <div class="shell">
+    <header class="topbar"><a class="brand" href="#observatory"><span class="brand-mark" aria-hidden="true">◉</span> STATUM LAB</a><nav aria-label="Main"><a href="#observatory" aria-current="page">Observatory</a><a href="#instrument">Experiment</a></nav><span class="session">LOCAL STUDY / 12</span></header>
+    <main id="observatory">
+      <div class="intro"><div><p class="eyebrow">RENDER STUDY / MONOCHROME ATMOSPHERE</p><h1>Orbital <em>observatory.</em></h1></div><p class="lede">A little wonder.<br>Room for the science.</p></div>
+      <section class="scene" aria-label="Orbital laboratory with six instrument links">
+        <canvas id="atmosphere" aria-hidden="true"></canvas>
+        <div class="globe-zone" aria-hidden="true"></div>
+        <div class="globe-controls" data-reserved role="group" aria-label="Globe and decorative motion">
+          <button id="rotate" aria-label="Rotate globe a quarter turn" title="Rotate globe">↻</button><button id="zoom-out" aria-label="Zoom globe out">−</button><button id="zoom-in" aria-label="Zoom globe in">+</button><button id="pause" aria-pressed="false">Pause atmosphere</button>
+        </div>
+        <p class="earth-label" data-reserved><span aria-hidden="true">•</span> EARTH / SYNTHETIC FIXTURE</p>
+        <div class="module-grid" id="instruments">
+          <a class="instrument selected" data-module="Distribution explorer" data-reserved href="#instrument"><span class="instrument-name">Distribution explorer <span aria-hidden="true">↗</span></span><span class="value-row">Sample mean <strong data-mean>0.500</strong></span><svg viewBox="0 0 180 35" aria-hidden="true"><path d="M5 32v-4h14v4m4 0V19h14v13m4 0V8h14v24m4 0V2h14v30m4 0V6h14v26m4 0V13h14v19m4 0V24h14v8m4 0V28h14v4"/></svg><span class="instrument-foot">Synthetic sample <span>n 512</span></span></a>
+          <a class="instrument" data-module="Convergence" data-reserved href="#instrument"><span class="instrument-name">Convergence <span aria-hidden="true">↗</span></span><span class="value-row">Reference expectation <strong>0.500</strong></span><svg viewBox="0 0 180 35" aria-hidden="true"><path d="M0 24l5-20 5 28 8-21 8 15 10-8 8 5 12-8 12 4 13-3 15 3 15-2 16 1 30-1"/></svg><span class="instrument-foot">Uniform fixture <span>U(0,1)</span></span></a>
+          <a class="instrument" data-module="Estimation" data-reserved href="#instrument"><span class="instrument-name">Estimation <span aria-hidden="true">↗</span></span><span class="value-row">Fixture standard error <strong>0.013</strong></span><svg viewBox="0 0 180 35" aria-hidden="true"><path d="M8 18h164M25 11v14m130-14v14M90 6v24"/></svg><span class="instrument-foot">Illustrative readout <span>SE</span></span></a>
+          <a class="instrument" data-module="Confidence intervals" data-reserved href="#instrument"><span class="instrument-name">Confidence intervals <span aria-hidden="true">↗</span></span><span class="value-row">Fixture coverage <strong>95%</strong></span><svg viewBox="0 0 180 35" aria-hidden="true"><path d="M30 8h110M15 18h148M43 28h82M90 1v33"/></svg><span class="instrument-foot">Illustrative intervals <span>95%</span></span></a>
+          <a class="instrument" data-module="Hypothesis testing" data-reserved href="#instrument"><span class="instrument-name">Hypothesis testing <span aria-hidden="true">↗</span></span><span class="value-row">Reference threshold <strong>0.050</strong></span><svg viewBox="0 0 180 35" aria-hidden="true"><path d="M10 24h160M25 20v8m30-8v8m30-8v8m30-8v8m30-8v8M80 9l5 5-5 5-5-5z"/></svg><span class="instrument-foot">Illustrative threshold <span>α</span></span></a>
+          <a class="instrument" data-module="Randomness" data-reserved href="#instrument"><span class="instrument-name">Randomness <span aria-hidden="true">↗</span></span><span class="value-row">Sample source <strong>Seeded</strong></span><svg viewBox="0 0 180 35" aria-hidden="true"><path d="M5 25h12V8h15v17h15V8h15v17h15V8h15v17h15V8h15v17h15V8h15v17h15"/></svg><span class="instrument-foot">Reproducible fixture <span>2048</span></span></a>
+        </div>
+      </section>
+      <section class="sample-bar" id="instrument" aria-labelledby="selected-instrument"><div><p class="eyebrow">SCIENTIFIC READOUT / SYNTHETIC SAMPLE</p><h2 id="selected-instrument">Distribution explorer</h2></div><p>n = 512 <span aria-hidden="true">/</span> mean <output id="sample-mean">0.500</output></p><button id="resample">Resample fixture ↻</button></section>
+      <section class="study-notes" aria-label="Rendering study observations"><div><p class="eyebrow">FIG. 12 / DECORATIVE LAYER</p><p>Stars, lamps and glyph craft are ornamental.<br>Scientific values stay in the instrument panels.</p><p class="legend"><span>⊞ ARRAY</span><span>◔ RELAY</span><span>+ SIGNAL</span></p></div><dl class="telemetry"><div><dt>Motion policy</dt><dd id="motion-state" role="status">Starting</dd></div><div><dt>Submitted objects</dt><dd id="objects">—</dd></div><div><dt>Canvas / DOM nodes</dt><dd id="nodes">—</dd></div><div><dt>Draw CPU / frame cadence</dt><dd id="timing">Collecting…</dd></div></dl></section>
+    </main>
+    <footer><span>STATUM LAB / DISCOVERY SPIKE</span><span>NO LIVE ORBIT OR NETWORK DATA</span></footer>
+  </div>
+</body>
+</html>
