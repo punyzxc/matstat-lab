@@ -1,0 +1,260 @@
+{
+  "schema": "statum-discovery-reference-v1",
+  "generator": {
+    "python": "3.12.14",
+    "oracle": "CPython standard library + analytical identities",
+    "scipy": null,
+    "numpy": null
+  },
+  "cases": [
+    {
+      "id": "uniform-shifted",
+      "parameters": {
+        "a": 2,
+        "b": 6,
+        "x": 3
+      },
+      "expected": {
+        "pdf": 0.25,
+        "cdf": 0.25
+      },
+      "reference": "Analytical: 1/(b-a), (x-a)/(b-a)",
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "id": "normal-shifted",
+      "parameters": {
+        "mu": 10,
+        "sigma": 4,
+        "x": 10
+      },
+      "expected": {
+        "pdf": 0.09973557010035818,
+        "cdf": 0.5
+      },
+      "reference": "CPython statistics.NormalDist",
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "id": "normal-central-95",
+      "parameters": {
+        "mu": 0,
+        "sigma": 1,
+        "alpha": 0.05
+      },
+      "expected": {
+        "lower": -1.9599639845400538,
+        "upper": 1.9599639845400536
+      },
+      "reference": "CPython statistics.NormalDist.inv_cdf",
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "id": "normal-right-tail-eight",
+      "parameters": {
+        "mu": 0,
+        "sigma": 1,
+        "x": 8
+      },
+      "expected": {
+        "sf": 6.220960574271819e-16
+      },
+      "reference": "Analytical: erfc(x/sqrt(2))/2",
+      "tolerance": {
+        "absolute": 1e-28,
+        "relative": 1e-10
+      }
+    },
+    {
+      "id": "exponential-rate-two",
+      "parameters": {
+        "rate": 2,
+        "x": 1
+      },
+      "expected": {
+        "pdf": 0.2706705664732254,
+        "cdf": 0.8646647167633873,
+        "mean": 0.5,
+        "variance": 0.25
+      },
+      "reference": "Analytical exponential density/CDF, rate lambda (not scale)",
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "id": "binomial-ten-quarter",
+      "parameters": {
+        "n": 10,
+        "p": 0.25,
+        "k": 3
+      },
+      "expected": {
+        "pmf": 0.25028228759765625,
+        "cdf": 0.7758750915527344
+      },
+      "reference": "Analytical binomial PMF and finite sum",
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "id": "poisson-two",
+      "parameters": {
+        "rate": 2,
+        "k": 3
+      },
+      "expected": {
+        "pmf": 0.1804470443154836,
+        "cdf": 0.8571234604985472
+      },
+      "reference": "Analytical Poisson PMF and finite sum",
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "id": "summary-five",
+      "parameters": {
+        "sample": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "ddofSample": 1
+      },
+      "expected": {
+        "n": 5,
+        "mean": 3,
+        "variancePopulation": 2,
+        "varianceSample": 2.5
+      },
+      "reference": "CPython statistics; exact rational mean and variances",
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "id": "t-df-one",
+      "parameters": {
+        "sample": [
+          0,
+          2
+        ],
+        "nullMean": 0,
+        "alpha": 0.05,
+        "alternative": "two-sided"
+      },
+      "expected": {
+        "df": 1,
+        "statistic": 1,
+        "pTwoSided": 0.5,
+        "ci95": [
+          -11.706204736174696,
+          13.706204736174696
+        ]
+      },
+      "reference": "Analytical t(df=1)=Cauchy; q(.975)=tan(pi*(.975-.5))",
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "id": "t-df-four",
+      "parameters": {
+        "sample": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "nullMean": 0,
+        "alpha": 0.05,
+        "alternative": "two-sided"
+      },
+      "expected": {
+        "df": 4,
+        "statistic": 4.242640687119285,
+        "pTwoSided": 0.013235599563682587,
+        "ci95": [
+          1.0367568385224428,
+          4.963243161477557
+        ]
+      },
+      "reference": "Analytical t(df=4) CDF=.5+(3*s-s^3)/4, s=t/sqrt(t^2+4); bisection q(.975)",
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    }
+  ],
+  "rng": {
+    "algorithm": "xorshift32-13-17-5/open-midpoint-v1",
+    "zeroSeedPolicy": "reject",
+    "vectors": [
+      {
+        "seed": 1,
+        "words": [
+          270369,
+          67634689,
+          2647435461,
+          307599695,
+          2398689233,
+          745495504,
+          632435482,
+          435756210
+        ],
+        "uniformOpen": [
+          6.29503047093749e-05,
+          0.015747428289614618,
+          0.6164041025331244,
+          0.0716186350909993,
+          0.5584883581614122,
+          0.17357419815380126,
+          0.1472503604600206,
+          0.1014573989668861
+        ]
+      },
+      {
+        "seed": 4294967295,
+        "words": [
+          253983,
+          4228382207,
+          1958451267,
+          4056713434,
+          2049502865,
+          2560970988,
+          1705115568,
+          279806459
+        ],
+        "uniformOpen": [
+          5.91351417824626e-05,
+          0.9844969509867951,
+          0.4559874691767618,
+          0.9445272000739351,
+          0.4771870713448152,
+          0.5962725236313418,
+          0.39700315531808883,
+          0.0651475180638954
+        ]
+      }
+    ]
+  }
+}
