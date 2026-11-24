@@ -83,6 +83,50 @@ area: research
 budget_hours: 2
 ```
 
+## Follow-ups from the merged research (2026-11-24)
+
+The merged research (#4, #6, #14, #15, #22) left these open points. Each one has its own deliverable and can run in parallel.
+
+```crew-research
+id: snapshot-comparison-fields
+question: Which fields must the next ExperimentSnapshot version add (axis units, series kind, histogram normalization, ECDF scale, variance divisor, quantile method) so comparisons and exports never guess, and how do version 1 records migrate?
+area: contracts
+owner: punyzxc
+budget_hours: 2
+```
+
+```crew-research
+id: scientific-decision-register
+question: Which scientific choices from the merged research (tolerances, divisors, replay bounds, interval eligibility, coverage bands) are decided, which are deferred, and who confirms each?
+area: research
+owner: punyzxc
+budget_hours: 2
+```
+
+```crew-research
+id: frontend-scaffold
+question: Can a static Vite, React and TypeScript scaffold without a server run Workers, IndexedDB, Vitest and Playwright locally and in CI, with the disjoint area paths proposed in #16?
+area: web
+owner: pluxha
+budget_hours: 3
+```
+
+```crew-research
+id: qa-multiplicity
+question: How should a suite of many Monte Carlo oracle and coverage checks keep its false failure rate fixed, and which cases are mandatory for the first release?
+area: e2e
+owner: adekin06
+budget_hours: 2
+```
+
+```crew-research
+id: convergence-teaching
+question: Which fixed-seed LLN prefix and CLT replicate fixtures, with predeclared bands, show convergence correctly for the Convergence module?
+area: research
+owner: Jumalinova
+budget_hours: 2
+```
+
 ## Exit criteria
 
 - [ ] Record resolved or explicitly deferred scientific decisions, including replay bounds and interval eligibility.
