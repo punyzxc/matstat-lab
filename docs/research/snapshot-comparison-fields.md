@@ -7,7 +7,7 @@ This note builds on two merged notes:
 - [explorer-chart.md](explorer-chart.md) (#4) defines snapshot versions 0 and 1.
 - [comparison-compatibility.md](comparison-compatibility.md) (#22) lists the metadata a comparison needs and marks five gaps.
 
-A throwaway decoder with migration and 8 `node:test` cases is in [`spikes/snapshot-comparison-fields/`](../../spikes/snapshot-comparison-fields/). It is not product code. It reuses both merged spikes directly: the v1 codec validates the shared core, and the #22 comparator checks the decisions. Run `node --test snapshot-v2.test.mjs` from that folder (Node 24).
+A throwaway decoder with migration and 13 `node:test` cases is in [`spikes/snapshot-comparison-fields/`](../../spikes/snapshot-comparison-fields/). It is not product code. It reuses both merged spikes directly: the v1 codec validates the shared core, and the #22 comparator checks the decisions. Run `node --test snapshot-v2.test.mjs` from that folder (Node 24).
 
 ## Facts
 
@@ -15,13 +15,19 @@ A throwaway decoder with migration and 8 `node:test` cases is in [`spikes/snapsh
 - **What the comparator needs.** The comparator refuses a pair when a required field is missing (`missing-metadata:<field>`). It reads units, the series kind, the histogram normalization, the ECDF scale, the variance divisor and the quantile method. [comparison-compatibility.md](comparison-compatibility.md), "Required metadata"
 - **Why the divisor and the method must be stored.** NumPy names the variance divisor through `ddof` and offers several quantile methods that give different values on the same data. [numpy.var](https://numpy.org/doc/stable/reference/generated/numpy.var.html) · [numpy.quantile](https://numpy.org/doc/stable/reference/generated/numpy.quantile.html)
 - **Shared rules from the decision register (#30).** The variance divisor defaults to n−1 and is always labeled (R1). Histogram counts are validated against the retained values (R2). Incompatible records are kept and counted, never coerced (R9). [scientific-decision-register.md](scientific-decision-register.md), which is under review in the #30 PR.
-- **Verified in the spike.** All 8 tests pass:
-  - a native version 2 record decodes unchanged
+- **Verified in the spike.** All 13 tests pass. An independent check of the first draft found bugs in labels, migration and copying, and five of the tests are regressions for them. The tests show:
+  - a native version 2 record decodes to a copy of its input, with the same content
   - version 0 and version 1 records migrate without mutating their input
+  - migration labels always override stray keys in a version 1 record
   - version 3 is reported as unsupported
-  - six kinds of corrupt version 2 records are rejected, including a wrong histogram count in the shared core
-  - a migrated record with unknown units is refused by the #22 comparator
-  - two native version 2 records that differ only in seed compare without transforms
+  - these corrupt version 2 records are rejected:
+    - unknown labels
+    - unknown keys
+    - a `migratedFrom` on a native record
+    - a wrong histogram count in the shared core
+    - a `density` or `fraction` label that the stored integer counts cannot back
+  - a migrated record with unknown units or an unknown statistic definition is refused by the #22 comparator, and the comparator names the exact field
+  - two native version 2 records that differ only in seed compare without transforms, both as histograms and as ECDFs
 
 ## Fields added in version 2
 
@@ -29,11 +35,11 @@ A throwaway decoder with migration and 8 `node:test` cases is in [`spikes/snapsh
 | --- | --- | --- | --- |
 | `axis.units` | one of a closed vocabulary (spike: `1` for dimensionless, `s`, `min`, `h`, `cm`, `m`, `kg`), or `null` | comparison (unit map, parameter rescaling), export headers | **`null` (unknown).** Version 1 never recorded units, and "dimensionless" would be a guess |
 | `series.histogram.kind` | `'histogram'` | comparison (series kind), renderer adapter | `'histogram'`, derived from the key name |
-| `series.histogram.normalization` | `'count'` \| `'relative'` \| `'density'` | comparison (scale), export | `'count'`. The version 1 codec checks counts against the retained values, so this is a fact |
+| `series.histogram.normalization` | `'count'` in this spike. `'relative'` and `'density'` are reserved for series stored without retained data, which need their own validator | comparison (scale), export | `'count'`. The version 1 codec checks counts against the retained values, so this is a fact |
 | `series.ecdf.kind` | `'ecdf'` | comparison, renderer adapter | `'ecdf'` |
-| `series.ecdf.scale` | `'count'` \| `'fraction'` | comparison (`normalize-ecdf`) | `'count'`. Version 1 stores `cumulativeCounts` |
-| `statistics.varianceDenominator` | `'n'` \| `'n-1'` \| `'not-reported'` \| `null` | comparison, report labels | `'not-reported'` if version 1 reported no variance or SD, otherwise **`null` (unknown)** |
-| `statistics.quantileMethod` | `'hf1'` … `'hf9'` (Hyndman–Fan type) \| `'not-reported'` \| `null` | comparison, report labels | `'not-reported'` if version 1 reported no quantile, otherwise **`null`** |
+| `series.ecdf.scale` | `'count'` in this spike. `'fraction'` is reserved on the same terms | comparison (`normalize-ecdf`) | `'count'`. Version 1 stores `cumulativeCounts` |
+| `statistics.varianceDenominator` | `'n'` \| `'n-1'` \| `'not-reported'` \| `null` | comparison, report labels | `'not-reported'` only if every key in the version 1 `observed` map is definition-free (`mean`, `min`, `max`, `n`, `sum`, `count`). Otherwise **`null` (unknown)** |
+| `statistics.quantileMethod` | `'hf1'` … `'hf9'` (Hyndman–Fan type) \| `'not-reported'` \| `null` | comparison, report labels | the same rule as the variance divisor |
 | `migratedFrom` | `0` \| `1`, absent on native version 2 records | audit, export | set by the migration |
 
 Rules for these fields:
@@ -49,9 +55,9 @@ Rules for these fields:
 | Native version 2, all fields valid | `ok`, unchanged, `migrated: false` |
 | Version 1 fixture (reports a mean only) | `ok`, `migrated: true`: units `null`, normalization `count`, ECDF scale `count`, both statistic fields `not-reported` |
 | Version 0 fixture | `ok`, `migratedFrom: 0`. The input object is not changed |
-| Version 1 that reports a variance | the variance divisor is `null` |
+| Version 1 that reports a variance, SD, percentile or any other key that is not definition-free | both statistic fields are `null` |
 | Version 3 | `unsupported-version` |
-| Version 2 with an unknown unit, a missing `axis`, an unknown normalization, a wrong ECDF kind, an unknown quantile method, or a wrong histogram count | `invalid-snapshot` |
+| Version 2 with any of: an unknown unit, a missing `axis`, an unknown or unbacked normalization or scale, a wrong ECDF kind, an unknown quantile method, unknown keys in the new objects, `migratedFrom` on a native record, or a wrong histogram count | `invalid-snapshot` |
 
 ## Assumptions and open points
 

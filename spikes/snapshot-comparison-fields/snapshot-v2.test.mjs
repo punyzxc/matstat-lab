@@ -67,8 +67,8 @@ test('future versions are unsupported and corrupt version 2 records are invalid'
 // Expected decisions, written before running the comparator.
 test('comparison never guesses: a migrated record without units is incompatible', () => {
   const migrated = toComparisonView(decode(storedRun).snapshot);
-  const bigger = toComparisonView({ ...v2(), spec: { ...v2().spec, sampleSize: 5, seed: 7 } });
-  const got = compare(migrated, bigger);
+  const native = toComparisonView({ ...v2(), spec: { ...v2().spec, seed: 7 } });
+  const got = compare(migrated, native);
   assert.equal(got.decision, 'incompatible');
   assert.ok(got.reasons.includes('missing-metadata:units@a'));
 });
@@ -86,5 +86,56 @@ test('an unknown statistic definition blocks the comparison', () => {
   rec.observed.variance = 1.3;
   const migrated = migrateV1(rec);
   migrated.axis.units = '1'; // even with units known
-  assert.equal(compare(toComparisonView(migrated), toComparisonView(v2())).decision, 'incompatible');
+  const got = compare(toComparisonView(migrated), toComparisonView(v2()));
+  assert.equal(got.decision, 'incompatible');
+  assert.ok(got.reasons.includes('missing-metadata:statistics.varianceDenominator@a'));
+});
+
+// Regressions from an independent check of the first draft.
+test("labels that the stored counts cannot back are rejected", () => {
+  for (const mutate of [
+    r => { r.series.histogram.normalization = "density"; },
+    r => { r.series.ecdf.scale = "fraction"; },
+    r => { r.series.histogram.values = [1]; },
+    r => { r.axis.note = "x"; },
+    r => { r.statistics.extra = 1; },
+    r => { r.migratedFrom = "banana"; },
+  ]) {
+    const bad = v2();
+    mutate(bad);
+    assert.equal(decode(bad).code, "invalid-snapshot");
+  }
+});
+
+test("migration labels always win over stray v1 keys", () => {
+  const rec = structuredClone(storedRun);
+  Object.assign(rec.series.histogram, { kind: "pmf", normalization: "percent" });
+  rec.series.ecdf.scale = "fraction";
+  const r = decode(rec);
+  assert.equal(r.ok, true);
+  assert.equal(r.snapshot.series.histogram.kind, "histogram");
+  assert.equal(r.snapshot.series.histogram.normalization, "count");
+  assert.equal(r.snapshot.series.ecdf.scale, "count");
+  const { migratedFrom, ...native } = r.snapshot;
+  assert.equal(decode({ ...native, schemaVersion: 2 }).ok, true);
+});
+
+test("any observed measure that may use a definition makes it unknown", () => {
+  for (const key of ["standardDeviation", "stdev", "p25", "percentile95", "quantile50"]) {
+    const rec = structuredClone(storedRun);
+    rec.observed[key] = 1;
+    assert.equal(migrateV1(rec).statistics.quantileMethod, null, key);
+  }
+});
+
+test("decoded version 2 records are copies of the input", () => {
+  const input = v2();
+  const r = decode(input);
+  r.snapshot.axis.units = "s";
+  assert.equal(input.axis.units, "1");
+});
+
+test("the ECDF series can be compared through the same view", () => {
+  const got = compare(toComparisonView(v2(), "ecdf"), toComparisonView({ ...v2(), spec: { ...v2().spec, seed: 7 } }, "ecdf"));
+  assert.equal(got.decision, "compatible");
 });
