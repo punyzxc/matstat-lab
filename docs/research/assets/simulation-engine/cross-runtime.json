@@ -1,0 +1,19 @@
+{
+  "node": "v24.15.0",
+  "browser": "157.0.8103.79",
+  "hardware": {
+    "CPU": "12th Gen Intel(R) Core(TM) i5-12500H",
+    "PhysicalCores": 12,
+    "LogicalProcessors": 16,
+    "RAMGiB": 15.7,
+    "OS": "Майкрософт Windows 11 Pro"
+  },
+  "absoluteTolerance": 1e-12,
+  "relativeTolerance": 1e-12,
+  "resultsCompared": 11,
+  "exactResults": 5,
+  "numericValuesCompared": 1100,
+  "maxAbsoluteDifference": 2.220446049250313e-16,
+  "maxRelativeDifference": 2.6469226970563616e-16,
+  "withinTolerance": true
+}

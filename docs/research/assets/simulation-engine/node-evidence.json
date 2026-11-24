@@ -1,0 +1,2338 @@
+{
+  "capturedAt": "2026-11-23T16:07:57.132Z",
+  "runtime": "v24.15.0",
+  "platform": "win32",
+  "hardware": {
+    "CPU": "12th Gen Intel(R) Core(TM) i5-12500H",
+    "PhysicalCores": 12,
+    "LogicalProcessors": 16,
+    "RAMGiB": 15.7,
+    "OS": "Майкрософт Windows 11 Pro"
+  },
+  "engineVersion": "simulation-fixture-v1",
+  "rngVersion": "fixture-mix32-v1",
+  "replay": [
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "clt",
+        "model": "exponential",
+        "seed": 2048,
+        "n": 17,
+        "repetitions": 31,
+        "retain": 31
+      },
+      "batchSize": 1,
+      "scheduler": "timeout",
+      "exact": true,
+      "sha256": "bb88a255091bb9562ffb55b7eaa70ed36533e3a9d9d7a624faca6fa1d3d8eb7f",
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "clt",
+          "model": "exponential",
+          "seed": 2048,
+          "n": 17,
+          "repetitions": 31,
+          "retain": 31,
+          "prefixNs": [],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 527,
+        "repetitions": 31,
+        "mean": 1.0253645247419576,
+        "sampleVariance": 0.07527197552613432,
+        "theory": {
+          "mean": 1,
+          "variance": 1,
+          "varianceOfMean": 0.058823529411764705
+        },
+        "prefixN": [],
+        "prefixMean": [],
+        "means": [
+          1.230953723780474,
+          0.8150896130714387,
+          0.7136983194656913,
+          0.856245889815411,
+          1.3427984423241521,
+          0.8835962939422944,
+          1.0586564539838956,
+          0.5877346432844784,
+          0.8319364854215604,
+          1.3495702432412913,
+          1.0484580258648655,
+          0.9703444277390155,
+          0.8085593847862432,
+          1.1109742340997892,
+          1.6960452312162981,
+          1.0202561018382124,
+          0.6107899826947727,
+          1.3033935167998028,
+          1.1373666949356196,
+          1.2888808522388124,
+          1.1781679352696197,
+          0.6183724130451107,
+          1.2979248620846868,
+          1.131592716426919,
+          0.621967215945537,
+          1.1531128129034285,
+          0.9770329758461569,
+          1.029887224700817,
+          1.0807869503101248,
+          0.6340718730785575,
+          1.39803472684561
+        ],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [
+            0,
+            0,
+            0,
+            0,
+            5,
+            1,
+            4,
+            3,
+            6,
+            5,
+            5,
+            1,
+            0,
+            1,
+            0,
+            0
+          ],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 312
+        }
+      }
+    },
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "clt",
+        "model": "exponential",
+        "seed": 2048,
+        "n": 17,
+        "repetitions": 31,
+        "retain": 31
+      },
+      "batchSize": 7,
+      "scheduler": "message",
+      "exact": true,
+      "sha256": "bb88a255091bb9562ffb55b7eaa70ed36533e3a9d9d7a624faca6fa1d3d8eb7f",
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "clt",
+          "model": "exponential",
+          "seed": 2048,
+          "n": 17,
+          "repetitions": 31,
+          "retain": 31,
+          "prefixNs": [],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 527,
+        "repetitions": 31,
+        "mean": 1.0253645247419576,
+        "sampleVariance": 0.07527197552613432,
+        "theory": {
+          "mean": 1,
+          "variance": 1,
+          "varianceOfMean": 0.058823529411764705
+        },
+        "prefixN": [],
+        "prefixMean": [],
+        "means": [
+          1.230953723780474,
+          0.8150896130714387,
+          0.7136983194656913,
+          0.856245889815411,
+          1.3427984423241521,
+          0.8835962939422944,
+          1.0586564539838956,
+          0.5877346432844784,
+          0.8319364854215604,
+          1.3495702432412913,
+          1.0484580258648655,
+          0.9703444277390155,
+          0.8085593847862432,
+          1.1109742340997892,
+          1.6960452312162981,
+          1.0202561018382124,
+          0.6107899826947727,
+          1.3033935167998028,
+          1.1373666949356196,
+          1.2888808522388124,
+          1.1781679352696197,
+          0.6183724130451107,
+          1.2979248620846868,
+          1.131592716426919,
+          0.621967215945537,
+          1.1531128129034285,
+          0.9770329758461569,
+          1.029887224700817,
+          1.0807869503101248,
+          0.6340718730785575,
+          1.39803472684561
+        ],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [
+            0,
+            0,
+            0,
+            0,
+            5,
+            1,
+            4,
+            3,
+            6,
+            5,
+            5,
+            1,
+            0,
+            1,
+            0,
+            0
+          ],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 312
+        }
+      }
+    },
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "clt",
+        "model": "exponential",
+        "seed": 2048,
+        "n": 17,
+        "repetitions": 31,
+        "retain": 31
+      },
+      "batchSize": 2048,
+      "scheduler": "timeout",
+      "exact": true,
+      "sha256": "bb88a255091bb9562ffb55b7eaa70ed36533e3a9d9d7a624faca6fa1d3d8eb7f",
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "clt",
+          "model": "exponential",
+          "seed": 2048,
+          "n": 17,
+          "repetitions": 31,
+          "retain": 31,
+          "prefixNs": [],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 527,
+        "repetitions": 31,
+        "mean": 1.0253645247419576,
+        "sampleVariance": 0.07527197552613432,
+        "theory": {
+          "mean": 1,
+          "variance": 1,
+          "varianceOfMean": 0.058823529411764705
+        },
+        "prefixN": [],
+        "prefixMean": [],
+        "means": [
+          1.230953723780474,
+          0.8150896130714387,
+          0.7136983194656913,
+          0.856245889815411,
+          1.3427984423241521,
+          0.8835962939422944,
+          1.0586564539838956,
+          0.5877346432844784,
+          0.8319364854215604,
+          1.3495702432412913,
+          1.0484580258648655,
+          0.9703444277390155,
+          0.8085593847862432,
+          1.1109742340997892,
+          1.6960452312162981,
+          1.0202561018382124,
+          0.6107899826947727,
+          1.3033935167998028,
+          1.1373666949356196,
+          1.2888808522388124,
+          1.1781679352696197,
+          0.6183724130451107,
+          1.2979248620846868,
+          1.131592716426919,
+          0.621967215945537,
+          1.1531128129034285,
+          0.9770329758461569,
+          1.029887224700817,
+          1.0807869503101248,
+          0.6340718730785575,
+          1.39803472684561
+        ],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [
+            0,
+            0,
+            0,
+            0,
+            5,
+            1,
+            4,
+            3,
+            6,
+            5,
+            5,
+            1,
+            0,
+            1,
+            0,
+            0
+          ],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 312
+        }
+      }
+    },
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "lln",
+        "model": "uniform",
+        "seed": 0,
+        "n": 257,
+        "repetitions": 1,
+        "retain": 31
+      },
+      "batchSize": 7,
+      "scheduler": "message",
+      "exact": true,
+      "sha256": "8ffe639524bbfb394c53313b9ff8234c25de2a152c9158e02844bab46a68f832",
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "lln",
+          "model": "uniform",
+          "seed": 0,
+          "n": 257,
+          "repetitions": 1,
+          "retain": 31,
+          "prefixNs": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+            257
+          ],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 257,
+        "repetitions": 1,
+        "mean": 0.5138193370248026,
+        "sampleVariance": 0.0888873925103676,
+        "theory": {
+          "mean": 0.5,
+          "variance": 0.08333333333333333,
+          "varianceOfMean": 0.00032425421530479895
+        },
+        "prefixN": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          257
+        ],
+        "prefixMean": [
+          0.9339972584275529,
+          0.7473283836152405,
+          0.4516105817165226,
+          0.6140697771043051,
+          0.5761046375118893,
+          0.5508541356030037,
+          0.5055361676713801,
+          0.5256901422180817,
+          0.5134775351598363,
+          0.5138193370248026
+        ],
+        "means": [],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 120
+        }
+      }
+    },
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "lln",
+        "model": "uniform",
+        "seed": 0,
+        "n": 257,
+        "repetitions": 1,
+        "retain": 31
+      },
+      "batchSize": 64,
+      "scheduler": "timeout",
+      "exact": true,
+      "sha256": "8ffe639524bbfb394c53313b9ff8234c25de2a152c9158e02844bab46a68f832",
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "lln",
+          "model": "uniform",
+          "seed": 0,
+          "n": 257,
+          "repetitions": 1,
+          "retain": 31,
+          "prefixNs": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+            257
+          ],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 257,
+        "repetitions": 1,
+        "mean": 0.5138193370248026,
+        "sampleVariance": 0.0888873925103676,
+        "theory": {
+          "mean": 0.5,
+          "variance": 0.08333333333333333,
+          "varianceOfMean": 0.00032425421530479895
+        },
+        "prefixN": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          257
+        ],
+        "prefixMean": [
+          0.9339972584275529,
+          0.7473283836152405,
+          0.4516105817165226,
+          0.6140697771043051,
+          0.5761046375118893,
+          0.5508541356030037,
+          0.5055361676713801,
+          0.5256901422180817,
+          0.5134775351598363,
+          0.5138193370248026
+        ],
+        "means": [],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 120
+        }
+      }
+    },
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "clt",
+        "model": "exponential",
+        "seed": 4294967295,
+        "n": 11,
+        "repetitions": 17,
+        "retain": 31
+      },
+      "batchSize": 17,
+      "scheduler": "timeout",
+      "exact": true,
+      "sha256": "71221feb4bb1c04728040cee5cf813f831b4116f06f6868e68a66b5d28a4142f",
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "clt",
+          "model": "exponential",
+          "seed": 4294967295,
+          "n": 11,
+          "repetitions": 17,
+          "retain": 31,
+          "prefixNs": [],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 187,
+        "repetitions": 17,
+        "mean": 1.0430690541428917,
+        "sampleVariance": 0.10018305418835743,
+        "theory": {
+          "mean": 1,
+          "variance": 1,
+          "varianceOfMean": 0.09090909090909091
+        },
+        "prefixN": [],
+        "prefixMean": [],
+        "means": [
+          1.2309593431384604,
+          0.4727706787223605,
+          1.3147146383582997,
+          1.0055628294594077,
+          1.3431055063823611,
+          0.8418408102823506,
+          1.2631751541163163,
+          0.9914256289751691,
+          1.6281228447030318,
+          0.7814295103235617,
+          0.9533722891363487,
+          0.7804116832973694,
+          0.7866201256234459,
+          0.8706621104360197,
+          0.9614387763657948,
+          1.6452312402817684,
+          0.8613307508270951
+        ],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            4,
+            5,
+            1,
+            2,
+            2,
+            0,
+            2,
+            0,
+            0,
+            0
+          ],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 200
+        }
+      }
+    },
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "clt",
+        "model": "exponential",
+        "seed": 4294967295,
+        "n": 11,
+        "repetitions": 17,
+        "retain": 31
+      },
+      "batchSize": 2048,
+      "scheduler": "message",
+      "exact": true,
+      "sha256": "71221feb4bb1c04728040cee5cf813f831b4116f06f6868e68a66b5d28a4142f",
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "clt",
+          "model": "exponential",
+          "seed": 4294967295,
+          "n": 11,
+          "repetitions": 17,
+          "retain": 31,
+          "prefixNs": [],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 187,
+        "repetitions": 17,
+        "mean": 1.0430690541428917,
+        "sampleVariance": 0.10018305418835743,
+        "theory": {
+          "mean": 1,
+          "variance": 1,
+          "varianceOfMean": 0.09090909090909091
+        },
+        "prefixN": [],
+        "prefixMean": [],
+        "means": [
+          1.2309593431384604,
+          0.4727706787223605,
+          1.3147146383582997,
+          1.0055628294594077,
+          1.3431055063823611,
+          0.8418408102823506,
+          1.2631751541163163,
+          0.9914256289751691,
+          1.6281228447030318,
+          0.7814295103235617,
+          0.9533722891363487,
+          0.7804116832973694,
+          0.7866201256234459,
+          0.8706621104360197,
+          0.9614387763657948,
+          1.6452312402817684,
+          0.8613307508270951
+        ],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            4,
+            5,
+            1,
+            2,
+            2,
+            0,
+            2,
+            0,
+            0,
+            0
+          ],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 200
+        }
+      }
+    }
+  ],
+  "lifecycle": [
+    {
+      "trial": 0,
+      "batchSize": 1,
+      "scheduler": "timeout",
+      "startupMs": 24.695200000000114,
+      "pauseMs": 0.26410000000032596,
+      "resumeMs": 0.4922999999998865,
+      "cancel": {
+        "acknowledged": true,
+        "terminated": true,
+        "workerRetainedBytes": 0,
+        "latencyMs": 1.8325000000004366
+      },
+      "restartStartupMs": 25.29570000000058,
+      "retainedWorkerBytesWhilePaused": 576,
+      "committedNumericBytesAfterReplacement": 312,
+      "rejectedInjectedEvents": 2,
+      "transitions": [
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 8758.88
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 8782.8321
+        },
+        {
+          "event": "progress",
+          "state": "running",
+          "processed": 1,
+          "atMs": 8791.5064
+        },
+        {
+          "event": "pausing",
+          "state": "pausing",
+          "processed": 1,
+          "atMs": 8791.5898
+        },
+        {
+          "event": "paused",
+          "state": "paused",
+          "processed": 1,
+          "atMs": 8791.7886
+        },
+        {
+          "event": "resuming",
+          "state": "resuming",
+          "processed": 1,
+          "atMs": 8821.9351
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 1,
+          "atMs": 8822.2702
+        },
+        {
+          "event": "cancelled",
+          "state": "cancelled",
+          "processed": 1,
+          "atMs": 8822.4071
+        },
+        {
+          "event": "cancel-acknowledged",
+          "state": "cancelled",
+          "processed": 1,
+          "atMs": 8822.7863
+        },
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 8825.0784
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 8849.5393
+        },
+        {
+          "event": "completed",
+          "state": "completed",
+          "processed": 527,
+          "atMs": 8854.2497
+        }
+      ],
+      "disposedNumericBytes": 0
+    },
+    {
+      "trial": 1,
+      "batchSize": 64,
+      "scheduler": "message",
+      "startupMs": 24.594900000000052,
+      "pauseMs": 15.124599999999191,
+      "resumeMs": 0.34090000000105647,
+      "cancel": {
+        "acknowledged": true,
+        "terminated": true,
+        "workerRetainedBytes": 0,
+        "latencyMs": 1.9873999999999796
+      },
+      "restartStartupMs": 22.640699999999924,
+      "retainedWorkerBytesWhilePaused": 576,
+      "committedNumericBytesAfterReplacement": 312,
+      "rejectedInjectedEvents": 2,
+      "transitions": [
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 8855.151
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 8879.1039
+        },
+        {
+          "event": "progress",
+          "state": "running",
+          "processed": 64,
+          "atMs": 8885.0625
+        },
+        {
+          "event": "pausing",
+          "state": "pausing",
+          "processed": 64,
+          "atMs": 8885.1211
+        },
+        {
+          "event": "paused",
+          "state": "paused",
+          "processed": 256,
+          "atMs": 8900.1916
+        },
+        {
+          "event": "resuming",
+          "state": "resuming",
+          "processed": 256,
+          "atMs": 8930.6398
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 256,
+          "atMs": 8930.9315
+        },
+        {
+          "event": "cancelled",
+          "state": "cancelled",
+          "processed": 256,
+          "atMs": 8930.9724
+        },
+        {
+          "event": "cancel-acknowledged",
+          "state": "cancelled",
+          "processed": 256,
+          "atMs": 8931.3831
+        },
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 8933.4509
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 8955.5951
+        },
+        {
+          "event": "completed",
+          "state": "completed",
+          "processed": 527,
+          "atMs": 8963.2209
+        }
+      ],
+      "disposedNumericBytes": 0
+    },
+    {
+      "trial": 2,
+      "batchSize": 256,
+      "scheduler": "timeout",
+      "startupMs": 24.081999999998516,
+      "pauseMs": 0.20719999999892025,
+      "resumeMs": 0.397000000000844,
+      "cancel": {
+        "acknowledged": true,
+        "terminated": true,
+        "workerRetainedBytes": 0,
+        "latencyMs": 1.54490000000078
+      },
+      "restartStartupMs": 24.593800000000556,
+      "retainedWorkerBytesWhilePaused": 576,
+      "committedNumericBytesAfterReplacement": 312,
+      "rejectedInjectedEvents": 2,
+      "transitions": [
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 8964.3961
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 8987.6378
+        },
+        {
+          "event": "progress",
+          "state": "running",
+          "processed": 256,
+          "atMs": 8993.4429
+        },
+        {
+          "event": "pausing",
+          "state": "pausing",
+          "processed": 256,
+          "atMs": 8993.4787
+        },
+        {
+          "event": "paused",
+          "state": "paused",
+          "processed": 256,
+          "atMs": 8993.6591
+        },
+        {
+          "event": "resuming",
+          "state": "resuming",
+          "processed": 256,
+          "atMs": 9023.5543
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 256,
+          "atMs": 9023.8859
+        },
+        {
+          "event": "cancelled",
+          "state": "cancelled",
+          "processed": 256,
+          "atMs": 9023.9447
+        },
+        {
+          "event": "cancel-acknowledged",
+          "state": "cancelled",
+          "processed": 256,
+          "atMs": 9024.1937
+        },
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9025.9267
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9049.9974
+        },
+        {
+          "event": "completed",
+          "state": "completed",
+          "processed": 527,
+          "atMs": 9056.0486
+        }
+      ],
+      "disposedNumericBytes": 0
+    },
+    {
+      "trial": 3,
+      "batchSize": 2048,
+      "scheduler": "message",
+      "startupMs": 32.097100000000864,
+      "pauseMs": 17.87670000000071,
+      "resumeMs": 0.5043000000005122,
+      "cancel": {
+        "acknowledged": true,
+        "terminated": true,
+        "workerRetainedBytes": 0,
+        "latencyMs": 2.919400000000678
+      },
+      "restartStartupMs": 29.059699999999793,
+      "retainedWorkerBytesWhilePaused": 576,
+      "committedNumericBytesAfterReplacement": 312,
+      "rejectedInjectedEvents": 2,
+      "transitions": [
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9057.4137
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9088.5468
+        },
+        {
+          "event": "progress",
+          "state": "running",
+          "processed": 2048,
+          "atMs": 9103.6317
+        },
+        {
+          "event": "pausing",
+          "state": "pausing",
+          "processed": 2048,
+          "atMs": 9103.6763
+        },
+        {
+          "event": "progress",
+          "state": "pausing",
+          "processed": 4096,
+          "atMs": 9121.0487
+        },
+        {
+          "event": "paused",
+          "state": "paused",
+          "processed": 8192,
+          "atMs": 9121.5035
+        },
+        {
+          "event": "resuming",
+          "state": "resuming",
+          "processed": 8192,
+          "atMs": 9150.0669
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 8192,
+          "atMs": 9150.4801
+        },
+        {
+          "event": "cancelled",
+          "state": "cancelled",
+          "processed": 8192,
+          "atMs": 9150.542
+        },
+        {
+          "event": "cancel-acknowledged",
+          "state": "cancelled",
+          "processed": 8192,
+          "atMs": 9150.7397
+        },
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9154.5443
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9182.5306
+        },
+        {
+          "event": "completed",
+          "state": "completed",
+          "processed": 527,
+          "atMs": 9199.0701
+        }
+      ],
+      "disposedNumericBytes": 0
+    },
+    {
+      "trial": 4,
+      "batchSize": 1,
+      "scheduler": "timeout",
+      "startupMs": 30.975800000000163,
+      "pauseMs": 0.3632000000015978,
+      "resumeMs": 0.2484999999996944,
+      "cancel": {
+        "acknowledged": true,
+        "terminated": true,
+        "workerRetainedBytes": 0,
+        "latencyMs": 1.42029999999977
+      },
+      "restartStartupMs": 27.603799999998955,
+      "retainedWorkerBytesWhilePaused": 576,
+      "committedNumericBytesAfterReplacement": 312,
+      "rejectedInjectedEvents": 2,
+      "transitions": [
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9200.6385
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9230.6794
+        },
+        {
+          "event": "progress",
+          "state": "running",
+          "processed": 1,
+          "atMs": 9245.8628
+        },
+        {
+          "event": "pausing",
+          "state": "pausing",
+          "processed": 1,
+          "atMs": 9245.9133
+        },
+        {
+          "event": "paused",
+          "state": "paused",
+          "processed": 1,
+          "atMs": 9246.2454
+        },
+        {
+          "event": "resuming",
+          "state": "resuming",
+          "processed": 1,
+          "atMs": 9274.3335
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 1,
+          "atMs": 9274.5458
+        },
+        {
+          "event": "cancelled",
+          "state": "cancelled",
+          "processed": 1,
+          "atMs": 9274.5878
+        },
+        {
+          "event": "cancel-acknowledged",
+          "state": "cancelled",
+          "processed": 1,
+          "atMs": 9274.7488
+        },
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9276.623
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9303.5551
+        },
+        {
+          "event": "completed",
+          "state": "completed",
+          "processed": 527,
+          "atMs": 9309.4508
+        }
+      ],
+      "disposedNumericBytes": 0
+    },
+    {
+      "trial": 5,
+      "batchSize": 64,
+      "scheduler": "message",
+      "startupMs": 30.328199999999924,
+      "pauseMs": 17.129300000000512,
+      "resumeMs": 0.48729999999886786,
+      "cancel": {
+        "acknowledged": true,
+        "terminated": true,
+        "workerRetainedBytes": 0,
+        "latencyMs": 3.2466999999996915
+      },
+      "restartStartupMs": 33.677300000001196,
+      "retainedWorkerBytesWhilePaused": 576,
+      "committedNumericBytesAfterReplacement": 312,
+      "rejectedInjectedEvents": 2,
+      "transitions": [
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9310.5226
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9340.0125
+        },
+        {
+          "event": "progress",
+          "state": "running",
+          "processed": 64,
+          "atMs": 9355.3213
+        },
+        {
+          "event": "pausing",
+          "state": "pausing",
+          "processed": 64,
+          "atMs": 9355.3641
+        },
+        {
+          "event": "progress",
+          "state": "pausing",
+          "processed": 128,
+          "atMs": 9372.2554
+        },
+        {
+          "event": "paused",
+          "state": "paused",
+          "processed": 256,
+          "atMs": 9372.4526
+        },
+        {
+          "event": "resuming",
+          "state": "resuming",
+          "processed": 256,
+          "atMs": 9400.3761
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 256,
+          "atMs": 9400.7762
+        },
+        {
+          "event": "cancelled",
+          "state": "cancelled",
+          "processed": 256,
+          "atMs": 9400.8462
+        },
+        {
+          "event": "cancel-acknowledged",
+          "state": "cancelled",
+          "processed": 256,
+          "atMs": 9401.0708
+        },
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9404.8513
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9437.7495
+        },
+        {
+          "event": "completed",
+          "state": "completed",
+          "processed": 527,
+          "atMs": 9450.0231
+        }
+      ],
+      "disposedNumericBytes": 0
+    },
+    {
+      "trial": 6,
+      "batchSize": 256,
+      "scheduler": "timeout",
+      "startupMs": 36.260299999999916,
+      "pauseMs": 0.37809999999990396,
+      "resumeMs": 0.3953000000001339,
+      "cancel": {
+        "acknowledged": true,
+        "terminated": true,
+        "workerRetainedBytes": 0,
+        "latencyMs": 1.494699999999284
+      },
+      "restartStartupMs": 32.407900000000154,
+      "retainedWorkerBytesWhilePaused": 576,
+      "committedNumericBytesAfterReplacement": 312,
+      "rejectedInjectedEvents": 2,
+      "transitions": [
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9451.9788
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9486.528
+        },
+        {
+          "event": "progress",
+          "state": "running",
+          "processed": 256,
+          "atMs": 9490.7133
+        },
+        {
+          "event": "pausing",
+          "state": "pausing",
+          "processed": 256,
+          "atMs": 9490.8368
+        },
+        {
+          "event": "paused",
+          "state": "paused",
+          "processed": 256,
+          "atMs": 9491.1543
+        },
+        {
+          "event": "resuming",
+          "state": "resuming",
+          "processed": 256,
+          "atMs": 9523.7099
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 256,
+          "atMs": 9524.059
+        },
+        {
+          "event": "cancelled",
+          "state": "cancelled",
+          "processed": 256,
+          "atMs": 9524.1165
+        },
+        {
+          "event": "cancel-acknowledged",
+          "state": "cancelled",
+          "processed": 256,
+          "atMs": 9524.3419
+        },
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9526.0167
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9557.9776
+        },
+        {
+          "event": "completed",
+          "state": "completed",
+          "processed": 527,
+          "atMs": 9572.5949
+        }
+      ],
+      "disposedNumericBytes": 0
+    },
+    {
+      "trial": 7,
+      "batchSize": 2048,
+      "scheduler": "message",
+      "startupMs": 35.85080000000016,
+      "pauseMs": 19.387000000000626,
+      "resumeMs": 0.3433999999997468,
+      "cancel": {
+        "acknowledged": true,
+        "terminated": true,
+        "workerRetainedBytes": 0,
+        "latencyMs": 1.9858000000003813
+      },
+      "restartStartupMs": 29.04110000000037,
+      "retainedWorkerBytesWhilePaused": 576,
+      "committedNumericBytesAfterReplacement": 312,
+      "rejectedInjectedEvents": 2,
+      "transitions": [
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9573.8857
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9608.7686
+        },
+        {
+          "event": "progress",
+          "state": "running",
+          "processed": 2048,
+          "atMs": 9620.286
+        },
+        {
+          "event": "pausing",
+          "state": "pausing",
+          "processed": 2048,
+          "atMs": 9620.4559
+        },
+        {
+          "event": "progress",
+          "state": "pausing",
+          "processed": 4096,
+          "atMs": 9639.2583
+        },
+        {
+          "event": "paused",
+          "state": "paused",
+          "processed": 8192,
+          "atMs": 9639.7571
+        },
+        {
+          "event": "resuming",
+          "state": "resuming",
+          "processed": 8192,
+          "atMs": 9663.0664
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 8192,
+          "atMs": 9663.3716
+        },
+        {
+          "event": "cancelled",
+          "state": "cancelled",
+          "processed": 8192,
+          "atMs": 9663.4133
+        },
+        {
+          "event": "cancel-acknowledged",
+          "state": "cancelled",
+          "processed": 8192,
+          "atMs": 9663.6781
+        },
+        {
+          "event": "starting",
+          "state": "starting",
+          "processed": 0,
+          "atMs": 9666.4808
+        },
+        {
+          "event": "running",
+          "state": "running",
+          "processed": 0,
+          "atMs": 9694.4077
+        },
+        {
+          "event": "completed",
+          "state": "completed",
+          "processed": 527,
+          "atMs": 9711.207
+        }
+      ],
+      "disposedNumericBytes": 0
+    }
+  ],
+  "convergence": [
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "lln",
+        "model": "uniform",
+        "seed": 2048,
+        "n": 65536,
+        "repetitions": 1,
+        "retain": 256
+      },
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "lln",
+          "model": "uniform",
+          "seed": 2048,
+          "n": 65536,
+          "repetitions": 1,
+          "retain": 256,
+          "prefixNs": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+            512,
+            1024,
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536
+          ],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 65536,
+        "repetitions": 1,
+        "mean": 0.500866811075884,
+        "sampleVariance": 0.08371167486105756,
+        "theory": {
+          "mean": 0.5,
+          "variance": 0.08333333333333333,
+          "varianceOfMean": 0.0000012715657552083333
+        },
+        "prefixN": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          512,
+          1024,
+          2048,
+          4096,
+          8192,
+          16384,
+          32768,
+          65536
+        ],
+        "prefixMean": [
+          0.9230904689757153,
+          0.5015899615827948,
+          0.4407191085629165,
+          0.5139751562091988,
+          0.4899981352064059,
+          0.4727070883309351,
+          0.4932851428711727,
+          0.47855948368305673,
+          0.5061257164470587,
+          0.508057093067691,
+          0.5058943820777132,
+          0.5066418856257535,
+          0.5056767467339665,
+          0.5037744122474807,
+          0.49785485304002597,
+          0.4994225696199056,
+          0.500866811075884
+        ],
+        "means": [],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 204
+        }
+      },
+      "sha256": "833d5ae3b915cc8c7aa29daab08c83737e26814e940756cda4bf9d505c1ac5f7",
+      "diagnostic": {
+        "meanSE": 0.0011276372445109878,
+        "meanDeviationSE": 0.7686967418852384,
+        "predeclaredBandSE": 6,
+        "interpretation": "Conditional iid-model diagnostic for this fixed pseudo-random fixture, not an RNG independence test or a proof of a limit theorem"
+      }
+    },
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "clt",
+        "model": "uniform",
+        "seed": 2048,
+        "n": 32,
+        "repetitions": 4096,
+        "retain": 256
+      },
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "clt",
+          "model": "uniform",
+          "seed": 2048,
+          "n": 32,
+          "repetitions": 4096,
+          "retain": 256,
+          "prefixNs": [],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 131072,
+        "repetitions": 4096,
+        "mean": 0.5004407281223462,
+        "sampleVariance": 0.002500900764443582,
+        "theory": {
+          "mean": 0.5,
+          "variance": 0.08333333333333333,
+          "varianceOfMean": 0.0026041666666666665
+        },
+        "prefixN": [],
+        "prefixMean": [],
+        "means": [
+          0.5344252768118168,
+          0.46940307987097185,
+          0.47901498151622945,
+          0.5565334399798302,
+          0.48958678781491477,
+          0.4391879274990061,
+          0.4510354147205362,
+          0.45992583215411287,
+          0.4406577237532474,
+          0.5827745328206219,
+          0.5628954726053051,
+          0.5374133844597964,
+          0.525406122818822,
+          0.4580809550170671,
+          0.537091265883646,
+          0.5242250983719715,
+          0.3962184363044797,
+          0.4986997654050357,
+          0.4657845423935214,
+          0.5310005934370566,
+          0.5939525115754803,
+          0.4428975493574399,
+          0.5425300701463129,
+          0.5737690167879919,
+          0.42895327688893314,
+          0.5445865959482035,
+          0.5392414115049177,
+          0.5096585848004908,
+          0.5005195140547586,
+          0.4998937374693923,
+          0.4947258598695043,
+          0.45120640456298133,
+          0.5544740529949196,
+          0.47831326462619467,
+          0.5218315867532509,
+          0.454554584219295,
+          0.585122558688454,
+          0.4745029807891115,
+          0.47215520218742313,
+          0.42813160745572537,
+          0.5899318791707628,
+          0.5824525458228892,
+          0.6234741996959201,
+          0.4989591056437348,
+          0.47809131376561703,
+          0.48435519200575083,
+          0.5503101948925179,
+          0.4830307992888266,
+          0.4264274804518208,
+          0.4668723292998038,
+          0.459166272317816,
+          0.5688513216664433,
+          0.5769412731024205,
+          0.5271450655054651,
+          0.6117944206489483,
+          0.49191689474537265,
+          0.5026922721444861,
+          0.4514861314819428,
+          0.5035032871892327,
+          0.5220632647469754,
+          0.4343455498237745,
+          0.5317510247550672,
+          0.5115558761754073,
+          0.4834663091751281,
+          0.4914494449767517,
+          0.5980349336969084,
+          0.49953068255126715,
+          0.46993661675514886,
+          0.5164960829279152,
+          0.5271765767611215,
+          0.5415303024055904,
+          0.4569298014030209,
+          0.4979750099737429,
+          0.49347857895918423,
+          0.4416252454611822,
+          0.4828256445180158,
+          0.4808048787090229,
+          0.47398747466650104,
+          0.5570655611081747,
+          0.4513959456817248,
+          0.46186582498194184,
+          0.49710521387169143,
+          0.5267448780286941,
+          0.4739625704241916,
+          0.45643895299872395,
+          0.4475824879555148,
+          0.5382221025720354,
+          0.4883554393964005,
+          0.44769724032812525,
+          0.45629803039628314,
+          0.4407432559382868,
+          0.5631499711089418,
+          0.5067325544368941,
+          0.5242252699172242,
+          0.4658903253875905,
+          0.4412398489075713,
+          0.462146645069879,
+          0.4267059209087165,
+          0.489672394192894,
+          0.4750709000072675,
+          0.5916176907194315,
+          0.4905055196213652,
+          0.4739881251225597,
+          0.4295144581919885,
+          0.5745255247093154,
+          0.5146382167877164,
+          0.5534086226180079,
+          0.5060764421286876,
+          0.5344511345829233,
+          0.4942260531097416,
+          0.4450742181579699,
+          0.5194045788230143,
+          0.48556599763833214,
+          0.5001750924857333,
+          0.4409246953800903,
+          0.6238715454164775,
+          0.5985692361791735,
+          0.5310274200237471,
+          0.4485534677442047,
+          0.4852049682740471,
+          0.5030388261729967,
+          0.5427572918342776,
+          0.44197342044208193,
+          0.5274805862645736,
+          0.377399651450105,
+          0.49255523987085337,
+          0.4850575989476056,
+          0.5146811903177878,
+          0.5887587392498971,
+          0.5893111355835574,
+          0.48562860815582093,
+          0.4773911494266941,
+          0.40378125572897267,
+          0.5881350911658955,
+          0.5505841834674357,
+          0.4331081082273158,
+          0.45377521376212826,
+          0.44271954990108503,
+          0.47173873754945816,
+          0.5311683366599026,
+          0.5711445957786053,
+          0.4714469620812452,
+          0.5451493790387759,
+          0.5357957577871276,
+          0.48419082139298547,
+          0.5195119672061992,
+          0.4803076612006407,
+          0.6324505718512227,
+          0.46218824659445085,
+          0.42445103659702,
+          0.4782527735223994,
+          0.5007764936381135,
+          0.4954492964534439,
+          0.4821607013436733,
+          0.4773846562675316,
+          0.5704471827921226,
+          0.4645032922562678,
+          0.48070386816107197,
+          0.5384485789691098,
+          0.5763532322016547,
+          0.4976658407467766,
+          0.5123881043909934,
+          0.5130933268810624,
+          0.509230279356416,
+          0.44029629758733785,
+          0.4525060313389986,
+          0.4775472902983893,
+          0.39548770337569294,
+          0.5154270613129484,
+          0.5122248491534266,
+          0.5111863718702807,
+          0.4354892947740155,
+          0.49293658609531116,
+          0.5347814006672708,
+          0.479308339257841,
+          0.485921295650769,
+          0.4860537138665677,
+          0.5461395919119242,
+          0.5214204864532803,
+          0.48328969672002114,
+          0.5155840410952807,
+          0.5796484390011755,
+          0.5341108740030903,
+          0.475306522246683,
+          0.46063100617902814,
+          0.47071757321100444,
+          0.5577502517990071,
+          0.4944598138827131,
+          0.46483287970477255,
+          0.5179957464497419,
+          0.4017997510309214,
+          0.43020672663260484,
+          0.46353112761426024,
+          0.5444947413125193,
+          0.5718328222428681,
+          0.5283967313444008,
+          0.4763306657405337,
+          0.4971123566938332,
+          0.43506239825364895,
+          0.40423000296141265,
+          0.4452831472372054,
+          0.46711885203694686,
+          0.5216691853493105,
+          0.5512788490450475,
+          0.4042994656556402,
+          0.4876436481281416,
+          0.47146207291370945,
+          0.539932295199833,
+          0.5218254496940061,
+          0.5164033905530232,
+          0.4311938599348651,
+          0.5499307993304683,
+          0.5515865102934187,
+          0.4699218025052688,
+          0.558256368873117,
+          0.4937991677143146,
+          0.4750611017370829,
+          0.5855870623054215,
+          0.570069850909931,
+          0.46688108219677815,
+          0.4932309126088512,
+          0.5166024025238586,
+          0.4910914490974392,
+          0.5362460334072239,
+          0.48454036066686973,
+          0.4684392264462076,
+          0.5477476957676117,
+          0.49834863884461816,
+          0.48845101702318067,
+          0.5524666256242199,
+          0.46572359247511474,
+          0.5213080980756787,
+          0.3762075490012649,
+          0.4835532237339066,
+          0.4724288522920688,
+          0.5715272648521934,
+          0.5086200356672633,
+          0.49210358129494125,
+          0.4251063403571606,
+          0.4925833064407926,
+          0.415908301845775,
+          0.4981933106100768,
+          0.5267381060330081,
+          0.5609203931817319,
+          0.4263330991452676,
+          0.5038779252790846,
+          0.4992018225675565,
+          0.3613722340087407,
+          0.629484091325139,
+          0.4738131828416953,
+          0.5130086640347143,
+          0.5263046761756413,
+          0.6297949572035577,
+          0.5591500191367231,
+          0.4615456000537961,
+          0.4587639383535133
+        ],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [
+            0,
+            1,
+            24,
+            53,
+            181,
+            355,
+            626,
+            812,
+            774,
+            643,
+            366,
+            172,
+            66,
+            21,
+            2,
+            0
+          ],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 2112
+        }
+      },
+      "sha256": "d7c1dc3ad32723409f05cb986add29842591d55b742ca4b78f98ca479584d7df",
+      "diagnostic": {
+        "meanSE": 0.0007973599423122325,
+        "meanDeviationSE": 0.552734215702058,
+        "predeclaredBandSE": 6,
+        "interpretation": "Conditional iid-model diagnostic for this fixed pseudo-random fixture, not an RNG independence test or a proof of a limit theorem"
+      }
+    },
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "lln",
+        "model": "exponential",
+        "seed": 2048,
+        "n": 65536,
+        "repetitions": 1,
+        "retain": 256
+      },
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "lln",
+          "model": "exponential",
+          "seed": 2048,
+          "n": 65536,
+          "repetitions": 1,
+          "retain": 256,
+          "prefixNs": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+            512,
+            1024,
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536
+          ],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 65536,
+        "repetitions": 1,
+        "mean": 1.00353081003822,
+        "sampleVariance": 1.0043470175369655,
+        "theory": {
+          "mean": 1,
+          "variance": 1,
+          "varianceOfMean": 0.0000152587890625
+        },
+        "prefixN": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          512,
+          1024,
+          2048,
+          4096,
+          8192,
+          16384,
+          32768,
+          65536
+        ],
+        "prefixMean": [
+          2.5651254696526777,
+          1.324302158067113,
+          0.9155507377706713,
+          0.9671337417502597,
+          0.9325819365560055,
+          0.9037063829361288,
+          0.9846016022455556,
+          0.9371200078314033,
+          1.0350957289248581,
+          1.0289450322427292,
+          1.0136049216708658,
+          1.022265908302265,
+          1.0178788883789915,
+          1.0162824578406673,
+          0.9919915256433386,
+          0.9983367285465247,
+          1.00353081003822
+        ],
+        "means": [],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [],
+          "underflow": 0,
+          "overflow": 0
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 204
+        }
+      },
+      "sha256": "b06eaec22b3adc69b3cf9fe7c9cd0cd39a51a14992caadb74fe5ef720e07e7af",
+      "diagnostic": {
+        "meanSE": 0.00390625,
+        "meanDeviationSE": 0.9038873697843428,
+        "predeclaredBandSE": 6,
+        "interpretation": "Conditional iid-model diagnostic for this fixed pseudo-random fixture, not an RNG independence test or a proof of a limit theorem"
+      }
+    },
+    {
+      "spec": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "experiment": "clt",
+        "model": "exponential",
+        "seed": 2048,
+        "n": 32,
+        "repetitions": 4096,
+        "retain": 256
+      },
+      "result": {
+        "engineVersion": "simulation-fixture-v1",
+        "rngVersion": "fixture-mix32-v1",
+        "spec": {
+          "experiment": "clt",
+          "model": "exponential",
+          "seed": 2048,
+          "n": 32,
+          "repetitions": 4096,
+          "retain": 256,
+          "prefixNs": [],
+          "engineVersion": "simulation-fixture-v1",
+          "rngVersion": "fixture-mix32-v1"
+        },
+        "processed": 131072,
+        "repetitions": 4096,
+        "mean": 1.0011632936646158,
+        "sampleVariance": 0.030991194233618156,
+        "theory": {
+          "mean": 1,
+          "variance": 1,
+          "varianceOfMean": 0.03125
+        },
+        "prefixN": [],
+        "prefixMean": [],
+        "means": [
+          1.3125531540462783,
+          0.748236250413908,
+          0.9414972524794204,
+          1.2023754969942908,
+          1.0402018062454326,
+          0.912528393630032,
+          0.8225705942499814,
+          0.839465993221763,
+          0.8363307768430102,
+          1.5262770425260288,
+          1.1297745677642383,
+          1.0987132306503749,
+          0.9119244558708509,
+          0.9310727030994352,
+          1.2655519300230629,
+          1.0118159817258625,
+          0.7594372313936836,
+          1.137328009888123,
+          0.9265684937457226,
+          1.1995313128494782,
+          1.476222316571009,
+          0.7616939549051855,
+          1.1435357824727141,
+          1.2571125932974563,
+          0.6971274091829729,
+          1.175482525532509,
+          0.9773402468532797,
+          0.9776528368500035,
+          0.9796958777887703,
+          0.98384197059334,
+          1.0529107179707367,
+          0.8410063946200222,
+          1.2316525937857914,
+          0.8813200802542364,
+          1.1243475586689513,
+          0.7212004277086467,
+          1.2835806962715608,
+          0.8124371483472601,
+          1.0773426827499908,
+          0.7940498080287159,
+          1.3416783731183908,
+          1.2207421034526535,
+          1.4531513660556832,
+          1.1267633312224046,
+          0.9164271488332275,
+          0.9283347562792688,
+          1.119030417458954,
+          0.9184602012045793,
+          0.747689520617057,
+          0.8472486599793748,
+          0.8956683843147382,
+          1.1625624609602863,
+          1.163476275085796,
+          1.0828280930481344,
+          1.2804250458113628,
+          1.0030310160532225,
+          0.9977505495894818,
+          0.8073228482547798,
+          0.9125116741002416,
+          1.0564558092225864,
+          0.7876515110825886,
+          1.1766997407000188,
+          0.9887691026809419,
+          0.8754709568023908,
+          0.874750280297505,
+          1.406692624040713,
+          1.0102733295780666,
+          0.9662217932804276,
+          0.9844954580955352,
+          1.2572377277852702,
+          1.30182580231814,
+          0.8683603813799321,
+          1.062923960232953,
+          1.0499028643226618,
+          0.8327152055294262,
+          0.8973557355317311,
+          0.9680239917738742,
+          0.9829707592559019,
+          1.1800491279905467,
+          0.9003092347256156,
+          0.7314315653981656,
+          1.0671016727993365,
+          0.9699150217126995,
+          0.9545555620793919,
+          0.837474985270265,
+          0.8318991513296127,
+          1.0179140999684941,
+          0.901412164664827,
+          0.7703078034491581,
+          0.854779924118188,
+          0.7426218909290674,
+          1.1501674303107485,
+          0.998910554987351,
+          1.0651362003182792,
+          0.7691834916100815,
+          0.9253824815867989,
+          0.8371537288110313,
+          0.6832710190348329,
+          0.9887777340977983,
+          0.8809404101952832,
+          1.4380222831821494,
+          0.9247131729535195,
+          1.0431614168164656,
+          0.7467119617152098,
+          1.1647711363636022,
+          1.0579825848757567,
+          1.0222002575825326,
+          1.0721703585452516,
+          1.2103838725060927,
+          0.9073240988396648,
+          0.8717609383388096,
+          1.059061121654538,
+          0.9201571630004017,
+          0.8388783139453475,
+          0.783244833398552,
+          1.3214226871586623,
+          1.2093390402200601,
+          1.0555161189960844,
+          0.8881562390031608,
+          0.9102710146742541,
+          0.9865256356908124,
+          1.273454302983967,
+          0.7887967491034209,
+          1.080839179435893,
+          0.6781393532114748,
+          0.911038353610361,
+          0.8746748734790297,
+          0.9920539044293815,
+          1.231896214409361,
+          1.4448485389079246,
+          0.9699090146755674,
+          1.059202129408391,
+          0.7891425111125037,
+          1.1504567023371464,
+          1.2345282436581007,
+          0.8131344364478359,
+          0.8626636722433243,
+          0.8780190859534677,
+          0.9427094649463938,
+          0.9716448025873432,
+          1.39914049305748,
+          0.9389038098498654,
+          1.072580755997028,
+          1.2561492802346306,
+          0.9799440445915165,
+          1.0896547730310333,
+          0.8760736204500507,
+          1.1984081322302484,
+          0.9341972035231332,
+          0.6731467139443353,
+          0.9123729571242015,
+          1.1510489863650488,
+          1.020063418424074,
+          0.8848260211161023,
+          0.8837739719262337,
+          1.2630820808582193,
+          0.8380511357074726,
+          0.8903380787692754,
+          1.0649252876556863,
+          1.272593706003343,
+          0.9629564826738211,
+          1.0669612192203994,
+          1.1945224818096711,
+          0.9525147187422637,
+          0.8559757424604167,
+          0.8591189498695595,
+          0.9575172964929766,
+          0.7272306078682607,
+          1.0300261975104854,
+          1.150668755238566,
+          1.129506041450778,
+          0.7809312126374414,
+          1.0286210717134114,
+          1.220272320031209,
+          0.8557280630169135,
+          1.1151822481290399,
+          0.8564198072538147,
+          1.1396168297574023,
+          1.1181053912840053,
+          0.861166853286404,
+          1.0703358519004684,
+          1.3316408420454955,
+          1.0865464575354695,
+          1.0693932263767414,
+          0.7882277848308056,
+          0.8998274961145801,
+          1.147768115536655,
+          1.0070919939363987,
+          0.9430970218957293,
+          1.0998636035982463,
+          0.6126100972476518,
+          0.7807744508265477,
+          0.8093044444891995,
+          1.273230595778724,
+          1.4825578310312184,
+          1.088883445087336,
+          0.9750279389733096,
+          0.8906425809219907,
+          0.899311028692896,
+          0.6385183485909736,
+          0.7839349216642624,
+          0.8843609729316689,
+          0.976603501559271,
+          1.1075366315543167,
+          0.850466998986252,
+          1.170971875304729,
+          0.9286404811517696,
+          1.250896787092081,
+          1.2726780823286727,
+          0.9467631326539321,
+          0.7562961507616963,
+          1.3201936639055254,
+          1.0819717755408738,
+          0.8840012158391856,
+          1.1790767367220554,
+          0.9933326102381533,
+          0.9291110918973953,
+          1.0576876523529248,
+          1.2101723515002794,
+          1.1470767971087845,
+          0.9049416612934114,
+          1.1032250973648696,
+          1.0401603426361319,
+          1.04376615766364,
+          1.134312900433549,
+          0.916825206427028,
+          1.0976745528697749,
+          0.9388440097861224,
+          1.1267503021729786,
+          1.0554887400069695,
+          0.9229179309018035,
+          1.1183623825256697,
+          0.7115905636465268,
+          0.8908701856739187,
+          0.8950264946008165,
+          1.3304651668509722,
+          1.075442358635435,
+          0.9375742928621067,
+          0.8495234296381227,
+          0.9546960040582275,
+          0.829742551814007,
+          0.8639847057046697,
+          1.0564305859784593,
+          1.1632898449336246,
+          0.7711057422114667,
+          1.0004913624182796,
+          0.9483168636786882,
+          0.5949542997502053,
+          1.5822887756505686,
+          0.8440945440701003,
+          1.201627020274145,
+          1.1392359899521431,
+          1.3491357224643576,
+          1.236834943874271,
+          0.9254576835404806,
+          0.8466093845245202
+        ],
+        "histogram": {
+          "zMin": -4,
+          "binWidth": 0.5,
+          "counts": [
+            0,
+            0,
+            4,
+            41,
+            166,
+            422,
+            712,
+            789,
+            751,
+            553,
+            347,
+            183,
+            75,
+            39,
+            11,
+            1
+          ],
+          "underflow": 0,
+          "overflow": 2
+        },
+        "retention": {
+          "policy": "first-k-means-and-complete-summary",
+          "rawDraws": 0,
+          "numericBytes": 2112
+        }
+      },
+      "sha256": "e347482053d7076ba90d125c51b1596215a5b227d6000974960e579b8ad46925",
+      "diagnostic": {
+        "meanSE": 0.0027621358640099515,
+        "meanDeviationSE": 0.4211572934457108,
+        "predeclaredBandSE": 6,
+        "interpretation": "Conditional iid-model diagnostic for this fixed pseudo-random fixture, not an RNG independence test or a proof of a limit theorem"
+      }
+    }
+  ]
+}
