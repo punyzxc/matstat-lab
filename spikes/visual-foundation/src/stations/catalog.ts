@@ -9,7 +9,7 @@ export const orbits = [
 ] as const;
 export type OrbitId = (typeof orbits)[number]['id'];
 
-type Base = { id: string; name: string; orbit: OrbitId; lectures: string; summary: string };
+type Base = { id: string; name: string; orbit: OrbitId; lectures: string; summary: string; hidden?: boolean };
 /** A station backed by one of the six existing prototype instruments. */
 export type LegacyStation = Base & { kind: 'legacy'; module: ModuleId };
 /** A station whose kernel follows the shared contract (`spikes/<kernel>/kernel.mjs`). */
@@ -56,10 +56,12 @@ export const stations: readonly Station[] = [
     summary: 'Use an exact two-sided sign test to compare a sample with the model median.' },
   { kind: 'legacy', id: 'randomness', name: 'Randomness', orbit: 'statistics', lectures: 'extra', module: 'randomness',
     summary: 'Count runs on either side of the model median in the original draw order.' },
+  { kind: 'kernel', id: 'contract-fixture', name: 'Contract fixture', orbit: 'probability', lectures: 'L1', kernel: 'scene-module-host', issue: 37, hidden: true,
+    summary: 'Test fixture for the kernel contract; reachable only by URL.' },
 ];
 
 /** Each orbit holds at most six stations: the six slots around the globe. */
-export const stationsOf = (orbit: OrbitId) => stations.filter((s) => s.orbit === orbit);
+export const stationsOf = (orbit: OrbitId) => stations.filter((s) => s.orbit === orbit && !s.hidden);
 export const findStation = (id: string) => stations.find((s) => s.id === id);
 export const orbitOfModule = (module: ModuleId): OrbitId =>
   stations.find((s): s is LegacyStation => s.kind === 'legacy' && s.module === module)?.orbit ?? 'variables';

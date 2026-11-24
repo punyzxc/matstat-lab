@@ -298,9 +298,10 @@ function StationApp() {
           <KernelStation station={station} seed={route.seed ?? DEFAULT_SEED} params={route.params}
             onState={(seed, params) => { window.location.hash = stationHash(station.id, seed, params); }} />
         ) : station.module === 'distribution' ? (
-          <Workspace settings={settings} onComplete={completeDistribution} />
+          <Workspace settings={route.seed == null ? settings : { ...settings, seed: route.seed }} onComplete={completeDistribution} />
         ) : (
-          <MethodPreview id={station.module} activeSettings={settings} lastResult={results[station.module]}
+          <MethodPreview id={station.module} activeSettings={route.seed == null ? settings : { ...settings, seed: route.seed }}
+            lastResult={route.seed == null ? results[station.module] : undefined}
             onComplete={result => complete(station.module, result)} />
         )}
       </SceneDock>

@@ -5,9 +5,10 @@
 export type KernelParam = { key: string; label: string; min: number; max: number; step: number; default: number };
 export type KernelMeta = { id: string; lectures: string[]; title: string; params: KernelParam[] };
 export type Readout = { key: string; label: string; observed?: number | string | null; theory?: number | string | null; unit?: string; convention?: string };
-export type SeriesKind = 'pmf' | 'pdf' | 'cdf' | 'hist' | 'ecdf' | 'line' | 'points' | 'band';
-export type Series = { id: string; kind: SeriesKind; x: number[]; y: number[]; y2?: number[]; unit?: string; label?: string };
-export type KernelResult = { readouts: Readout[]; series: Series[]; notes: string[] };
+export type SeriesKind = 'pmf' | 'pdf' | 'cdf' | 'hist' | 'ecdf' | 'line' | 'points' | 'band' | 'rule';
+/** `tone`: default (observed), signal (theory / reference), muted (context), accent (critical region, highlight). */
+export type Series = { id: string; kind: SeriesKind; x: number[]; y: number[]; y2?: number[]; unit?: string; label?: string; tone?: 'default' | 'signal' | 'muted' | 'accent' };
+export type KernelResult = { readouts: Readout[]; series: Series[]; notes: string[]; axes?: { x?: string; y?: string } };
 export type Kernel = {
   meta: KernelMeta;
   run: (params: Record<string, number>, options: { seed: number; station?: string }) => KernelResult;
@@ -19,10 +20,16 @@ export type Kernel = {
 export function resolveParams(params: KernelParam[], overrides: Record<string, number> = {}) {
   const out: Record<string, number> = {};
   for (const p of params) {
+    const lo = Math.min(p.min, p.max), hi = Math.max(p.min, p.max);
     const raw = overrides[p.key];
-    const value = Number.isFinite(raw) ? Math.min(p.max, Math.max(p.min, raw)) : p.default;
-    const snapped = p.min + Math.round((value - p.min) / p.step) * p.step;
-    out[p.key] = Number(Math.min(p.max, snapped).toPrecision(12));
+    if (!Number.isFinite(raw)) {
+      out[p.key] = p.default;
+      continue;
+    }
+    const value = Math.min(hi, Math.max(lo, raw));
+    // Snap to the step grid from min; the ends of the range always stay reachable.
+    const snapped = p.step > 0 && value !== hi && value !== lo ? lo + Math.round((value - lo) / p.step) * p.step : value;
+    out[p.key] = Number(Math.min(hi, Math.max(lo, snapped)).toPrecision(12));
   }
   return out;
 }

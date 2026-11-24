@@ -16,24 +16,37 @@ export type Route = {
 };
 
 const empty = (): Route => ({ orbit: null, station: null, seed: null, params: {}, drawer: null });
-const legacy: Record<string, string> = { '#workspace': 'distribution' };
+const legacy: Record<string, string> = { workspace: 'distribution' };
+const decode = (s: string) => {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return null;
+  }
+};
+const SEED = /^\d{1,10}$/;
+const NUMBER = /^-?(\d+\.?\d*|\.\d+)(e-?\d+)?$/i;
 
 export function parseRoute(hash: string): Route {
   const route = empty();
-  const [path, query = ''] = hash.replace(/^#/, '').split('?');
-  if (legacy[hash]) route.station = legacy[hash];
+  const body = hash.replace(/^#/, '');
+  const cut = body.indexOf('?');
+  const path = cut < 0 ? body : body.slice(0, cut);
+  const query = cut < 0 ? '' : body.slice(cut + 1).replace(/\?/g, '&');
+  if (legacy[path]) route.station = legacy[path];
   const [head, id] = path.split('/');
   if ((head === 'station' || head === 'module') && id && findStation(id)) route.station = id;
   if (head === 'orbit' && orbits.some((o) => o.id === id)) route.orbit = id as OrbitId;
   if (head === 'notes' || head === 'record') route.drawer = head;
   for (const pair of query.split('&')) {
     if (!pair) continue;
-    const [key, raw] = pair.split('=').map(decodeURIComponent);
-    const value = Number(raw);
-    if (!Number.isFinite(value)) continue;
+    const eq = pair.indexOf('=');
+    const key = decode(eq < 0 ? pair : pair.slice(0, eq));
+    const raw = eq < 0 ? null : decode(pair.slice(eq + 1));
+    if (!key || raw == null) continue;
     if (key === 'seed') {
-      if (Number.isInteger(value) && value >= 0 && value <= 4294967295) route.seed = value;
-    } else route.params[key] = value;
+      if (SEED.test(raw) && Number(raw) <= 4294967295) route.seed = Number(raw);
+    } else if (NUMBER.test(raw) && Number.isFinite(Number(raw))) route.params[key] = Number(raw);
   }
   return route;
 }

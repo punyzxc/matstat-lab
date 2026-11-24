@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import { FigureCaption } from './lab-shell';
 import type { LastResult } from './last-results';
 import { moduleReadout } from './method-readouts';
-import { modules, type ModuleId } from './modules';
-import { Trace } from './sample-readouts';
+import type { ModuleId } from './modules';
+import { Chart } from './stations/chart';
+import { methodSeries } from './stations/method-series';
 import { collect, sources, type RunSettings } from './statistics';
 import { Button } from './ui';
 
@@ -18,13 +19,13 @@ export function MethodPreview({
   lastResult?: LastResult;
   onComplete: (result: LastResult) => void;
 }) {
-  const m = modules.find(({ id: moduleId }) => moduleId === id)!;
   const [settings, setSettings] = useState(lastResult?.settings ?? activeSettings);
   const [size, setSize] = useState(lastResult?.size ?? settings.count);
   const [recorded, setRecorded] = useState(Boolean(lastResult));
   const all = useMemo(() => collect(settings), [settings]);
   const sample = useMemo(() => all.slice(0, size), [all, size]);
   const data = moduleReadout(id, sample, settings);
+  const chart = useMemo(() => methodSeries(id, sample, settings), [id, sample, settings]);
   const hasNewSample =
     settings.seed !== activeSettings.seed ||
     settings.count !== activeSettings.count ||
@@ -37,10 +38,15 @@ export function MethodPreview({
     setRecorded(true);
     onComplete({ settings: nextSettings, size: observations });
   }
-  return <div className="station-legacy">
+  return (
+    <div className="station-legacy method-station">
+      <section className="method-figure" aria-label="Experiment chart">
+        <FigureCaption number="A">{chart.y}</FigureCaption>
+        <Chart series={chart.series} xLabel={chart.x} yLabel={chart.y} height={250} domain={chart.domain} />
+      </section>
       <div className="method-desk">
         <section>
-          <FigureCaption number="A">Sample prefix</FigureCaption>
+          <FigureCaption number="B">Sample prefix</FigureCaption>
           <label htmlFor="prefix-size">
             Observations <output>{size}</output>
           </label>
@@ -53,27 +59,23 @@ export function MethodPreview({
             value={size}
             onChange={(e) => analyze(e.currentTarget.valueAsNumber)}
           />
-          <div className="method-trace">
-            <Trace sample={sample.slice(0, 48)} animate={false} />
-          </div>
           <p className="session-source">
             {sources[settings.distribution].label} · seed {settings.seed}
           </p>
           <div className="method-result-actions">
-            {!recorded && <Button onClick={() => analyze(size)}>Save result</Button>}
+            {!recorded && <Button onClick={() => analyze(size)}>Save Result</Button>}
             {hasNewSample && (
-              <Button onClick={() => analyze(activeSettings.count, activeSettings)}>
-                Use active sample
-              </Button>
+              <Button onClick={() => analyze(activeSettings.count, activeSettings)}>Use Active Sample</Button>
             )}
           </div>
         </section>
         <section className="method-value" aria-live="polite">
-          <FigureCaption number="B">{data.label}</FigureCaption>
+          <FigureCaption number="C">{data.label}</FigureCaption>
           <strong>{data.value}</strong>
           <code>{data.formula}</code>
           <p>{data.detail}</p>
         </section>
       </div>
-</div>;
+    </div>
+  );
 }

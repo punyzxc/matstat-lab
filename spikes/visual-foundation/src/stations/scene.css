@@ -391,3 +391,176 @@ html:has(.orbital-lab) body {
 .scene-dock .specimen {
   min-height: 330px;
 }
+
+/* Charts: one grammar for every station. Observed = ink, theory/reference = signal yellow,
+   context = grey, highlighted region = translucent signal. Labels are mono and tabular. */
+.chart {
+  margin: 0;
+}
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font: 10.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.chart-grid line {
+  stroke: #232323;
+  stroke-width: 1;
+}
+.chart-axis path {
+  fill: none;
+  stroke: #5a5a5a;
+}
+.chart-axis text {
+  fill: #9a9a9a;
+}
+.chart-axis .chart-title {
+  fill: #c9c9c9;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+.chart-series {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.chart-series.tone-signal {
+  stroke: var(--signal);
+}
+.chart-series.tone-muted {
+  stroke: #7d7d7d;
+}
+.chart-series.tone-accent {
+  stroke: var(--signal);
+}
+.chart-series--line.tone-signal {
+  stroke-dasharray: 5 4;
+}
+.chart-series--hist rect {
+  fill: #cfcfcf;
+  stroke: none;
+}
+.chart-series--hist.tone-muted rect {
+  fill: #4b4b4b;
+}
+.chart-series--pmf circle {
+  fill: var(--ink);
+  stroke: none;
+}
+.chart-series--pmf.tone-muted circle {
+  fill: #7d7d7d;
+}
+.chart-series--pmf.tone-accent circle {
+  fill: var(--signal);
+}
+.chart-series--points circle {
+  fill: var(--ink);
+  stroke: none;
+  opacity: 0.75;
+}
+.chart-series--band {
+  fill: rgb(244 244 242 / 0.08);
+  stroke: none;
+}
+.chart-series--band:is(.tone-signal, .tone-accent) {
+  fill: rgb(232 228 133 / 0.13);
+}
+.chart-series--rule line {
+  stroke-width: 1.25;
+}
+.chart-series--rule.tone-default line {
+  stroke-dasharray: 2 3;
+}
+.chart figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 6px;
+  color: #a8a8a8;
+  font: 10.5px var(--mono);
+}
+.chart-key i {
+  display: inline-block;
+  width: 14px;
+  height: 0;
+  margin-right: 7px;
+  vertical-align: middle;
+  border-top: 1.5px solid var(--ink);
+}
+.chart-key:is(.tone-signal, .tone-accent) i {
+  border-color: var(--signal);
+}
+.chart-key.tone-muted i {
+  border-color: #7d7d7d;
+}
+.chart-key--line.tone-signal i {
+  border-top-style: dashed;
+}
+.chart-key--band i,
+.chart-key--hist i {
+  height: 8px;
+  border: 0;
+  background: rgb(244 244 242 / 0.18);
+}
+.chart-key--band:is(.tone-signal, .tone-accent) i {
+  background: rgb(232 228 133 / 0.3);
+}
+.chart-key--hist.tone-muted i {
+  background: #4b4b4b;
+}
+.chart-empty {
+  color: var(--quiet);
+  font: 12px var(--mono);
+}
+.method-station {
+  display: grid;
+  gap: 16px;
+}
+.method-station .method-desk {
+  margin-top: 0;
+}
+.chart-series.chart-series--band {
+  stroke: rgb(232 228 133 / 0.45);
+  stroke-width: 0.75;
+}
+.chart-series.chart-series--band.tone-default,
+.chart-series.chart-series--band.tone-muted {
+  stroke: none;
+}
+
+/* Card telemetry: readable at a glance on a projector. The value leads; labels are secondary. */
+@media (min-width: 761px) {
+  .orbital-lab .orbit-preview {
+    gap: 6px;
+    padding: 11px 13px 9px;
+  }
+  .orbital-lab .orbit-preview-label {
+    font-size: clamp(13px, 1.1vw, 16px);
+  }
+  .orbital-lab .orbit-preview-meta > span {
+    font-size: 10.5px;
+    color: #b4b4b4;
+  }
+  .orbital-lab .orbit-preview-value {
+    font-size: clamp(14px, 1.25vw, 19px);
+    letter-spacing: -0.01em;
+  }
+  .orbital-lab .orbit-preview-chart {
+    height: 46px;
+    color: #e2e2e2;
+  }
+  .orbital-lab .orbit-preview-provenance {
+    font-size: 10px;
+    color: #b9b9b9;
+  }
+  .orbital-lab .orbit-console {
+    font-size: 11px;
+    color: #c4c4c4;
+  }
+  .orbital-lab .orbit-console :is(strong, b) {
+    color: var(--ink);
+  }
+}

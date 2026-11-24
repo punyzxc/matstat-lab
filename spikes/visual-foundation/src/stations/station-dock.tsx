@@ -1,4 +1,15 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { Component, useEffect, useRef, type ReactNode } from 'react';
+
+/** A failing station must never take the scene down with it. */
+class StationBoundary extends Component<{ children: ReactNode }, { error: string | null }> {
+  state = { error: null as string | null };
+  static getDerivedStateFromError(e: unknown) {
+    return { error: e instanceof Error ? e.message : String(e) };
+  }
+  render() {
+    return this.state.error ? <p className="station-status" role="alert">This station failed to render: {this.state.error}</p> : this.props.children;
+  }
+}
 import { X } from 'lucide-react';
 
 /**
@@ -49,7 +60,7 @@ export function SceneDock({
           <X size={17} aria-hidden="true" />
         </button>
       </header>
-      <div className="scene-dock-body">{children}</div>
+      <div className="scene-dock-body"><StationBoundary>{children}</StationBoundary></div>
     </section>
   );
 }
