@@ -131,3 +131,13 @@ test('per-view stations select their view regardless of the view slider', () => 
   const a = run({ view: 1 }, { seed: 4, station: 'bayes-guessing' });
   assert.equal(JSON.stringify(a), JSON.stringify(run({ view: 4 }, { seed: 4 })));
 });
+
+test('band: clipped to [0, 1] and omitted when too few outcomes are expected', () => {
+  const tiny = byKey(run({ view: 1, n: 100, h: 0.01, b: 0.01 }, { seed: 1 }));
+  assert.equal(tiny.pB.band, null);
+  assert.equal(tiny.pAgB.band, null);
+  const r = byKey(run({ view: 4, skill: 0.2, m: 10, n: 400 }, { seed: 1 }));
+  assert.ok(r.pCorrect.band[0] >= 0 && r.pCorrect.band[1] <= 1);
+  for (const view of [1, 2, 3, 4]) for (const x of run({ view, n: 100 }, { seed: 2 }).readouts)
+    if (x.band) assert.ok(x.band[0] >= 0 && x.band[1] <= 1, x.key);
+});

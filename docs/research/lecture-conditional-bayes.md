@@ -1,10 +1,10 @@
-# Conditional probability and Bayes kernel
+﻿# Conditional probability and Bayes kernel
 
 Research for `lecture-conditional-bayes` (#43). Owner: punyzxc (Claude executor). Date: 2026-11-24.
 
 **Question.** Which seeded kernel shows event algebra, conditional and total probability and Bayes as counts of simulated outcomes (lectures 1 and 2)?
 
-**Deliverables.** `spikes/lecture-conditional-bayes/kernel.mjs` and `kernel.test.mjs` (`node --test`, 10 tests, green). The kernel follows the shared contract in `docs/research/lecture-module-map.md` (PR #48). The scene host from PR #49 already lists the station `bayes` with `kernel: 'lecture-conditional-bayes'`, so the station appears in the Orbital laboratory without layout work once both land. This task contains no UI code.
+**Deliverables.** `spikes/lecture-conditional-bayes/kernel.mjs` and `kernel.test.mjs` (`node --test`, 11 tests, green). The kernel follows the shared contract in `docs/research/lecture-module-map.md` (PR #48). The scene host from PR #49 already lists the station `bayes` with `kernel: 'lecture-conditional-bayes'`, so the station appears in the Orbital laboratory without layout work once both land. This task contains no UI code.
 
 ## Sources
 
@@ -24,9 +24,9 @@ One station `bayes`, four views chosen by the slider `view`. The kernel also exp
 | 3 Bayes | Three hypotheses with priors q₁, q₂, q₃ and likelihoods P(A\|Bₖ). | P(A) = Σ qₖP(A\|Bₖ); P(Bₖ\|A) = qₖP(A\|Bₖ)/P(A). | Hypothesis drawn by the priors, then A by its likelihood; posterior = share of A-outcomes from Bₖ. | Priors, posteriors, observed shares. |
 | 4 Guessing student | Knows the answer with probability p, otherwise picks one of m options. | P(guessed \| correct) = (1 − p)/((m − 1)p + 1); for m = 5 this is (1 − p)/(4p + 1). | Share of correct answers that were guesses. | The curve over p with its band, and the simulated point. |
 
-**Band (predeclared).** Every observed frequency carries `band = theory ± 4·√(theory(1 − theory)/m)`, where m is the number of trials or, for a conditional frequency, the expected number of conditioning outcomes. The value 4 is fixed in code (`BAND_Z`) and tested on five fixed seeds; seeds were not chosen to pass. When the conditioning event is empty, the conditional readout is `null`, never NaN.
+**Band (predeclared).** Every observed frequency carries `band = theory ± 4·√(theory(1 − theory)/m)`, clipped to [0, 1], where m is the number of trials or, for a conditional frequency, the expected number of conditioning outcomes. The band is a normal approximation, so it is given only when m·theory(1 − theory) ≥ 9; for rarer events (for example a tiny B with n = 100) the readout has `band: null`. Without that rule a probe over 2000 seeds found about 0.4 % of rare-event frequencies outside a ±4σ band, far above the nominal rate. The value 4 is fixed in code (`BAND_Z`) and tested on five fixed seeds; seeds were not chosen to pass. When the conditioning event is empty, the conditional readout is `null`, never NaN.
 
-**Rejection.** `checkHypotheses` rejects priors outside [0, 1] and priors whose sum differs from 1 by more than 10⁻⁹. With the three prior sliders the student sees the rejection live as soon as the priors stop summing to 1.
+**Rejection.** `checkHypotheses` rejects priors outside [0, 1] and priors whose sum differs from 1 by more than 10⁻⁹. With the three prior sliders, the host shows the rejection after the student presses Run with priors that do not sum to 1 (PR #49 recomputes on submit).
 
 ## Acceptance criteria and tests
 

@@ -7,7 +7,13 @@ export const BAND_Z = 4;
 const SUM_TOL = 1e-9;
 const u01 = (seed, stream, i) => (fixtureUint32(seed, stream, i) + 0.5) / 2 ** 32;
 const clip01 = (v) => Math.min(1, Math.max(0, v));
-const band = (p, m) => (m > 0 ? [p - BAND_Z * Math.sqrt((p * (1 - p)) / m), p + BAND_Z * Math.sqrt((p * (1 - p)) / m)] : [0, 1]);
+/** Normal-approximation band, clipped to [0, 1]. null when m·p(1−p) < MIN_SPREAD: too few expected outcomes for it to hold. */
+export const MIN_SPREAD = 9;
+const band = (p, m) => {
+  if (!(m > 0) || m * p * (1 - p) < MIN_SPREAD) return null;
+  const half = BAND_Z * Math.sqrt((p * (1 - p)) / m);
+  return [Math.max(0, p - half), Math.min(1, p + half)];
+};
 const ratio = (a, b) => (b > 0 ? a / b : null);
 
 // ---------- View 1: events as rectangles in the unit square ----------
@@ -55,7 +61,7 @@ function runEvents(p, seed) {
     notes: [
       'Addition theorem (L1, corollary 4): P(A∪B) = P(A) + P(B) − P(AB).',
       'Conditional probability (L2, formula 6): P(A|B) = P(AB)/P(B); observed value is (#AB)/(#B) over simulated points.',
-      `Bands are ±${BAND_Z} standard errors around the exact value; for P(A|B) the expected count of B is used.`,
+      `Bands are ±${BAND_Z} standard errors around the exact value (for P(A|B) over the expected count of B), clipped to [0, 1]; no band is given when the expected spread m·p(1−p) is below ${MIN_SPREAD}.`,
       'A and C are independent for any sliders (a vertical and a horizontal strip); A and B are independent only when their overlap equals a·|B|.',
     ],
   };
@@ -139,7 +145,7 @@ function runHypotheses(p, seed) {
     readouts: [
       { key: 'pA', label: 'P(A) = Σ P(Bk)P(A|Bk)', observed: hits / p.n, theory: pA, band: band(pA, p.n), count: hits },
       ...post.map((q, k) => ({ key: `post${k + 1}`, label: `P(B${k + 1}|A), Bayes`, observed: ratio(hitsBy[k], hits), theory: q, band: band(q, p.n * pA), count: hitsBy[k] })),
-      { key: 'sum', label: 'Σ P(Bk|A)', observed: hits > 0 ? 1 : null, theory: post.reduce((m, v) => m + v, 0) },
+      { key: 'sum', label: 'Σ P(Bk|A)', observed: hits > 0 ? hitsBy.reduce((m, h) => m + h / hits, 0) : null, theory: post.reduce((m, v) => m + v, 0) },
     ],
     series: [
       { id: 'prior', kind: 'pmf', tone: 'muted', label: 'prior P(Bk)', x: x.map((v) => v - 0.12), y: priors },
@@ -168,7 +174,7 @@ function runGuessing(p, seed) {
   const theory = guessingPosterior(skill, m), pCorrect = skill + (1 - skill) / m;
   const grid = Array.from({ length: 101 }, (_, i) => i / 100);
   const curve = grid.map((q) => (1 - q) / ((m - 1) * q + 1));
-  const bands = grid.map((q, i) => band(curve[i], n * (q + (1 - q) / m)));
+  const bands = grid.map((q, i) => band(curve[i], n * (q + (1 - q) / m)) ?? [curve[i], curve[i]]);
   return {
     axes: { x: 'probability p that the student solves the problem', y: 'P(guessed | correct answer)' },
     readouts: [
