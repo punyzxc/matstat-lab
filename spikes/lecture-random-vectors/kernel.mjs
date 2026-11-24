@@ -266,6 +266,15 @@ export function makeTransform({ phi, alpha, b, beta, lambda, sigma }) {
 }
 
 function runTransform(params, seed) {
+  if (params.phi === 0 && params.alpha === 0) {
+    // Degenerate case the slider passes through: η = b with probability 1, so η has no density.
+    return {
+      axes: { x: 'value y of η', y: 'probability' },
+      readouts: [{ key: 'mean', label: 'Mη', observed: params.b, theory: params.b, convention: 'η = b with probability 1' }],
+      series: [{ id: 'atom', kind: 'pmf', tone: 'signal', label: 'P(η = b) = 1', x: [params.b], y: [1] }],
+      notes: ['α = 0 makes η = b a constant: φ is not strictly monotone, so formula (44) does not apply and η has no density. Move α away from 0.'],
+    };
+  }
   const t = makeTransform(params);
   const { n, lambda, sigma } = params;
   const ys = Array.from({ length: n }, (_, i) => t.map(t.source === 'normal' ? sigma * gauss(seed, 70, i) : -Math.log(uni(seed, 72, i)) / lambda));
@@ -288,7 +297,7 @@ function runTransform(params, seed) {
   const readouts = [
     { key: 'mean', label: 'Mη', observed: r6(sm.mean), theory: r6(t.mean), convention: 'sample mean' },
     { key: 'ks', label: 'Kolmogorov distance sup|Fₙ(y) − F(y)|', observed: r6(D), theory: r6(1.358 / Math.sqrt(n)), convention: 'theory column: 95 % critical value 1.358/√n' },
-    { key: 'bins', label: 'Largest bin deviation, in standard errors', observed: r6(worst), theory: '≤ 3.5 expected', convention: '40 bins with expected count ≥ 5, expected mass from F' },
+    { key: 'bins', label: 'Largest bin deviation, in standard errors', observed: r6(worst), theory: '≤ 4.0 in 99 % of runs', convention: 'max over ≤ 40 bins with expected count ≥ 5 (Bonferroni); expected mass from F' },
     { key: 'mass', label: 'Share of η inside the shown range', observed: r6(1 - h.outside / n), theory: r6(t.cdf(hi) - t.cdf(lo)) },
   ];
   if (params.phi === 2) {
@@ -351,7 +360,8 @@ function surfaceGrid(xs, ys, [x0, x1], [y0, y1], N, density, labels) {
   return {
     x: gx.map(r6), y: gy.map(r6), labels,
     z: gy.map((y) => gx.map((x) => r6(density(x, y)))),
-    zSample: counts.map((row) => row.map((c) => r6(c / (xs.length * dx * dy)))),
+    // Nearest-node cells: the outer ring is half a cell wide, the corners a quarter.
+    zSample: counts.map((row, j) => row.map((c, i) => r6(c / (xs.length * dx * dy * (i === 0 || i === N - 1 ? 0.5 : 1) * (j === 0 || j === N - 1 ? 0.5 : 1))))),
   };
 }
 

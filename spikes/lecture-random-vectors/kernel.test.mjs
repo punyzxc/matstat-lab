@@ -136,7 +136,9 @@ test('Transform: seeded histograms stay inside their bands', () => {
       close(r.observed, r.theory, 4 * Math.sqrt((r.theory * (1 - r.theory)) / n), 'F(0.5)');
     }
   }
-  assert.throws(() => K.run({ ...defaults('transform'), phi: 0, alpha: 0 }, { seed: 1, station: 'transform' }), /monotone/);
+  assert.throws(() => K.makeTransform({ ...defaults('transform'), phi: 0, alpha: 0 }), /monotone/);
+  const atom = K.run({ ...defaults('transform'), phi: 0, alpha: 0, b: 1.5 }, { seed: 1, station: 'transform' });
+  assert.deepEqual(atom.series[0].x, [1.5], 'α = 0 shows the atom at b instead of failing during a live drag');
 });
 
 test('Scatter: bivariate normal correlation within the Fisher band; regression lines (63)–(64)', () => {
@@ -149,6 +151,11 @@ test('Scatter: bivariate normal correlation within the Fisher band; regression l
     // Theory slopes are formulas (63) and (64) with σ₁ = 1.
     close(readout(res, 'slope63').theory, rho * sigma2, 1e-6, 'theory slope (63)');
     close(readout(res, 'slope64').theory, rho / sigma2, 1e-6, 'theory slope (64)');
+    // Observed values against theory with predeclared bands (≈ 4 standard errors).
+    close(readout(res, 'cov').observed, rho * sigma2, 4 * sigma2 * Math.sqrt((1 + rho * rho) / n), 'sample covariance');
+    close(readout(res, 'slope63').observed, rho * sigma2, 4 * sigma2 * Math.sqrt((1 - rho * rho) / n), 'sample slope (63)');
+    const pin = 1 - Math.exp(-2);
+    close(readout(res, 'ellipse').observed, pin, 4 * Math.sqrt((pin * (1 - pin)) / n), 'share inside the ellipse');
     if (rho === 0) close(readout(res, 'angle').theory, 90, 0, 'perpendicular lines at r = 0');
   }
 });

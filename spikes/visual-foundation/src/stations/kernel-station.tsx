@@ -70,7 +70,11 @@ function ReadyStation({ station, kernel, seed, params, onState }: {
   const [liveParams, setLiveParams] = useState(resolved);
   useEffect(() => {
     if (!live) return;
-    const frame = requestAnimationFrame(() => setLiveParams(resolveParams(declared, draft)));
+    const frame = requestAnimationFrame(() => setLiveParams((prev) => {
+      // Keep the same object when nothing changed, so opening a station runs the kernel once.
+      const next = resolveParams(declared, draft);
+      return declared.every((p) => prev[p.key] === next[p.key]) ? prev : next;
+    }));
     return () => cancelAnimationFrame(frame);
   }, [live, declared, draft]);
   const runParams = live ? liveParams : resolved;

@@ -43,7 +43,7 @@ Research for `lecture-random-vectors` (#44). Owner: punyzxc (Claude executor). D
 ### Transform (L6 §Functions of one random argument, formula (44))
 
 - φ is one of αx + b with ξ ~ N(0, σ), eˣ with ξ ~ N(0, σ), e^(−βx) with ξ ~ Exp(λ), or x² with ξ ~ Exp(λ).
-- The density curve is formula (44): f_η(y) = f_ξ(φ⁻¹(y)) · |dφ⁻¹/dy|. The absolute value is what joins the lecture's (42) and (43) for increasing and decreasing φ. α < 0 is allowed, and α = 0 is rejected with a message, because (44) needs a strictly monotone φ.
+- The density curve is formula (44): f_η(y) = f_ξ(φ⁻¹(y)) · |dφ⁻¹/dy|. The absolute value is what joins the lecture's (42) and (43) for increasing and decreasing φ. α < 0 is allowed. At α = 0 (the slider passes through it) η = b is a constant with no density: the station shows the atom P(η = b) = 1 and says that (44) needs a strictly monotone φ.
 - x² is not monotone on ℝ. It is used only with Exp(λ), where the support x ≥ 0 makes it monotone. This is the one-branch case, and the note says so.
 - **Fact (tested).**
   - Every transformed law has total mass 1, checked through the CDF. This is robust where f is unbounded at 0 (e^(−βξ) with λ < β, and ξ²).
@@ -51,7 +51,7 @@ Research for `lecture-random-vectors` (#44). Owner: punyzxc (Claude executor). D
   - ∫f over an interior interval equals the CDF difference to 1e-8.
 - **Fact (tested).** The L6 example η = e^(−βξ), ξ ~ Exp(λ) gives F(y) = y^(λ/β) on [0, 1]. The derivation is P(e^(−βξ) < y) = P(ξ > −ln y/β) = e^(λ ln y/β). The lecture's result is correct.
 - The comparison with the seeded histogram uses expected bin heights (F(b) − F(a))/width, which stay exact where f is unbounded.
-- Readouts: the largest bin deviation in standard errors, counting only bins with an expected count ≥ 5; the Kolmogorov distance with the 95 % critical value 1.358/√n; and Mη.
+- Readouts: the largest bin deviation in standard errors, counting only bins with an expected count ≥ 5 (as a maximum over up to 40 bins it stays below 4.0 in about 99 % of runs, Bonferroni); the Kolmogorov distance with the 95 % critical value 1.358/√n; and Mη.
 - An unbounded curve is cut at 1.6 times the tallest bar, and the note says so.
 
 ### Scatter (L6 §Random vectors, covariance, correlation, regression lines (61)–(64), the lottery)
