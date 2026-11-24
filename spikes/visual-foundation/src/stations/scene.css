@@ -584,3 +584,91 @@ html:has(.orbital-lab) body {
     font-size: clamp(12px, 1vw, 15px);
   }
 }
+
+/* Live preview line and the rotatable surface view (kernel stations with a joint density). */
+.live-note {
+  margin: 6px 0 0;
+  color: var(--quiet);
+  font: 11px var(--mono);
+}
+.surface {
+  margin: 0 0 12px;
+}
+.surface-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.surface-heading {
+  color: #c9c9c9;
+  font: 11px var(--mono);
+  letter-spacing: 0.02em;
+}
+.surface-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font: 10.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.surface-svg:active {
+  cursor: grabbing;
+}
+.surface-svg:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+.surface-box path,
+.surface-box line {
+  fill: none;
+  stroke: #2c2c2c;
+}
+.surface-quad {
+  fill: color-mix(in srgb, var(--signal) calc(var(--h, 0) * 85%), #151515);
+  stroke: rgb(232 228 133 / 0.28);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+}
+.surface-stem line {
+  stroke: var(--ink);
+  stroke-width: 0.8;
+  opacity: 0.75;
+}
+.surface-stem circle {
+  fill: var(--ink);
+}
+.surface-axis path {
+  fill: none;
+  stroke: #5a5a5a;
+}
+.surface-axis text {
+  fill: #9a9a9a;
+}
+.surface-axis .surface-title {
+  fill: #c9c9c9;
+  font-size: 11px;
+}
+.surface figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 4px;
+  color: #b4b4b4;
+  font: 10.5px var(--mono);
+}
+.surface-key-sample i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.surface-hint {
+  color: var(--quiet);
+}
