@@ -14,7 +14,8 @@ npm ci                      # exact versions from package-lock.json
 npm run lint                # tsc --noEmit
 npm test                    # Vitest: pure run, Worker (shimmed by @vitest/web-worker), IndexedDB (fake-indexeddb), area boundaries
 npx playwright install chromium   # once per machine / CI runner; locally the installed Chrome is used instead (PW_CHANNEL)
-npm run e2e                 # vite build, then Playwright against `vite preview` on port 4231 (PORT=... to change)
+npm run e2e                 # tsc, `vite build --mode smoke`, then Playwright against `vite preview` on port 4231 (PORT=... to change)
+npm run build               # production build: index.html only, no smoke page
 ```
 
 Local runs use the installed Google Chrome (`channel: 'chrome'`). With `CI` set, Playwright uses its own Chromium,
@@ -24,7 +25,7 @@ so CI needs `npx playwright install --with-deps chromium` first. `PW_CHANNEL` ov
 
 ```
 index.html                       product entry: mounts the one Orbital scene (src/app)
-smoke.html                       test-only entry used by tests/e2e
+smoke.html                       test-only entry used by tests/e2e, built only in `--mode smoke`
 src/app/                         owner-managed shell; scene-host.tsx is the mount slot for the Orbital scene
 src/smoke/                       test-only page
 src/functional/statistics/       area: statistics     (seeded PRNG)

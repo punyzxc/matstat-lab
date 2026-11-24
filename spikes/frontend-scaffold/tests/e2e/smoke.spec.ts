@@ -10,7 +10,9 @@ test('built app: a real Worker posts progress and a result, IndexedDB stores and
   expect(mean).toBeLessThan(0.55);
   await expect(smoke).toHaveAttribute('data-stored', String(mean));
 
-  // The record survives a reload: it was read from IndexedDB, not from memory.
+  // The record survives a page load: after navigating to the product page (no smoke run there),
+  // a fresh connection still reads it from IndexedDB, not from memory.
+  await page.goto('/');
   const persisted = await page.evaluate(
     () =>
       new Promise<unknown>((resolve, reject) => {
@@ -26,7 +28,8 @@ test('built app: a real Worker posts progress and a result, IndexedDB stores and
   expect(persisted).toBe(mean);
 });
 
-test('built app: the product entry mounts the scene host and nothing else', async ({ page }) => {
+test('built app: the product entry mounts only the scene host', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('main[data-scene-host]')).toBeAttached();
+  await expect(page.locator('#root > *')).toHaveCount(1);
 });

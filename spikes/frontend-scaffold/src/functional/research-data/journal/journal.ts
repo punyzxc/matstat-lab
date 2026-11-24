@@ -17,10 +17,11 @@ export function openJournal(name = 'statum-lab', factory: IDBFactory = indexedDB
 export function putRecord(db: IDBDatabase, record: JournalRecord): Promise<void> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).put(record);
+    const request = tx.objectStore(STORE).put(record);
     tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
+    // A failed request bubbles to the transaction before tx.error is set, so prefer the request's own error.
+    tx.onerror = () => reject(request.error ?? tx.error ?? new Error('journal write failed'));
+    tx.onabort = () => reject(tx.error ?? request.error ?? new Error('journal write aborted'));
   });
 }
 

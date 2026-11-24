@@ -2,8 +2,9 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 // Static build only: `vite build` writes dist/, any static host serves it. No server process.
-// Two entries: the product (index.html, the one Orbital scene) and a test-only smoke page.
-export default defineConfig({
+// The product build has one entry (index.html, the one Orbital scene). `--mode smoke` adds the
+// test-only smoke page for Playwright, so it is never deployed.
+export default defineConfig(({ mode }) => ({
   base: './',
   worker: { format: 'es' },
   build: {
@@ -11,8 +12,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
-        smoke: resolve(import.meta.dirname, 'smoke.html'),
+        ...(mode === 'smoke' ? { smoke: resolve(import.meta.dirname, 'smoke.html') } : {}),
       },
     },
   },
-});
+}));

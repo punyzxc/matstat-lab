@@ -17,10 +17,16 @@ export function runInWorker(spec: RunSpec, onProgress?: (done: number, total: nu
       if (message.type === 'result') resolve(message.result);
       else reject(new Error(message.message));
     };
-    worker.onerror = (event) => {
+    const fail = (error: Error) => {
       worker.terminate();
-      reject(new Error(event.message || 'worker failed'));
+      reject(error);
     };
-    worker.postMessage(spec);
+    worker.onerror = (event) => fail(new Error(event.message || 'worker failed'));
+    worker.onmessageerror = () => fail(new Error('worker message could not be deserialized'));
+    try {
+      worker.postMessage(spec);
+    } catch (error) {
+      fail(error instanceof Error ? error : new Error(String(error)));
+    }
   });
 }
