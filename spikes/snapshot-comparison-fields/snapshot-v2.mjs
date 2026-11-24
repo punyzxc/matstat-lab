@@ -47,7 +47,7 @@ export function migrateV1(s) {
 
 function validV2Fields(s) {
   const { axis, series, statistics } = s;
-  if ('migratedFrom' in s) return false; // only migration output carries it
+  if ('migratedFrom' in s && ![0, 1].includes(s.migratedFrom)) return false; // audit marker from migration
   if (!object(axis) || !onlyKeys(axis, ['units']) || !nullOr(axis.units, UNITS)) return false;
   if (!object(series) || !onlyKeys(series, ['histogram', 'ecdf'])) return false;
   const { histogram: h, ecdf: e } = series;

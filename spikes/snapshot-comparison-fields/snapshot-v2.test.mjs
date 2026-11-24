@@ -100,6 +100,7 @@ test("labels that the stored counts cannot back are rejected", () => {
     r => { r.axis.note = "x"; },
     r => { r.statistics.extra = 1; },
     r => { r.migratedFrom = "banana"; },
+    r => { r.migratedFrom = 2; },
   ]) {
     const bad = v2();
     mutate(bad);
@@ -116,8 +117,7 @@ test("migration labels always win over stray v1 keys", () => {
   assert.equal(r.snapshot.series.histogram.kind, "histogram");
   assert.equal(r.snapshot.series.histogram.normalization, "count");
   assert.equal(r.snapshot.series.ecdf.scale, "count");
-  const { migratedFrom, ...native } = r.snapshot;
-  assert.equal(decode({ ...native, schemaVersion: 2 }).ok, true);
+  assert.equal(decode(r.snapshot).ok, true);
 });
 
 test("any observed measure that may use a definition makes it unknown", () => {
@@ -138,4 +138,13 @@ test("decoded version 2 records are copies of the input", () => {
 test("the ECDF series can be compared through the same view", () => {
   const got = compare(toComparisonView(v2(), "ecdf"), toComparisonView({ ...v2(), spec: { ...v2().spec, seed: 7 } }, "ecdf"));
   assert.equal(got.decision, "compatible");
+});
+
+test("a migrated record survives a JSON round trip and keeps its audit marker", () => {
+  const migrated = decode(storedRun).snapshot;
+  const again = decode(JSON.stringify(migrated));
+  assert.equal(again.ok, true);
+  assert.equal(again.migrated, false);
+  assert.equal(again.snapshot.migratedFrom, 1);
+  assert.deepEqual(again.snapshot, migrated);
 });
