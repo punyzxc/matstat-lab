@@ -134,15 +134,16 @@ export function kolmogorovCritical(n, alpha) {
 }
 
 /** Full Kolmogorov test of a fully specified continuous F. */
-export function kolmogorovTest(sample, F, alpha) {
+/** Above this n·Dₙ the exact matrix (order 2⌈n·Dₙ⌉ − 1) is too slow for a slider; the p-value is then tiny and K is used. */
+export const EXACT_ND_LIMIT = 40;
+export function kolmogorovTest(sample, F, alpha, critical = kolmogorovCritical(sample.length, alpha)) {
   const n = sample.length;
   const stat = kolmogorovStatistic(sample, F);
-  const critical = kolmogorovCritical(n, alpha);
   const lambda = Math.sqrt(n) * stat.d;
   return {
     ...stat, n, lambda, critical,
     criticalAsymptotic: kolmogorovQuantile(1 - alpha) / Math.sqrt(n),
-    pExact: 1 - kolmogorovExactCdf(n, stat.d),
+    pExact: n * stat.d <= EXACT_ND_LIMIT ? 1 - kolmogorovExactCdf(n, stat.d) : null,
     pAsymptotic: 1 - kolmogorovK(lambda),
     reject: stat.d >= critical,
   };
@@ -207,10 +208,9 @@ export const MC_BUDGET = 300_000;
  * Repeat the tests on samples drawn from H₀ itself (streams 1…R) and count false rejections.
  * Predeclared band: α ± 3·√(α(1 − α)/R).
  */
-export function falseRejection(h0, n, seed, reps, opts) {
+export function falseRejection(h0, n, seed, reps, opts, crit = kolmogorovCritical(n, opts.alpha)) {
   const R = Math.min(reps, Math.floor(MC_BUDGET / n));
   let pearson = 0, pearsonRuns = 0, kolm = 0;
-  const crit = R > 0 ? kolmogorovCritical(n, opts.alpha) : 0;
   for (let rep = 1; rep <= R; rep++) {
     const x = drawSample(h0, n, seed, rep);
     const p = pearsonTest(x, h0, opts);
@@ -222,7 +222,7 @@ export function falseRejection(h0, n, seed, reps, opts) {
   const half = R > 0 ? 3 * Math.sqrt((opts.alpha * (1 - opts.alpha)) / R) : 0;
   return {
     R, pearsonRate: pearsonRuns ? pearson / pearsonRuns : null, pearsonRuns,
-    kolmogorovRate: R ? kolm / R : null, band: [Math.max(0, opts.alpha - half), opts.alpha + half],
+    kolmogorovRate: R ? kolm / R : null, band: R ? [Math.max(0, opts.alpha - half), opts.alpha + half] : null,
   };
 }
 /** Maximum-likelihood fit from the raw sample (used only to show the Kolmogorov test with estimated parameters). */
@@ -327,9 +327,10 @@ function runFit({ law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, estimate =
   const opts = { cells, alpha, estimate: estimate === 1, merge: merge === 1 };
   const pearson = pearsonTest(sample, h0, opts);
   const F0 = opts.estimate ? fittedCdf(sample, h0) : H.cdf;
-  const kol = kolmogorovTest(sample, F0, alpha);
+  const critical = kolmogorovCritical(n, alpha);
+  const kol = kolmogorovTest(sample, F0, alpha, critical);
   const mom = shapeMoments(sample);
-  const mc = falseRejection(h0, n, seed, reps, opts);
+  const mc = falseRejection(h0, n, seed, reps, opts, critical);
   const E = ecdf(sample);
   const lo = Math.min(L.range[0], H.range[0], E.x[0]), hi = Math.max(L.range[1], H.range[1], E.x[E.x.length - 1]);
   const xs = grid([lo, hi]);
@@ -345,7 +346,8 @@ function runFit({ law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, estimate =
   };
   const hLabel = opts.estimate ? `${H.family.label} fitted` : H.label;
   const decision = (rej) => (rej == null ? 'not applicable' : rej ? 'reject H₀' : 'do not reject H₀');
-  const inBand = (v) => (v == null ? '' : v >= mc.band[0] && v <= mc.band[1] ? ' (inside the band)' : ' (outside the band)');
+  const inBand = (v) => (v == null || !mc.band ? '' : v >= mc.band[0] && v <= mc.band[1] ? ' (inside the band)' : ' (outside the band)');
+  const bandText = mc.band ? `band α ± 3σ: [${fmt(mc.band[0])}, ${fmt(mc.band[1])}]` : 'no replicates: move the replicate slider above 0';
   return {
     axes: { x: 'x', y: 'distribution function' },
     readouts: [
@@ -353,7 +355,7 @@ function runFit({ law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, estimate =
       { key: 'dminus', label: 'Dₙ⁻ = max(F(x₍ᵢ₎) − (i−1)/n)', observed: kol.dMinus, theory: null },
       { key: 'dn', label: 'Kolmogorov Dₙ = max(Dₙ⁺, Dₙ⁻)', observed: kol.d, theory: kol.critical, convention: `theory column: exact critical value λₙ(α) for n = ${n}; asymptotic λ/√n = ${fmt(kol.criticalAsymptotic)}` },
       { key: 'lambda', label: '√n·Dₙ', observed: kol.lambda, theory: kolmogorovQuantile(1 - alpha), convention: 'theory column: λ with K(λ) = 1 − α' },
-      { key: 'ksp', label: 'Kolmogorov p-value', observed: ksValid ? kol.pExact : null, theory: ksValid ? kol.pAsymptotic : null, convention: ksValid ? 'observed: exact finite-n law; theory: 1 − K(√n·Dₙ)' : 'not valid with estimated parameters' },
+      { key: 'ksp', label: 'Kolmogorov p-value', observed: ksValid ? kol.pExact ?? kol.pAsymptotic : null, theory: ksValid ? kol.pAsymptotic : null, convention: !ksValid ? 'not valid with estimated parameters' : kol.pExact == null ? `n·Dₙ > ${EXACT_ND_LIMIT}: both columns use 1 − K(√n·Dₙ); the p-value is tiny` : 'observed: exact finite-n law; theory: 1 − K(√n·Dₙ)' },
       { key: 'ksdecision', label: 'Kolmogorov decision', observed: ksValid ? decision(kol.reject) : 'not applicable', theory: null },
       { key: 'chi2', label: 'Pearson χ² = Σ (mᵢ − npᵢ)²/(npᵢ)', observed: pearson.chi2, theory: pearson.critical, convention: `theory column: χ²₁₋α(k), k = s − 1 − r = ${pearson.s} − 1 − ${pearson.r} = ${pearson.df}` },
       { key: 'df', label: 'Degrees of freedom k = s − 1 − r', observed: pearson.df, theory: null },
@@ -362,8 +364,8 @@ function runFit({ law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, estimate =
       { key: 'small', label: 'Cells with expected count < 5', observed: pearson.small, theory: 0, convention: opts.merge ? `${pearson.smallBefore} before merging` : 'merging is off' },
       { key: 'skew', label: 'Skewness a_s = m₃/σ³', observed: mom.skew, theory: L.skew, convention: `approximate standard error under normality ${fmt(se.skew)}` },
       { key: 'kurt', label: 'Excess kurtosis e_k = m₄/σ⁴ − 3', observed: mom.exKurt, theory: L.exKurt, convention: `approximate standard error under normality ${fmt(se.kurt)}` },
-      { key: 'mcchi', label: `Pearson false-rejection rate under H₀ (${mc.pearsonRuns} runs)`, observed: mc.pearsonRate, theory: alpha, convention: `band α ± 3σ: [${fmt(mc.band[0])}, ${fmt(mc.band[1])}]${inBand(mc.pearsonRate)}` },
-      { key: 'mcks', label: `Kolmogorov false-rejection rate under H₀ (${mc.R} runs)`, observed: mc.kolmogorovRate, theory: alpha, convention: `band [${fmt(mc.band[0])}, ${fmt(mc.band[1])}]${inBand(mc.kolmogorovRate)}${opts.estimate ? '; parameters re-estimated in every run' : ''}` },
+      { key: 'mcchi', label: `Pearson false-rejection rate under H₀ (${mc.pearsonRuns} runs)`, observed: mc.pearsonRate, theory: alpha, convention: `${bandText}${inBand(mc.pearsonRate)}` },
+      { key: 'mcks', label: `Kolmogorov false-rejection rate under H₀ (${mc.R} runs)`, observed: mc.kolmogorovRate, theory: alpha, convention: `${bandText}${inBand(mc.kolmogorovRate)}${opts.estimate ? '; parameters re-estimated in every run' : ''}` },
     ],
     series: [
       band,
@@ -377,7 +379,9 @@ function runFit({ law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, estimate =
         ? 'The test needs a continuous F with every parameter known in advance. Here H₀ is fully specified.'
         : 'H₀ parameters were estimated from this sample. The Kolmogorov critical values then no longer hold: for the normal and exponential laws the test becomes far too lenient (compare the false-rejection rate with α). Use Pearson with r estimated parameters instead, and read its own false-rejection rate: the L12 midpoint estimates hold α only roughly.',
       `Pearson (L12): ${pearson.s} cells after ${opts.merge ? 'merging' : 'no merging'}, r = ${pearson.r} estimated parameter${pearson.r === 1 ? '' : 's'}${pearson.params ? ` (${pearson.params.map((v) => fmt(v)).join(', ')} from interval midpoints)` : ''}, k = s − 1 − r = ${pearson.df}. The outer cells are open to ±∞ so that Σ pᵢ = 1.`,
-      pearson.warning ?? 'Every expected count is at least 5.',
+      pearson.valid
+        ? pearson.warning ?? 'Every expected count is at least 5.'
+        : `Too few cells: k = s − 1 − r = ${pearson.s} − 1 − ${pearson.r} = ${pearson.df} < 1, so the χ² test cannot run. Increase s${opts.merge ? ' or n (merging joined cells)' : ''}.`,
       'L10 gives the degrees of freedom as "number of intervals − 1" and counts parameters from there. The general rule is the one in L12: k = s − 1 − r.',
       `Monte Carlo: ${mc.R} samples were drawn from H₀ itself (${H.label}) with the same seed and different streams. A correct level-α test rejects about α of them.${mc.R < reps ? ` Replicates were capped at ${mc.R} to keep n·R ≤ ${MC_BUDGET}.` : ''}`,
       'Skewness and excess kurtosis (L12): both are 0 for a normal law. Values far beyond about two standard errors argue against normality.',

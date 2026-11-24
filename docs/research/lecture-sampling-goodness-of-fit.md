@@ -4,7 +4,7 @@ Research for `lecture-sampling-goodness-of-fit` (#45). Owner: punyzxc (Claude ex
 
 **Question.** Which kernel builds the variation series, histogram, ECDF, Kolmogorov and Pearson tests with correct degrees of freedom (lectures 10 and 12)?
 
-**Answer.** `spikes/lecture-sampling-goodness-of-fit/kernel.mjs`. It follows the shared kernel contract (`docs/research/lecture-module-map.md`, PR #48). It serves the two stations that the scene host (#49) already registers, **Sample** and **Fit**. Its special functions are in `special.mjs`, under the names agreed for #54. 18 `node --test` checks pass. All of them use independent references.
+**Answer.** `spikes/lecture-sampling-goodness-of-fit/kernel.mjs`. It follows the shared kernel contract (`docs/research/lecture-module-map.md`, PR #48). It serves the two stations that the scene host (#49) already registers, **Sample** and **Fit**. Its special functions are in `special.mjs`, under the names agreed for #54. 19 `node --test` checks pass. All of them use independent references.
 
 ## Sources
 
@@ -24,7 +24,7 @@ All three laws have mean 1 and variance 1: N(1, 1), U(1 − √3, 1 + √3) and 
 
 Notes in the panel give the variation series (the first 12 values), the full interval table (Table 11), the df rule and every warning.
 
-Checked by hand in the #49 host: both stations open in the scene dock with the chart, the readouts and the notes. Each run takes about 50 ms with the default 300 replicates. The Monte Carlo work is capped at n·R ≤ 300 000 so that sliders stay interactive.
+Checked by hand in the #49 host: both stations open in the scene dock with the chart, the readouts and the notes. A Fit run takes about 50–200 ms with the default 300 replicates (warm or cold JIT), and about 300 ms at n = 1000. The Monte Carlo work is capped at n·R ≤ 300 000 so that sliders stay interactive. The exact p-value of Kolmogorov's test is used while n·Dₙ ≤ 40. Above that, the matrix gets too large for a slider and the p-value is tiny, so 1 − K(√n·Dₙ) is shown in both columns. When s − 1 − r < 1 the station says that there are too few cells.
 
 ## Acceptance criteria and evidence
 

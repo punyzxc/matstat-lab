@@ -220,6 +220,20 @@ test('finding: L12 uniform moment estimates make Pearson anti-conservative; Kolm
   assert.ok(norm.kolmogorovRate < 0.01, `Kolmogorov with fitted normal: ${norm.kolmogorovRate}`);
 });
 
+test('edge cases: df < 1 explained, zero replicates, fast run for a far H₀ at n = 1000', () => {
+  const few = FIT({ cells: 3, estimate: 1, n: 100 });
+  assert.equal(readout(few, 'chidecision').observed, 'not applicable');
+  assert.ok(few.notes.some((n) => /Too few cells/.test(n)));
+  const none = FIT({ reps: 0 });
+  assert.equal(readout(none, 'mcchi').observed, null);
+  assert.match(readout(none, 'mcchi').convention, /no replicates/);
+  const t0 = performance.now();
+  const far = FIT({ law: 1, h0: 2, n: 1000, reps: 0 });
+  assert.ok(performance.now() - t0 < 500, 'large n·Dₙ must not use the exact matrix');
+  assert.match(readout(far, 'ksp').convention, /1 − K/);
+  close(readout(far, 'ksp').observed, readout(far, 'ksp').theory, 0);
+});
+
 test('power: a wrong H₀ is rejected (n = 500)', () => {
   const res = FIT({ law: 1, h0: 0, n: 500 });
   assert.equal(readout(res, 'chidecision').observed, 'reject H₀');
