@@ -60,7 +60,10 @@ Each lecture spike lives in `spikes/<id>/` and contains:
        - `tone` is `'default'` (observed), `'signal'` (theory or reference), `'muted'` (context) or `'accent'` (highlighted region).
      - `notes`: short teaching notes, one per lecture formula used.
      - `axes`: optional `{ x, y }` axis titles.
-   - One kernel may serve several stations (Moments, Transform and Scatter share `lecture-random-vectors`). It exports an optional `stations: { <stationId>: { params } }`, and `run` receives `options.station`.
+   - One kernel may serve several stations (Moments, Transform and Scatter share `lecture-random-vectors`). It exports an optional `stations: { <stationId>: { params, live } }`, and `run` receives `options.station`.
+   - `live: true` on a station makes the host re-run the kernel on every slider move and morph the output. Use it only for kernels that finish in a few milliseconds. Heavy runs (replicates, coverage, power) stay behind the Run button and move to the Worker runner (#55). Added in PR #64.
+   - `surface` (optional) is a 3D surface over a regular grid of up to about 41×41 nodes: `{ x, y, z, zSample?, labels: { x, y, z }, title? }`. `z[j][i]` is the theoretical density at (x[i], y[j]), and `zSample` is the sample's 2D-histogram density on the same grid. The host renders it as a surface the user can rotate. Added in PR #64.
+   - Owner rule: a surface or a family of curves must come from real kernel output and react to the parameters. Static decoration is not allowed.
    - The host clamps every parameter to `[min, max]` and snaps it to `step` before calling `run`. The source of truth is `spikes/visual-foundation/src/stations/kernel-contract.ts` (PR #49), and `spikes/scene-module-host/kernel.mjs` is a working example.
    - It is deterministic: the same params and seed give byte-identical output (checked with `JSON.stringify`).
    - Randomness comes only from `fixtureUint32(seed, stream, index)` in `spikes/simulation-engine/engine.mjs` (counter-based, `fixture-mix32-v1`). Kernels do not use `Math.random`.
