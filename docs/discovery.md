@@ -90,3 +90,102 @@ budget_hours: 2
 - [ ] Verify a frontend-only scaffold and review the required path and check changes through the maintainer workflow.
 - [ ] Confirm all functional owners as repository members and complete independent reviews of the research.
 - [ ] Land the final PRD on main through a reviewed PR.
+
+## Lecture modules (epic proposal, 2026-11-24)
+
+The owner asked for lab modules that follow the 12 course lectures and open inside the single scene of the Orbital laboratory. [The lecture module map](research/lecture-module-map.md) gives the lecture-to-station table, the shared kernel contract and the lecture errata. Each kernel spike is pure, seeded and tested against independent references. The scene host turns kernels into stations. These blocks become the production epic "Lecture modules" after the PRD is approved.
+
+```crew-research
+id: lecture-module-map
+question: How do the 12 course lectures map to in-scene lab stations, one shared kernel contract and a list of lecture errata?
+area: research
+owner: punyzxc
+budget_hours: 2
+```
+
+```crew-research
+id: scene-module-host
+question: Can the Orbital laboratory host every module inside its one scene (no page scroll, no extra views) with keyboard and URL-hash state?
+area: web
+owner: punyzxc
+budget_hours: 4
+```
+
+```crew-research
+id: lecture-combinatorics
+question: Which seeded kernel shows urn sampling counts, hypergeometric and balls-in-boxes laws exactly next to simulation (lecture 1)?
+area: research
+owner: GredesCerber
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-bernoulli-approximations
+question: Which kernel compares the exact binomial law with local, integral and Poisson approximations and their errors (lectures 3 and 9)?
+area: research
+owner: GredesCerber
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-geometric-probability
+question: Which seeded kernel shows frequency stabilisation, geometric probability and the three Bertrand chord schemes (lectures 1 and 4)?
+area: research
+owner: Jumalinova
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-limit-theorems
+question: Which kernel shows uniform-sum convolution, Chebyshev bounds against real tails, Cauchy non-convergence and the CLT (lectures 6 to 9)?
+area: research
+owner: Jumalinova
+budget_hours: 4
+```
+
+```crew-research
+id: lecture-worked-examples-audit
+question: Do the worked examples of all 12 lectures hold under independent recomputation, and which reference fixtures should the kernels reuse?
+area: e2e
+owner: adekin06
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-conditional-bayes
+question: Which seeded kernel shows event algebra, conditional and total probability and Bayes as counts of simulated outcomes (lectures 1 and 2)?
+area: research
+owner: punyzxc
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-random-vectors
+question: Which kernel shows moments, the 3-sigma rule, functions of a random variable, correlation and regression lines (lectures 5 and 6)?
+area: research
+owner: punyzxc
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-sampling-goodness-of-fit
+question: Which kernel builds the variation series, histogram, ECDF, Kolmogorov and Pearson tests with correct degrees of freedom (lectures 10 and 12)?
+area: research
+owner: punyzxc
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-estimation-intervals
+question: Which kernel shows estimator bias and MSE and the coverage of normal, t and chi-square intervals and the two-proportion test (lecture 11)?
+area: research
+owner: punyzxc
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-hypothesis-tests
+question: Which kernel shows critical regions, type I and II errors and power for the z, t and F tests of lecture 12?
+area: research
+budget_hours: 3
+```
