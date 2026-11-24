@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ArrowUpRight, BookOpen, X } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { ArrowUpRight, BookOpen } from 'lucide-react';
+import { orbits, type OrbitId } from './stations/catalog';
+import { orbitHash } from './stations/route';
 
 export function LabMark() {
   return (
@@ -18,32 +20,10 @@ export function LabMark() {
     </svg>
   );
 }
-function Notes({ close }: { close: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const node = ref.current;
-    node?.showModal();
-    return () => node?.close();
-  }, []);
+export function LabNotesContent() {
   return (
-    <dialog
-      className="lab-notes"
-      ref={ref}
-      aria-labelledby="notes-title"
-      onCancel={close}
-      onClick={(e) => {
-        if (e.target === ref.current) close();
-      }}
-    >
-      <div>
-        <div className="notes-chrome">
-          <BookOpen size={17} />
-          <button onClick={close} aria-label="Close notes">
-            <X size={17} />
-          </button>
-        </div>
-        <h2 id="notes-title">Lab notes</h2>
-        <h3>Geometric studies</h3>
+    <div className="lab-notes-body">
+      <h3>Geometric studies</h3>
         <p>
           The trefoil winds twice around a torus and three times through its hole. The yellow cross-section
           sits at the probability coordinate F(x) of the inspected draw. Choose the draw readout to advance
@@ -56,60 +36,46 @@ function Notes({ close }: { close: () => void }) {
           Each experiment uses a seeded sequence. The trace shows the first 48 draws in order. The ASCII
           histogram counts observations in 34 equal-width bins. Sample variance uses n − 1.
         </p>
-        <h3>Experiment index</h3>
-        <p>
-          Open an instrument directly from its orbital preview. Each preview shows its most recent saved
-          result or a labeled example. Distribution Explorer generates and exports samples. The other five
-          studies explore prefixes of the same completed run.
-        </p>
+        <h3>Moving around</h3>
+      <p>
+        Choose a lecture orbit in the top bar, then open a station from its card. A station opens inside the
+        scene and Escape closes it. The address bar keeps the station, its parameters and its seed, so a copied
+        link reopens the same run.
+      </p>
         <a
           href="https://www.naturalearthdata.com/downloads/110m-physical-vectors/110m-land/"
           target="_blank"
           rel="noreferrer"
         >
-          Earth geometry source <ArrowUpRight size={14} />
+          Earth geometry source <ArrowUpRight size={14} aria-hidden="true" />
         </a>
-      </div>
-    </dialog>
+    </div>
   );
 }
-export function LabHeader({ home = false, action }: { home?: boolean; action?: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const trigger = useRef<HTMLButtonElement>(null);
-  function close() {
-    setOpen(false);
-    requestAnimationFrame(() => trigger.current?.focus());
-  }
+export function LabHeader({ orbit, action }: { orbit?: OrbitId | null; action?: ReactNode }) {
   return (
-    <>
-      <header className="lab-bar">
-        <div className="lab-brand">
-          <a href="#observatory" aria-label="STATUM LAB home">
-            <LabMark />
-            <strong>
-              STATUM<span>LAB</span>
-            </strong>
+    <header className="lab-bar">
+      <div className="lab-brand">
+        <a href={orbit ? orbitHash(orbit) : '#'} aria-label="STATUM LAB, back to the scene">
+          <LabMark />
+          <strong translate="no">
+            STATUM<span>LAB</span>
+          </strong>
+        </a>
+      </div>
+      <nav aria-label="Lecture orbits" className="orbit-switch">
+        {orbits.map((o) => (
+          <a key={o.id} href={orbitHash(o.id)} aria-current={orbit === o.id ? 'true' : undefined} title={`Lectures ${o.lectures}`}>
+            <b>{o.numeral}</b> {o.name}
           </a>
-        </div>
-        <nav aria-label="Laboratory navigation">
-          <a href="#observatory" aria-current={home ? 'page' : undefined}>
-            Observatory
-          </a>
-          <a href="#experiments">Experiments</a>
-          <button ref={trigger} onClick={() => setOpen(true)} aria-haspopup="dialog">
-            Lab notes
-          </button>
-        </nav>
-        <div className="lab-session">
-          {action ?? (
-            <>
-              <i /> Local session
-            </>
-          )}
-        </div>
-      </header>
-      {open && <Notes close={close} />}
-    </>
+        ))}
+      </nav>
+      <div className="lab-session">
+        {action}
+        <a href="#record" className="lab-tool">Sample record</a>
+        <a href="#notes" className="lab-tool"><BookOpen size={14} aria-hidden="true" /> Lab notes</a>
+      </div>
+    </header>
   );
 }
 export function FigureCaption({ number, children }: { number: string; children: ReactNode }) {
