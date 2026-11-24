@@ -1,0 +1,42 @@
+{
+  "lecture": 6,
+  "title": "Numerical characteristics, functions and sums of random variables",
+  "scientists": [],
+  "steps": [
+    {
+      "title": "Expectation and variance",
+      "idea": "The mean is the centre of mass of the distribution; the variance is the mean squared spread around it.",
+      "formula": [
+        "M ξ = Σ xᵢ pᵢ  or  ∫ x f(x) dx",
+        "D ξ = M(ξ − Mξ)²"
+      ],
+      "experiment": {
+        "station": "moments",
+        "seed": 606
+      }
+    },
+    {
+      "title": "The 3σ rule",
+      "idea": "For a normal variable almost all values lie within three standard deviations of the mean.",
+      "formula": [
+        "P(|ξ − a| < 3σ) = 1 − 2Φ(−3) ≈ 0.9973"
+      ],
+      "experiment": {
+        "station": "moments",
+        "seed": 3
+      }
+    },
+    {
+      "title": "Sums and convolution",
+      "idea": "The density of a sum of independent variables is the convolution of their densities.",
+      "formula": [
+        "f₍ξ+η₎(z) = ∫ f_ξ(x) f_η(z − x) dx"
+      ],
+      "experiment": {
+        "station": "convolution",
+        "seed": 616
+      }
+    }
+  ],
+  "status": "draft"
+}

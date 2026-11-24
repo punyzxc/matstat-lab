@@ -1,0 +1,34 @@
+{
+  "lecture": 8,
+  "title": "The central limit theorem",
+  "scientists": [
+    "lindeberg",
+    "levy",
+    "lyapunov"
+  ],
+  "steps": [
+    {
+      "title": "Standardised sums",
+      "idea": "A sum of many independent draws, centred and scaled, is close to the standard normal law.",
+      "formula": [
+        "(Sₙ − na) / (σ√n)  →  N(0, 1)"
+      ],
+      "scientists": [
+        "lindeberg",
+        "levy"
+      ],
+      "experiment": {
+        "station": "clt",
+        "seed": 808
+      }
+    },
+    {
+      "title": "Lyapunov condition",
+      "idea": "Different laws can be added as long as no single term dominates the sum.",
+      "scientists": [
+        "lyapunov"
+      ]
+    }
+  ],
+  "status": "draft"
+}

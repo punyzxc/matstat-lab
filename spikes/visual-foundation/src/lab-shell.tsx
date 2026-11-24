@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ArrowUpRight, BookOpen } from 'lucide-react';
+import { ArrowUpRight, BookOpen, GraduationCap } from 'lucide-react';
 import { orbits, type OrbitId } from './stations/catalog';
 import { orbitHash } from './stations/route';
 
@@ -72,6 +72,7 @@ export function LabHeader({ orbit, action }: { orbit?: OrbitId | null; action?: 
       </nav>
       <div className="lab-session">
         {action}
+        <a href="#lectures" className="lab-tool"><GraduationCap size={14} aria-hidden="true" /> Lectures</a>
         <a href="#record" className="lab-tool">Sample record</a>
         <a href="#notes" className="lab-tool"><BookOpen size={14} aria-hidden="true" /> Lab notes</a>
       </div>
