@@ -50,16 +50,24 @@ Each lecture spike lives in `spikes/<id>/` and contains:
 
 1. `kernel.mjs`. Plain ES module, no DOM and no UI library.
    - `meta`: `{ id, lectures: ['L3'], title, params: [{ key, label, min, max, step, default }] }`.
-   - `run(params, { seed })` returns `{ readouts, series, notes }`:
+   - `run(params, { seed, station })` returns `{ readouts, series, notes, axes }`:
      - `readouts`: `[{ key, label, observed, theory, unit, convention }]`
-     - `series`: `[{ id, kind: 'pmf' | 'pdf' | 'cdf' | 'hist' | 'ecdf' | 'line' | 'points' | 'band', x, y, unit }]`
+     - `series`: `[{ id, kind, x, y, y2, label, unit, tone }]`
+       - `kind` is one of `'pmf' | 'pdf' | 'cdf' | 'hist' | 'ecdf' | 'line' | 'points' | 'band' | 'rule'`.
+       - `band` fills between `y` and `y2`.
+       - `rule` draws vertical markers at each `x`.
+       - `hist` puts `x` at the bin starts.
+       - `tone` is `'default'` (observed), `'signal'` (theory or reference), `'muted'` (context) or `'accent'` (highlighted region).
      - `notes`: short teaching notes, one per lecture formula used.
+     - `axes`: optional `{ x, y }` axis titles.
+   - One kernel may serve several stations (Moments, Transform and Scatter share `lecture-random-vectors`). It exports an optional `stations: { <stationId>: { params } }`, and `run` receives `options.station`.
+   - The host clamps every parameter to `[min, max]` and snaps it to `step` before calling `run`. The source of truth is `spikes/visual-foundation/src/stations/kernel-contract.ts` (PR #49), and `spikes/scene-module-host/kernel.mjs` is a working example.
    - It is deterministic: the same params and seed give byte-identical output (checked with `JSON.stringify`).
    - Randomness comes only from `fixtureUint32(seed, stream, index)` in `spikes/simulation-engine/engine.mjs` (counter-based, `fixture-mix32-v1`). Kernels do not use `Math.random`.
 2. `kernel.test.mjs`. `node --test` checks exact values against independent references (closed forms, exact enumeration, or values recomputed from first principles). Monte Carlo checks use a predeclared band.
 3. The research document `docs/research/<id>.md`: facts, assumptions, a position, and the lecture errata found.
 
-The station UI is not part of a kernel task. The scene host (`scene-module-host`) imports `kernel.mjs`, draws `series` with the existing plot components and shows `readouts`.
+The station UI is not part of a kernel task. The scene host (`scene-module-host`) imports `kernel.mjs`, draws `series` with one shared chart component and shows `readouts`.
 
 ## Correctness pins (the lecture is wrong or ambiguous)
 
@@ -78,8 +86,9 @@ The station UI is not part of a kernel task. The scene host (`scene-module-host`
 | L5 vs L10 ECDF | F(x) = P(ξ < x), left-continuous; L10 counts sample values "not exceeding x" and also calls Fₙ left-continuous | The two definitions differ at the jumps. | Decision needed (see below). Every ECDF and CDF readout states its convention. |
 | L10 Pearson df | r = n − 1 (n = number of intervals), 16 intervals for a sample of 16 | k = s − 1 − r (L12), and the expected counts must be large enough (L10 itself asks for n > 50) | Use L12's df. Warn when expected counts are below 5. |
 | L11 coin example | Numerator written as 0.480 − 0.490 for H₀: p = 0.5 | Value −1.26 matches 0.480 − 0.5 = −1.265 | Use p̂ − p₀. |
-| L11 t-interval | 2.9528 < M < 3.1108 | With s² = 0.0303, n = 22 and t = 2.080: 2.9546 < M < 3.1090 | Use s/√n with the stated divisor. |
-| L11 χ² interval for D | χ² = 37.6 and 9.9 for γ = 0.95, r = 21, which gives 0.017 < D < 0.064 | χ²₀.₉₇₅ = 35.48 and χ²₀.₀₂₅ = 10.28, which gives 0.0179 < D < 0.0619 | Compute quantiles, do not use table values. |
+| L11 example data | x̄ = 3.0318 and s² = 0.0303 | The 22 listed values give Σx = 66.7, Σx² = 202.81, x̄ = 3.0318 and s² = 0.02799 (divisor n − 1). The lecture's s² does not match its own data. | Compute s² from the data. |
+| L11 t-interval | 2.9528 < M < 3.1108 | With s² = 0.02799, n = 22 and t₀.₉₇₅(21) = 2.0796: 2.9576 < M < 3.1060 | Use s/√n with the stated divisor. |
+| L11 χ² interval for D | χ² = 37.6 and 9.9 for γ = 0.95, r = 21, which gives 0.017 < D < 0.064 | χ²₀.₉₇₅ = 35.48 and χ²₀.₀₂₅ = 10.28. With s² = 0.02799 this gives 0.0166 < D < 0.0572. | Compute quantiles, do not use table values. |
 | L9 examples | Normal approximations given as answers (0.92135, 0.5, 0.7888) | Exact binomial: 0.9520, 0.5307, 0.7963 | Show exact and approximate together, with the error. |
 
 Checked and correct: L1 balls in boxes for n = 5 (24/625, 48/125, 12/25, 12/125, 1/625 by full enumeration of 5⁵ cases); L1 sin² example (0.5); L2 posterior (1 − p)/(4p + 1); L3 P₅₀₀₀(50) ≈ 0.0566; L3 typo example 0.0952; L11 two-series z = −0.447; L12 U = 0.471.

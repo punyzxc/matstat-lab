@@ -189,3 +189,39 @@ question: Which kernel shows critical regions, type I and II errors and power fo
 area: research
 budget_hours: 3
 ```
+
+## Interactive lectures (owner request, 2026-11-24)
+
+A quiet "Lectures" drawer inside the scene walks through each lecture step by step: the idea, the formula, a worked example and a button that opens the matching station with preset parameters. A teacher can run a lesson from it (presenter mode). Each lecture shows the scientists it mentions next to a slot for an ASCII portrait; the owner draws the portraits.
+
+```crew-research
+id: lecture-walkthrough-host
+question: Which in-scene step player, step format and presenter mode let a teacher run each lecture and open its experiment with preset parameters?
+area: web
+owner: punyzxc
+budget_hours: 4
+```
+
+```crew-research
+id: lecture-walkthroughs-probability
+question: Which step-by-step scripts for lectures 1 to 3 explain each idea and formula and link to the right station presets?
+area: research
+owner: GredesCerber
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-walkthroughs-random-variables
+question: Which step-by-step scripts for lectures 4 to 9 explain each idea and formula and link to the right station presets?
+area: research
+owner: Jumalinova
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-walkthroughs-statistics
+question: Which step-by-step scripts for lectures 10 to 12 explain each idea and formula and link to the right station presets?
+area: research
+owner: adekin06
+budget_hours: 3
+```
