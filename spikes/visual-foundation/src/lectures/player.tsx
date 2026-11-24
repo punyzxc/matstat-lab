@@ -49,9 +49,10 @@ export function LecturePlayer({ lecture, step, present }: { lecture: Lecture; st
   };
 
   useEffect(() => {
-    // An out-of-range step in a link lands on the nearest real step.
-    if (index !== step) window.location.replace(lectureHash({ n: lecture.lecture, step: index, present }));
-  }, [index, step, lecture.lecture, present]);
+    // A malformed or out-of-range step in a link lands on the nearest real step, and the address shows it.
+    const canonical = lectureHash({ n: lecture.lecture, step: index, present });
+    if (total && window.location.hash !== canonical) window.location.replace(canonical);
+  }); // after every render: any hash change re-renders the app, even when it parses to the same step
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || typing(e.target)) return;
@@ -75,6 +76,7 @@ export function LecturePlayer({ lecture, step, present }: { lecture: Lecture; st
     };
   }, [present]);
 
+  if (!current) return <p className="station-status" role="alert">This lecture script has no steps yet.</p>;
   return (
     <div className="lecture-player" data-testid="lecture-player">
       <nav className="lecture-steps" aria-label="Steps">
@@ -151,7 +153,10 @@ function loadPortrait(slug: string) {
     p = fetch(`${import.meta.env.BASE_URL}portraits/${slug}.txt`, { cache: 'no-cache' })
       .then((r) => (r.ok ? r.text() : null))
       .then(fitPortrait)
-      .catch(() => null);
+      .catch(() => {
+        portraitCache.delete(slug); // a network error is retried on the next visit
+        return null;
+      });
     portraitCache.set(slug, p);
   }
   return p;
@@ -190,7 +195,7 @@ const initials = (name: string) =>
   name
     .replace(/\(.*?\)/g, '')
     .split(/\s+/)
-    .filter((w) => /^\p{Lu}/u.test(w))
+    .filter((w) => /^\p{L}/u.test(w) && !/^(de|von|van|le|la)$/.test(w))
     .map((w) => w[0])
     .slice(0, 3)
     .join('');

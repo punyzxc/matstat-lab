@@ -47,6 +47,8 @@ The 12 files on this branch are **drafts**. They are written from the lecture ma
 - **Roster.** The 25 names are every person the 12 lectures name (Pascal, Fermat, Newton, Gauss, Glivenko and Snedecor were missing from the lecture map). A name the lectures spell differently could slip through a text search; #51–#53 add anyone their scripts name: one roster entry and one empty `.txt` each.
 - **Formula rendering.** Unicode text is enough for the formulas in the lecture map. Fractions and integrals with limits read as linear text. If the owner wants typeset math later, MathML Core renders natively in Chromium and Firefox with system fonts. It would be one optional `mathml` field per step, with no change to the player.
 - **Portrait slot.** The slot is 40 × 20 characters at 7 px (10 px in presenter mode). The owner may change `PORTRAIT` in `script.ts`, and the README states the same numbers.
+- **Reserved names.** `lecture`, `step` and `present` in a station hash are the way back to a lecture, so no kernel may declare a parameter with those keys. No kernel does today.
+- **Independent check** (a separate agent, before the PR) found no blocking defects. Fixed after it: a malformed step in the address (`#lecture/3/abc`, `#lecture/3`) is rewritten to the real step; a script with no steps shows a message instead of failing; a portrait that failed to load on a network error is fetched again on the next visit.
 - **Visual polish** of the drawer, player and placeholders is the owner's.
 - The production version follows the PRD. These are discovery spikes, and the route grammar and the script format are the parts worth keeping.
 

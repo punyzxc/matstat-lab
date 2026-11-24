@@ -48,6 +48,10 @@ test('a lecture shows one step at a time; arrows and buttons move between steps 
   await expect(page.getByTestId('step-counter')).toHaveText('Step 2 / 4');
   await page.goto('/#lecture/3/99');
   await expect(page).toHaveURL(/#lecture\/3\/4$/);
+  await page.goto('/#lecture/3/abc');
+  await expect(page).toHaveURL(/#lecture\/3\/1$/);
+  await page.goto('/#lecture/3');
+  await expect(page).toHaveURL(/#lecture\/3\/1$/);
 });
 
 test('"Open experiment" opens the station with the step\'s seed and parameters; "Back to lecture" returns to the step', async ({ page }) => {
