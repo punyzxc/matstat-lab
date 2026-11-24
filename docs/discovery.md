@@ -225,3 +225,31 @@ area: research
 owner: adekin06
 budget_hours: 3
 ```
+
+## Shared infrastructure for lecture kernels (2026-11-24)
+
+Several kernels need the same special functions, heavy runs and independent acceptance tests. Each item below has one owner, so the kernel tasks do not each rebuild them.
+
+```crew-research
+id: lecture-special-functions
+question: Which shared special functions (Φ, normal, t, χ² and F quantiles, log-gamma, Kolmogorov K) with fixtures should every lecture kernel import?
+area: research
+owner: GredesCerber
+budget_hours: 3
+```
+
+```crew-research
+id: kernel-worker-runner
+question: Can the scene run any contract kernel in the simulation Web Worker with progress and cancellation, so heavy stations never block the scene?
+area: web
+owner: Jumalinova
+budget_hours: 3
+```
+
+```crew-research
+id: scene-acceptance-audit
+question: Do independent browser tests confirm the one-scene rules (no scroll, in-scene stations, URL replay, keyboard and focus) for every station?
+area: e2e
+owner: adekin06
+budget_hours: 2
+```
