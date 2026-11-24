@@ -68,7 +68,7 @@ export function moduleReadout(id: ModuleId, sample: number[], settings: RunSetti
         label: 'Observed runs',
         value: String(runs),
         formula: 'R = 1 + number of sign changes',
-        detail: `Each run is a consecutive group on one side of the model median. For ${signs.length} independent fair signs, the expected run count is ${v(signs.length ? (signs.length + 1) / 2 : 0)}.`,
+        detail: `Each run is a consecutive group on one side of the model median. With ${above} signs above and ${signs.length - above} below in random order, the expected run count is E R = 1 + 2n₁n₂/n = ${v(signs.length ? 1 + (2 * above * (signs.length - above)) / signs.length : 0)}.`,
       };
     default:
       return {

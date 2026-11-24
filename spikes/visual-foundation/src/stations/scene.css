@@ -564,3 +564,23 @@ html:has(.orbital-lab) body {
     color: var(--ink);
   }
 }
+@media (min-width: 761px) {
+  .orbital-lab .orbit-preview-meta {
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .orbital-lab .orbit-preview-meta > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .orbital-lab .orbit-preview-value {
+    flex: none;
+    white-space: nowrap;
+  }
+  .orbital-lab .orbit-preview[data-module='confidence'] .orbit-preview-value {
+    font-size: clamp(12px, 1vw, 15px);
+  }
+}

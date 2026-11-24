@@ -86,3 +86,24 @@ test('reduced motion: the dock opens without animation', async ({ page }) => {
   const animation = await page.getByTestId('station-dock').evaluate((n) => getComputedStyle(n).animationName);
   expect(animation).toBe('none');
 });
+
+test('station cards never overlap on any orbit at common laptop sizes', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const [width, height] of [[1280, 720], [1366, 768], [1440, 900], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    for (const orbit of ['probability', 'variables', 'limits', 'statistics']) {
+      await page.goto(`/#orbit/${orbit}`);
+      const overlaps = await page.evaluate(() => {
+        const boxes = [...document.querySelectorAll('.orbit-node')].map((n) => [n.dataset.orbitId, n.getBoundingClientRect()]);
+        const hits = [];
+        for (let i = 0; i < boxes.length; i++)
+          for (let j = i + 1; j < boxes.length; j++) {
+            const [a, A] = boxes[i], [b, B] = boxes[j];
+            if (A.left < B.right && B.left < A.right && A.top < B.bottom && B.top < A.bottom) hits.push(`${a}/${b}`);
+          }
+        return hits;
+      });
+      expect(overlaps, `${orbit} at ${width}×${height}`).toEqual([]);
+    }
+  }
+});
