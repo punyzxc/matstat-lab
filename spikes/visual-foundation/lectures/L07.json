@@ -1,0 +1,53 @@
+{
+  "lecture": 7,
+  "title": "The law of large numbers",
+  "scientists": [
+    "chebyshev",
+    "markov",
+    "khinchin",
+    "bernoulli-jacob",
+    "poisson",
+    "cauchy"
+  ],
+  "steps": [
+    {
+      "title": "Chebyshev inequality",
+      "idea": "A finite variance bounds the chance of a large deviation from the mean, whatever the law.",
+      "formula": [
+        "P(|ξ − Mξ| ≥ ε) ≤ Dξ / ε²"
+      ],
+      "scientists": [
+        "chebyshev"
+      ]
+    },
+    {
+      "title": "Running means settle",
+      "idea": "The mean of n independent draws with finite variance converges in probability to the expectation.",
+      "formula": [
+        "(ξ₁ + … + ξₙ) / n  →  a"
+      ],
+      "scientists": [
+        "chebyshev",
+        "khinchin"
+      ],
+      "experiment": {
+        "station": "convergence",
+        "seed": 707,
+        "params": {
+          "dist": 1,
+          "n": 2048,
+          "scale": 1
+        },
+        "label": "Watch the running mean"
+      }
+    },
+    {
+      "title": "When it fails",
+      "idea": "The Cauchy law has no mean, and its running means never settle.",
+      "scientists": [
+        "cauchy"
+      ]
+    }
+  ],
+  "status": "draft"
+}

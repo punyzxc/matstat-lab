@@ -1,0 +1,34 @@
+{
+  "lecture": 9,
+  "title": "Characteristic functions and the de Moivre–Laplace theorem",
+  "scientists": [
+    "de-moivre",
+    "laplace",
+    "chebyshev",
+    "lyapunov"
+  ],
+  "steps": [
+    {
+      "title": "Characteristic function",
+      "idea": "The characteristic function of a sum of independent variables is the product of their characteristic functions.",
+      "formula": [
+        "φ(t) = M e^(itξ)",
+        "φ₍ξ+η₎(t) = φ_ξ(t) φ_η(t)"
+      ]
+    },
+    {
+      "title": "Exact versus approximate",
+      "idea": "The normal approximation of a binomial probability has an error you can measure.",
+      "example": "Lecture answer 0.92135 (normal), exact binomial 0.9520.",
+      "scientists": [
+        "de-moivre",
+        "laplace"
+      ],
+      "experiment": {
+        "station": "bernoulli",
+        "seed": 909
+      }
+    }
+  ],
+  "status": "draft"
+}

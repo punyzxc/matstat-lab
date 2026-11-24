@@ -1,0 +1,75 @@
+{
+  "lecture": 3,
+  "title": "The Bernoulli scheme and its approximations",
+  "scientists": [
+    "bernoulli-jacob",
+    "de-moivre",
+    "laplace",
+    "gauss",
+    "poisson",
+    "newton"
+  ],
+  "steps": [
+    {
+      "title": "Bernoulli formula",
+      "idea": "n independent trials, each a success with probability p: the number of successes follows the binomial law.",
+      "formula": [
+        "Pₙ(k) = Cₙᵏ pᵏ qⁿ⁻ᵏ,  q = 1 − p"
+      ],
+      "example": "n = 7, k = 5, p = 0.5: P₇(5) = 21/128 ≈ 0.164.",
+      "scientists": [
+        "bernoulli-jacob"
+      ],
+      "experiment": {
+        "station": "bernoulli",
+        "seed": 7
+      }
+    },
+    {
+      "title": "Local de Moivre–Laplace theorem",
+      "idea": "For large n the binomial probabilities follow the normal bell.",
+      "formula": [
+        "Pₙ(k) ≈ φ(x) / √(npq),  x = (k − np) / √(npq)"
+      ],
+      "scientists": [
+        "de-moivre",
+        "laplace",
+        "gauss"
+      ],
+      "experiment": {
+        "station": "bernoulli",
+        "seed": 1733
+      }
+    },
+    {
+      "title": "Integral theorem",
+      "idea": "The probability that the count falls in a range is an area under the normal curve.",
+      "formula": [
+        "P(k₁ ≤ k ≤ k₂) ≈ Φ(x₂) − Φ(x₁)"
+      ],
+      "example": "n = 5000, p = 0.01, P(0 ≤ k ≤ 50): exact 0.5375, normal 0.5. The continuity correction closes most of the gap.",
+      "scientists": [
+        "laplace"
+      ],
+      "experiment": {
+        "station": "bernoulli",
+        "seed": 5000
+      }
+    },
+    {
+      "title": "Poisson approximation",
+      "idea": "When p is small and np = λ is moderate, rare events follow the Poisson law.",
+      "formula": [
+        "Pₙ(k) ≈ λᵏ e^(−λ) / k!,  λ = np"
+      ],
+      "scientists": [
+        "poisson"
+      ],
+      "experiment": {
+        "station": "bernoulli",
+        "seed": 1837
+      }
+    }
+  ],
+  "status": "draft"
+}
