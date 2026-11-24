@@ -1,0 +1,46 @@
+{
+  "lecture": 11,
+  "title": "Point estimates and confidence intervals",
+  "scientists": [
+    "gosset",
+    "fisher"
+  ],
+  "steps": [
+    {
+      "title": "Unbiased variance",
+      "idea": "Dividing by n underestimates the variance; dividing by n − 1 removes the bias.",
+      "formula": [
+        "s² = Σ (xᵢ − x̄)² / (n − 1)"
+      ],
+      "experiment": {
+        "station": "estimation",
+        "seed": 1111,
+        "params": {
+          "dist": 0,
+          "n": 256,
+          "scale": 1
+        }
+      }
+    },
+    {
+      "title": "Confidence interval for the mean",
+      "idea": "An interval built from the sample covers the true mean in a stated share of repeated samples.",
+      "formula": [
+        "x̄ ± t₍γ, n−1₎ · s / √n"
+      ],
+      "scientists": [
+        "gosset"
+      ],
+      "experiment": {
+        "station": "confidence",
+        "seed": 1908,
+        "params": {
+          "dist": 0,
+          "n": 512,
+          "scale": 1
+        }
+      }
+    }
+  ],
+  "status": "draft"
+}

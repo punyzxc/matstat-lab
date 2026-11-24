@@ -25,6 +25,7 @@ export function SceneDock({
   onClose,
   children,
   testId,
+  className,
 }: {
   title: string;
   eyebrow?: ReactNode;
@@ -33,6 +34,7 @@ export function SceneDock({
   onClose: () => void;
   children: ReactNode;
   testId?: string;
+  className?: string;
 }) {
   const panel = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -49,7 +51,7 @@ export function SceneDock({
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
   return (
-    <section ref={panel} className={`scene-dock scene-dock--${side}`} aria-labelledby="dock-title" data-testid={testId}>
+    <section ref={panel} className={`scene-dock scene-dock--${side}${className ? ` ${className}` : ''}`} aria-labelledby="dock-title" data-testid={testId}>
       <header className="scene-dock-head">
         <div>
           {eyebrow && <p className="edition">{eyebrow}</p>}

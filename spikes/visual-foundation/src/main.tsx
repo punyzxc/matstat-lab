@@ -18,10 +18,24 @@ import type { ModuleId } from './modules';
 import { LabNotesContent } from './lab-shell';
 import { findStation, orbitOfModule, orbits, type OrbitId } from './stations/catalog';
 import { KernelStation } from './stations/kernel-station';
-import { orbitHash, parseRoute, stationHash, type Route } from './stations/route';
+import { lectureHash, orbitHash, parseRoute, stationHash, type Route } from './stations/route';
+import { findLecture, LectureList, LecturePlayer } from './lectures/player';
 import { SceneDock } from './stations/station-dock';
 import { Plot } from './plot.tsx';
 import { asciiHistogram, collect, histogram, initialSettings, moments, sources, type Distribution, type RunSettings } from './statistics.ts';
+
+/** Legacy stations take `n` (sample size), `scale` and `dist` (0 normal, 1 uniform, 2 exponential) from the hash, clamped to their sliders. */
+const distributions = Object.keys(sources) as Distribution[];
+const clamp = (v: number, lo: number, hi: number, step: number) => Math.min(hi, Math.max(lo, lo + Math.round((v - lo) / step) * step));
+export function legacySettings(base: RunSettings, seed: number | null, params: Record<string, number>): RunSettings {
+  const out = { ...base };
+  if (seed != null) out.seed = seed;
+  if (Number.isFinite(params.n)) out.count = clamp(params.n, 64, 2048, 64);
+  if (Number.isFinite(params.scale)) out.scale = Number(clamp(params.scale, 0.5, 2.5, 0.05).toFixed(2));
+  if (Number.isInteger(params.dist) && distributions[params.dist]) out.distribution = distributions[params.dist];
+  return out;
+}
+const pinned = (route: Route) => route.seed != null || ['n', 'scale', 'dist'].some((k) => k in route.params);
 import { Button, Panel, PanelHeading, Slider, Stat } from './ui.tsx';
 
 type Phase = 'running' | 'paused' | 'complete';
@@ -242,6 +256,8 @@ function StationApp() {
   const [lastVisited, setLastVisited] = useState<string | undefined>(readLastVisited);
   const settings = results.distribution?.settings ?? initialSettings;
   const station = route.station ? findStation(route.station) ?? null : null;
+  const lecture = route.lecture ? findLecture(route.lecture.n) : null;
+  const back = route.back ? { ...route.back, present: route.present } : null;
 
   const complete = useCallback((id: ModuleId, result: LastResult) => {
     setResults(current => ({ ...current, [id]: result }));
@@ -281,29 +297,46 @@ function StationApp() {
     return () => window.removeEventListener('storage', synchronize);
   }, []);
   useEffect(() => {
-    const title = station?.name ?? (route.drawer === 'notes' ? 'Lab notes' : route.drawer === 'record' ? 'Sample record' : orbits.find(o => o.id === orbit)!.name);
+    const title = station?.name ?? (lecture ? `Lecture ${lecture.lecture}` : route.drawer === 'notes' ? 'Lab notes' : route.drawer === 'record' ? 'Sample record' : route.drawer === 'lectures' ? 'Lectures' : orbits.find(o => o.id === orbit)!.name);
     document.title = title + ' · STATUM LAB';
-  }, [station, route.drawer, orbit]);
+  }, [station, lecture, route.drawer, orbit]);
 
+  const backHash = back ? lectureHash(back) : null;
   const close = useCallback(() => {
-    window.location.hash = orbitHash(orbit);
-  }, [orbit]);
+    // A station opened from a lecture step closes back to that step.
+    window.location.hash = backHash ?? orbitHash(orbit);
+  }, [orbit, backHash]);
 
   let overlay = null;
   if (station) {
-    const lead = <>{station.summary} <span className="dock-lecture">Lecture {station.lectures}</span></>;
+    const legacy = route.seed == null && !pinned(route) ? settings : legacySettings(settings, route.seed, route.params);
+    const lead = <>{station.summary} <span className="dock-lecture">Lecture {station.lectures}</span>
+      {backHash && <a className="dock-back" href={backHash}>← Back to lecture {back!.n}, step {back!.step}</a>}</>;
     overlay = (
       <SceneDock key={station.id} title={station.name} eyebrow={<><i /> STATION · ORBIT {orbits.find(o => o.id === station.orbit)!.numeral}</>} lead={lead} onClose={close} testId="station-dock">
         {station.kind === 'kernel' ? (
           <KernelStation station={station} seed={route.seed ?? DEFAULT_SEED} params={route.params}
-            onState={(seed, params) => { window.location.hash = stationHash(station.id, seed, params); }} />
+            onState={(seed, params) => { window.location.hash = stationHash(station.id, seed, params, back); }} />
         ) : station.module === 'distribution' ? (
-          <Workspace settings={route.seed == null ? settings : { ...settings, seed: route.seed }} onComplete={completeDistribution} />
+          <Workspace settings={legacy} onComplete={completeDistribution} />
         ) : (
-          <MethodPreview id={station.module} activeSettings={route.seed == null ? settings : { ...settings, seed: route.seed }}
-            lastResult={route.seed == null ? results[station.module] : undefined}
+          <MethodPreview id={station.module} activeSettings={legacy}
+            lastResult={pinned(route) ? undefined : results[station.module]}
             onComplete={result => complete(station.module, result)} />
         )}
+      </SceneDock>
+    );
+  } else if (lecture && route.lecture) {
+    overlay = (
+      <SceneDock key="lecture" className="scene-dock--lecture" title={lecture.title} testId="lecture-dock"
+        eyebrow={<><i /> LECTURE {lecture.lecture}{lecture.status !== 'ready' ? ' · DRAFT SCRIPT' : ''}</>} onClose={close}>
+        <LecturePlayer lecture={lecture} step={route.lecture.step} present={route.present} />
+      </SceneDock>
+    );
+  } else if (route.drawer === 'lectures') {
+    overlay = (
+      <SceneDock key="lectures" side="end" title="Lectures" lead="Walk through a lecture step by step and open its experiments." onClose={close} testId="drawer-lectures">
+        <LectureList />
       </SceneDock>
     );
   } else if (route.drawer) {
