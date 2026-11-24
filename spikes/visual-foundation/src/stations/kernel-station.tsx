@@ -4,6 +4,7 @@ import { Button, Panel, PanelHeading, Slider } from '../ui';
 import { isKernel, resolveParams, type Kernel, type KernelResult } from './kernel-contract';
 import type { KernelStation as KernelStationInfo } from './catalog';
 import { Chart } from './chart';
+import { Surface3D } from './surface-3d';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
 const sources = import.meta.glob('../../../*/kernel.mjs');
@@ -64,17 +65,27 @@ function ReadyStation({ station, kernel, seed, params, onState }: {
   const [seedText, setSeedText] = useState(String(seed));
   useEffect(() => setDraft(resolved), [resolved]);
   useEffect(() => setSeedText(String(seed)), [seed]);
+  const live = Boolean(kernel.stations?.[station.id]?.live);
+  // Live stations run on the draft parameters, at most once per animation frame (latest wins).
+  const [liveParams, setLiveParams] = useState(resolved);
+  useEffect(() => {
+    if (!live) return;
+    const frame = requestAnimationFrame(() => setLiveParams(resolveParams(declared, draft)));
+    return () => cancelAnimationFrame(frame);
+  }, [live, declared, draft]);
+  const runParams = live ? liveParams : resolved;
   const validSeed = /^\d{1,10}$/.test(seedText) && Number(seedText) <= 4294967295;
   const result = useMemo<KernelResult | { error: string }>(() => {
     try {
-      const out = kernel.run(resolved, { seed, station: station.id }) as Partial<KernelResult> | null;
+      const out = kernel.run(runParams, { seed, station: station.id }) as Partial<KernelResult> | null;
       if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series))
         return { error: 'The kernel returned no readouts or series.' };
-      return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes };
+      return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface };
     } catch (e) {
       return { error: e instanceof Error ? e.message : String(e) };
     }
-  }, [kernel, resolved, seed, station.id]);
+  }, [kernel, runParams, seed, station.id]);
+  const previewing = live && declared.some((p) => draft[p.key] !== resolved[p.key]);
   const changed = validSeed && (Number(seedText) !== seed || declared.some((p) => draft[p.key] !== resolved[p.key]));
 
   return (
@@ -109,7 +120,9 @@ function ReadyStation({ station, kernel, seed, params, onState }: {
           <p className="station-status" role="alert">The kernel rejected these parameters: {result.error}</p>
         ) : (
           <>
+            {result.surface && <Surface3D surface={result.surface} />}
             {result.series.length > 0 && <Chart series={result.series} xLabel={result.axes?.x} yLabel={result.axes?.y} />}
+            {previewing && <p className="live-note">Live preview — press Run to record these parameters in the link.</p>}
             <table className="readouts" aria-label="Readouts">
               <thead><tr><th scope="col">Quantity</th><th scope="col">Observed</th><th scope="col">Theory</th></tr></thead>
               <tbody>

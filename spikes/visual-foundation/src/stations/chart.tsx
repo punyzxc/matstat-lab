@@ -1,5 +1,7 @@
-import { useId } from 'react';
+import { useId, useMemo } from 'react';
 import type { Series } from './kernel-contract';
+import { lerp, lerpArray } from './surface-math.mjs';
+import { useTween } from './use-tween';
 
 /** "Nice" tick values (1, 2, 2.5, 5 × 10ᵏ) covering [lo, hi]. */
 export function ticks(lo: number, hi: number, target = 5) {
@@ -22,6 +24,42 @@ const tickText = (v: number, step: number) => {
  * Kinds: hist (bars on bin starts), pmf (stems), pdf/cdf/line (polylines), ecdf (steps),
  * points, band (area between y and y2), rule (vertical marker at x[0]). `tone` picks the colour.
  */
+type Frame = { series: Series[]; ext: [number, number, number, number] | null };
+
+/** Axis extents [x0, x1, y0, y1] for a series list, honouring fixed domains; null when there is nothing to plot. */
+function extents(series: Series[], dx?: [number, number], dy?: [number, number]): Frame['ext'] {
+  const finite = (v: number) => Number.isFinite(v);
+  const xs = series.flatMap((s) => s.x).filter(finite);
+  const ys = series.filter((s) => s.kind !== 'rule').flatMap((s) => [...s.y, ...(s.y2 ?? [])]).filter(finite);
+  if (!xs.length) return null;
+  const min = (a: number[], d: number) => a.reduce((m, v) => (v < m ? v : m), a.length ? a[0] : d);
+  const max = (a: number[], d: number) => a.reduce((m, v) => (v > m ? v : m), a.length ? a[0] : d);
+  let [x0, x1] = dx ?? [min(xs, 0), max(xs, 1)];
+  let [y0, y1] = dy ?? [Math.min(0, min(ys, 0)), max(ys, 1)];
+  if (x0 === x1) [x0, x1] = [x0 - 1, x1 + 1];
+  if (y0 === y1) y1 = y0 + 1;
+  if (!dy) y1 += (y1 - y0) * 0.06;
+  return [x0, x1, y0, y1];
+}
+
+const sameShape = (a: Series, b: Series) =>
+  a.id === b.id && a.kind === b.kind && (a.x?.length ?? 0) === (b.x?.length ?? 0) && (a.y?.length ?? 0) === (b.y?.length ?? 0) && (a.y2?.length ?? -1) === (b.y2?.length ?? -1);
+
+/** Series whose id and array lengths match the previous frame glide; the rest snap. Null when nothing can glide. */
+function mixFrame(from: Frame, to: Frame, t: number): Frame | null {
+  if (!from.ext || !to.ext) return null;
+  let any = false;
+  const series = to.series.map((s, i) => {
+    const prev = from.series[i];
+    if (!prev || !sameShape(prev, s)) return s;
+    any = true;
+    return { ...s, x: lerpArray(prev.x, s.x, t), y: lerpArray(prev.y, s.y, t), ...(s.y2 && prev.y2 ? { y2: lerpArray(prev.y2, s.y2, t) } : {}) };
+  });
+  if (!any) return null;
+  const f = from.ext, g = to.ext;
+  return { series, ext: [lerp(f[0], g[0], t), lerp(f[1], g[1], t), lerp(f[2], g[2], t), lerp(f[3], g[3], t)] };
+}
+
 export function Chart({
   series,
   xLabel,
@@ -36,19 +74,17 @@ export function Chart({
   domain?: { x?: [number, number]; y?: [number, number] };
 }) {
   const clip = useId();
+  const dx0 = domain?.x?.[0], dx1 = domain?.x?.[1], dy0 = domain?.y?.[0], dy1 = domain?.y?.[1];
+  const target = useMemo<Frame>(
+    () => ({ series, ext: extents(series, dx0 == null || dx1 == null ? undefined : [dx0, dx1], dy0 == null || dy1 == null ? undefined : [dy0, dy1]) }),
+    [series, dx0, dx1, dy0, dy1],
+  );
+  const shown = useTween(target, mixFrame);
   const W = 680, H = height, L = 52, R = 14, T = yLabel ? 24 : 12, B = xLabel ? 42 : 28;
   const finite = (v: number) => Number.isFinite(v);
-  const xs = series.flatMap((s) => s.x).filter(finite);
-  const ys = series.filter((s) => s.kind !== 'rule').flatMap((s) => [...s.y, ...(s.y2 ?? [])]).filter(finite);
-  if (!xs.length) return <p className="chart-empty">No data to plot yet.</p>;
-  const min = (a: number[], d: number) => a.reduce((m, v) => (v < m ? v : m), a.length ? a[0] : d);
-  const max = (a: number[], d: number) => a.reduce((m, v) => (v > m ? v : m), a.length ? a[0] : d);
-  let [x0, x1] = domain?.x ?? [min(xs, 0), max(xs, 1)];
-  let [y0, y1] = domain?.y ?? [Math.min(0, min(ys, 0)), max(ys, 1)];
-  if (x0 === x1) [x0, x1] = [x0 - 1, x1 + 1];
-  if (y0 === y1) y1 = y0 + 1;
-  const pad = (y1 - y0) * 0.06;
-  if (!domain?.y) y1 += pad;
+  if (!shown.ext) return <p className="chart-empty">No data to plot yet.</p>;
+  const [x0, x1, y0, y1] = shown.ext;
+  series = shown.series;
   const xt = ticks(x0, x1, 6), yt = ticks(y0, y1, 4);
   const xs_ = xt.length > 1 ? xt[1] - xt[0] : 1, ys_ = yt.length > 1 ? yt[1] - yt[0] : 1;
   const sx = (x: number) => L + ((x - x0) / (x1 - x0)) * (W - L - R);
