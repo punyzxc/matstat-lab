@@ -113,6 +113,8 @@ export function betaI(a, b, x, y = 1 - x) {
 // erfc through the incomplete gamma identity erfc(z) = Q(1/2, z^2) for z >= 0.
 export function erfc(z) {
   if (z === 0) return 1;
+  // Beyond |z| = 40 erfc is 0 or 2 in double precision; z * z would overflow for huge z.
+  if (Math.abs(z) > 40) return z > 0 ? 0 : 2;
   const q = gammaPQ(0.5, z * z);
   return z > 0 ? q.Q : 1 + q.P;
 }

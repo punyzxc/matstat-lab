@@ -140,3 +140,11 @@ test('AC3: unit-width integer bins make a discrete histogram height equal relati
   // The discrete ECDF jumps at the support points and is flat between them (right-continuous).
   assert.deepEqual(ecdf(draws), { x: [0, 1, 2, 3], p: [1 / 8, 3 / 8, 6 / 8, 1] });
 });
+
+test('Normal CDF and SF reach their limits at infinite and huge arguments instead of NaN', () => {
+  const d = create('normal', { mu: 0, sigma: 1 });
+  for (const x of [Infinity, 1e200, 50]) {
+    assert.equal(d.cdf(x), 1); assert.equal(d.sf(x), 0);
+    assert.equal(d.cdf(-x), 0); assert.equal(d.sf(-x), 1);
+  }
+});
