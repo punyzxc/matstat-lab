@@ -20,6 +20,7 @@ Research for `lecture-random-vectors` (#44). Owner: punyzxc (Claude executor). D
 
 ### Moments (L5 §Main laws, L6 §Expectation … kurtosis, §3σ rule)
 
+- Display ranges and bin counts are fixed per law over the whole slider span, so moving σ or λ visibly changes the shape (a scale-only change with an auto-scaled axis would look identical). Draws outside the fixed range are counted in every readout and reported in a note.
 - Six laws: Bernoulli(p), Binomial(m, p), Poisson(λ), Uniform[−σ√3, σ√3], Exponential(λ), Normal(0, σ).
 - Readouts, theory next to sample: Mξ, Dξ, σ, median, mode, skewness Sk, excess kurtosis Ek, and P(|ξ − Mξ| < kσ) for k = 1…4.
 - **Fact (tested).** The closed forms in the kernel agree with direct summation of the PMF and with Simpson quadrature of the density to 1e-6 or better, for all six laws. For the normal law Ek = 0 exactly.
@@ -81,6 +82,8 @@ Research for `lecture-random-vectors` (#44). Owner: punyzxc (Claude executor). D
 | L6 Table 3, k = 4 | 0.9997 | 0.999937 | Exact value; note names 0.9997 |
 | L6 Table 3, "%" column | 32 %, 5 %, 0.7 %, 0.07 % outside | 31.7 %, 4.6 %, 0.27 %, 0.0063 % | Note gives the correct shares |
 | L6 lottery | "M + D = 1 + 1 = 2 prizes" | Mean plus variance mixes units; the usual allowance is M + σ. It is the same number only because D = σ = 1 | Note explains |
+
+**Assumption.** The Table 3 entries were read from text extracted from the lecture PDF; the owner should confirm the 4σ entry and the "%" column against the printed page before the lab quotes them as the lecture's values.
 
 All of these were checked with exact computation in the tests (erf by its convergent series, cross-checked against Simpson quadrature and 12-digit reference values).
 

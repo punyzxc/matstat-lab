@@ -21,10 +21,17 @@ test('Scatter shows a rotatable joint-density surface that follows ρ', async ({
 test('Moments curves morph while the σ slider moves, and the link updates only on Run', async ({ page }) => {
   await page.goto('/#station/moments?seed=3');
   const curve = page.locator('.chart-series--pdf').first();
-  const before = await curve.getAttribute('d');
+  // Width at half height of the drawn bell, in screen pixels: a real change of shape, not path noise.
+  const halfWidth = () => curve.evaluate((path) => {
+    const pts = [...path.getAttribute('d').matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map((m) => [+m[1], +m[2]]);
+    const top = Math.min(...pts.map((p) => p[1])), base = Math.max(...pts.map((p) => p[1]));
+    const above = pts.filter((p) => p[1] < (top + base) / 2).map((p) => p[0]);
+    return Math.max(...above) - Math.min(...above);
+  });
+  const before = await halfWidth();
   await page.locator('#p-sigma').focus();
-  await page.keyboard.press('ArrowRight');
-  await expect.poll(() => curve.getAttribute('d')).not.toBe(before);
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight');
+  await expect.poll(halfWidth).toBeGreaterThan(before + 20);
   await page.getByRole('button', { name: /Run With These Parameters/ }).click();
-  await expect(page).toHaveURL(/sigma=1\.1/);
+  await expect(page).toHaveURL(/sigma=1\.5/);
 });

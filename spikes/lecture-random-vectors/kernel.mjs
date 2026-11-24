@@ -57,7 +57,7 @@ export function makeLaw(index, { p, m, lambda, sigma }) {
     };
   }
   if (index === 2) {
-    const top = Math.ceil(lambda + 12 * Math.sqrt(lambda) + 12);
+    const top = Math.ceil(Math.max(lambda + 12 * Math.sqrt(lambda) + 12, 30));
     const support = Array.from({ length: top + 1 }, (_, k) => k);
     const pmf = [Math.exp(-lambda)];
     for (let k = 0; k < top; k++) pmf.push((pmf[k] * lambda) / (k + 1));
@@ -77,23 +77,23 @@ export function makeLaw(index, { p, m, lambda, sigma }) {
   if (index === 3) {
     const h = sigma * Math.sqrt(3); // uniform on [−h, h] with standard deviation σ
     return {
-      name: `Uniform[−${r6(h)}, ${r6(h)}] (σ = ${sigma})`, discrete: false, range: [-1.25 * h, 1.25 * h],
+      name: `Uniform[−${r6(h)}, ${r6(h)}] (σ = ${sigma})`, discrete: false, range: [-6.5, 6.5], bins: 65,
       pdf: (x) => (Math.abs(x) <= h ? 1 / (2 * h) : 0), cdf: (x) => Math.min(1, Math.max(0, (x + h) / (2 * h))),
       mean: 0, variance: sigma * sigma, skew: 0, exkurt: -6 / 5, median: 0, mode: 'every point of [−h, h]',
-      pdfPolyline: () => ({ x: [-1.25 * h, -h, -h, h, h, 1.25 * h], y: [0, 0, 1 / (2 * h), 1 / (2 * h), 0, 0] }),
+      pdfPolyline: () => ({ x: [-6.5, -h, -h, h, h, 6.5], y: [0, 0, 1 / (2 * h), 1 / (2 * h), 0, 0] }),
       sample: (seed, i) => -h + 2 * h * uni(seed, 40, i),
     };
   }
   if (index === 4) {
     return {
-      name: `Exponential(λ = ${lambda})`, discrete: false, range: [0, 7 / lambda],
+      name: `Exponential(λ = ${lambda})`, discrete: false, range: [0, 10], bins: 100,
       pdf: (x) => (x < 0 ? 0 : lambda * Math.exp(-lambda * x)), cdf: (x) => (x < 0 ? 0 : 1 - Math.exp(-lambda * x)),
       mean: 1 / lambda, variance: 1 / lambda ** 2, skew: 2, exkurt: 6, median: Math.LN2 / lambda, mode: [0],
       sample: (seed, i) => -Math.log(uni(seed, 50, i)) / lambda,
     };
   }
   return {
-    name: `Normal(a = 0, σ = ${sigma})`, discrete: false, range: [-4 * sigma, 4 * sigma],
+    name: `Normal(a = 0, σ = ${sigma})`, discrete: false, range: [-9, 9], bins: 90,
     pdf: (x) => normPdf(x / sigma) / sigma, cdf: (x) => Phi(x / sigma),
     mean: 0, variance: sigma * sigma, skew: 0, exkurt: 0, median: 0, mode: [0],
     sample: (seed, i) => sigma * gauss(seed, 60, i),
@@ -170,11 +170,12 @@ function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
   const sorted = [...xs].sort((a, b) => a - b);
   const sd = Math.sqrt(law.variance);
   const series = [];
-  let medTheory, medConvention, modeObserved;
+  let medTheory, medConvention, modeObserved, extraNote;
   if (law.discrete) {
     const freq = law.support.map(() => 0);
     for (const x of xs) freq[x]++;
-    const shown = law.support.filter((k, i) => i <= law.mean + 6 * sd + 2 || law.pmf[i] > 1e-4);
+    // Fixed support per law (Poisson: 0…27, enough for λ ≤ 8), so bars glide as the parameter moves.
+    const shown = law.support.filter((k) => k <= 27);
     series.push({ id: 'freq', kind: 'hist', label: 'Sample frequency nₖ/n', x: shown.map((k) => k - 0.5), y: shown.map((k) => freq[k] / n) });
     series.push({ id: 'pmf', kind: 'pmf', tone: 'signal', label: 'P(ξ = k)', x: shown, y: shown.map((k) => law.pmf[k]) });
     const best = Math.max(...freq);
@@ -183,7 +184,7 @@ function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
     medTheory = med.value;
     medConvention = med.flat ? 'F(x) = 1/2 on a whole step: every point up to the next value is a median; shown is the smallest' : 'smallest x with F(x) ≥ 1/2';
   } else {
-    const [lo, hi] = law.range, bins = 40;
+    const [lo, hi] = law.range, bins = law.bins;
     const h = histogram(xs, lo, hi, bins);
     series.push({ id: 'hist', kind: 'hist', label: 'Sample histogram (density scale)', x: h.x, y: h.y });
     const curve = law.pdfPolyline ? law.pdfPolyline() : (() => { const x = grid(lo, hi, 241); return { x, y: x.map(law.pdf) }; })();
@@ -191,6 +192,7 @@ function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
     const top = h.counts.indexOf(Math.max(...h.counts));
     modeObserved = r6(lo + (top + 0.5) * h.w);
     medTheory = law.median;
+    if (h.outside) extraNote = `${h.outside} of ${n} draws fall outside the fixed display range [${lo}, ${hi}]; the readouts use all of them.`;
     medConvention = 'F(x) = 1/2';
   }
   series.push({ id: 'sigma-rules', kind: 'rule', tone: 'muted', label: 'M ± σ, 2σ, 3σ', x: [-3, -2, -1, 1, 2, 3].map((k) => law.mean + k * sd), y: [] });
@@ -202,7 +204,7 @@ function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
     { key: 'variance', label: 'Variance Dξ', observed: r6(sm.s2), theory: r6(law.variance), convention: 's², divisor n − 1' },
     { key: 'sd', label: 'Standard deviation σ', observed: r6(Math.sqrt(sm.s2)), theory: r6(sd) },
     { key: 'median', label: 'Median', observed: r6(sampleMedian(sorted)), theory: r6(medTheory), convention: medConvention },
-    { key: 'mode', label: 'Mode', observed: modeObserved, theory: modeText(law.mode), convention: law.discrete ? 'most frequent sample value' : 'centre of the tallest of 40 histogram bins' },
+    { key: 'mode', label: 'Mode', observed: modeObserved, theory: modeText(law.mode), convention: law.discrete ? 'most frequent sample value' : `centre of the tallest of ${law.bins} histogram bins` },
     { key: 'skew', label: 'Skewness Sk = μ₃/σ³', observed: r6(sm.skew), theory: r6(law.skew), convention: 'm₃/m₂^1.5, central moments with divisor n' },
     { key: 'exkurt', label: 'Excess kurtosis Ek = μ₄/σ⁴ − 3', observed: r6(sm.exkurt), theory: r6(law.exkurt), convention: 'm₄/m₂² − 3, divisor n' },
   ];
@@ -215,6 +217,7 @@ function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
   ];
   if (li === 5) notes.push('L6 Table 3 prints 0.9997 for 4σ; the exact value is 0.99994. Its "% outside" column (32 %, 5 %, 0.7 %, 0.07 %) should read 31.7 %, 4.6 %, 0.27 %, 0.006 %.');
   if (li !== 5) notes.push('The 3σ rule is a property of the normal law. For this law the exact share inside 3σ is shown in the table and may differ from 0.9973.');
+  if (extraNote) notes.push(extraNote);
   if (law.discrete) notes.push('For a discrete law the bars are sample frequencies at each value k, the stems are P(ξ = k).');
   return { axes: { x: 'value x', y: law.discrete ? 'probability' : 'density f(x)' }, readouts, series, notes };
 }
@@ -238,14 +241,14 @@ export function makeTransform({ phi, alpha, b, beta, lambda, sigma }) {
     const s = Math.abs(alpha) * sigma;
     return {
       name: `η = ${alpha}ξ ${b < 0 ? '−' : '+'} ${Math.abs(b)}, ξ ~ N(0, ${sigma})`, source: 'normal',
-      map: (x) => alpha * x + b, range: [b - 4 * s, b + 4 * s],
+      map: (x) => alpha * x + b, range: [-8, 8],
       pdf: (y) => normPdf((y - b) / alpha / sigma) / sigma / Math.abs(alpha),
       cdf: (y) => Phi((y - b) / s), mean: b,
     };
   }
   if (phi === 1)
     return {
-      name: `η = e^ξ, ξ ~ N(0, ${sigma})`, source: 'normal', map: Math.exp, range: [0, Math.exp(2.6 * sigma)],
+      name: `η = e^ξ, ξ ~ N(0, ${sigma})`, source: 'normal', map: Math.exp, range: [0, 6],
       pdf: (y) => (y <= 0 ? 0 : normPdf(Math.log(y) / sigma) / (sigma * y)), cdf: (y) => (y <= 0 ? 0 : Phi(Math.log(y) / sigma)),
       mean: Math.exp((sigma * sigma) / 2),
     };
@@ -257,9 +260,8 @@ export function makeTransform({ phi, alpha, b, beta, lambda, sigma }) {
       mean: lambda / (lambda + beta), unboundedAtZero: g < 1,
     };
   }
-  const top = (Math.log(100) / lambda) ** 2;
   return {
-    name: `η = ξ², ξ ~ Exp(${lambda}) (monotone on ξ ≥ 0)`, source: 'exponential', map: (x) => x * x, range: [0, top],
+    name: `η = ξ², ξ ~ Exp(${lambda}) (monotone on ξ ≥ 0)`, source: 'exponential', map: (x) => x * x, range: [0, 6],
     pdf: (y) => (y <= 0 ? 0 : (lambda * Math.exp(-lambda * Math.sqrt(y))) / (2 * Math.sqrt(y))),
     cdf: (y) => (y <= 0 ? 0 : 1 - Math.exp(-lambda * Math.sqrt(y))), mean: 2 / lambda ** 2, unboundedAtZero: true,
   };
