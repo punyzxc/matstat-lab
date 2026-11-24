@@ -21,9 +21,11 @@ test('orbital previews use independent saved samples and label unsaved sample pr
   );
   await page.goto('/');
 
-  const windows = page.locator('a.orbit-preview');
-  await expect(windows).toHaveCount(6);
+  const windows = page.locator('a.orbit-preview[data-module]');
+  const orbitOf = { distribution: 'II Random variables', convergence: 'III Limit theorems' };
+  await expect(page.getByRole('link', { name: 'IV Statistics' })).toHaveAttribute('aria-current', 'true');
   for (const [id, run] of Object.entries(snapshots)) {
+    await page.getByRole('link', { name: orbitOf[id] ?? 'IV Statistics' }).click();
     const window = windows.and(page.locator(`[data-module="${id}"]`));
     await expect(window).toHaveAttribute('data-saved', 'true');
     await expect(window).toHaveAttribute('data-motion', 'false');
@@ -42,6 +44,7 @@ test('orbital previews use independent saved samples and label unsaved sample pr
       await expect(window.locator('.orbit-preview-value')).toHaveText(probability);
     }
   }
+  await page.getByRole('link', { name: 'IV Statistics' }).click();
   const lastOpened = windows.and(page.locator('[data-module="confidence"]'));
   await expect(lastOpened).toHaveAccessibleName(/Last opened/);
   const randomness = windows.and(page.locator('[data-module="randomness"]'));
@@ -49,5 +52,5 @@ test('orbital previews use independent saved samples and label unsaved sample pr
   await expect(randomness).toHaveAccessibleName(/Randomness.*Seeded preview/);
   await randomness.focus();
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(/#module\/randomness$/);
+  await expect(page).toHaveURL(/#station\/randomness$/);
 });

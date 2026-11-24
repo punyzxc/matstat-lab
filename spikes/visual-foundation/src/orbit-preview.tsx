@@ -361,7 +361,7 @@ export function OrbitPreview({
   const valueLabel = `${data.measure}: ${data.format(data.values)}`;
   return (
     <a
-      href={`#module/${module.id}`}
+      href={`#station/${module.id}`}
       className="orbit-preview"
       data-active={active}
       data-motion={animate}

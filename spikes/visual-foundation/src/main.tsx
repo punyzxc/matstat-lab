@@ -7,16 +7,19 @@ import { createRoot } from 'react-dom/client';
 import * as Tabs from '@radix-ui/react-tabs';
 import { MotionConfig, motion } from 'motion/react';
 import {
-  Activity, ArrowDownToLine, ArrowLeft, ChevronDown, CircleHelp,
+  Activity, ArrowDownToLine, ChevronDown, CircleHelp,
   Maximize, Minimize, Pause, Play, RotateCcw, SlidersHorizontal,
 } from 'lucide-react';
-import { Observatory } from './observatory';
+import { Observatory, SampleRecord } from './observatory';
 import { MethodPreview } from './method-preview';
 import { historyPrefix, readLastResults, readLastVisited, writeLastResult, writeLastVisited, type LastResult } from './last-results';
 import { useStationReducedMotion } from './motion-preference';
-import { modules, type ModuleId } from './modules';
-import { LabHeader, LabFooter } from './lab-shell';
-import { PlateGlyph } from './plate-glyph';
+import type { ModuleId } from './modules';
+import { LabNotesContent } from './lab-shell';
+import { findStation, orbitOfModule, orbits, type OrbitId } from './stations/catalog';
+import { KernelStation } from './stations/kernel-station';
+import { orbitHash, parseRoute, stationHash, type Route } from './stations/route';
+import { SceneDock } from './stations/station-dock';
 import { Plot } from './plot.tsx';
 import { asciiHistogram, collect, histogram, initialSettings, moments, sources, type Distribution, type RunSettings } from './statistics.ts';
 import { Button, Panel, PanelHeading, Slider, Stat } from './ui.tsx';
@@ -112,131 +115,133 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
   const status = busy ? 'Running simulation' : run.phase === 'paused' ? 'Simulation paused' : `${number.format(run.shown)} observations complete`;
   const actionText = busy ? 'Pause simulation' : run.phase === 'paused' ? 'Resume simulation' : 'Run simulation';
 
-  return <div className={projector ? 'app app--projector' : 'app'}>
-    <a className="skip" href="#workspace" onClick={e=>{e.preventDefault();document.getElementById('workspace')?.focus();}}>Skip to experiment</a>
-    <LabHeader action={<Button variant="ghost" aria-pressed={projector} onClick={()=>setProjector(!projector)} aria-label="Projector" title="Toggle projector mode">
-      {projector ? <Minimize size={14}/> : <Maximize size={14}/>}<span>Projector</span></Button>}/>
-    <div className="shell">
-      <main id="workspace" tabIndex={-1} className="lab-spread">
-        <a href="#observatory" className="backlink"><ArrowLeft size={14}/>Orbital laboratory</a>
-        <div className="method-intro"><div><div className="edition"><i/> EXPERIMENT 01</div>
-          <h1>Distribution Explorer</h1><p>Draw a random sample and compare it with the theoretical distribution.</p></div>
-          <PlateGlyph id="distribution"/></div>
+  return <div id="workspace" className={projector ? 'station-legacy app--projector' : 'station-legacy'}>
+    <div className="workspace-title">
+      <h2>Experiment workspace</h2>
+      <span className="workspace-actions"><Button variant="ghost" aria-pressed={projector} onClick={()=>setProjector(!projector)} title="Toggle projector mode">
+          {projector ? <Minimize size={14} aria-hidden/> : <Maximize size={14} aria-hidden/>}<span>Projector</span></Button>
+        <Button onClick={download} disabled={!sample.length} aria-label="Export CSV"><ArrowDownToLine size={15} aria-hidden /> {exported ? 'Exported' : 'Export CSV'}</Button></span>
+    </div>
 
-        <div className="workspace-title">
-          <h2>Experiment workspace</h2>
-          <Button onClick={download} disabled={!sample.length} aria-label="Export CSV"><ArrowDownToLine size={15} aria-hidden /> {exported ? 'Exported' : 'Export CSV'}</Button>
-        </div>
-
-        <div className="instrument-grid">
-          <Panel label="Simulation parameters" className="parameters">
-            <PanelHeading icon={<SlidersHorizontal size={16} aria-hidden />} title="Parameters" />
-            <div className="parameter-body">
-              <label htmlFor="distribution">Distribution</label>
-              <div className="select-field">
-                <select id="distribution" name="distribution" value={draft.distribution} disabled={run.phase !== 'complete'}
-                  onChange={event => setDraft({ ...draft, distribution: event.currentTarget.value as Distribution })}>
-                  {Object.entries(sources).map(([key, source]) => <option key={key} value={key}>{source.label}</option>)}
-                </select>
-                <ChevronDown size={16} aria-hidden />
-              </div>
-              <fieldset disabled={run.phase !== 'complete'} aria-label="Sample parameters">
-                <Slider id="sample-size" label="Sample size" value={draft.count} display={number.format(draft.count)}
-                  min={64} max={2048} step={64} onChange={count => setDraft({ ...draft, count })} />
-                <Slider id="distribution-scale" label={sources[draft.distribution].parameter} value={draft.scale}
-                  display={draft.scale.toFixed(2)} min={0.5} max={2.5} step={0.05} onChange={scale => setDraft({ ...draft, scale })} />
-                <div className="seed-field">
-                  <label htmlFor="seed">Random seed</label>
-                  <input inputMode="numeric" id="seed" name="seed" autoComplete="off" value={seedText}
-                    aria-invalid={!validSeed} aria-describedby={!validSeed ? 'seed-error' : undefined}
-                    onChange={event => setSeedText(event.currentTarget.value)} />
-                  {!validSeed && <small id="seed-error">Enter an integer from 0 to 4,294,967,295.</small>}
-                </div>
-              </fieldset>
-            </div>
-            <div className="parameter-actions">
-              <Button variant="primary" disabled={run.phase === 'complete' && !validSeed} onClick={action}>
-                {busy ? <Pause size={16} aria-hidden /> : <Play size={16} aria-hidden />}{actionText}
-              </Button>
-              <Button aria-label="Reset parameters and run" title="Reset parameters and run" onClick={reset}><RotateCcw size={16} aria-hidden /></Button>
-            </div>
-            <div className="run-meta">
-              <span className={busy ? 'signal signal--active' : 'signal'} />
-              <span role="status">{status}</span>
-              {draftChanged && run.phase === 'complete' && <span className="pending">Parameters changed</span>}
-            </div>
-            {run.phase !== 'complete' && <progress aria-label="Simulation progress" max={run.settings.count} value={run.shown} />}
-          </Panel>
-
-          <Panel label="Experiment output" className="outputs">
-            <Tabs.Root value={mode} onValueChange={value => setMode(value as (typeof modes)[number])}>
-              <PanelHeading icon={<Activity size={17} aria-hidden />} title="Distribution output"
-                trailing={<Tabs.List aria-label="Data view" className="tabs">{modes.map(item => <Tabs.Trigger key={item} value={item}>{item}</Tabs.Trigger>)}</Tabs.List>} />
-              <div className="plot-toolbar">
-                <span className="plot-model">{run.settings.distribution === 'normal' ? 'Normal' : model.label} distribution <b>{model.notation}</b></span>
-                <label className="theory-toggle">
-                  <input type="checkbox" checked={theory} disabled={mode === 'ASCII'} onChange={event => setTheory(event.currentTarget.checked)} />
-                  <span aria-hidden /><span>Theory overlay</span>
-                </label>
-              </div>
-              {modes.map(item => <Tabs.Content key={item} value={item} className="tab-content">
-                <motion.div initial={reduced ? false : { opacity: 0.45 }} animate={{ opacity: 1 }} transition={{ duration: reduced ? 0 : 0.16 }}>
-                  <p className="plot-axis">{item === 'Histogram' && run.phase !== 'complete' ? 'Accumulating density · count / (target n × bin width)' : guide[item]}</p>
-                  {item === 'ASCII' ?
-                    <div className="ascii"><pre aria-hidden data-testid="ascii-data">{asciiHistogram(hist.counts, 12, Math.max(1, ...finalBins.counts))}</pre>
-                      <p>Bin counts · {number.format(sample.length)} observations</p></div>
-                    : <Plot sample={sample} settings={run.settings} mode={item === 'ECDF' ? 'ecdf' : 'histogram'} showTheory={theory} densityPeak={densityPeak} />}
-                </motion.div>
-              </Tabs.Content>)}
-              <div className="chart-legend">
-                <span><i /> Observed sample</span>
-                {theory && mode !== 'ASCII' && <span><i className="line-key" /> Theoretical model</span>}
-                {hist.outside > 0 && <span>{hist.outside} outside visible range</span>}
-              </div>
-            </Tabs.Root>
-            <dl className="stats">
-              <Stat label="Sample mean" actual={fixed(summary?.mean)} theoretical={fixed(theoreticalMean)} id="sample-mean" />
-              <Stat label="Sample variance" actual={fixed(summary?.variance)} theoretical={fixed(theoreticalVariance)} />
-              <Stat label="Std. deviation" actual={fixed(summary?.deviation)} theoretical={fixed(Math.sqrt(theoreticalVariance))} />
-              <Stat label="Observations" referenceLabel="Target" actual={number.format(sample.length)} theoretical={number.format(run.settings.count)} />
-            </dl>
-          </Panel>
-        </div>
-
-        <Panel label="Theory and bin data" className="theory-panel">
-          <PanelHeading icon={<CircleHelp size={16} aria-hidden />} title="Reading the experiment" />
-          <div className="theory-body">
-            <div><p>{model.description}</p><p>Sample variance uses n − 1. The histogram, empirical CDF and ASCII view all use the same seed and observations.</p>{run.settings.distribution === 'normal' && <p>The normal CDF uses a numerical approximation.</p>}</div>
-            <details>
-              <summary>View bin data</summary>
-              <div className="table-scroll">
-                <table aria-label="Histogram bins"><thead><tr><th scope="col">Range</th><th scope="col">Count</th><th scope="col">Density</th></tr></thead>
-                  <tbody>{hist.counts.map((count, index) => {
-                    const lo = domain[0] + hist.width * index;
-                    return <tr key={index}><th scope="row">{fixed(lo)} – {fixed(lo + hist.width)}</th><td>{count}</td><td>{fixed(hist.density[index])}</td></tr>;
-                  })}</tbody>
-                </table>
-              </div>
-            </details>
+    <div className="instrument-grid">
+      <Panel label="Simulation parameters" className="parameters">
+        <PanelHeading icon={<SlidersHorizontal size={16} aria-hidden />} title="Parameters" />
+        <div className="parameter-body">
+          <label htmlFor="distribution">Distribution</label>
+          <div className="select-field">
+            <select id="distribution" name="distribution" value={draft.distribution} disabled={run.phase !== 'complete'}
+              onChange={event => setDraft({ ...draft, distribution: event.currentTarget.value as Distribution })}>
+              {Object.entries(sources).map(([key, source]) => <option key={key} value={key}>{source.label}</option>)}
+            </select>
+            <ChevronDown size={16} aria-hidden />
           </div>
-        </Panel>
-      </main>
-    </div><LabFooter/>
+          <fieldset disabled={run.phase !== 'complete'} aria-label="Sample parameters">
+            <Slider id="sample-size" label="Sample size" value={draft.count} display={number.format(draft.count)}
+              min={64} max={2048} step={64} onChange={count => setDraft({ ...draft, count })} />
+            <Slider id="distribution-scale" label={sources[draft.distribution].parameter} value={draft.scale}
+              display={draft.scale.toFixed(2)} min={0.5} max={2.5} step={0.05} onChange={scale => setDraft({ ...draft, scale })} />
+            <div className="seed-field">
+              <label htmlFor="seed">Random seed</label>
+              <input inputMode="numeric" id="seed" name="seed" autoComplete="off" value={seedText}
+                aria-invalid={!validSeed} aria-describedby={!validSeed ? 'seed-error' : undefined}
+                onChange={event => setSeedText(event.currentTarget.value)} />
+              {!validSeed && <small id="seed-error">Enter an integer from 0 to 4,294,967,295.</small>}
+            </div>
+          </fieldset>
+        </div>
+        <div className="parameter-actions">
+          <Button variant="primary" disabled={run.phase === 'complete' && !validSeed} onClick={action}>
+            {busy ? <Pause size={16} aria-hidden /> : <Play size={16} aria-hidden />}{actionText}
+          </Button>
+          <Button aria-label="Reset parameters and run" title="Reset parameters and run" onClick={reset}><RotateCcw size={16} aria-hidden /></Button>
+        </div>
+        <div className="run-meta">
+          <span className={busy ? 'signal signal--active' : 'signal'} />
+          <span role="status">{status}</span>
+          {draftChanged && run.phase === 'complete' && <span className="pending">Parameters changed</span>}
+        </div>
+        {run.phase !== 'complete' && <progress aria-label="Simulation progress" max={run.settings.count} value={run.shown} />}
+      </Panel>
+
+      <Panel label="Experiment output" className="outputs">
+        <Tabs.Root value={mode} onValueChange={value => setMode(value as (typeof modes)[number])}>
+          <PanelHeading icon={<Activity size={17} aria-hidden />} title="Distribution output"
+            trailing={<Tabs.List aria-label="Data view" className="tabs">{modes.map(item => <Tabs.Trigger key={item} value={item}>{item}</Tabs.Trigger>)}</Tabs.List>} />
+          <div className="plot-toolbar">
+            <span className="plot-model">{run.settings.distribution === 'normal' ? 'Normal' : model.label} distribution <b>{model.notation}</b></span>
+            <label className="theory-toggle">
+              <input type="checkbox" checked={theory} disabled={mode === 'ASCII'} onChange={event => setTheory(event.currentTarget.checked)} />
+              <span aria-hidden /><span>Theory overlay</span>
+            </label>
+          </div>
+          {modes.map(item => <Tabs.Content key={item} value={item} className="tab-content">
+            <motion.div initial={reduced ? false : { opacity: 0.45 }} animate={{ opacity: 1 }} transition={{ duration: reduced ? 0 : 0.16 }}>
+              <p className="plot-axis">{item === 'Histogram' && run.phase !== 'complete' ? 'Accumulating density · count / (target n × bin width)' : guide[item]}</p>
+              {item === 'ASCII' ?
+                <div className="ascii"><pre aria-hidden data-testid="ascii-data">{asciiHistogram(hist.counts, 12, Math.max(1, ...finalBins.counts))}</pre>
+                  <p>Bin counts · {number.format(sample.length)} observations</p></div>
+                : <Plot sample={sample} settings={run.settings} mode={item === 'ECDF' ? 'ecdf' : 'histogram'} showTheory={theory} densityPeak={densityPeak} />}
+            </motion.div>
+          </Tabs.Content>)}
+          <div className="chart-legend">
+            <span><i /> Observed sample</span>
+            {theory && mode !== 'ASCII' && <span><i className="line-key" /> Theoretical model</span>}
+            {hist.outside > 0 && <span>{hist.outside} outside visible range</span>}
+          </div>
+        </Tabs.Root>
+        <dl className="stats">
+          <Stat label="Sample mean" actual={fixed(summary?.mean)} theoretical={fixed(theoreticalMean)} id="sample-mean" />
+          <Stat label="Sample variance" actual={fixed(summary?.variance)} theoretical={fixed(theoreticalVariance)} />
+          <Stat label="Std. deviation" actual={fixed(summary?.deviation)} theoretical={fixed(Math.sqrt(theoreticalVariance))} />
+          <Stat label="Observations" referenceLabel="Target" actual={number.format(sample.length)} theoretical={number.format(run.settings.count)} />
+        </dl>
+      </Panel>
+    </div>
+
+    <Panel label="Theory and bin data" className="theory-panel">
+      <PanelHeading icon={<CircleHelp size={16} aria-hidden />} title="Reading the experiment" />
+      <div className="theory-body">
+        <div><p>{model.description}</p><p>Sample variance uses n − 1. The histogram, empirical CDF and ASCII view all use the same seed and observations.</p>{run.settings.distribution === 'normal' && <p>The normal CDF uses a numerical approximation.</p>}</div>
+        <details>
+          <summary>View bin data</summary>
+          <div className="table-scroll">
+            <table aria-label="Histogram bins"><thead><tr><th scope="col">Range</th><th scope="col">Count</th><th scope="col">Density</th></tr></thead>
+              <tbody>{hist.counts.map((count, index) => {
+                const lo = domain[0] + hist.width * index;
+                return <tr key={index}><th scope="row">{fixed(lo)} – {fixed(lo + hist.width)}</th><td>{count}</td><td>{fixed(hist.density[index])}</td></tr>;
+              })}</tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </Panel>
   </div>;
 }
 
-function readModuleRoute(): ModuleId | null {
-  const hash = window.location.hash;
-  if (hash === '#workspace') return 'distribution';
-  return modules.find(m => hash === '#module/' + m.id)?.id ?? null;
-}
+const DEFAULT_SEED = 2048;
+const orbitKey = 'statum-lab:orbit';
+const readOrbit = (): OrbitId => {
+  try {
+    const v = localStorage.getItem(orbitKey);
+    if (orbits.some((o) => o.id === v)) return v as OrbitId;
+    const last = readLastVisited();
+    return last ? orbitOfModule(last) : 'variables';
+  } catch {
+    return 'variables';
+  }
+};
 
+/** The program: one scene. The URL hash decides which orbit is shown and what is open inside the scene. */
 function StationApp() {
-  const [route, setRoute] = useState(readModuleRoute);
-  const [selected, setSelected] = useState<ModuleId>(() => readModuleRoute() ?? readLastVisited() ?? 'distribution');
+  const [route, setRoute] = useState<Route>(() => parseRoute(window.location.hash));
+  const [orbit, setOrbit] = useState<OrbitId>(() => {
+    const station = route.station ? findStation(route.station) : null;
+    return station?.orbit ?? route.orbit ?? readOrbit();
+  });
   const [results, setResults] = useState(readLastResults);
-  const [lastVisited, setLastVisited] = useState(readLastVisited);
+  const [lastVisited, setLastVisited] = useState<string | undefined>(readLastVisited);
   const settings = results.distribution?.settings ?? initialSettings;
+  const station = route.station ? findStation(route.station) ?? null : null;
 
   const complete = useCallback((id: ModuleId, result: LastResult) => {
     setResults(current => ({ ...current, [id]: result }));
@@ -247,11 +252,24 @@ function StationApp() {
   }, [complete]);
 
   useEffect(() => {
-    if (!route) return;
-    setLastVisited(route);
-    writeLastVisited(route);
-  }, [route]);
-
+    const navigate = () => {
+      const next = parseRoute(window.location.hash);
+      setRoute(next);
+      const s = next.station ? findStation(next.station) : null;
+      if (s) setOrbit(s.orbit);
+      else if (next.orbit) setOrbit(next.orbit);
+    };
+    window.addEventListener('hashchange', navigate);
+    return () => window.removeEventListener('hashchange', navigate);
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem(orbitKey, orbit); } catch { /* private mode: the URL still carries the orbit */ }
+  }, [orbit]);
+  useEffect(() => {
+    if (!station) return;
+    setLastVisited(station.id);
+    if (station.kind === 'legacy') writeLastVisited(station.module);
+  }, [station]);
   useEffect(() => {
     function synchronize(event: StorageEvent) {
       if (event.key === null || event.key.startsWith(historyPrefix)) {
@@ -262,33 +280,40 @@ function StationApp() {
     window.addEventListener('storage', synchronize);
     return () => window.removeEventListener('storage', synchronize);
   }, []);
+  useEffect(() => {
+    const title = station?.name ?? (route.drawer === 'notes' ? 'Lab notes' : route.drawer === 'record' ? 'Sample record' : orbits.find(o => o.id === orbit)!.name);
+    document.title = title + ' · STATUM LAB';
+  }, [station, route.drawer, orbit]);
 
-  useEffect(() => {
-    const navigate = () => {
-      const next = readModuleRoute();
-      setRoute(next);
-      if (next) setSelected(next);
-      requestAnimationFrame(() => {
-        const index = window.location.hash === '#experiments';
-        const heading = document.querySelector<HTMLElement>(index ? '#index-title' : 'main h1');
-        if (!heading) return;
-        heading.tabIndex = -1;
-        heading.focus({ preventScroll: true });
-        if (index) heading.scrollIntoView({ block: 'start' });
-        else window.scrollTo(0,0);
-      });
-    };
-    window.addEventListener('hashchange', navigate);
-    return () => window.removeEventListener('hashchange', navigate);
-  }, []);
-  useEffect(() => {
-    document.title = (modules.find(m => m.id === route)?.name ?? 'Orbital laboratory') + ' · STATUM LAB';
-  }, [route]);
-  if (route === 'distribution') return <Workspace settings={settings} onComplete={completeDistribution}/>;
-  if (route) return <MethodPreview key={route} id={route} activeSettings={settings} lastResult={results[route]}
-    onComplete={result => complete(route, result)}/>;
-  return <Observatory settings={settings} results={results} lastVisited={lastVisited} initialModule={selected}
-    onSelect={setSelected} onSample={completeDistribution}/>;
+  const close = useCallback(() => {
+    window.location.hash = orbitHash(orbit);
+  }, [orbit]);
+
+  let overlay = null;
+  if (station) {
+    const lead = <>{station.summary} <span className="dock-lecture">Lecture {station.lectures}</span></>;
+    overlay = (
+      <SceneDock key={station.id} title={station.name} eyebrow={<><i /> STATION · ORBIT {orbits.find(o => o.id === station.orbit)!.numeral}</>} lead={lead} onClose={close} testId="station-dock">
+        {station.kind === 'kernel' ? (
+          <KernelStation station={station} seed={route.seed ?? DEFAULT_SEED} params={route.params}
+            onState={(seed, params) => { window.location.hash = stationHash(station.id, seed, params); }} />
+        ) : station.module === 'distribution' ? (
+          <Workspace settings={settings} onComplete={completeDistribution} />
+        ) : (
+          <MethodPreview id={station.module} activeSettings={settings} lastResult={results[station.module]}
+            onComplete={result => complete(station.module, result)} />
+        )}
+      </SceneDock>
+    );
+  } else if (route.drawer) {
+    overlay = (
+      <SceneDock key={route.drawer} side="end" title={route.drawer === 'notes' ? 'Lab notes' : 'Sample record'} onClose={close} testId={`drawer-${route.drawer}`}>
+        {route.drawer === 'notes' ? <LabNotesContent /> : <SampleRecord settings={settings} />}
+      </SceneDock>
+    );
+  }
+  return <Observatory settings={settings} orbit={orbit} openStation={station?.id ?? null} openKey={station?.id ?? route.drawer} results={results}
+    lastVisited={lastVisited} onSample={completeDistribution} overlay={overlay} />;
 }
 
 createRoot(document.getElementById('root')!).render(

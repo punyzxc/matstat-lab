@@ -1,5 +1,5 @@
 import { useEffect, useState, type RefObject } from 'react';
-import type { ModuleId } from './modules';
+type ModuleId = string;
 
 type Point = { x: number; y: number };
 type Link = { id: ModuleId; from: Point; end: Point; path: string };
