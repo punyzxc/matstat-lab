@@ -17,14 +17,18 @@ flowchart LR
 
 ## Module responsibilities
 
-| Module | Contract and location |
-| --- | --- |
-| Statistical core | `web/src/core/{statistics,distributions,random}/`. Pure numerical functions, parameter validation, explicit domain errors and a versioned seeded PRNG. Export functions independently of React, chart libraries and storage. |
-| Simulation | `web/src/core/simulation/`, `web/src/workers/` and `web/src/hooks/`. Own transport, batching, replay and controls. |
-| Visualization | `web/src/components/charts/` and `web/src/features/{distributions,convergence,estimation,confidence}/`. Consume results by kind and render theory, observations, and textual alternatives. |
-| Application shell | `web/src/app/`, `web/src/components/{ui,laboratory}/`, `web/src/styles/` and `web/src/stores/`. Own navigation, layout, local journal, export forms and accessibility. |
-| Learning content | `web/src/features/education/` and `docs/research/`. Lessons, assumptions, terminology and classroom scenarios. |
-| Platform | `contracts/`, `tests/{e2e,acceptance,pending,fixtures}/`, and deployment configuration. Own schemas and integration checks in collaboration with the subject-area owner. |
+Paths follow the proposed area split in [functional-areas.md](functional-areas.md) and the PRD task paths. Independent functional packages live under `web/src/functional/`. They export plain TypeScript and do not import React, CSS or chart libraries. The owner-managed UI consumes them only through the captain's adapter.
+
+| Module | Area | Contract and location |
+| --- | --- | --- |
+| Statistical core | `statistics` | `web/src/functional/statistics/{random,distributions,summary,series}/`. Pure numerical functions, parameter validation, explicit domain errors, a versioned seeded PRNG and prepared chart series. Independent of React, chart libraries and storage. |
+| Simulation | `simulation` | `web/src/functional/simulation/{worker,run,convergence}/`. Own the Worker transport, batching, replay, run lifecycle and LLN/CLT runs. |
+| Inference | `inference` | `web/src/functional/inference/{estimation,intervals,hypothesis}/`. Estimator metrics, confidence intervals with coverage, and the later sign test. |
+| Research data | `research-data` | `web/src/functional/research-data/{journal,export,comparison}/`. IndexedDB journal, per-module last result, versioned export and comparison compatibility. |
+| Functional adapter | `web` (captain) | `web/src/functional/adapters/`. Turns UI input into a typed `RunSpec` and hands committed `ExperimentSnapshot`s and prepared series to the UI. This is the only place where UI code meets the functional packages. |
+| UI integration | `web` / `design` (owner-managed) | Owner-managed app shell, visual components and styles (for example `web/src/styles/**`). Navigation, layout, charts that render prepared series, journal and export controls, and accessibility. Exact visual paths are assigned once by the maintainer and must not overlap `web/src/functional/**`. |
+| Learning content | `research` | `docs/research/`. Lessons, assumptions, terminology and classroom scenarios. |
+| Platform | `contracts`, `e2e`, `infra` | `contracts/`, `tests/{e2e,acceptance,pending,fixtures}/`, and deployment configuration. Own schemas and integration checks in collaboration with the subject-area owner. |
 
 ## Contracts for Discovery
 
