@@ -373,14 +373,18 @@ function runHomogeneity({ n1, p1, n2, p2, alpha, R }, seed) {
   const d = p1 - p2, sd1 = Math.sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2), pbar = (p1 * n1 + p2 * n2) / (n1 + n2);
   const sd0 = Math.sqrt(pbar * (1 - pbar) * (1 / n1 + 1 / n2));
   const power = normalCdf((d - crit * sd0) / sd1) + normalCdf((-d - crit * sd0) / sd1);
-  const expected = same ? alpha : power, { lo, hi } = acceptanceBand(R, Math.min(1 - 1e-12, Math.max(1e-12, expected)), BAND_LEVEL);
+  const valid = R - degenerate, expected = same ? alpha : power;
+  const { lo, hi } = acceptanceBand(valid, Math.min(1 - 1e-12, Math.max(1e-12, expected)), BAND_LEVEL);
+  // The normal approximation behind (139) needs enough successes and failures in each series.
+  const smallest = Math.min(n1 * p1, n1 * (1 - p1), n2 * p2, n2 * (1 - p2)), rough = smallest < 10;
+  const flag = rejected < lo ? ' — below the band' : rejected > hi ? ' — above the band' : '';
   const ex = homogeneityTest(480, 1000, 490, 1000, alpha), one = proportionTest(480, 1000, 0.5, alpha);
   const readouts = [
     { key: 'z-first', label: 'Your experiment: z (139)', observed: first.ok ? first.z : '—', theory: null, convention: `m₁ = ${first.m1} of ${n1}, m₂ = ${first.m2} of ${n2}` },
     { key: 'p-first', label: 'Your experiment: two-sided p-value 2Φ(−|z|)', observed: first.ok ? first.pValue : '—', theory: null, convention: 'Φ is the normal CDF from −∞' },
     { key: 'decision-first', label: `Decision at α = ${alpha}`, observed: first.ok ? (first.reject ? 'reject H₀: p₁ = p₂' : 'do not reject H₀') : 'z undefined', theory: null, convention: `critical |z| = ${fmt(crit, 3)}` },
-    { key: 'rejection-rate', label: same ? 'Rejection rate under H₀ (type I error)' : 'Rejection rate under H₁ (power)', observed: rejected / (R - degenerate || 1), theory: expected,
-      convention: `${rejected}/${R - degenerate} rejections; 99.9% band ${fmt(lo / R, 3)}–${fmt(hi / R, 3)}${same ? '' : '; theory is the normal approximation'}` },
+    { key: 'rejection-rate', label: same ? 'Rejection rate under H₀ (type I error)' : 'Rejection rate under H₁ (power)', observed: valid ? rejected / valid : null, theory: expected,
+      convention: `${rejected}/${valid} rejections; 99.9% band ${fmt(lo / (valid || 1), 3)}–${fmt(hi / (valid || 1), 3)}${flag}${same ? '' : '; theory is the normal approximation'}${rough ? `; the smallest expected count is ${fmt(smallest, 1)} (below 10), so z is only roughly normal` : ''}` },
     { key: 'l11-z', label: 'L11 example: z for 480/1000 and 490/1000', observed: ex.z, theory: null, convention: `p = ${fmt(ex.pValue, 3)}; lecture prints −0.447` },
     { key: 'l11-z140', label: 'L11 example: z (140) for H₀: p = 0.5, series 1', observed: one.z, theory: null,
       convention: 'lecture writes the numerator as 0.480 − 0.490 but its value −1.26 matches 0.480 − 0.5' },
@@ -397,6 +401,7 @@ function runHomogeneity({ n1, p1, n2, p2, alpha, R }, seed) {
   const notes = [
     'Formula 139 pools both series: p̃ = (m₁ + m₂)/(n₁ + n₂). Under H₀: p₁ = p₂ the statistic is approximately N(0, 1).',
     'Set p₁ = p₂ to see the type I error stay near α; move them apart to see the power grow with n₁ and n₂.',
+    rough ? `Here n·p or n·(1 − p) is as small as ${fmt(smallest, 1)}: z is discrete and skewed, so its rejection rate can leave the band around α. That is the limit of the normal approximation, not a simulation error.` : 'Every series expects at least 10 successes and 10 failures, so the normal approximation of z is reasonable.',
     degenerate ? `${degenerate} replicate(s) had p̃ = 0 or 1, where z is undefined; they are left out.` : 'No replicate was degenerate (p̃ = 0 or 1).',
   ];
   return { readouts, series, notes, axes: { x: 'z statistic', y: 'density' } };

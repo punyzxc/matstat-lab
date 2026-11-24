@@ -4,7 +4,7 @@ Research for `lecture-estimation-intervals` (issue #46). Owner: punyzxc (Claude 
 
 **Question.** Which kernel shows estimator bias and MSE, the coverage of the normal-approximation, Student t and χ² intervals, and the two-series homogeneity test of lecture 11?
 
-**Answer in one line.** One kernel, [`spikes/lecture-estimation-intervals/kernel.mjs`](../../spikes/lecture-estimation-intervals/kernel.mjs), serves three stations (Estimation, Confidence Intervals, Homogeneity) through the shared contract of `docs/research/lecture-module-map.md`. Its 11 `node:test` cases in [`kernel.test.mjs`](../../spikes/lecture-estimation-intervals/kernel.test.mjs) cover the four acceptance criteria. Run `node --test spikes/lecture-estimation-intervals/kernel.test.mjs` (Node 24, about 2 s).
+**Answer in one line.** One kernel, [`spikes/lecture-estimation-intervals/kernel.mjs`](../../spikes/lecture-estimation-intervals/kernel.mjs), serves three stations (Estimation, Confidence Intervals, Homogeneity) through the shared contract of `docs/research/lecture-module-map.md`. Its 12 `node:test` cases in [`kernel.test.mjs`](../../spikes/lecture-estimation-intervals/kernel.test.mjs) cover the four acceptance criteria. Run `node --test spikes/lecture-estimation-intervals/kernel.test.mjs` (Node 24, about 2 s).
 
 ## What the kernel contains
 
@@ -53,6 +53,7 @@ The station parameters are numbers, because the contract sliders are numeric. A 
 
   The approximate methods under-cover at small n and reach the band only near the lecture's own rule n > 20 (M) or later (D). The exact methods stay in the band for normal data. For the skewed law the χ² interval does not recover as n grows: it depends on normality through Var(s²), whose κ term does not vanish. This is a documented limitation of (138), not a bug, and it is the station's strongest teaching case.
 - **Fact (spike output).** Under H₀ (n₁ = 200, n₂ = 300, p = 0.3, R = 2000, α = 0.05) the rejection rate of (139) stays in the binomial band around α. The lecture example gives z = −0.4474, p = 0.6546, H₀ not rejected.
+- **Fact (spike output, seed 20261124, R = 2000).** With small expected counts the pooled z test leaves the band: p₁ = p₂ = 0.05, n₁ = n₂ = 50, α = 0.01 gives 4/1987 = 0.002 rejections against the band 0.004–0.018, and the readout marks it "below the band". The station then warns that the smallest expected count (here 2.5) is below 10 and z is only roughly normal. The band is computed over the non-degenerate replicates (p̃ = 0 or 1 is left out).
 
 ## Lecture errata (lecture 11)
 

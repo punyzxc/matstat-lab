@@ -180,3 +180,15 @@ test('contract: randomness only from fixtureUint32', () => {
     assert.doesNotMatch(src, /Math\.random/);
   }
 });
+
+test('AC4: small expected counts are flagged, and the band uses the non-degenerate replicates', () => {
+  const out = k.run({ n1: 50, p1: 0.05, n2: 50, p2: 0.05, alpha: 0.05, R: 2000 }, { seed: 20261124, station: 'homogeneity' });
+  const r = out.readouts.find((x) => x.key === 'rejection-rate');
+  const [, hits, valid] = /^(\d+)\/(\d+) rejections/.exec(r.convention).map(Number);
+  assert.ok(valid < 2000, 'some replicates are degenerate at n·p = 2.5');
+  close(r.observed, hits / valid, 1e-15);
+  assert.match(r.convention, /roughly normal/);
+  assert.ok(out.notes.some((n) => n.includes('limit of the normal approximation')));
+  const big = k.run({ n1: 1000, p1: 0.485, n2: 1000, p2: 0.485, alpha: 0.05, R: 200 }, { seed: 1, station: 'homogeneity' });
+  assert.doesNotMatch(big.readouts.find((x) => x.key === 'rejection-rate').convention, /roughly normal/);
+});
