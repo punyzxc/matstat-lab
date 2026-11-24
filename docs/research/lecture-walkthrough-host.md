@@ -11,7 +11,7 @@ Research for `lecture-walkthrough-host` (#50). Owner: punyzxc (captain). Date: 2
 - **Fact.** The request and acceptance criteria: issue #50 (owner request, 2026-11-24).
 - **Fact.** The host, its routes, `stationHash` and the kernel contract: `docs/research/scene-module-host.md` and `spikes/visual-foundation/src/stations/*` (PR #49).
 - **Fact.** Lecture sections, stations and the people the lectures name: `docs/research/lecture-module-map.md` (#36, PR #48).
-- **Assumption.** The lecture PDFs are not in this repository. The draft scripts and the scientist roster come from the lecture map, not from the PDFs. The script tasks #51–#53 check them against the PDFs.
+- **Fact.** The lecture PDFs (Russian, held by the owner, never committed: the repository is public). The scientist roster was checked against their extracted text: a person is listed for a lecture when the lecture names them. The draft scripts come from the lecture map; the script tasks #51–#53 check them against the PDFs.
 
 ## What was built
 
@@ -22,7 +22,7 @@ Research for `lecture-walkthrough-host` (#50). Owner: punyzxc (captain). Date: 2
 | "Open experiment" opens the station with the step's seed and parameters. "Back to lecture" returns to the same step. | `stationHash(id, seed, params, from)` adds `lecture=<n>&step=<k>[&present=1]`. The station dock shows "← Back to lecture n, step k". Esc and the close button also return to the step. Kernel reruns keep the way back. | Tests 3 and 4 |
 | Presenter mode: large type, reduced chrome, the step counter and keys visible. | `P`, or the "Presenter" button, toggles `?present=1`. The dock fills the viewport, and the orbit switcher, header tools, globe and station cards are hidden. Body text is `clamp(20px, 2vw, 30px)`, and teacher `notes` show only here. PageUp/PageDown work, so a presentation clicker drives the steps. | Test 5: font ≥ 20 px, chrome hidden, counter and keys visible, no scroll, state kept through a station round trip |
 | `public/portraits/<slug>.txt` renders in a fixed slot. A missing file shows a placeholder with the name, years and contribution. | `Portrait` fetches the file and fits it with `fitPortrait` to 40 columns × 20 lines. An empty file, a 404 or the dev server's HTML fallback each show the placeholder (initials, file name, name, years, one line). | Test 6 and the node test for `fitPortrait` |
-| A roster entry for every scientist the lectures name, and a README on where to put the art. | `lectures/scientists.json` (19 people), `public/portraits/<slug>.txt` (one empty slot file each), `public/portraits/README.md`. | `tests/lectures.test.mjs`: each name in a script is in the roster, the roster entry lists that lecture, and each slug has a slot file |
+| A roster entry for every scientist the lectures name, and a README on where to put the art. | `lectures/scientists.json` (25 people), `public/portraits/<slug>.txt` (one empty slot file each), `public/portraits/README.md`. | `tests/lectures.test.mjs`: each name in a script is in the roster, the roster entry lists that lecture, and each slug has a slot file |
 
 ## Lecture-step presets on legacy stations
 
@@ -44,7 +44,7 @@ The 12 files on this branch are **drafts**. They are written from the lecture ma
 ## Limits and open points
 
 - **Language.** The interface and the draft scripts are in English, while the lectures are in Russian. The lesson language is still open in `docs/decisions.md`. The format does not depend on it.
-- **Roster completeness (assumption).** The 19 names come from the lecture map. The PDFs may name more people, such as Gauss for the normal law. #51–#53 add them: one roster entry and one empty `.txt` each.
+- **Roster.** The 25 names are every person the 12 lectures name (Pascal, Fermat, Newton, Gauss, Glivenko and Snedecor were missing from the lecture map). A name the lectures spell differently could slip through a text search; #51–#53 add anyone their scripts name: one roster entry and one empty `.txt` each.
 - **Formula rendering.** Unicode text is enough for the formulas in the lecture map. Fractions and integrals with limits read as linear text. If the owner wants typeset math later, MathML Core renders natively in Chromium and Firefox with system fonts. It would be one optional `mathml` field per step, with no change to the player.
 - **Portrait slot.** The slot is 40 × 20 characters at 7 px (10 px in presenter mode). The owner may change `PORTRAIT` in `script.ts`, and the README states the same numbers.
 - **Visual polish** of the drawer, player and placeholders is the owner's.

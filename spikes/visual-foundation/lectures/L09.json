@@ -4,7 +4,8 @@
   "scientists": [
     "de-moivre",
     "laplace",
-    "levy"
+    "chebyshev",
+    "lyapunov"
   ],
   "steps": [
     {
@@ -13,9 +14,6 @@
       "formula": [
         "φ(t) = M e^(itξ)",
         "φ₍ξ+η₎(t) = φ_ξ(t) φ_η(t)"
-      ],
-      "scientists": [
-        "levy"
       ]
     },
     {

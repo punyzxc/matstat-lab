@@ -71,10 +71,10 @@ test('"Open experiment" opens the station with the step\'s seed and parameters; 
 });
 
 test('a kernel station opened from a lecture keeps the seed, and a rerun keeps the way back', async ({ page }) => {
-  await page.goto('/#lecture/1/1');
+  await page.goto('/#lecture/1/2');
   await page.getByRole('link', { name: /Open the Urn station/ }).click();
-  await expect(page).toHaveURL(/#station\/urn\?seed=101&lecture=1&step=1$/);
-  await expect(page.getByTestId('station-dock').getByRole('link', { name: 'Back to lecture 1, step 1' })).toBeVisible();
+  await expect(page).toHaveURL(/#station\/urn\?seed=101&lecture=1&step=2$/);
+  await expect(page.getByTestId('station-dock').getByRole('link', { name: 'Back to lecture 1, step 2' })).toBeVisible();
 
   // A rerun with a new seed rewrites the hash and keeps the reference to the step.
   await page.goto('/#station/contract-fixture?seed=7&n=2000&lecture=2&step=1');
@@ -87,11 +87,11 @@ test('a kernel station opened from a lecture keeps the seed, and a rerun keeps t
 });
 
 test('presenter mode enlarges type, reduces the scene chrome and keeps the counter and keys visible', async ({ page }) => {
-  await page.goto('/#lecture/1/3');
+  await page.goto('/#lecture/1/4');
   const idea = page.locator('.lecture-idea');
   const normal = await idea.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
   await page.keyboard.press('p');
-  await expect(page).toHaveURL(/#lecture\/1\/3\?present=1$/);
+  await expect(page).toHaveURL(/#lecture\/1\/4\?present=1$/);
   await expect(page.locator('html')).toHaveAttribute('data-present', '');
   const large = await idea.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
   expect(large).toBeGreaterThanOrEqual(20);
@@ -105,14 +105,14 @@ test('presenter mode enlarges type, reduces the scene chrome and keeps the count
 
   // Steps keep presenter mode, and so does a trip to a station and back.
   await page.keyboard.press('ArrowRight');
-  await expect(page).toHaveURL(/#lecture\/1\/4\?present=1$/);
+  await expect(page).toHaveURL(/#lecture\/1\/5\?present=1$/);
   await page.getByRole('link', { name: /Throw the three chord schemes/ }).click();
-  await expect(page).toHaveURL(/lecture=1&step=4&present=1$/);
+  await expect(page).toHaveURL(/lecture=1&step=5&present=1$/);
   await page.keyboard.press('Escape');
-  await expect(page).toHaveURL(/#lecture\/1\/4\?present=1$/);
+  await expect(page).toHaveURL(/#lecture\/1\/5\?present=1$/);
 
   await page.keyboard.press('p');
-  await expect(page).toHaveURL(/#lecture\/1\/4$/);
+  await expect(page).toHaveURL(/#lecture\/1\/5$/);
   await expect(page.locator('html')).not.toHaveAttribute('data-present', '');
   await expect(page.getByRole('navigation', { name: 'Lecture orbits' })).toBeVisible();
 });

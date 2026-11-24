@@ -2,13 +2,25 @@
   "lecture": 1,
   "title": "Combinatorics and the classical definition of probability",
   "scientists": [
+    "pascal",
+    "fermat",
+    "gauss",
     "laplace",
     "buffon",
     "pearson",
     "bertrand",
-    "bernstein"
+    "bernstein",
+    "newton"
   ],
   "steps": [
+    {
+      "title": "Where probability began",
+      "idea": "Probability theory grew out of questions about games of chance, in the 1654 letters between Pascal and Fermat.",
+      "scientists": [
+        "pascal",
+        "fermat"
+      ]
+    },
     {
       "title": "The urn scheme",
       "idea": "Choosing k balls out of n can be ordered or not, with or without replacement. Each of the four cases has its own count.",
@@ -16,14 +28,18 @@
         "ordered, with replacement:     nᵏ",
         "ordered, without replacement:  Aₙᵏ = n! / (n − k)!",
         "unordered, without replacement: Cₙᵏ = n! / (k! (n − k)!)",
-        "unordered, with replacement:   C(n + k − 1, k)"
+        "unordered, with replacement:   C(n + k − 1, k)",
+        "Cₙᵏ are the coefficients of Newton’s binomial (a + b)ⁿ"
       ],
       "example": "n = 3, k = 2: 9 ordered pairs with replacement, 6 without, 3 unordered without, 6 unordered with.",
       "experiment": {
         "station": "urn",
         "seed": 101,
         "label": "Open the Urn station"
-      }
+      },
+      "scientists": [
+        "newton"
+      ]
     },
     {
       "title": "Classical probability",

@@ -5,7 +5,9 @@
     "pearson",
     "kolmogorov",
     "gosset",
-    "fisher"
+    "fisher",
+    "snedecor",
+    "laplace"
   ],
   "steps": [
     {
@@ -27,12 +29,13 @@
     },
     {
       "title": "Comparing variances",
-      "idea": "The ratio of two sample variances follows the F law under H₀.",
+      "idea": "The ratio of two sample variances follows the Fisher–Snedecor F law under H₀.",
       "formula": [
         "F = s₁² / s₂²"
       ],
       "scientists": [
-        "fisher"
+        "fisher",
+        "snedecor"
       ]
     }
   ],
