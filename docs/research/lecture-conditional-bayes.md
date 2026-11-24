@@ -1,4 +1,4 @@
-﻿# Conditional probability and Bayes kernel
+# Conditional probability and Bayes kernel
 
 Research for `lecture-conditional-bayes` (#43). Owner: punyzxc (Claude executor). Date: 2026-11-24.
 
