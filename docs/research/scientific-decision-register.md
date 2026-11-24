@@ -72,7 +72,7 @@ Only the rows in [decisions.md](../decisions.md) are decided. This task adds one
 
 ## What this closes in the Discovery exit criteria
 
-- "Record resolved or explicitly deferred scientific decisions, including replay bounds and interval eligibility." This register lists every choice with a status. Replay is covered by R7 and R8, and interval eligibility by R6. The criterion closes when the named people confirm R1–R10 and choose C1–C4. Until then it stays unchecked.
+- "Record resolved or explicitly deferred scientific decisions, including replay bounds and interval eligibility." This register lists every choice with a status. Replay is covered by R7 and R8, and interval eligibility by R6. The criterion closes when the named people confirm R1–R10 and choose C1–C8. Until then it stays unchecked.
 - The other exit criteria still need people:
   - confirming the remaining owners, including the inference and research-data owners and pluxha's access. pluxha owns #31 but has not yet accepted the repository invitation
   - the maintainer review in #16 and the scaffold in #31
