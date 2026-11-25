@@ -1,0 +1,297 @@
+{
+ "//": "Every formula and worked example of lectures 1-3 (course-lectures branch, commit 8dfee73) and the step that covers it, or the reason it is skipped (#51).",
+ "formulas": {
+  "1": [
+   1,
+   11
+  ],
+  "2": [
+   1,
+   12
+  ],
+  "3": [
+   1,
+   14
+  ],
+  "4": [
+   1,
+   15
+  ],
+  "5": [
+   1,
+   19
+  ],
+  "6": [
+   2,
+   1
+  ],
+  "7": [
+   2,
+   2
+  ],
+  "8": [
+   2,
+   3
+  ],
+  "9": [
+   2,
+   4
+  ],
+  "10": [
+   2,
+   6
+  ],
+  "11": [
+   3,
+   1
+  ],
+  "12": [
+   3,
+   1
+  ],
+  "13": [
+   3,
+   3
+  ],
+  "14": [
+   3,
+   6
+  ],
+  "15": [
+   3,
+   6
+  ],
+  "16": [
+   3,
+   7
+  ],
+  "17": [
+   3,
+   7
+  ],
+  "18": [
+   3,
+   10
+  ],
+  "19": [
+   3,
+   11
+  ],
+  "20": [
+   3,
+   11
+  ]
+ },
+ "items": [
+  {
+   "lecture": 1,
+   "item": "Intro ex. 1-4: exam ticket, concert ticket (certain and impossible events), canteen, Brownian motion",
+   "step": 1
+  },
+  {
+   "lecture": 1,
+   "item": "History: Pascal and Fermat to Kolmogorov",
+   "step": 2
+  },
+  {
+   "lecture": 1,
+   "item": "Operations on events, disjoint events, complete group",
+   "step": 3
+  },
+  {
+   "lecture": 1,
+   "item": "Algebra and sigma-algebra of events, axioms 1-3, probability space",
+   "step": 4
+  },
+  {
+   "lecture": 1,
+   "item": "Consequences 1-5 of the axioms, addition theorem",
+   "step": 5
+  },
+  {
+   "lecture": 1,
+   "item": "Independent events and properties 1-6",
+   "step": 6
+  },
+  {
+   "lecture": 1,
+   "item": "Combinatorics ex. 1 (n^k vectors), ex. 2 (900 three-digit numbers), ex. 3 (A_n^k, n!, three volumes)",
+   "step": 7
+  },
+  {
+   "lecture": 1,
+   "item": "Combinatorics ex. 4 (C_n^k)",
+   "step": 8
+  },
+  {
+   "lecture": 1,
+   "item": "Urn scheme, cases a-c, ex. 5 (arrangements with repetition)",
+   "step": 9
+  },
+  {
+   "lecture": 1,
+   "item": "Ex. 6 combinations with repetition and its remark (Diophantine equation, partial derivatives)",
+   "step": 10
+  },
+  {
+   "lecture": 1,
+   "item": "Newton's binomial (1), sums of C_n^k, symmetry, Pascal's rule",
+   "step": 11
+  },
+  {
+   "lecture": 1,
+   "item": "Classical method, formula (2)",
+   "step": 12
+  },
+  {
+   "lecture": 1,
+   "item": "Ex. 7 (samples with s red balls) and the Vandermonde identity",
+   "step": 13
+  },
+  {
+   "lecture": 1,
+   "item": "Ex. 8, hypergeometric law (3), direct and inverse problem (Borovkov)",
+   "step": 14
+  },
+  {
+   "lecture": 1,
+   "item": "Polynomial coefficients (4) and the theorem on k boxes",
+   "step": 15
+  },
+  {
+   "lecture": 1,
+   "item": "Balls in boxes, n = 5: 24/625, 48/125, 12/25, 12/125, 1/625",
+   "step": 16
+  },
+  {
+   "lecture": 1,
+   "item": "Geometric method, ex. 1 (sqrt(0.5 - sin^2 x))",
+   "step": 17
+  },
+  {
+   "lecture": 1,
+   "item": "Ex. 2 Bertrand's paradox",
+   "step": 18
+  },
+  {
+   "lecture": 1,
+   "item": "Statistical definition (5), 450 heads in 1000, Buffon and Pearson",
+   "step": 19
+  },
+  {
+   "lecture": 1,
+   "item": "Remark: the sigma-algebra as a sponge in a liquid",
+   "skipped": "an analogy without a formula or a number; step 4 keeps the definition"
+  },
+  {
+   "lecture": 1,
+   "item": "General pattern-by-pattern sums for two and three empty boxes",
+   "skipped": "the patterns need n >= 6 and the sums are long; step 16 names the issue and the station computes every n exactly (Stirling numbers)"
+  },
+  {
+   "lecture": 2,
+   "item": "Conditional probability (6) and the r/k picture (fig. 3)",
+   "step": 1
+  },
+  {
+   "lecture": 2,
+   "item": "Multiplication theorem (7)",
+   "step": 2
+  },
+  {
+   "lecture": 2,
+   "item": "Independence (8), mutual independence, Bernstein's example",
+   "step": 3
+  },
+  {
+   "lecture": 2,
+   "item": "Total probability (9) and the remark on hypotheses",
+   "step": 4
+  },
+  {
+   "lecture": 2,
+   "item": "Example: an even face of a die, two solutions",
+   "step": 5
+  },
+  {
+   "lecture": 2,
+   "item": "Bayes formula (10), prior and posterior",
+   "step": 6
+  },
+  {
+   "lecture": 2,
+   "item": "Example: the guessing student (five options)",
+   "step": 7
+  },
+  {
+   "lecture": 2,
+   "item": "Fig. 4: three ways to draw hypotheses around A",
+   "skipped": "a picture; step 4 states its conclusion (the hypotheses need only cover A)"
+  },
+  {
+   "lecture": 3,
+   "item": "Bernoulli trials, the space of 2^n binary vectors, (11), (12), 1 - q^n",
+   "step": 1
+  },
+  {
+   "lecture": 3,
+   "item": "P_n(k) -> 0 for fixed k",
+   "step": 2
+  },
+  {
+   "lecture": 3,
+   "item": "Most probable number (13)",
+   "step": 3
+  },
+  {
+   "lecture": 3,
+   "item": "Ex. 1: five days / P_7(5) = 0.311",
+   "step": 4
+  },
+  {
+   "lecture": 3,
+   "item": "Ex. 2a, 2b exact values, the mode 51, the recurrence",
+   "step": 5
+  },
+  {
+   "lecture": 3,
+   "item": "Local theorem (14), (15), properties of phi, the solved ex. 2a",
+   "step": 6
+  },
+  {
+   "lecture": 3,
+   "item": "Integral theorem (16), (17), the Poisson integral, Phi(x) + Phi(-x) = 1",
+   "step": 7
+  },
+  {
+   "lecture": 3,
+   "item": "The solved ex. 2b by the integral theorem",
+   "step": 8
+  },
+  {
+   "lecture": 3,
+   "item": "Rough estimate P(40 <= k <= 60) ~ 0.7",
+   "step": 9
+  },
+  {
+   "lecture": 3,
+   "item": "Poisson formula (18), its derivation, the typo example",
+   "step": 10
+  },
+  {
+   "lecture": 3,
+   "item": "Bernoulli's theorem (19), formula (20), the coin example",
+   "step": 11
+  },
+  {
+   "lecture": 3,
+   "item": "Fig. 5: binomial points against the Gauss curve",
+   "skipped": "the Bernoulli station draws it live (step 6 experiment)"
+  },
+  {
+   "lecture": 3,
+   "item": "Appendix tables 2-4 (Poisson, phi, Phi)",
+   "skipped": "the stations compute the functions exactly; step 7 names the Phi conventions instead"
+  }
+ ]
+}
