@@ -81,7 +81,7 @@ test('legacy prototype links still resolve inside the scene', async ({ page }) =
   await expect(page.getByTestId('station-dock')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Estimation', exact: true })).toBeVisible();
   await page.goto('/#workspace');
-  await expect(page.getByRole('button', { name: 'Run simulation' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /(Play|Stop) the experiment/ })).toBeVisible();
 });
 
 test('reduced motion: the dock opens without animation', async ({ page }) => {

@@ -69,7 +69,7 @@ test('narrow screens keep all connected windows and immediate static previews', 
   await expect(page.locator('.orbit-link-trace')).toHaveCount(4);
   await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(1);
   await page.getByRole('link', { name: /^Distribution Explorer/ }).click();
-  await expect(page.getByRole('button', { name: 'Run simulation' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /(Play|Stop) the experiment/ })).toBeVisible();
 });
 
 test('the active sample updates the distribution window and unvisited examples', async ({ page }) => {

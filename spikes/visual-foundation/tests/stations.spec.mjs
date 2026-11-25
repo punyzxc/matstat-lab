@@ -40,15 +40,16 @@ test('a contract kernel renders as a station and its URL reproduces the run', as
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#station/contract-fixture?seed=7&n=2000&p=0.3');
   const dock = page.getByTestId('station-dock');
-  await expect(dock.getByLabel('Trials n')).toHaveValue('2000');
+  await expect(dock.getByLabel('Trials n', { exact: true })).toHaveValue('2000');
   await expect(dock.getByLabel('Random seed')).toHaveValue('7');
   await expect(dock.getByRole('img', { name: /m\/k/ })).toBeVisible();
   const readout = dock.getByRole('row', { name: /Relative frequency/ });
   const first = await readout.textContent();
-  await expect(dock.getByRole('button', { name: 'Result Is Up to Date' })).toBeDisabled();
+  // No Run button: a reduced-motion visitor gets a stopped experiment that still reacts at once.
+  await expect(dock.getByRole('button', { name: /Run With|Up to Date/ })).toHaveCount(0);
+  await expect(dock.getByRole('button', { name: 'Play the experiment' })).toBeVisible();
 
   await dock.getByLabel('Random seed').fill('11');
-  await dock.getByRole('button', { name: 'Run With These Parameters' }).click();
   await expect(page).toHaveURL(/seed=11/);
   await expect(readout).not.toHaveText(first);
 
@@ -72,4 +73,57 @@ test('legacy stations honour a seed in the URL', async ({ page }) => {
   await expect(page.getByLabel('Random seed')).toHaveValue('7');
   await page.goto('/#station/convergence?seed=9');
   await expect(page.locator('.method-desk .session-source')).toContainText('seed 9');
+});
+
+test('a kernel station plays by itself: it grows the sample, keeps drawing, stops on Space and steps on N', async ({ page }) => {
+  await page.goto('/#station/contract-fixture?seed=7&n=2000&p=0.3');
+  const dock = page.getByTestId('station-dock');
+  const status = dock.locator('.autoplay-status');
+  await expect(status).toContainText('Growing the sample');
+  await expect(status).toContainText(/Live · draw [2-9]/, { timeout: 15000 });
+  await dock.getByRole('heading', { name: 'Contract fixture' }).focus();
+  await page.keyboard.press('Space');
+  await expect(dock.getByRole('button', { name: 'Play the experiment' })).toBeVisible();
+  const stopped = (await status.textContent()).match(/seed (\d+)/)[1];
+  await page.waitForTimeout(1500);
+  await expect(status).toContainText(`seed ${stopped}`);
+  await expect(page).toHaveURL(new RegExp(`seed=${stopped}`));
+  await page.keyboard.press('n');
+  await expect(status).toContainText(`seed ${Number(stopped) + 1}`);
+  // Each draw adds a dot to the across-draws trace of the followed readout.
+  await expect(dock.getByRole('region', { name: /across draws/ })).toContainText(/over \d+ draws/);
+});
+
+test('typed parameter values accept arithmetic and decimal commas, and clamp to the range', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#station/contract-fixture?seed=7&n=2000&p=0.3');
+  const dock = page.getByTestId('station-dock');
+  const p = dock.getByLabel('Probability p, typed value');
+  await p.fill('1/4');
+  await p.press('Enter');
+  await expect(dock.getByLabel('Probability p', { exact: true })).toHaveValue('0.25');
+  await expect(page).toHaveURL(/p=0\.25/);
+  await p.fill('0,6');
+  await p.press('Enter');
+  await expect(page).toHaveURL(/p=0\.6/);
+  const n = dock.getByLabel('Trials n, typed value');
+  await n.fill('1e9');
+  await n.press('Enter');
+  await expect(dock.getByText(/Kept within 100 … 5/)).toBeVisible();
+  await expect(page).toHaveURL(/n=5000/);
+  await n.press('ArrowDown');
+  await expect(page).toHaveURL(/n=4900/);
+});
+
+test('a parameter with named values is a row of choices', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#station/lln?seed=3');
+  const dock = page.getByTestId('station-dock');
+  const law = dock.getByRole('radiogroup', { name: 'Law' });
+  await expect(law.getByRole('radio', { name: 'Cauchy' })).toHaveAttribute('aria-checked', 'true');
+  await law.getByRole('radio', { name: 'normal' }).click();
+  await expect(page).toHaveURL(/law=0/);
+  await page.keyboard.press('ArrowRight');
+  await expect(law.getByRole('radio', { name: 'uniform' })).toBeFocused();
+  await expect(page).toHaveURL(/law=1/);
 });

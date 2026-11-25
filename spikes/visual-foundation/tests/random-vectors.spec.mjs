@@ -14,11 +14,10 @@ test('Scatter shows a rotatable joint-density surface that follows ρ', async ({
   await rho.focus();
   await page.keyboard.press('ArrowLeft');
   await expect(surface).toHaveAttribute('aria-label', /ρ = 0\.55/);
-  await expect(page.getByText('Live preview')).toBeVisible();
-  await expect(page).toHaveURL(/rho=0\.6/);
+  await expect(page).toHaveURL(/rho=0\.55/);
 });
 
-test('Moments curves morph while the σ slider moves, and the link updates only on Run', async ({ page }) => {
+test('Moments curves morph while the σ slider moves, and the link follows without a Run button', async ({ page }) => {
   await page.goto('/#station/moments?seed=3');
   const curve = page.locator('.chart-series--pdf').first();
   // Width at half height of the drawn bell, in screen pixels: a real change of shape, not path noise.
@@ -32,6 +31,5 @@ test('Moments curves morph while the σ slider moves, and the link updates only 
   await page.locator('#p-sigma').focus();
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight');
   await expect.poll(halfWidth).toBeGreaterThan(before + 20);
-  await page.getByRole('button', { name: /Run With These Parameters/ }).click();
   await expect(page).toHaveURL(/sigma=1\.5/);
 });
