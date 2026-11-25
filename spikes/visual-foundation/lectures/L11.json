@@ -87,7 +87,13 @@
         "intuition": "Each violet brick is the mean of one whole sample. The cloud is centred on $a$ (no bias), and the ladder below shows the same experiment for $n = 2, 5, 10, 20, 50$: it narrows like $1/\\sqrt{n}$.",
         "definition": "An estimate is consistent if it converges to the parameter in probability as $n \\to \\infty$. Here $D\\bar{x} = \\sigma^2/n \\to 0$, so by Chebyshev's inequality $P(|\\bar{x} - a| \\ge \\varepsilon) \\le \\dfrac{\\sigma^2}{n\\varepsilon^2} \\to 0$.",
         "details": "Even for the skewed law the cloud of $\\bar{x}$ is close to normal: this is the central limit theorem from lecture 8 at work."
-      }
+      },
+      "portals": [
+        {
+          "lecture": 8,
+          "step": 5
+        }
+      ]
     },
     {
       "title": "Unbiased variance",
@@ -170,7 +176,13 @@
       ],
       "layers": {
         "definition": "For normal data $\\frac{\\bar{x} - a}{s/\\sqrt{n}}$ has Student's law with $n - 1$ degrees of freedom; $t_{\\gamma}$ is its two-sided quantile, so the interval covers $a$ with probability exactly $\\gamma$."
-      }
+      },
+      "portals": [
+        {
+          "lecture": 8,
+          "step": 6
+        }
+      ]
     },
     {
       "title": "A wall of intervals",

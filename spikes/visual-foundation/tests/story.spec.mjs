@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11),
-// #135 clouds of estimates and the n vs n - 1 race (L11).
+// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals.
 const fits = (page) => page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
 
 test.beforeEach(async ({ page }) => {
@@ -153,6 +153,35 @@ test('L11 estimate cloud: typing n tightens the cloud; the n vs n - 1 race shows
   await expect(race.locator('[data-v="mn1"][data-role="res"]')).toHaveText('0.982');
   await expect(race.locator('[data-v="mnth"][data-role="res"]')).toHaveText('0.8');
   await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/estimation\?seed=1111&n=5&sigma=1&law=0&R=2000&view=0&lecture=11&step=3$/);
+  expect(await fits(page)).toBe(true);
+});
+
+test('a math portal previews another lecture live over the figure; Esc comes back, "Go there" opens it', async ({ page }) => {
+  await page.goto('/#lecture/11/4');
+  const link = page.locator('[data-step="4"]').getByTestId('story-portal');
+  await expect(link).toHaveAccessibleName(/Portal: Lecture 8, The central limit theorem/);
+  await link.click();
+  const portal = page.getByTestId('story-portal-view');
+  await expect(portal).toBeVisible();
+  await expect(portal.locator('#story-portal-title')).toHaveText('The central limit theorem');
+  // the preview is live: its own figure and its live formula with the Kolmogorov distance
+  await expect(portal.locator('canvas')).toBeVisible();
+  await expect(portal.getByTestId('live-formula').locator('[data-v="ks"][data-role="res"]')).not.toHaveText('—');
+  await expect(page.getByRole('button', { name: /^Back/ })).toBeFocused();
+  // arrows do not move the lecture behind the portal
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Escape');
+  await expect(portal).toHaveCount(0);
+  await expect(page).toHaveURL(/#lecture\/11\/4$/);
+  await expect(page.getByTestId('step-counter')).toHaveText('Step 4 / 7');
+  await expect(link).toBeFocused();
+
+  await link.click();
+  await page.getByTestId('story-portal-go').click();
+  await expect(page).toHaveURL(/#lecture\/8\/6$/);
+  await expect(page.getByTestId('story-beat')).toHaveText('The normal law appears');
+  await expect(page.getByTestId('step-counter')).toHaveText('Step 6 / 8');
+  await expect(page.locator('[data-step="6"]').getByTestId('story-portal')).toHaveAccessibleName(/Lecture 11, A wall of intervals/);
   expect(await fits(page)).toBe(true);
 });
 

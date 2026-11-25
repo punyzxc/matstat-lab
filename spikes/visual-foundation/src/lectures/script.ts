@@ -19,6 +19,8 @@ export type FigureRef = { id: string; beat: string; params?: Record<string, numb
 export type WhatIf = { label: string; params: Record<string, number> };
 /** Layered explanation: the reader opens as much depth as they want. Text with inline `$…$`. */
 export type Layers = { intuition?: string; definition?: string; details?: string };
+/** A math portal (#138): a related step of another lecture, previewed live without leaving this one. */
+export type Portal = { lecture: number; step: number };
 export type Step = {
   title: string;
   /** One idea, a sentence or a short paragraph. */
@@ -38,6 +40,7 @@ export type Step = {
   live?: string[];
   layers?: Layers;
   whatIf?: WhatIf[];
+  portals?: Portal[];
 };
 export type Lecture = {
   lecture: number;
@@ -68,6 +71,8 @@ type Known = {
   figures?: Record<string, KnownFigure>;
   /** Extracts the keys of a live formula (src/lectures/live-tex.mjs liveTexKeys); throws on bad syntax. */
   liveKeys?: (tex: string) => { symbols: Set<string>; values: Set<string>; results: Set<string> };
+  /** Number of steps of every lecture, to check that portal targets exist. */
+  lectureSteps?: Record<number, number>;
 };
 export function validateLecture(value: unknown, known: Known = {}): string[] {
   const errors: string[] = [];
@@ -104,7 +109,7 @@ export function validateLecture(value: unknown, known: Known = {}): string[] {
     if (Array.isArray(s.scientists) && Array.isArray(l.scientists)) {
       for (const slug of s.scientists) if (!l.scientists.includes(slug)) errors.push(`${at}: "${slug}" is missing from the lecture's scientists`);
     }
-    if (!l.story && (s.figure || s.live || s.whatIf)) errors.push(`${at}: figure, live and whatIf need "story": true`);
+    if (!l.story && (s.figure || s.live || s.whatIf || s.portals)) errors.push(`${at}: figure, live, whatIf and portals need "story": true`);
     if (s.figure != null) {
       const f = s.figure;
       if (!f || typeof f !== 'object' || !isText(f.id) || !isText(f.beat)) errors.push(`${at}: figure needs an id and a beat`);
@@ -157,6 +162,16 @@ export function validateLecture(value: unknown, known: Known = {}): string[] {
           if (!w || !isText(w.label)) errors.push(`${at}: whatIf ${j + 1} needs a label`);
           if (!w?.params || !Object.keys(w.params).length) errors.push(`${at}: whatIf ${j + 1} needs params`);
           else paramsOk(`whatIf ${j + 1}`, w.params);
+        });
+    }
+    if (s.portals != null) {
+      if (!Array.isArray(s.portals) || !s.portals.length) errors.push(`${at}: portals must be a non-empty list`);
+      else
+        s.portals.forEach((p, j) => {
+          if (!p || !Number.isInteger(p.lecture) || !Number.isInteger(p.step) || p.step < 1) return errors.push(`${at}: portal ${j + 1} needs a lecture and a step`);
+          if (p.lecture === l.lecture) errors.push(`${at}: portal ${j + 1} points into its own lecture`);
+          const steps = known.lectureSteps?.[p.lecture];
+          if (known.lectureSteps && (steps == null || p.step > steps)) errors.push(`${at}: portal ${j + 1} points to lecture ${p.lecture}, step ${p.step}, which does not exist`);
         });
     }
     const e = s.experiment;

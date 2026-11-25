@@ -662,3 +662,144 @@ html[data-present] .story {
 .live-formula-tex .live-var {
   pointer-events: auto;
 }
+
+/* ---------------------------------------------------------------- math portals (#138) */
+.story-portals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 16px;
+}
+.story-portals > span {
+  color: var(--grey);
+  font: 10px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.story-portals .story-portal {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px 5px 9px;
+  border: 1px solid rgb(127 214 232 / 0.45);
+  border-radius: 999px;
+  background: radial-gradient(circle at 12px 50%, rgb(127 214 232 / 0.16), transparent 60%);
+  color: #cdeff6;
+  font: 12px var(--sans);
+  cursor: pointer;
+  transition: background-color 160ms var(--ease), border-color 160ms var(--ease), box-shadow 200ms var(--ease);
+}
+.story-portals .story-portal svg {
+  color: #7fd6e8;
+}
+.story-portals .story-portal:hover,
+.story-portals .story-portal:focus-visible {
+  border-color: #7fd6e8;
+  background-color: rgb(127 214 232 / 0.08);
+  box-shadow: 0 0 18px rgb(127 214 232 / 0.25);
+}
+.story-portal-n {
+  color: #7fd6e8;
+  font: 10px var(--mono);
+  letter-spacing: 0.08em;
+}
+.story-portal-view {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  background: rgb(8 10 11 / 0.985);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgb(127 214 232 / 0.4);
+  box-shadow: inset 0 0 60px rgb(127 214 232 / 0.08), 0 0 40px rgb(127 214 232 / 0.12);
+  animation: portal-open 520ms var(--ease) both;
+}
+@keyframes portal-open {
+  from {
+    opacity: 0;
+    clip-path: circle(4% at 8% 50%);
+  }
+  to {
+    opacity: 1;
+    clip-path: circle(150% at 8% 50%);
+  }
+}
+.story-portal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px 10px 22px;
+  border-bottom: 1px solid rgb(127 214 232 / 0.2);
+}
+.story-portal-head > div:first-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.story-portal-head .story-stage-eyebrow {
+  color: #7fd6e8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.story-portal-head b {
+  font: 450 18px/1.15 var(--sans);
+  letter-spacing: -0.02em;
+}
+.story-portal-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.story-portal-view .story-portal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 1px solid #3a3a3a;
+  background: transparent;
+  color: var(--ink);
+  font: 500 12px var(--sans);
+  cursor: pointer;
+}
+.story-portal-view .story-portal-back:hover,
+.story-portal-view .story-portal-back:focus-visible {
+  border-color: #7fd6e8;
+}
+.story-portal-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+.story-portal-figure {
+  position: relative;
+  min-height: 0;
+}
+.story-portal-text {
+  order: 2;
+  max-height: 38vh;
+  overflow: auto;
+  padding: 12px 22px 14px;
+  border-top: 1px solid #222;
+}
+.story-portal-text .lecture-idea {
+  margin: 0 0 8px;
+}
+.story-portal-text .story-live {
+  margin: 0;
+}
+.story-portal-hint {
+  margin: 8px 0 0;
+  color: var(--grey);
+  font: 10px var(--mono);
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-portal-view {
+    animation: none;
+  }
+}
