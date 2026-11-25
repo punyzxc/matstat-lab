@@ -1,4 +1,5 @@
-// #109 live formulas, #110 story lectures, #111 the normal factory, #112 the confidence interval wall.
+// #109 live formulas, #110 story lectures, #111 the normal factory, #112 the confidence interval wall,
+// #135 clouds of estimates and the n vs n - 1 race.
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -9,9 +10,10 @@ import { expandLiveTex, formatLive, LIVE_KATEX, liveTexKeys, snapValue } from '.
 import { FIGURES, figureParams } from '../src/lectures/figures/specs.mjs';
 import { ksToNormal, replicate, SOURCES, zHistogram, zSample } from '../src/lectures/figures/clt-model.mjs';
 import { intervalAt, wall } from '../src/lectures/figures/ci-model.mjs';
+import { estimatesAt, LADDER, race, theory } from '../src/lectures/figures/est-model.mjs';
 import { validateLecture } from '../src/lectures/script.ts';
 import { ksBand, LAWS, standardizedSums } from '../../lecture-limit-theorems/kernel.mjs';
-import { acceptanceBand, coverageAt } from '../../lecture-estimation-intervals/kernel.mjs';
+import { acceptanceBand, coverageAt, run as runEstimation } from '../../lecture-estimation-intervals/kernel.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = (p) => JSON.parse(readFileSync(root + p, 'utf8'));
@@ -168,4 +170,36 @@ test('wall: a skewed law with n = 5 undercovers, and z in place of t undercovers
   assert.ok(t < 0.93, `skewed t coverage ${t}`);
   assert.ok(Math.abs(tNormal - 0.95) < 0.015, `normal t coverage ${tNormal}`);
   assert.ok(z < t, `z ${z} < t ${t}`);
+});
+
+// ---------------------------------------------------------------- #135 clouds of estimates
+test('cloud: every sample drops one estimate, and the cloud tightens like sigma / sqrt(n)', () => {
+  assert.deepEqual(figureParams('estimate-cloud'), { n: 5, sigma: 1, law: 0 });
+  assert.deepEqual(estimatesAt({ n: 5, seed: 1111, r: 4 }), estimatesAt({ n: 5, seed: 1111, r: 4 }));
+  let prev = Infinity;
+  for (const n of LADDER) {
+    const { sdX, meanX } = race({ n, sigma: 1, seed: 1111 }, 600);
+    const th = theory(n, 1).sdX;
+    assert.ok(sdX < prev, `spread falls with n: ${sdX} at n = ${n}`);
+    assert.ok(Math.abs(sdX / th - 1) < 0.12, `spread ${sdX} near sigma/sqrt(n) = ${th} at n = ${n}`);
+    assert.ok(Math.abs(meanX) < 4 * th / Math.sqrt(600), `cloud centred on a at n = ${n}`);
+    prev = sdX;
+  }
+  // the cloud of a typed sigma scales with it
+  assert.ok(Math.abs(race({ n: 5, sigma: 2, seed: 1111 }, 600).sdX / race({ n: 5, sigma: 1, seed: 1111 }, 600).sdX - 2) < 1e-9);
+});
+
+test('race: the same samples feed both divisors; n = 5 shows the bias -sigma^2/n, and the race equals the Estimation station', () => {
+  for (const seed of [1111, 7, 2024]) {
+    const r = race({ n: 5, sigma: 1, seed }, 2000), th = theory(5, 1);
+    assert.ok(Math.abs(r.meanN - r.meanN1 * 4 / 5) < 1e-12, 'one sum of squares, two divisors');
+    assert.ok(Math.abs(r.meanN1 - 1) < 4 * r.seN1, `divisor n - 1 mean ${r.meanN1} within 4 SE of sigma^2 (seed ${seed})`);
+    assert.ok(Math.abs(r.meanN - 1 - th.bias) < 4 * r.seN1, `divisor n bias ${r.meanN - 1} near -sigma^2/n = ${th.bias} (seed ${seed})`);
+    assert.ok(r.meanN < 1, 'divisor n mean below sigma^2');
+  }
+  const r = race({ n: 5, sigma: 1, law: 0, seed: 1111 }, 2000);
+  const station = runEstimation({ n: 5, sigma: 1, law: 0, R: 2000, view: 0 }, { seed: 1111, station: 'estimation' }).readouts;
+  assert.ok(Math.abs(station.find((x) => x.key === 'bias-n').observed - (r.meanN - 1)) < 1e-12);
+  assert.ok(Math.abs(station.find((x) => x.key === 'bias-n1').observed - (r.meanN1 - 1)) < 1e-12);
+  assert.deepEqual(FIGURES['estimate-cloud'].station({ n: 5, sigma: 1, law: 0 }), { station: 'estimation', params: { n: 5, sigma: 1, law: 0, R: 2000, view: 0 } });
 });

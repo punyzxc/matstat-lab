@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-// #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11).
+// #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11),
+// #135 clouds of estimates and the n vs n - 1 race (L11).
 const fits = (page) => page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
 
 test.beforeEach(async ({ page }) => {
@@ -113,11 +114,11 @@ test('the figure expands into its full station, and Esc folds back to the same s
 });
 
 test('L11 interval wall: 1000 intervals cover as often as the Confidence station says; γ typed in the formula re-runs it', async ({ page }) => {
-  await page.goto('/#lecture/11/4');
+  await page.goto('/#lecture/11/5');
   await expect(page.getByTestId('story-beat')).toHaveText('A thousand intervals');
   // reduced motion fills the wall at once: 940 of 1000 Student intervals cover a (seed 1111, n = 10, γ = 0.95)
   await expect(page.getByTestId('ci-coverage')).toHaveText('94.0%');
-  const formula = page.locator('[data-step="4"]').getByTestId('live-formula').first();
+  const formula = page.locator('[data-step="5"]').getByTestId('live-formula').first();
   await expect(formula.locator('[data-v="hits"]')).toHaveText('940');
   const gamma = formula.locator('[data-v="gamma"][data-role="edit"]');
   await gamma.click();
@@ -125,7 +126,33 @@ test('L11 interval wall: 1000 intervals cover as often as the Confidence station
   await formula.getByRole('textbox').press('Enter');
   await expect(gamma).toHaveText('0.80');
   await expect(page.getByTestId('ci-coverage')).not.toHaveText('94.0%');
-  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/confidence\?seed=1111&n=10&gamma=0.8&law=0&target=0&R=1000&view=1&lecture=11&step=4$/);
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/confidence\?seed=1111&n=10&gamma=0.8&law=0&target=0&R=1000&view=1&lecture=11&step=5$/);
+  expect(await fits(page)).toBe(true);
+});
+
+test('L11 estimate cloud: typing n tightens the cloud; the n vs n - 1 race shows the bias and expands into the Estimation station', async ({ page }) => {
+  await page.goto('/#lecture/11/2');
+  await expect(page.getByTestId('story-beat')).toHaveText('A cloud of sample means');
+  const cloud = page.locator('[data-step="2"]').getByTestId('live-formula').first();
+  // reduced motion fills the cloud at once: 2000 sample means of n = 5
+  await expect(cloud.locator('[data-v="sdth"][data-role="res"]')).toHaveText('0.447');
+  const wide = Number(await cloud.locator('[data-v="sdx"][data-role="res"]').textContent());
+  expect(Math.abs(wide - 0.447)).toBeLessThan(0.03);
+  const n = cloud.locator('[data-v="n"][data-role="edit"]');
+  await n.click();
+  await cloud.getByRole('textbox').fill('50');
+  await cloud.getByRole('textbox').press('Enter');
+  await expect(cloud.locator('[data-v="sdth"][data-role="res"]')).toHaveText('0.141');
+  await expect.poll(async () => Number(await cloud.locator('[data-v="sdx"][data-role="res"]').textContent())).toBeLessThan(wide / 2.5);
+
+  await page.goto('/#lecture/11/3');
+  await expect(page.getByTestId('story-beat')).toContainText('Divisor');
+  const race = page.locator('[data-step="3"]').getByTestId('live-formula').nth(2);
+  // seed 1111, n = 5, 2000 samples: the Estimation station's bias readouts (-0.2144 and -0.0180)
+  await expect(race.locator('[data-v="mn"][data-role="res"]')).toHaveText('0.786');
+  await expect(race.locator('[data-v="mn1"][data-role="res"]')).toHaveText('0.982');
+  await expect(race.locator('[data-v="mnth"][data-role="res"]')).toHaveText('0.8');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/estimation\?seed=1111&n=5&sigma=1&law=0&R=2000&view=0&lecture=11&step=3$/);
   expect(await fits(page)).toBe(true);
 });
 

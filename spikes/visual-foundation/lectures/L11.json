@@ -43,8 +43,55 @@
       }
     },
     {
+      "title": "A cloud of estimates",
+      "idea": "Repeat the experiment many times. Every sample gives its own $\\bar{x}$, and the means gather into a cloud around the true $a$. The larger $n$, the tighter the cloud: its spread is $\\sigma/\\sqrt{n}$.",
+      "figure": {
+        "id": "estimate-cloud",
+        "beat": "cloud",
+        "params": {
+          "n": 5,
+          "sigma": 1,
+          "law": 0
+        }
+      },
+      "live": [
+        "\\sqrt{D\\lv{xbar}{\\bar{x}}} = \\dfrac{\\lval{sigma}}{\\sqrt{\\lval{n}}} = \\lres{sdth}, \\qquad \\lv{sdx}{s_{\\bar{x}}} = \\lres{sdx}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 2$",
+          "params": {
+            "n": 2
+          }
+        },
+        {
+          "label": "$n = 20$",
+          "params": {
+            "n": 20
+          }
+        },
+        {
+          "label": "$n = 50$",
+          "params": {
+            "n": 50
+          }
+        },
+        {
+          "label": "a skewed law",
+          "params": {
+            "law": 1
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Each violet brick is the mean of one whole sample. The cloud is centred on $a$ (no bias), and the ladder below shows the same experiment for $n = 2, 5, 10, 20, 50$: it narrows like $1/\\sqrt{n}$.",
+        "definition": "An estimate is consistent if it converges to the parameter in probability as $n \\to \\infty$. Here $D\\bar{x} = \\sigma^2/n \\to 0$, so by Chebyshev's inequality $P(|\\bar{x} - a| \\ge \\varepsilon) \\le \\dfrac{\\sigma^2}{n\\varepsilon^2} \\to 0$.",
+        "details": "Even for the skewed law the cloud of $\\bar{x}$ is close to normal: this is the central limit theorem from lecture 8 at work."
+      }
+    },
+    {
       "title": "Unbiased variance",
-      "idea": "Dividing by $n$ underestimates the variance; dividing by $n - 1$ removes the bias.",
+      "idea": "The same samples feed two formulas for the variance. Dividing by $n$ underestimates $\\sigma^2$ on average; dividing by $n - 1$ removes the bias.",
       "formula": [
         "s^2 = \\dfrac{1}{n-1} \\sum_{i=1}^{n} (x_i - \\bar{x})^2"
       ],
@@ -60,18 +107,56 @@
         }
       },
       "live": [
-        "\\lv{s}{s} = \\sqrt{\\dfrac{1}{n-1} \\sum_{i=1}^{n} \\left(x_i - \\lv{xbar}{\\bar{x}}\\right)^2} = \\lres{s}"
+        "\\lv{vn}{s_n^2} = \\dfrac{1}{\\lval{n}} \\sum_{i=1}^{n} (x_i - \\bar{x})^2 = \\lres{vn}",
+        "\\lv{vn1}{s^2} = \\dfrac{1}{n-1} \\sum_{i=1}^{n} (x_i - \\bar{x})^2 = \\lres{vn1}",
+        "\\overline{\\lv{mn}{s_n^2}} = \\lres{mn} \\approx \\dfrac{n-1}{n}\\,\\lv{s2}{\\sigma^2} = \\lres{mnth}, \\qquad \\overline{\\lv{mn1}{s^2}} = \\lres{mn1} \\approx \\lv{s2}{\\sigma^2}"
       ],
       "layers": {
+        "intuition": "Coral is divisor $n$, cyan is divisor $n - 1$. Both histograms are built from the very same samples, yet the coral mean stops short of the yellow line $\\sigma^2$, and the gap is about $\\sigma^2/n$.",
         "details": "With divisor $n$ the expectation is $\\frac{n-1}{n}\\sigma^2$: the spread around $\\bar{x}$ is smaller than around the true $a$, because $\\bar{x}$ is fitted to the same data. Dividing by $n - 1$ cancels that factor."
-      }
+      },
+      "figure": {
+        "id": "estimate-cloud",
+        "beat": "race",
+        "params": {
+          "n": 5,
+          "sigma": 1,
+          "law": 0
+        }
+      },
+      "whatIf": [
+        {
+          "label": "$n = 2$",
+          "params": {
+            "n": 2
+          }
+        },
+        {
+          "label": "$n = 30$",
+          "params": {
+            "n": 30
+          }
+        },
+        {
+          "label": "$\\sigma = 2$",
+          "params": {
+            "sigma": 2
+          }
+        }
+      ]
     },
     {
       "title": "Confidence interval for the mean",
       "idea": "Widen the point into an interval that covers the true mean with a stated probability $\\gamma$. Its half-width grows with the spread $s$ and shrinks like $1/\\sqrt{n}$.",
       "figure": {
         "id": "ci-wall",
-        "beat": "interval"
+        "beat": "interval",
+        "params": {
+          "n": 10,
+          "gamma": 0.95,
+          "law": 0,
+          "method": 0
+        }
       },
       "live": [
         "\\lv{xbar}{\\bar{x}} \\pm \\lv{t}{t_{\\gamma}}\\,\\dfrac{\\lv{s}{s}}{\\sqrt{\\lval{n}}}, \\qquad \\lv{t}{t_{\\gamma}} = \\lres{t}",

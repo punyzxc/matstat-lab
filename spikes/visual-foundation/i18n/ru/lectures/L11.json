@@ -7,7 +7,6 @@
   "$n = 3$": "$n = 3$",
   "$n = 50$": "$n = 50$",
   "Unbiased variance": "Несмещённая оценка дисперсии",
-  "Dividing by $n$ underestimates the variance; dividing by $n - 1$ removes the bias.": "При делении на $n$ дисперсия занижается; деление на $n - 1$ устраняет смещение.",
   "With divisor $n$ the expectation is $\\frac{n-1}{n}\\sigma^2$: the spread around $\\bar{x}$ is smaller than around the true $a$, because $\\bar{x}$ is fitted to the same data. Dividing by $n - 1$ cancels that factor.": "С делителем $n$ математическое ожидание равно $\\frac{n-1}{n}\\sigma^2$: разброс вокруг $\\bar{x}$ меньше, чем вокруг истинного $a$, потому что $\\bar{x}$ подогнано к тем же данным. Деление на $n - 1$ убирает этот множитель.",
   "Confidence interval for the mean": "Доверительный интервал для среднего",
   "Widen the point into an interval that covers the true mean with a stated probability $\\gamma$. Its half-width grows with the spread $s$ and shrinks like $1/\\sqrt{n}$.": "Расширим точку до интервала, который накрывает истинное среднее с заданной вероятностью $\\gamma$. Его полуширина растёт с разбросом $s$ и убывает как $1/\\sqrt{n}$.",
@@ -29,5 +28,17 @@
   "Run the two-series test": "Проведите критерий для двух серий",
   "\\text{mean width } = \\lres{width}": "\\text{средняя ширина } = \\lres{width}",
   "\\text{coverage } \\lv{cover}{\\lres{cover}} \\quad \\text{vs} \\quad \\lv{gamma}{\\gamma} = \\lval{gamma}, \\qquad n = \\lval{n}": "\\text{доля накрытий } \\lv{cover}{\\lres{cover}} \\quad \\text{против} \\quad \\lv{gamma}{\\gamma} = \\lval{gamma}, \\qquad n = \\lval{n}",
-  "\\text{reject homogeneity when}\\quad |z| > z_{1-\\alpha/2}": "\\text{однородность отвергается, если}\\quad |z| > z_{1-\\alpha/2}"
+  "\\text{reject homogeneity when}\\quad |z| > z_{1-\\alpha/2}": "\\text{однородность отвергается, если}\\quad |z| > z_{1-\\alpha/2}",
+  "A cloud of estimates": "Облако оценок",
+  "Repeat the experiment many times. Every sample gives its own $\\bar{x}$, and the means gather into a cloud around the true $a$. The larger $n$, the tighter the cloud: its spread is $\\sigma/\\sqrt{n}$.": "Повторим опыт много раз. Каждая выборка даёт своё $\\bar{x}$, и средние собираются в облако вокруг истинного $a$. Чем больше $n$, тем плотнее облако: его разброс равен $\\sigma/\\sqrt{n}$.",
+  "Each violet brick is the mean of one whole sample. The cloud is centred on $a$ (no bias), and the ladder below shows the same experiment for $n = 2, 5, 10, 20, 50$: it narrows like $1/\\sqrt{n}$.": "Каждый фиолетовый кирпичик — среднее одной целой выборки. Облако стоит над $a$ (смещения нет), а лесенка внизу показывает тот же опыт при $n = 2, 5, 10, 20, 50$: облако сужается как $1/\\sqrt{n}$.",
+  "An estimate is consistent if it converges to the parameter in probability as $n \\to \\infty$. Here $D\\bar{x} = \\sigma^2/n \\to 0$, so by Chebyshev's inequality $P(|\\bar{x} - a| \\ge \\varepsilon) \\le \\dfrac{\\sigma^2}{n\\varepsilon^2} \\to 0$.": "Оценка состоятельна, если она сходится к параметру по вероятности при $n \\to \\infty$. Здесь $D\\bar{x} = \\sigma^2/n \\to 0$, поэтому по неравенству Чебышёва $P(|\\bar{x} - a| \\ge \\varepsilon) \\le \\dfrac{\\sigma^2}{n\\varepsilon^2} \\to 0$.",
+  "Even for the skewed law the cloud of $\\bar{x}$ is close to normal: this is the central limit theorem from lecture 8 at work.": "Даже для асимметричного закона облако $\\bar{x}$ близко к нормальному: так работает центральная предельная теорема из лекции 8.",
+  "$n = 2$": "$n = 2$",
+  "$n = 20$": "$n = 20$",
+  "$n = 30$": "$n = 30$",
+  "$\\sigma = 2$": "$\\sigma = 2$",
+  "a skewed law": "асимметричный закон",
+  "The same samples feed two formulas for the variance. Dividing by $n$ underestimates $\\sigma^2$ on average; dividing by $n - 1$ removes the bias.": "Одни и те же выборки идут в две формулы дисперсии. Деление на $n$ в среднем занижает $\\sigma^2$; деление на $n - 1$ убирает смещение.",
+  "Coral is divisor $n$, cyan is divisor $n - 1$. Both histograms are built from the very same samples, yet the coral mean stops short of the yellow line $\\sigma^2$, and the gap is about $\\sigma^2/n$.": "Коралловый цвет — делитель $n$, голубой — делитель $n - 1$. Обе гистограммы строятся по одним и тем же выборкам, но коралловое среднее не доходит до жёлтой линии $\\sigma^2$, и зазор близок к $\\sigma^2/n$."
 }
