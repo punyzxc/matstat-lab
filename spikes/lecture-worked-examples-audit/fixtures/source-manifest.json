@@ -1,0 +1,66 @@
+{
+  "source_commit": "8dfee73781e39d6946d76c07866f2a0534a3d988",
+  "pypdf_version": "6.21.4",
+  "lectures": [
+    {
+      "lecture": "L01",
+      "pages": 31,
+      "sha256": "6773d77eda9ae190bcce4af5ebed7e825db78087dd2cada2b07f046b683f5a37"
+    },
+    {
+      "lecture": "L02",
+      "pages": 7,
+      "sha256": "f4afe85d5ca5622bfdf5f2b91944998342c17043fe79ce1ec128771c6073d17b"
+    },
+    {
+      "lecture": "L03",
+      "pages": 12,
+      "sha256": "46464180b701926270e838b0cfbfa310f3b547c466ed8162d42df89587e693e9"
+    },
+    {
+      "lecture": "L04",
+      "pages": 5,
+      "sha256": "88935efa83517d93254d5a7adab248d892423326b6b46da6eaf522dce0ddb3e3"
+    },
+    {
+      "lecture": "L05",
+      "pages": 11,
+      "sha256": "43a5e64c0e3d701d3358b0be0f174efb613cafcf5db0e32e2a4120fb829420dd"
+    },
+    {
+      "lecture": "L06",
+      "pages": 43,
+      "sha256": "6b5d0c4b6da0e16304caec1e390631c0e118f5b9dd578b9cdcc0164ae7573295"
+    },
+    {
+      "lecture": "L07",
+      "pages": 7,
+      "sha256": "11e13c039c72e3212520076d03bb0442f2252fd39ff1dcf2ea6dff8dae3b0c4d"
+    },
+    {
+      "lecture": "L08",
+      "pages": 5,
+      "sha256": "ed8cbe64e05bfc6e4613c2a0a67bdcdc05c40254c5895b46c6cd704b030faf06"
+    },
+    {
+      "lecture": "L09",
+      "pages": 8,
+      "sha256": "dc0c290e58d88845b3b55b70d5b7c2dfc7e09124492e08a904741c52eebac0fc"
+    },
+    {
+      "lecture": "L10",
+      "pages": 14,
+      "sha256": "55facf445cd4f410c91ec1b9de982043595d41540ee02f5749420f36661860bb"
+    },
+    {
+      "lecture": "L11",
+      "pages": 14,
+      "sha256": "9ec7cfc9ba2f00a4aba72da19ed8b425df5e0c849a8efd2d8233a1c544f27eea"
+    },
+    {
+      "lecture": "L12",
+      "pages": 10,
+      "sha256": "2d91eabf46ca8ef162716667e2a63b74bf14025b071265bfd4411db4ab4e65b1"
+    }
+  ]
+}
