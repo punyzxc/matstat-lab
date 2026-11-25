@@ -5,6 +5,7 @@
 // Contract: docs/research/lecture-module-map.md; research: docs/research/lecture-limit-theorems.md.
 import { fixtureUint32 } from '../simulation-engine/engine.mjs';
 import { normalCdf, kolmogorovQuantile } from '../lecture-special-functions/special.mjs';
+import { CF_LAWS, empiricalPhi, tRange } from './charfn.mjs';
 
 /** Uniform on (0, 1), never 0 or 1, from one counter-based draw. */
 const uni = (seed, stream, i) => (fixtureUint32(seed, stream, i) + 0.5) / 2 ** 32;
@@ -371,6 +372,57 @@ function runClt({ law: li, n, R, view }, seed) {
   };
 }
 
+// ---------------------------------------------------------------- characteristic function (L9, #121)
+export const PHASOR_SHOWN = 240; // vectors drawn; the mean uses all n
+const CF_GRID = 241;
+const d4 = (v) => String(Number((Math.abs(v) < 5e-13 ? 0 : v).toPrecision(4)));
+const cTex = ([re, im]) => `${d4(re)} ${im < 0 ? '-' : '+'} ${d4(Math.abs(im))}\\,i`;
+
+function runCharfn({ law: li, t, motion, n, p, m, lambda, a, s }, seed) {
+  const law = CF_LAWS[li];
+  const q = { p, m, lambda, a, s };
+  const u = (k, i) => uni(seed, 1300 + 7 * k, i);
+  const xs = Array.from({ length: n }, (_, i) => law.draw(u, i, q));
+  const T = tRange(law, q);
+  const ts = grid(-T, T, CF_GRID);
+  const exact = ts.map((v) => law.phi(v, q)), emp = ts.map((v) => empiricalPhi(xs, v));
+  const ph = law.phi(t, q), eh = empiricalPhi(xs, t);
+  const band = 4 / Math.sqrt(n);
+  const symmetric = law.symmetric(q);
+  const near = (x, y) => Math.abs(x - y) <= band;
+  const readouts = [
+    { key: 're', label: `$\\operatorname{Re}\\varphi(t)$ at $t = ${t}$`, observed: r6(eh[0]), theory: r6(ph[0]), convention: `± ${fmt(band, 3)} (4 SE); ${near(eh[0], ph[0]) ? 'inside' : 'outside'}` },
+    { key: 'im', label: `$\\operatorname{Im}\\varphi(t)$ at $t = ${t}$`, observed: r6(eh[1]), theory: r6(ph[1] + 0), convention: symmetric ? 'symmetric law: $\\operatorname{Im}\\varphi \\equiv 0$' : `± ${fmt(band, 3)} (4 SE)` },
+    { key: 'abs', label: '$|\\varphi(t)|$, never above 1', observed: r6(Math.hypot(...eh)), theory: r6(Math.hypot(...ph)) },
+    { key: 'zero', label: '$\\varphi(0) = M\\,e^{0} = 1$', observed: r6(empiricalPhi(xs, 0)[0]), theory: 1 },
+  ];
+  const notes = [
+    'L9: the characteristic function is $\\varphi(t) = M e^{itX}$. Each value $x_j$ becomes the unit vector $e^{itx_j} = \\cos tx_j + i \\sin tx_j$; their mean is the empirical $\\hat\\varphi(t)$, which settles at $\\varphi(t)$ as $n$ grows.',
+    'Every vector has length 1, so their mean never leaves the unit disc: $|\\varphi(t)| \\le 1$, and $\\varphi(0) = 1$ because at $t = 0$ all vectors point to 1.',
+  ];
+  if (symmetric) notes.push('The law is symmetric about 0, so the vectors of $x$ and $-x$ are mirror images: the imaginary parts cancel and $\\operatorname{Im}\\varphi \\equiv 0$. The empirical one only wobbles about 0.');
+  if (law.id === 'bernoulli' || law.id === 'binomial' || law.id === 'poisson') notes.push('Integer values make $\\varphi$ periodic with period $2\\pi$: $e^{i(t + 2\\pi)k} = e^{itk}$.');
+  return {
+    readouts,
+    series: [
+      { id: 'reExact', kind: 'line', tone: 'signal', label: '$\\operatorname{Re}\\varphi(t)$', x: ts, y: exact.map((z) => z[0]) },
+      { id: 'imExact', kind: 'line', tone: 'accent', label: '$\\operatorname{Im}\\varphi(t)$', x: ts, y: exact.map((z) => z[1]) },
+      { id: 'reEmp', kind: 'line', tone: 'default', thin: true, label: `empirical, $n = ${n}$`, x: ts, y: emp.map((z) => z[0]) },
+      { id: 'imEmp', kind: 'line', tone: 'default', thin: true, x: ts, y: emp.map((z) => z[1]) },
+      { id: 't', kind: 'rule', tone: 'muted', label: `$t = ${t}$`, x: [t], y: [0] },
+    ],
+    axes: { x: '$t$', y: '$\\operatorname{Re}\\varphi$, $\\operatorname{Im}\\varphi$' },
+    domain: { x: [-T, T], y: [-1.05, 1.05] },
+    formula: [
+      `\\varphi(t) = M\\,e^{itX} = ${law.tex(q)}`,
+      `\\varphi(${t}) = ${cTex(ph)}, \\quad \\hat\\varphi(${t}) = \\dfrac{1}{n}\\sum_{j=1}^{n} e^{i t x_j} = ${cTex(eh)}`,
+    ],
+    phasor: { xs: xs.map((x) => r6(x)), shown: Math.min(n, PHASOR_SHOWN), T, t, motion: motion === 0, ts: ts.map(r6),
+      exact: exact.map((z) => [r6(z[0]), r6(z[1] + 0)]), symmetric },
+    notes,
+  };
+}
+
 // ---------------------------------------------------------------- contract
 const stationParams = {
   convolution: [
@@ -392,10 +444,22 @@ const stationParams = {
     { key: 'view', label: 'View (0 histogram, 1 distance vs $n$, 2 Poisson lemma)', min: 0, max: 2, step: 1, default: 0 },
   ],
 };
+stationParams.charfn = [
+  { key: 'law', label: 'Law (0 Bernoulli, 1 binomial, 2 Poisson, 3 uniform, 4 normal, 5 exponential)', min: 0, max: 5, step: 1, default: 4 },
+  { key: 'motion', label: 'Parameter $t$ (0 sweeps by itself, 1 stays at the typed value)', min: 0, max: 1, step: 1, default: 0 },
+  { key: 't', label: 'Value of $t$', min: -20, max: 20, step: 0.01, default: 1 },
+  { key: 'n', label: 'Sample size $n$', min: 10, max: 5000, step: 10, default: 500 },
+  { key: 'p', label: 'Probability $p$', min: 0.01, max: 0.99, step: 0.01, default: 0.3, when: { law: [0, 1] } },
+  { key: 'm', label: 'Trials $m$', min: 1, max: 30, step: 1, default: 10, when: { law: [1] } },
+  { key: 'lambda', label: 'Rate $\\lambda$', min: 0.1, max: 10, step: 0.1, default: 2, when: { law: [2, 5] } },
+  { key: 'a', label: 'Centre $a$', min: -3, max: 3, step: 0.1, default: 0, when: { law: [3, 4] } },
+  { key: 's', label: 'Spread $s$ (half-width or $\\sigma$)', min: 0.1, max: 3, step: 0.1, default: 1, when: { law: [3, 4] } },
+];
 export const stations = Object.freeze({
   convolution: { params: stationParams.convolution, live: true },
   lln: { params: stationParams.lln },
   clt: { params: stationParams.clt },
+  charfn: { params: stationParams.charfn, live: true },
 });
 export const meta = {
   id: 'lecture-limit-theorems',
@@ -407,5 +471,10 @@ export const meta = {
 export function run(params, { seed, station = 'clt' } = {}) {
   if (station === 'convolution') return runConvolution(params, seed);
   if (station === 'lln') return runConvergence(params, seed);
+  if (station === 'charfn') {
+    const q = Object.fromEntries(stationParams.charfn.map((d) => [d.key, Number.isFinite(params?.[d.key]) ? params[d.key] : d.default]));
+    if (!Number.isInteger(q.n) || q.n < 1) throw new Error('n must be a positive integer.');
+    return runCharfn(q, seed);
+  }
   return runClt(params, seed);
 }

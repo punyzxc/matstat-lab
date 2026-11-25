@@ -96,6 +96,13 @@ export type BayesTree = {
   priors: number[]; lik: number[]; joint: number[]; pA: number; post: number[] | null;
   H: number[]; HA: number[]; A: number; n: number; particles: number[][]; keys: string[];
 };
+/**
+ * The characteristic function on the complex plane (#121): the sample `xs`, how many vectors to draw (`shown`), the
+ * t range [-T, T], the typed `t`, whether t sweeps by itself (`motion`), and the exact φ on the grid `ts` as [re, im].
+ */
+export type Phasor = {
+  xs: number[]; shown: number; T: number; t: number; motion: boolean; ts: number[]; exact: [number, number][]; symmetric: boolean;
+};
 export type KernelResult = {
   readouts: Readout[];
   series: Series[];
@@ -115,6 +122,7 @@ export type KernelResult = {
   board?: Board;
   square?: EventSquare;
   tree?: BayesTree;
+  phasor?: Phasor;
 };
 export type Kernel = {
   meta: KernelMeta;

@@ -14,7 +14,19 @@
       "formula": [
         "\\varphi(t) = M e^{it\\xi}",
         "\\varphi_{\\xi+\\eta}(t) = \\varphi_\\xi(t)\\, \\varphi_\\eta(t)"
-      ]
+      ],
+      "experiment": {
+        "station": "charfn",
+        "seed": 121,
+        "params": {
+          "law": 5,
+          "motion": 0,
+          "t": 1,
+          "n": 800,
+          "lambda": 1
+        },
+        "label": "Spin the unit vectors of the characteristic function"
+      }
     },
     {
       "title": "Exact versus approximate",
