@@ -2,39 +2,285 @@
   "lecture": 10,
   "title": "Samples and goodness of fit",
   "scientists": [
+    "glivenko",
     "kolmogorov",
     "pearson"
   ],
+  "status": "draft",
+  "story": true,
   "steps": [
     {
-      "title": "Variation series and histogram",
-      "idea": "Sort the sample, group it into intervals and draw the histogram and the empirical distribution function.",
-      "formula": [
-        "k \\approx 5 \\lg n \\quad \\text{intervals}",
-        "F_n(x) = \\dfrac{\\#\\{\\, i : x_i \\le x \\,\\}}{n}"
+      "title": "A sample leaves the population",
+      "idea": "Statistics starts from a population: all the values the experiment could give, here $N = 5000$ of them spread as the law dictates. We see only a sample: $n$ members picked at random. Everything that follows is computed from those $n$ numbers alone.",
+      "figure": {
+        "id": "sample-life",
+        "beat": "draw",
+        "params": {
+          "law": 0,
+          "n": 40,
+          "bins": 0
+        }
+      },
+      "live": [
+        "x_1, x_2, \\dots, x_{\\lval{n}}, \\qquad \\lv{xbar}{\\bar{x}} = \\dfrac{1}{n}\\sum_{i=1}^{n} x_i = \\lres{xbar} \\approx \\lv{a}{a} = \\lres{a}"
       ],
-      "experiment": {
-        "station": "sample",
-        "seed": 1010
+      "whatIf": [
+        {
+          "label": "$n = 10$",
+          "params": {
+            "n": 10
+          }
+        },
+        {
+          "label": "$n = 400$",
+          "params": {
+            "n": 400
+          }
+        },
+        {
+          "label": "exponential law",
+          "params": {
+            "law": 2
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "The grey cloud is the population: its outline is the density $f(x)$. The yellow dots are the sample. A small sample can sit off-centre; a large one copies the cloud.",
+        "definition": "A sample of size $n$ is $n$ independent observations $x_1, \\dots, x_n$ of a random variable $\\xi$, all with the law of $\\xi$. The law of $\\xi$ is the law of the population."
+      },
+      "portals": [
+        {
+          "lecture": 11,
+          "step": 2
+        }
+      ]
+    },
+    {
+      "title": "The variation series",
+      "idea": "Sort the observations: the sample becomes the variation series. Each dot moves to its rank, and its height is its value. The ends of the series are the extremes, its middle is the median.",
+      "figure": {
+        "id": "sample-life",
+        "beat": "sort"
+      },
+      "live": [
+        "\\lv{xmin}{x_{(1)}} = \\lres{xmin} \\le x_{(2)} \\le \\dots \\le \\lv{xmax}{x_{(n)}} = \\lres{xmax}",
+        "\\lv{range}{R} = x_{(n)} - x_{(1)} = \\lres{range}, \\qquad \\lv{med}{\\tilde{x}} = \\lres{med}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 10$",
+          "params": {
+            "n": 10
+          }
+        },
+        {
+          "label": "$n = 200$",
+          "params": {
+            "n": 200
+          }
+        },
+        {
+          "label": "uniform law",
+          "params": {
+            "law": 1
+          }
+        }
+      ],
+      "layers": {
+        "definition": "The variation series is the sample sorted in non-decreasing order, $x_{(1)} \\le x_{(2)} \\le \\dots \\le x_{(n)}$. The value $x_{(r)}$ is the $r$-th order statistic."
       }
     },
     {
-      "title": "Kolmogorov test",
-      "idea": "The largest gap between the empirical and the hypothesised distribution function tells whether the law fits.",
-      "formula": [
-        "D_n = \\sup_x \\bigl|F_n(x) - F(x)\\bigr|, \\qquad \\lambda = D_n\\sqrt{n}"
+      "title": "The frequency table",
+      "idea": "Cut the range into $k$ equal intervals and count the observations in each: the dots fall into stacks. The top row of the table is the counts $m_r$, the second row the relative frequencies $W_r = m_r/n$.",
+      "figure": {
+        "id": "sample-life",
+        "beat": "table",
+        "params": {
+          "n": 100
+        }
+      },
+      "live": [
+        "\\lv{k}{k} \\approx 5 \\lg \\lval{n} \\;\\Rightarrow\\; k = \\lres{k}",
+        "\\lv{h}{h} = \\dfrac{x_{(n)} - x_{(1)}}{k} = \\lres{h}",
+        "\\sum_{r=1}^{k} \\lv{mr}{m_r} = \\lres{sum} = n, \\qquad W_r = \\dfrac{m_r}{n}"
       ],
+      "whatIf": [
+        {
+          "label": "$k = 4$",
+          "params": {
+            "bins": 4
+          }
+        },
+        {
+          "label": "$k = 20$",
+          "params": {
+            "bins": 20
+          }
+        },
+        {
+          "label": "$n = 1000$",
+          "params": {
+            "n": 1000
+          }
+        }
+      ],
+      "layers": {
+        "details": "The last interval is closed, $[e_{k-1}, x_{(n)}]$, so the largest observation is counted. The rule $k \\approx 5 \\lg n$ is a habit, not a law: too few intervals hide the shape, too many turn it into noise."
+      }
+    },
+    {
+      "title": "The histogram",
+      "idea": "Turn each stack into a bar of height $H_r = W_r/h$. The total area of the bars is exactly one, so the histogram is an estimate of the density, and it can be laid over the curve $f(x)$.",
+      "figure": {
+        "id": "sample-life",
+        "beat": "hist"
+      },
+      "live": [
+        "H_r = \\dfrac{W_r}{\\lv{h}{h}}, \\qquad \\sum_{r=1}^{k} H_r h = \\lres{area}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 1000$",
+          "params": {
+            "n": 1000
+          }
+        },
+        {
+          "label": "exponential law",
+          "params": {
+            "law": 2
+          }
+        },
+        {
+          "label": "$k = 30$",
+          "params": {
+            "bins": 30
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Dots that were stacked are now spread over the bar: each still is one observation. More observations give a histogram that hugs the density closer."
+      }
+    },
+    {
+      "title": "The empirical distribution function",
+      "idea": "Each observation now lifts a staircase by $1/n$: the empirical distribution function $F_n^*(x)$ is the share of observations not greater than $x$. The dashed curve is the true $F(x)$; the staircase hugs it.",
+      "figure": {
+        "id": "sample-life",
+        "beat": "ecdf",
+        "params": {
+          "n": 40
+        }
+      },
+      "live": [
+        "\\lv{Fn}{F_n^*(x)} = \\dfrac{\\#\\{\\, i : x_i \\le x \\,\\}}{\\lval{n}}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 10$",
+          "params": {
+            "n": 10
+          }
+        },
+        {
+          "label": "$n = 1000$",
+          "params": {
+            "n": 1000
+          }
+        },
+        {
+          "label": "uniform law",
+          "params": {
+            "law": 1
+          }
+        }
+      ],
+      "layers": {
+        "details": "Glivenko's theorem: $\\sup_x |F_n^*(x) - F(x)| \\to 0$ with probability one as $n \\to \\infty$. The whole staircase, not just one point of it, converges to $F$. At a repeated value the staircase jumps by $m/n$ in one step."
+      },
+      "scientists": [
+        "glivenko"
+      ]
+    },
+    {
+      "title": "One sample, four portraits",
+      "idea": "The sample, its variation series, its histogram and its empirical distribution function side by side. Hover any dot: the same observation lights up in all four, with its rank, its interval and its step.",
+      "figure": {
+        "id": "sample-life",
+        "beat": "linked",
+        "params": {
+          "n": 40
+        }
+      },
+      "live": [
+        "\\lv{n}{n} = \\lval{n}, \\qquad \\lv{k}{k} = \\lres{k}, \\qquad \\lv{xbar}{\\bar{x}} = \\lres{xbar}, \\qquad \\lv{s2}{s^2} = \\lres{s2}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 100$",
+          "params": {
+            "n": 100
+          }
+        },
+        {
+          "label": "exponential law",
+          "params": {
+            "law": 2
+          }
+        }
+      ]
+    },
+    {
+      "title": "Kolmogorov test",
+      "idea": "Is the law of the population really $F$? Measure the largest vertical gap $D_n$ between the staircase and $F$. Kolmogorov found the law of $\\sqrt{n}\\, D_n$, the same for every continuous $F$, so a large gap can be judged.",
+      "figure": {
+        "id": "sample-life",
+        "beat": "gap",
+        "params": {
+          "n": 40
+        }
+      },
+      "live": [
+        "\\lv{dn}{D_n} = \\sup_x \\bigl|F_n^*(x) - F(x)\\bigr| = \\lres{dn}",
+        "\\lv{lambda}{\\sqrt{n}\\, D_n} = \\lres{lambda}, \\qquad \\lv{crit}{\\lambda_n(\\alpha)} = \\lres{crit}",
+        "H_0 \\text{ is rejected when } D_n \\ge \\lambda_n(\\alpha)"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 10$",
+          "params": {
+            "n": 10
+          }
+        },
+        {
+          "label": "$n = 1000$",
+          "params": {
+            "n": 1000
+          }
+        }
+      ],
+      "layers": {
+        "details": "The test needs a continuous $F$ with every parameter known in advance. When the parameters are estimated from the same sample, the critical values no longer hold: use Pearson's test instead."
+      },
       "scientists": [
         "kolmogorov"
       ],
       "experiment": {
         "station": "fit",
-        "seed": 1933
-      }
+        "seed": 1933,
+        "label": "Test a law against the sample"
+      },
+      "portals": [
+        {
+          "lecture": 12,
+          "step": 2
+        }
+      ]
     },
     {
       "title": "Pearson $\\chi^2$ test",
-      "idea": "Compare observed and expected counts in each interval.",
+      "idea": "Compare observed and expected counts in each interval. Under $H_0$ the sum of squared, scaled differences follows the $\\chi^2$ law with $s - 1 - r$ degrees of freedom, where $r$ parameters were estimated.",
       "formula": [
         "\\chi^2 = \\sum_{i=1}^{s} \\dfrac{(n_i - np_i)^2}{np_i}"
       ],
@@ -46,6 +292,5 @@
         "seed": 1900
       }
     }
-  ],
-  "status": "draft"
+  ]
 }
