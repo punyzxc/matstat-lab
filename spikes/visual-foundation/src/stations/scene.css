@@ -75,6 +75,24 @@ html:has(.orbital-lab) body {
 .lab-session > i {
   display: none;
 }
+/* The language switch: a quiet mono tag at the end of the tools; it names the language it switches to. */
+.lab-session .lab-lang {
+  min-width: 30px;
+  height: 22px;
+  justify-content: center;
+  margin-left: 4px;
+  padding: 0 6px;
+  border: 1px solid #ffffff1f;
+  border-radius: 999px;
+  font: 500 10px var(--mono);
+  letter-spacing: 0.08em;
+  color: var(--quiet);
+}
+.lab-session .lab-lang:hover,
+.lab-session .lab-lang:focus-visible {
+  border-color: #e8e48566;
+  color: var(--signal);
+}
 
 /* Lecture station cards share the instrument preview frame. */
 .station-card {

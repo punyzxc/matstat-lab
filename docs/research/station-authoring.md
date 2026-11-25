@@ -124,6 +124,18 @@ Then run the lab (`cd spikes/visual-foundation && npm ci && npm run dev -- --hos
 `http://127.0.0.1:4175/#station/dice-template`. A lecture step links to it with
 `"experiment": { "station": "dice-template", "seed": 5, "params": { "n": 1200 } }` (`lectures/README.md`).
 
+### Russian
+
+The lab opens in Russian; the **EN** switch shows English (`spikes/visual-foundation/i18n/README.md`). Write the
+kernel and the catalog entry in English, then:
+
+- add the station's Russian `name` and `summary` to the `ru` table under `stations` in `catalog.ts`;
+- write `spikes/visual-foundation/i18n/ru/kernels/<kernel>.json` (start from `station-template.json`): every text
+  the kernel shows, with `[[1]]`, `[[2]]`… for computed parts. `node tests/i18n-kernel-texts.mjs <kernel>` lists
+  what is left; terms follow `i18n/glossary.md`.
+
+`tests/i18n.test.mjs` fails while any text of the kernel stays English.
+
 ## 4. The owner's checklist (every station must pass)
 
 From @punyzxc, 2026-11-25. Review against this before you open the PR.
@@ -134,6 +146,7 @@ From @punyzxc, 2026-11-25. Review against this before you open the PR.
       one more draw (N), start over and pace; do not add your own.
 - [ ] **Keyboard input everywhere.** Every value a person might want is a parameter, so it can be typed;
       the experiment reacts at once.
+- [ ] **Russian first.** Every text in Russian with the Russian terms of the course; English only on the EN switch.
 - [ ] **Textbook formulas.** Every formula in `$…$` (KaTeX), `\dfrac` for fractions; `kernel-math.test.mjs` is green.
 - [ ] **Real data only.** Every curve, stem and number comes from the seeded run or from exact theory; nothing
       decorative that is not live.

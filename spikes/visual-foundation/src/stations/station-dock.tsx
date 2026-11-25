@@ -7,10 +7,11 @@ class StationBoundary extends Component<{ children: ReactNode }, { error: string
     return { error: e instanceof Error ? e.message : String(e) };
   }
   render() {
-    return this.state.error ? <p className="station-status" role="alert">This station failed to render: {this.state.error}</p> : this.props.children;
+    return this.state.error ? <p className="station-status" role="alert">{t('This station failed to render: ', 'Станцию не удалось отрисовать: ')}{this.state.error}</p> : this.props.children;
   }
 }
 import { X } from 'lucide-react';
+import { t } from '../i18n';
 
 /**
  * A station or drawer opened inside the scene. The scene, the header and the orbit switcher stay
@@ -58,7 +59,7 @@ export function SceneDock({
           <h2 id="dock-title" tabIndex={-1}>{title}</h2>
           {lead && <p className="scene-dock-lead">{lead}</p>}
         </div>
-        <button type="button" className="scene-dock-close" onClick={onClose} aria-label={`Close ${title}`} title="Close (Esc)">
+        <button type="button" className="scene-dock-close" onClick={onClose} aria-label={t(`Close ${title}`, `Закрыть: ${title}`)} title={t('Close (Esc)', 'Закрыть (Esc)')}>
           <X size={17} aria-hidden="true" />
         </button>
       </header>

@@ -1,0 +1,21 @@
+{
+  "// ": "Charts of the prototype instruments (src/stations/method-series.ts), not a kernel.",
+  "number of observations $k$": "число наблюдений $k$",
+  "running mean $\\bar{x}_k$": "скользящее среднее $\\bar{x}_k$",
+  "$\\mu \\pm 2\\sigma/\\sqrt{k}$ (theory)": "$\\mu \\pm 2\\sigma/\\sqrt{k}$ (теория)",
+  "$\\bar{x}_k$ (this sample)": "$\\bar{x}_k$ (эта выборка)",
+  "value x": "значение $x$",
+  "density": "плотность",
+  "sample histogram": "гистограмма выборки",
+  "true $\\mu = [[1]]$": "истинное $\\mu = [[1]]$",
+  "interval for $\\mu$": "интервал для $\\mu$",
+  "95% Chebyshev interval $\\bar{x}_k \\pm \\sqrt{\\sigma^2/0.05k}$": "95% интервал Чебышёва $\\bar{x}_k \\pm \\sqrt{\\sigma^2/0.05k}$",
+  "$K$ = observations above the model median": "$K$ — число наблюдений выше медианы модели",
+  "$P(K = k)$ under $H_0$": "$P(K = k)$ при $H_0$",
+  "as or more extreme (p-value)": "столь же или более крайние ($p$-значение)",
+  "observed $K = [[1]]$": "наблюдаемое $K = [[1]]$",
+  "number of runs $R$": "число серий $R$",
+  "approximate density under $H_0$": "приближённая плотность при $H_0$",
+  "normal approximation to R under randomness": "нормальное приближение для $R$ при случайном порядке",
+  "observed $R = [[1]]$": "наблюдаемое $R = [[1]]$"
+}

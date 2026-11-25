@@ -1,0 +1,10 @@
+{
+  "Samples and goodness of fit": "Выборки и критерии согласия",
+  "Variation series and histogram": "Вариационный ряд и гистограмма",
+  "Sort the sample, group it into intervals and draw the histogram and the empirical distribution function.": "Упорядочим выборку, сгруппируем её по интервалам и построим гистограмму и эмпирическую функцию распределения.",
+  "k \\approx 5 \\lg n \\quad \\text{intervals}": "k \\approx 5 \\lg n \\quad \\text{интервалов}",
+  "Kolmogorov test": "Критерий Колмогорова",
+  "The largest gap between the empirical and the hypothesised distribution function tells whether the law fits.": "Наибольшее расхождение между эмпирической и гипотетической функциями распределения показывает, согласуется ли с данными выбранный закон.",
+  "Pearson $\\chi^2$ test": "Критерий $\\chi^2$ Пирсона",
+  "Compare observed and expected counts in each interval.": "Сравним наблюдаемые и ожидаемые частоты в каждом интервале."
+}

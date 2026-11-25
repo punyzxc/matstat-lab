@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SvgMathText, Tex } from '../math';
+import { t, useLang } from '../i18n';
 import { useStationReducedMotion } from '../motion-preference';
 import type { Decisions } from './kernel-contract';
 
@@ -26,16 +27,18 @@ const jitter = (k: number) => {
   return ((h >>> 0) % 10000) / 10000;
 };
 
-const META: Record<Cell, { tex: string; note: string; error: boolean }> = {
-  'h0-keep': { tex: '1 - \\alpha', note: 'correct', error: false },
-  'h0-reject': { tex: '\\alpha', note: 'type I error', error: true },
-  'h1-keep': { tex: '\\beta', note: 'type II error', error: true },
-  'h1-reject': { tex: '1 - \\beta', note: 'correct: the power', error: false },
+const META: Record<Cell, { tex: string; note: () => string; error: boolean }> = {
+  'h0-keep': { tex: '1 - \\alpha', note: () => t('correct', 'верно'), error: false },
+  'h0-reject': { tex: '\\alpha', note: () => t('type I error', 'ошибка I рода'), error: true },
+  'h1-keep': { tex: '\\beta', note: () => t('type II error', 'ошибка II рода'), error: true },
+  'h1-reject': { tex: '1 - \\beta', note: () => t('correct: the power', 'верно: мощность'), error: false },
 };
-const fmt = (v: number | null | undefined, d = 3) => (v == null || !Number.isFinite(v) ? '—' : v.toFixed(d));
+const fmt = (v: number | null | undefined, d = 3) => (v == null || !Number.isFinite(v) ? '—' : t(v.toFixed(d), v.toFixed(d).replace('.', ',')));
+const texNum = (v: number | null | undefined) => (v == null || !Number.isFinite(v) ? '—' : t(v.toFixed(3), v.toFixed(3).replace('.', '{,}')));
 
 export function DecisionZones({ decisions, drawKey, experimentKey }: { decisions: Decisions; drawKey: number; experimentKey: string }) {
   const reduced = useStationReducedMotion();
+  useLang();
   const [state, setState] = useState(() => ({ key: experimentKey, dots: [] as Dot[], counts: { 'h0-keep': 0, 'h0-reject': 0, 'h1-keep': 0, 'h1-reject': 0 } as Record<Cell, number>, next: 0, seen: new Set<string>() }));
   const last = useRef<string>('');
   useEffect(() => {
@@ -72,20 +75,20 @@ export function DecisionZones({ decisions, drawKey, experimentKey }: { decisions
     'h1-reject': decisions.theory.power,
   }), [decisions.theory]);
   const cells: Cell[] = ['h0-keep', 'h0-reject', 'h1-keep', 'h1-reject'];
-  const summary = cells.map((c) => `${META[c].note} ${counts[c]}`).join(', ');
+  const summary = cells.map((c) => `${META[c].note()} ${counts[c]}`).join(', ');
 
   return (
-    <section className="decision-zones" aria-label="Decision zones" data-truth={decisions.truth}>
+    <section className="decision-zones" aria-label={t('Decision zones', 'Зоны решений')} data-truth={decisions.truth}>
       <p className="decision-zones-head">
-        <b>Stream of decisions</b> · each dot is one experiment of this draw, tested at the rule above ·
-        now flowing: <Tex tex={decisions.truth === 0 ? 'H_0 \\text{ true}' : 'H_1 \\text{ true}'} />
+        <b>{t('Stream of decisions', 'Поток решений')}</b> · {t('each dot is one experiment of this draw, tested by the rule above · now flowing: ', 'каждая точка — один опыт этой серии, проверенный правилом выше · сейчас идут опыты, где ')}
+        <Tex tex={decisions.truth === 0 ? t('H_0 \\text{ true}', '\\text{верна } H_0') : t('H_1 \\text{ true}', '\\text{верна } H_1')} />
       </p>
       <div className="decision-zones-stage">
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Decision zones: ${summary}`} data-reduced={reduced || undefined}>
-          <SvgMathText className="dz-col" x={SIDE + cw / 2} y={22} anchor="middle" width={160} text="keep $H_0$" />
-          <SvgMathText className="dz-col" x={SIDE + cw * 1.5} y={22} anchor="middle" width={160} text="reject $H_0$" />
-          <SvgMathText className="dz-row" x={SIDE - 10} y={HEAD + ch / 2 + 4} anchor="end" width={84} text="$H_0$ true" />
-          <SvgMathText className="dz-row" x={SIDE - 10} y={HEAD + ch * 1.5 + 4} anchor="end" width={84} text="$H_1$ true" />
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${t('Decision zones', 'Зоны решений')}: ${summary}`} data-reduced={reduced || undefined}>
+          <SvgMathText className="dz-col" x={SIDE + cw / 2} y={22} anchor="middle" width={160} text={t('keep $H_0$', 'принять $H_0$')} />
+          <SvgMathText className="dz-col" x={SIDE + cw * 1.5} y={22} anchor="middle" width={160} text={t('reject $H_0$', 'отвергнуть $H_0$')} />
+          <SvgMathText className="dz-row" x={SIDE - 10} y={HEAD + ch / 2 + 4} anchor="end" width={84} text={t('$H_0$ true', 'верна $H_0$')} />
+          <SvgMathText className="dz-row" x={SIDE - 10} y={HEAD + ch * 1.5 + 4} anchor="end" width={84} text={t('$H_1$ true', 'верна $H_1$')} />
           {cells.map((c) => {
             const b = cellBox(c);
             return (
@@ -93,7 +96,7 @@ export function DecisionZones({ decisions, drawKey, experimentKey }: { decisions
                 data-active={(row(c) === 0) === (decisions.truth === 0) || undefined}>
                 <rect x={b.x + 3} y={b.y + 3} width={cw - 6} height={ch - 6} rx={4} />
                 <text className="dz-count" x={b.x + cw - 14} y={b.y + 22}>{counts[c]}</text>
-                <text className="dz-note" x={b.x + 14} y={b.y + 22}>{META[c].note}</text>
+                <text className="dz-note" x={b.x + 14} y={b.y + 22}>{META[c].note()}</text>
               </g>
             );
           })}
@@ -105,17 +108,17 @@ export function DecisionZones({ decisions, drawKey, experimentKey }: { decisions
           </g>
         </svg>
       </div>
-      <table className="decision-shares" aria-label="Zone shares">
+      <table className="decision-shares" aria-label={t('Zone shares', 'Доли зон')}>
         <thead>
-          <tr><th scope="col">Zone</th><th scope="col">Count</th><th scope="col">Share of its row</th><th scope="col">Theory</th></tr>
+          <tr><th scope="col">{t('Zone', 'Зона')}</th><th scope="col">{t('Count', 'Число')}</th><th scope="col">{t('Share of its row', 'Доля в строке')}</th><th scope="col">{t('Theory', 'Теория')}</th></tr>
         </thead>
         <tbody>
           {cells.map((c) => (
             <tr key={c} data-cell={c}>
-              <th scope="row">{row(c) === 0 ? <Tex tex="H_0" /> : <Tex tex="H_1" />} true, {col(c) === 0 ? 'keep' : 'reject'} · {META[c].note}</th>
+              <th scope="row">{t('true ', 'верна ')}{row(c) === 0 ? <Tex tex="H_0" /> : <Tex tex="H_1" />}, {col(c) === 0 ? t('keep', 'принять') : t('reject', 'отвергнуть')} · {META[c].note()}</th>
               <td>{counts[c]}</td>
               <td>{fmt(share(c))}</td>
-              <td><Tex tex={`${META[c].tex} = ${fmt(theory[c])}`} /></td>
+              <td><Tex tex={`${META[c].tex} = ${texNum(theory[c])}`} /></td>
             </tr>
           ))}
         </tbody>

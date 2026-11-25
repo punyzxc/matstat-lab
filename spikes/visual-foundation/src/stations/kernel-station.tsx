@@ -10,15 +10,36 @@ import { Chart } from './chart';
 import { Surface3D } from './surface-3d';
 import { MathText, Tex, mathToPlain } from '../math';
 import { DecisionZones } from './decision-zones';
+import { kernelText, locale, plural, t, texDec, useLang } from '../i18n';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
 const sources = import.meta.glob('../../../*/kernel.mjs');
 const keyFor = (kernel: string) => `../../../${kernel}/kernel.mjs`;
 export const kernelAvailable = (kernel: string) => keyFor(kernel) in sources;
 
-const format = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 5 });
+const formats = new Map<string, Intl.NumberFormat>();
+const format = (v: number) => {
+  let f = formats.get(locale());
+  if (!f) formats.set(locale(), (f = new Intl.NumberFormat(locale(), { maximumSignificantDigits: 5 })));
+  return f.format(v).replace(/\u00a0/g, '\u2009');
+};
 const show = (v: number | string | null | undefined) =>
-  v == null ? '—' : typeof v === 'number' ? (Number.isFinite(v) ? format.format(v) : String(v)) : v;
+  v == null ? '—' : typeof v === 'number' ? (Number.isFinite(v) ? format(v) : String(v)) : v;
+
+/** A kernel's output with every text in the current language (numbers stay numbers). */
+function localizeResult(kernel: string, r: KernelResult): KernelResult {
+  const k = <T extends string | undefined>(s: T) => kernelText(kernel, s) as T;
+  const v = (x: number | string | null | undefined) => (typeof x === 'string' ? k(x) : x);
+  return {
+    readouts: r.readouts.map((x) => ({ ...x, label: k(x.label), convention: k(x.convention), unit: k(x.unit), observed: v(x.observed), theory: v(x.theory) })),
+    series: r.series.map((s) => (s.label ? { ...s, label: k(s.label) } : s)),
+    notes: r.notes.map((n) => k(n)),
+    axes: r.axes && { x: k(r.axes.x), y: k(r.axes.y) },
+    surface: r.surface && { ...r.surface, title: k(r.surface.title), sampleLabel: k(r.surface.sampleLabel), labels: { x: k(r.surface.labels.x), y: k(r.surface.labels.y), z: k(r.surface.labels.z) } },
+    formula: r.formula?.map((line) => texDec(k(line))),
+    decisions: r.decisions,
+  };
+}
 /** A readout cell: numbers formatted, text with `$…$` formulas typeset. */
 const cell = (v: number | string | null | undefined) => <MathText text={show(v)} />;
 
@@ -57,8 +78,8 @@ export function KernelStation({
 }) {
   const load = useKernel(station.kernel);
   if (load.state === 'missing') return <PendingStation station={station} />;
-  if (load.state === 'loading') return <p className="station-status" role="status">Loading the {station.name} kernel…</p>;
-  if (load.state === 'error') return <p className="station-status" role="alert">The kernel failed to load: {load.message}</p>;
+  if (load.state === 'loading') return <p className="station-status" role="status">{t(`Loading the ${station.name} kernel…`, `Загрузка ядра станции «${station.name}»…`)}</p>;
+  if (load.state === 'error') return <p className="station-status" role="alert">{t('The kernel failed to load: ', 'Ядро не загрузилось: ')}{load.message}</p>;
   return <ReadyStation station={station} kernel={load.kernel} seed={seed} params={params} onState={onState} />;
 }
 
@@ -73,7 +94,10 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
   station: KernelStationInfo; kernel: Kernel; seed: number; params: Record<string, number>;
   onState: (seed: number, params: Record<string, number>) => void;
 }) {
+  const lang = useLang();
   const declared = kernel.stations?.[station.id]?.params ?? kernel.meta.params;
+  /** Parameter labels in the current language, for display only (keys and ranges are the kernel's). */
+  const labelled = useMemo(() => declared.map((p) => ({ ...p, label: kernelText(station.kernel, p.label) })), [declared, station.kernel, lang]);
   const size = useMemo(() => sizeParamOf(declared), [declared]);
   const resolved = useMemo(() => resolveParams(declared, paramsProp), [declared, paramsProp]);
   const [params, setParams] = useState(resolved);
@@ -98,10 +122,12 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
     if (!outcome) return null;
     if (!outcome.ok) return { error: outcome.error };
     const out = outcome.result as Partial<KernelResult> | null;
-    if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series)) return { error: 'The kernel returned no readouts or series.' };
+    if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series)) return { error: t('The kernel returned no readouts or series.', 'Ядро не вернуло ни показаний, ни графиков.') };
     return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface,
       formula: Array.isArray(out.formula) ? out.formula.filter((l) => typeof l === 'string') : undefined, decisions: out.decisions };
   }, [outcome]);
+  /** What is on screen: the same result with its texts in the current language. */
+  const view = useMemo(() => (result && !('error' in result) ? localizeResult(station.kernel, result) : result), [result, station.kernel, lang]);
   const failed = Boolean(result && 'error' in result);
 
   // The URL always reproduces what is on screen (replaceState: no history entry per draw).
@@ -159,16 +185,17 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
   const trackKey = tracked && trackable.some((r) => r.key === tracked) ? tracked
     : (trackable.find((r) => numeric(r.theory)) ?? trackable[0])?.key ?? null;
 
-  const status = failed ? 'Stopped: the kernel rejected these parameters'
-    : growing && size ? `Growing the sample · ${mathToPlain(size.label).replace(/\s*\(.*\)$/, '')} ${fmtInt(job.params[size.key])} of ${fmtInt(params[size.key])}`
-    : `${playing ? 'Live' : 'Stopped'} · draw ${draws + 1} · seed ${seed}`;
+  const sizeName = size ? mathToPlain(kernelText(station.kernel, size.label)).replace(/\s*\(.*\)$/, '') : '';
+  const status = failed ? t('Stopped: the kernel rejected these parameters', 'Остановлено: ядро отклонило эти параметры')
+    : growing && size ? t(`Growing the sample · ${sizeName} ${fmtInt(job.params[size.key])} of ${fmtInt(params[size.key])}`, `Выборка растёт · ${sizeName} ${fmtInt(job.params[size.key])} из ${fmtInt(params[size.key])}`)
+    : t(`${playing ? 'Live' : 'Stopped'} · draw ${draws + 1} · seed ${seed}`, `${playing ? 'Идёт' : 'Остановлено'} · прогон ${draws + 1} · зерно ${seed}`);
 
   return (
     <div className="station-grid">
-      <Panel label="Station parameters" className="parameters">
-        <PanelHeading icon={<SlidersHorizontal size={16} aria-hidden />} title="Parameters" />
+      <Panel label={t('Station parameters', 'Параметры станции')} className="parameters">
+        <PanelHeading icon={<SlidersHorizontal size={16} aria-hidden />} title={t('Parameters', 'Параметры')} />
         <div className="parameter-body">
-          {declared.map((p) => {
+          {labelled.map((p) => {
             const choice = choicesOf(p);
             return choice ? (
               <Choice key={p.key} id={`p-${p.key}`} title={choice.title} options={choice.options} value={params[p.key]}
@@ -179,58 +206,58 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
             );
           })}
           <SeedField seed={seed} onSeed={(v) => { setSeed(v); setDraws(0); }} />
-          <p className="parameter-hint">Every change runs at once. Type exact values in the boxes: 0,5 · 20 000 · 1/3 · π/4.</p>
+          <p className="parameter-hint">{t('Every change runs at once. Type exact values in the boxes: 0,5 · 20 000 · 1/3 · π/4.', 'Любое изменение применяется сразу. Точные значения вводятся в полях: 0,5 · 20 000 · 1/3 · π/4.')}</p>
         </div>
       </Panel>
-      <Panel label="Station output" className="outputs">
+      <Panel label={t('Station output', 'Результаты станции')} className="outputs">
         <AutoplayBar playback={playback} onStep={step} onRestart={size ? restart : undefined} status={status}
           progress={growing ? (grow + 1) / GROWTH.length : null} />
-        {!result ? (
-          <p className="station-status" role="status">Running the first experiment…</p>
-        ) : 'error' in result ? (
-          <p className="station-status" role="alert">The kernel rejected these parameters: {result.error}</p>
+        {!view ? (
+          <p className="station-status" role="status">{t('Running the first experiment…', 'Идёт первый эксперимент…')}</p>
+        ) : 'error' in view ? (
+          <p className="station-status" role="alert">{t('The kernel rejected these parameters: ', 'Ядро отклонило эти параметры: ')}{view.error}</p>
         ) : (
           <>
-            {result.formula && result.formula.length > 0 && (
-              <div className="live-formula" aria-label="Live formula" role="group">
-                {result.formula.map((line, i) => <Tex key={i} tex={line} display />)}
+            {view.formula && view.formula.length > 0 && (
+              <div className="live-formula" aria-label={t('Live formula', 'Живая формула')} role="group">
+                {view.formula.map((line, i) => <Tex key={i} tex={line} display />)}
               </div>
             )}
-            {result.surface && <Surface3D surface={result.surface} />}
-            {result.series.length > 0 && (
+            {view.surface && <Surface3D surface={view.surface} />}
+            {view.series.length > 0 && (
               <div className="chart-stage">
-                <Chart series={result.series} xLabel={result.axes?.x} yLabel={result.axes?.y} />
+                <Chart series={view.series} xLabel={view.axes?.x} yLabel={view.axes?.y} />
                 <RidgeToggle draws={past} on={ridgeOn} onToggle={() => setRidgeOn((v) => !v)} />
               </div>
             )}
-            {ridgeOn && <Ridge draws={past} axes={result.axes} />}
-            {result.decisions && outcome?.ok && (
-              <DecisionZones decisions={result.decisions} drawKey={outcome.job.seed}
+            {ridgeOn && <Ridge draws={past} axes={view.axes} />}
+            {view.decisions && outcome?.ok && (
+              <DecisionZones decisions={view.decisions} drawKey={outcome.job.seed}
                 experimentKey={declared.filter((d) => !['truth', 'view', 'R'].includes(d.key)).map((d) => `${d.key}=${outcome.job.params[d.key]}`).join('&')} />
             )}
-            <table className="readouts" aria-label="Readouts">
-              <thead><tr><th scope="col">Quantity</th><th scope="col">Observed</th><th scope="col">Theory</th><th scope="col"><span className="sr-only">Track</span></th></tr></thead>
+            <table className="readouts" aria-label={t('Readouts', 'Показания')}>
+              <thead><tr><th scope="col">{t('Quantity', 'Величина')}</th><th scope="col">{t('Observed', 'Опыт')}</th><th scope="col">{t('Theory', 'Теория')}</th><th scope="col"><span className="sr-only">{t('Track', 'Следить')}</span></th></tr></thead>
               <tbody>
-                {result.readouts.map((r, i) => (
+                {view.readouts.map((r, i) => (
                   <tr key={r.key + i} data-tracked={r.key === trackKey || undefined}>
                     <th scope="row"><MathText text={r.label} />{r.convention && <small><MathText text={r.convention} /></small>}</th>
                     <td>{cell(r.observed)}{r.unit && r.observed != null ? ` ${r.unit}` : ''}</td>
                     <td>{cell(r.theory)}{r.unit && r.theory != null ? ` ${r.unit}` : ''}</td>
                     <td className="readout-track">
                       {numeric(r.observed) && (
-                        <button type="button" aria-pressed={r.key === trackKey} aria-label={`Follow ${mathToPlain(r.label)} across draws`}
-                          title="Follow this quantity across draws" onClick={() => setTracked(r.key)}><Activity size={13} aria-hidden /></button>
+                        <button type="button" aria-pressed={r.key === trackKey} aria-label={t(`Follow ${mathToPlain(r.label)} across draws`, `Следить за величиной ${mathToPlain(r.label)} по прогонам`)}
+                          title={t('Follow this quantity across draws', 'Следить за этой величиной по прогонам')} onClick={() => setTracked(r.key)}><Activity size={13} aria-hidden /></button>
                       )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {trackKey && <Trace draws={past} readoutKey={trackKey} />}
-            {result.notes.length > 0 && (
+            {trackKey && <Trace draws={past} readoutKey={trackKey} kernel={station.kernel} />}
+            {view.notes.length > 0 && (
               <div className="station-notes">
-                <PanelHeading icon={<CircleHelp size={16} aria-hidden />} title="Reading the result" />
-                {result.notes.map((n, i) => <p key={i}><MathText text={n} /></p>)}
+                <PanelHeading icon={<CircleHelp size={16} aria-hidden />} title={t('Reading the view', 'Как читать результат')} />
+                {view.notes.map((n, i) => <p key={i}><MathText text={n} /></p>)}
               </div>
             )}
           </>
@@ -249,7 +276,7 @@ function SeedField({ seed, onSeed }: { seed: number; onSeed: (seed: number) => v
   const valid = /^\d{1,10}$/.test(value) && Number(value) <= 4294967295;
   return (
     <div className="seed-field">
-      <label htmlFor="station-seed">Random seed</label>
+      <label htmlFor="station-seed">{t('Random seed', 'Зерно генератора')}</label>
       <input id="station-seed" name="seed" inputMode="numeric" autoComplete="off" spellCheck={false} value={value}
         aria-invalid={!valid} aria-describedby={valid ? undefined : 'station-seed-error'}
         onFocus={() => setText(String(seed))}
@@ -260,7 +287,7 @@ function SeedField({ seed, onSeed }: { seed: number; onSeed: (seed: number) => v
           setText(v);
           if (/^\d{1,10}$/.test(v) && Number(v) <= 4294967295) onSeed(Number(v));
         }} />
-      {!valid && <small id="station-seed-error">Enter an integer from 0 to 4,294,967,295.</small>}
+      {!valid && <small id="station-seed-error">{t('Enter an integer from 0 to 4,294,967,295.', 'Введите целое число от 0 до 4 294 967 295.')}</small>}
     </div>
   );
 }
@@ -295,32 +322,33 @@ function Choice({ id, title, options, value, onChange }: {
 }
 
 /** One readout followed across draws: each dot is one experiment, the line their running mean. */
-function Trace({ draws, readoutKey }: { draws: Draw[]; readoutKey: string }) {
+function Trace({ draws, readoutKey, kernel }: { draws: Draw[]; readoutKey: string; kernel: string }) {
+  const lang = useLang();
   const rows = draws.map((d) => ({ draw: d.draw, r: d.result.readouts.find((r) => r.key === readoutKey) }));
   const values = rows.map((x) => (numeric(x.r?.observed) ? x.r.observed : NaN));
-  const label = rows.at(-1)?.r?.label ?? readoutKey;
+  const label = kernelText(kernel, rows.at(-1)?.r?.label ?? readoutKey);
   const theory = rows.at(-1)?.r?.theory;
   const sum = traceSummary(values, numeric(theory) ? theory : null);
   const series = useMemo<Series[]>(() => {
     const x = rows.map((r) => r.draw);
     let acc = 0, n = 0;
     const mean = values.map((v) => (Number.isFinite(v) ? ((acc += v), ++n, acc / n) : n ? acc / n : NaN));
-    const out: Series[] = [{ id: 'draws', kind: 'points', x, y: values, label: 'one draw' }];
-    if (x.length > 1) out.push({ id: 'mean', kind: 'line', x, y: mean, label: 'mean of the draws' });
-    if (numeric(theory) && x.length) out.push({ id: 'theory', kind: 'line', x: [x[0], x[x.length - 1] + 0.001], y: [theory, theory], tone: 'signal', label: 'theory' });
+    const out: Series[] = [{ id: 'draws', kind: 'points', x, y: values, label: t('one draw', 'один прогон') }];
+    if (x.length > 1) out.push({ id: 'mean', kind: 'line', x, y: mean, label: t('mean of the draws', 'среднее по прогонам') });
+    if (numeric(theory) && x.length) out.push({ id: 'theory', kind: 'line', x: [x[0], x[x.length - 1] + 0.001], y: [theory, theory], tone: 'signal', label: t('theory', 'теория') });
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draws, readoutKey]);
+  }, [draws, readoutKey, lang]);
   return (
-    <section className="trace" aria-label={`${mathToPlain(label)} across draws`}>
+    <section className="trace" aria-label={t(`${mathToPlain(label)} across draws`, `${mathToPlain(label)} по прогонам`)}>
       <p className="trace-head">
-        <b>Across draws</b> · <MathText text={label} />
-        {sum.count > 0 && <span> · mean {show(sum.mean)}{sum.sd != null && <> ± {show(sum.sd)}</>} over {sum.count} draw{sum.count === 1 ? '' : 's'}{sum.theory != null && <> · theory {show(sum.theory)}</>}</span>}
+        <b>{t('Across draws', 'По прогонам')}</b> · <MathText text={label} />
+        {sum.count > 0 && <span> · {t('mean', 'среднее')} {show(sum.mean)}{sum.sd != null && <> ± {show(sum.sd)}</>} {t(`over ${sum.count} draw${sum.count === 1 ? '' : 's'}`, `за ${sum.count} ${plural(sum.count, 'прогон', 'прогона', 'прогонов')}`)}{sum.theory != null && <> · {t('theory', 'теория')} {show(sum.theory)}</>}</span>}
       </p>
       {draws.length < 2 ? (
-        <p className="trace-empty">Each new draw adds a dot here. {draws.length ? 'One so far.' : ''}</p>
+        <p className="trace-empty">{t('Each new draw adds a dot here.', 'Каждый новый прогон добавляет сюда точку.')} {draws.length ? t('One so far.', 'Пока одна.') : ''}</p>
       ) : (
-        <Chart series={series} xLabel="draw" height={150} domain={{ y: traceDomain(values, sum.theory) }} />
+        <Chart series={series} xLabel={t('draw', 'прогон')} height={150} domain={{ y: traceDomain(values, sum.theory) }} />
       )}
     </section>
   );
@@ -352,28 +380,33 @@ function RidgeToggle({ draws, on, onToggle }: { draws: Draw[]; on: boolean; onTo
   const last = draws.at(-1);
   if (!last || !mainCurve(last.result)) return null;
   return (
-    <button type="button" className="ridge-toggle" aria-pressed={on} onClick={onToggle} title="Stack the last draws into a rotatable 3D landscape">
-      <Box size={13} aria-hidden /> 3D draws
+    <button type="button" className="ridge-toggle" aria-pressed={on} onClick={onToggle} title={t('Stack the last draws into a rotatable 3D landscape', 'Сложить последние прогоны в поворотный трёхмерный рельеф')}>
+      <Box size={13} aria-hidden /> {t('3D draws', '3D-прогоны')}
     </button>
   );
 }
 function Ridge({ draws, axes }: { draws: Draw[]; axes?: KernelResult['axes'] }) {
-  const surface = useMemo(() => ridgeOf(ridgeRows(draws), { x: axes?.x ?? 'x', y: 'draw', z: axes?.y ?? 'height' }), [draws, axes]);
-  if (!surface) return <p className="trace-empty">The 3D view appears after three draws. {draws.length ? `${draws.length} so far.` : ''}</p>;
-  return <Surface3D surface={surface} keyLabel={`Each ridge: one draw's ${axes?.y ?? 'curve'}`} />;
+  const lang = useLang();
+  const surface = useMemo(() => {
+    const s = ridgeOf(ridgeRows(draws), { x: axes?.x ?? 'x', y: t('draw', 'прогон'), z: axes?.y ?? t('height', 'высота') });
+    return s && { ...s, title: t(s.title ?? '', 'Последние прогоны рядом: каждый гребень — один эксперимент') };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draws, axes, lang]);
+  if (!surface) return <p className="trace-empty">{t('The 3D view appears after three draws.', 'Трёхмерный вид появится после трёх прогонов.')} {draws.length ? t(`${draws.length} so far.`, `Пока ${draws.length}.`) : ''}</p>;
+  return <Surface3D surface={surface} keyLabel={t(`Each ridge: one draw's ${axes?.y ?? 'curve'}`, `Каждый гребень — ${axes?.y ?? 'кривая'} одного прогона`)} />;
 }
 
 /** A station whose kernel has not landed yet: says what it will show and where the work is tracked. */
 export function PendingStation({ station }: { station: KernelStationInfo }) {
   return (
     <div className="station-pending">
-      <p className="edition"><i /> KERNEL IN PROGRESS</p>
+      <p className="edition"><i /> {t('KERNEL IN PROGRESS', 'ЯДРО В РАБОТЕ')}</p>
       <p><MathText text={station.summary} /></p>
       <p>
-        The station appears here as soon as <code translate="no">spikes/{station.kernel}/kernel.mjs</code> lands.
+        {t('The station appears here as soon as ', 'Станция появится здесь, как только будет готово ')}<code translate="no">spikes/{station.kernel}/kernel.mjs</code>{t(' lands.', '.')}
       </p>
       <a href={`https://github.com/punyzxc/matstat-lab/issues/${station.issue}`} target="_blank" rel="noreferrer">
-        Track issue #{station.issue} <ExternalLink size={13} aria-hidden />
+        {t('Track issue', 'Задача')} #{station.issue} <ExternalLink size={13} aria-hidden />
       </a>
     </div>
   );
