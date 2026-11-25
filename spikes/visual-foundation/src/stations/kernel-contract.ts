@@ -105,6 +105,11 @@ export type Phasor = {
   /** #122: the factors of a product φ_X φ_Y (then `exact` is the product and `xs` are the sums x_j + y_j). */
   parts?: { key: string; exact: [number, number][] }[];
 };
+/**
+ * The independent-trials machine (#115): the first series of n trials with success probability p, each as its count k
+ * and its trials folded into `cells` (share of successes per cell); the k `window` drawn and the exact law on it.
+ */
+export type TrialsMachine = { n: number; p: number; rows: { k: number; cells: number[] }[]; window: [number, number]; exact: (number | null)[] };
 export type KernelResult = {
   readouts: Readout[];
   series: Series[];
@@ -125,6 +130,7 @@ export type KernelResult = {
   square?: EventSquare;
   tree?: BayesTree;
   phasor?: Phasor;
+  machine?: TrialsMachine;
 };
 export type Kernel = {
   meta: KernelMeta;

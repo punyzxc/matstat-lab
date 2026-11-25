@@ -1961,3 +1961,92 @@ html:has(.orbital-lab) body {
   stroke: #e6e6e6;
   stroke-dasharray: 3 3;
 }
+
+/* #115: the independent-trials machine. */
+.trials-machine {
+  margin: 4px 0 12px;
+}
+.tm-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-bottom: 6px;
+  font: 11px var(--mono);
+  color: #a8a8a8;
+}
+.tm-total {
+  color: var(--signal);
+}
+.trials-machine svg {
+  display: block;
+  width: 100%;
+  max-width: 880px;
+  overflow: visible;
+}
+.tm-row {
+  transition: opacity 0.17s linear;
+}
+.tm-enter {
+  animation: tm-row-in 0.17s linear both;
+}
+@keyframes tm-row-in {
+  from {
+    opacity: 0;
+  }
+}
+.tm-cell {
+  fill: #262626;
+  animation: tm-cell-in 0.12s ease-out both;
+}
+.tm-hit {
+  fill: var(--signal);
+}
+@keyframes tm-cell-in {
+  from {
+    opacity: 0;
+  }
+}
+.tm-k {
+  fill: #c8c8c8;
+  font: 10px var(--mono);
+}
+.tm-ball {
+  fill: var(--signal);
+  animation: tm-drop 0.56s cubic-bezier(0.5, 0, 0.75, 0.4) 0.1s both;
+}
+@keyframes tm-drop {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy));
+    opacity: 0;
+  }
+}
+.tm-pile {
+  fill: #8a8a8a;
+  transition: y 0.2s ease-out, height 0.2s ease-out;
+}
+.tm-exact {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+}
+.tm-axis {
+  stroke: #3a3a3a;
+}
+.tm-tick {
+  fill: #8a8a8a;
+  font: 10px var(--mono);
+}
+.trials-machine[data-reduced] .tm-row,
+.trials-machine[data-reduced] .tm-cell,
+.trials-machine[data-reduced] .tm-pile {
+  animation: none;
+  transition: none;
+}
