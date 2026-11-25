@@ -272,3 +272,22 @@ test('lecture pins: L10 example 2 — Pearson with the lecture’s own data', ()
   close(chi2, 2.962, 1e-3);
   assert.ok(p.every((pi) => n * pi < 5), 'every expected count is below 5: the test does not apply');
 });
+
+// #127: the statistics drawn: the Kolmogorov gap as a bar, Pearson's χ² cell by cell.
+test('#127 the gap bar is exactly D_n long and stands at its argmax; Pearson bars add up to χ²', () => {
+  for (const [law, h0] of [[0, 0], [1, 0], [2, 2], [0, 2]]) for (const n of [30, 200, 600]) {
+    const k0 = FIT({ view: 0, law, h0, n }), k1 = FIT({ view: 1, law, h0, n });
+    const gap = k0.series.find((s) => s.id === 'gap');
+    const dn = k0.readouts.find((r) => r.key === 'dn').observed;
+    assert.equal(gap.x[0], gap.x[1]);
+    assert.ok(Math.abs(Math.abs(gap.y[1] - gap.y[0]) - dn) < 1e-12, `gap ${law}/${h0}/${n}`);
+    const terms = K.pearsonTerms(K.pearsonTest(K.drawSample(law, n, 2026), h0, { cells: 10, alpha: 0.05, estimate: false, merge: true }));
+    assert.deepEqual(k1.series.find((s) => s.id === 'terms').y, terms);
+    const chi2 = k1.readouts.find((r) => r.key === 'chi2').observed;
+    assert.ok(Math.abs(terms.reduce((a, b) => a + b, 0) - chi2) < 1e-9 * Math.max(1, chi2));
+    assert.equal(k1.linked.series.find((s) => s.id === 'observed').y.reduce((a, b) => a + b, 0), n);
+    assert.ok(Math.abs(k1.linked.series.find((s) => s.id === 'expected').y.reduce((a, b) => a + b, 0) - n) < 1e-6);
+    // The readouts are the same in both views: only the picture changes.
+    assert.deepEqual(k0.readouts, k1.readouts);
+  }
+});
