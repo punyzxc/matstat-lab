@@ -67,3 +67,24 @@ test('Russian: region errors are translated', async ({ page }) => {
   await field.press('Enter');
   await expect(dock.getByRole('alert')).toContainText('Неизвестное имя «q»');
 });
+
+// #124: Bertrand's paradox, three circles; a circle in focus lights its formula line.
+test('Bertrand: three circles draw their chords, shares next to 1/2, 1/3, 1/4, hover lights the formula line', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#station/darts?seed=6&view=2&N=4000');
+  const dock = page.getByTestId('station-dock');
+  const circles = dock.locator('.chord-circle');
+  await expect(circles).toHaveCount(3);
+  await expect(circles.nth(0).locator('.chord')).toHaveCount(36);
+  await expect(circles.nth(0)).toContainText('→ 1/2');
+  await expect(circles.nth(1)).toContainText('→ 1/3');
+  await expect(circles.nth(2)).toContainText('→ 1/4');
+  const lines = dock.locator('.live-formula-line');
+  await expect(lines).toHaveCount(3);
+  await circles.nth(1).hover();
+  await expect(lines.nth(1)).toHaveAttribute('data-on', 'true');
+  await expect(lines.nth(0)).not.toHaveAttribute('data-on', /.*/);
+  await circles.nth(2).focus();
+  await expect(lines.nth(2)).toHaveAttribute('data-on', 'true');
+  await expect(lines.nth(1)).not.toHaveAttribute('data-on', /.*/);
+});

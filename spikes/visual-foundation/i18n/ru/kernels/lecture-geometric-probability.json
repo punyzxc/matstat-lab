@@ -88,5 +88,8 @@
  "A function takes a number, not a condition.": "Функция принимает число, а не условие.",
  "Arithmetic takes numbers, not conditions.": "Арифметика работает с числами, а не с условиями.",
  "Write an inequality, for example y < x^2: an expression alone is not a region.": "Запишите неравенство, например y < x^2: одно выражение — ещё не область.",
- "The region does not depend on x or y.": "Область не зависит ни от x, ни от y."
+ "The region does not depend on x or y.": "Область не зависит ни от x, ни от y.",
+ "\\text{a point on a radius: } P = \\tfrac12, \\quad \\tfrac{m}{n} = [[1]]": "\\text{точка на радиусе: } P = \\tfrac12, \\quad \\tfrac{m}{n} = [[1]]",
+ "\\text{random endpoints: } P = \\tfrac13, \\quad \\tfrac{m}{n} = [[1]]": "\\text{случайные концы: } P = \\tfrac13, \\quad \\tfrac{m}{n} = [[1]]",
+ "\\text{a midpoint in the disc: } P = \\tfrac14, \\quad \\tfrac{m}{n} = [[1]]": "\\text{середина в круге: } P = \\tfrac14, \\quad \\tfrac{m}{n} = [[1]]"
 }
