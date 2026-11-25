@@ -84,7 +84,6 @@ test('a kernel station opened from a lecture keeps the seed, and a rerun keeps t
   await page.goto('/#station/contract-fixture?seed=7&n=2000&lecture=2&step=1');
   const dock = page.getByTestId('station-dock');
   await dock.getByLabel('Random seed').fill('11');
-  await dock.getByRole('button', { name: 'Run With These Parameters' }).click();
   await expect(page).toHaveURL(/seed=11.*&lecture=2&step=1$/);
   await dock.getByRole('link', { name: 'Back to lecture 2, step 1' }).click();
   await expect(page).toHaveURL(/#lecture\/2\/1$/);

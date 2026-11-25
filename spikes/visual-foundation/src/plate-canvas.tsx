@@ -76,7 +76,7 @@ export function PlateCanvas({
           const delta = now - last;
           const step = Math.min(delta / 1000, 0.12);
           frame.time += step;
-          if (spin) {
+          if (spin && !pointer) {
             frame.yaw += spin * step;
             spin *= Math.exp(-step * 2.6);
             if (Math.abs(spin) < 0.01) spin = 0;
@@ -121,7 +121,7 @@ export function PlateCanvas({
     }
     function up(e: PointerEvent) {
       // A drag that stopped before release leaves no spin.
-      if (pointer && e.timeStamp - pointer.t > 90) spin = 0;
+      if (!state.current.playing || (pointer && e.timeStamp - pointer.t > 90)) spin = 0;
       pointer = null;
     }
     function key(e: KeyboardEvent) {

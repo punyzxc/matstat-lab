@@ -339,7 +339,9 @@ html:not([data-present]) .orbital-lab > .scene-dock--end {
     --hud-bar: 56px;
   }
 }
-/* The dock title takes focus programmatically on open; the frosted panel already shows where focus is. */
+/* The dock title takes focus on open: a quiet underline instead of a box around the heading. */
 .orbital-lab #dock-title:focus-visible {
   outline: none;
+  text-decoration: underline 1px var(--signal);
+  text-underline-offset: 6px;
 }
