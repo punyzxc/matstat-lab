@@ -1,0 +1,222 @@
+{
+  "runtime": "v26.13.1",
+  "scope": "Fixed reference-spike runs only; not empirical FWER calibration or product acceptance",
+  "results": [
+    {
+      "schedule": "pr",
+      "id": "coverage-z-n1",
+      "seed": 1001,
+      "R": 2000,
+      "hits": 1915,
+      "band": [
+        1859,
+        1937
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "pr",
+      "id": "coverage-z-n5",
+      "seed": 1005,
+      "R": 2000,
+      "hits": 1891,
+      "band": [
+        1859,
+        1937
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "pr",
+      "id": "coverage-t-n2",
+      "seed": 2002,
+      "R": 2000,
+      "hits": 1911,
+      "band": [
+        1859,
+        1937
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "pr",
+      "id": "coverage-t-n5",
+      "seed": 2005,
+      "R": 2000,
+      "hits": 1895,
+      "band": [
+        1859,
+        1937
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "pr",
+      "id": "coverage-t-n30",
+      "seed": 2030,
+      "R": 2000,
+      "hits": 1899,
+      "band": [
+        1859,
+        1937
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "pr",
+      "id": "mean-uniform-lln",
+      "seed": 2048,
+      "N": 64000,
+      "mean": 0.5009430533524226,
+      "band": [
+        0.49094665366708323,
+        0.5090533463329168
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "pr",
+      "id": "mean-uniform-clt",
+      "seed": 2048,
+      "N": 64000,
+      "mean": 0.5007151275677745,
+      "band": [
+        0.49094665366708323,
+        0.5090533463329168
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "pr",
+      "id": "mean-exponential-lln",
+      "seed": 2048,
+      "N": 64000,
+      "mean": 1.0041617996637364,
+      "band": [
+        0.9820024261442384,
+        1.018216141272428
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "pr",
+      "id": "mean-exponential-clt",
+      "seed": 2048,
+      "N": 64000,
+      "mean": 1.0027192500966349,
+      "band": [
+        0.9820024261442384,
+        1.018216141272428
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "nightly",
+      "id": "coverage-z-n1",
+      "seed": 1001,
+      "R": 20000,
+      "hits": 19073,
+      "band": [
+        18874,
+        19122
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "nightly",
+      "id": "coverage-z-n5",
+      "seed": 1005,
+      "R": 20000,
+      "hits": 18985,
+      "band": [
+        18874,
+        19122
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "nightly",
+      "id": "coverage-t-n2",
+      "seed": 2002,
+      "R": 20000,
+      "hits": 18997,
+      "band": [
+        18874,
+        19122
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "nightly",
+      "id": "coverage-t-n5",
+      "seed": 2005,
+      "R": 20000,
+      "hits": 18997,
+      "band": [
+        18874,
+        19122
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "nightly",
+      "id": "coverage-t-n30",
+      "seed": 2030,
+      "R": 20000,
+      "hits": 19011,
+      "band": [
+        18874,
+        19122
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "nightly",
+      "id": "mean-uniform-lln",
+      "seed": 2048,
+      "N": 640000,
+      "mean": 0.5004587924854003,
+      "band": [
+        0.49713708051416494,
+        0.5028629194858351
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "nightly",
+      "id": "mean-uniform-clt",
+      "seed": 2048,
+      "N": 640000,
+      "mean": 0.5003178043877785,
+      "band": [
+        0.49713708051416494,
+        0.5028629194858351
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "nightly",
+      "id": "mean-exponential-lln",
+      "seed": 2048,
+      "N": 640000,
+      "mean": 1.0021144842310103,
+      "band": [
+        0.994285084220464,
+        1.0057367725928603
+      ],
+      "pass": true
+    },
+    {
+      "schedule": "nightly",
+      "id": "mean-exponential-clt",
+      "seed": 2048,
+      "N": 640000,
+      "mean": 1.0019616727651401,
+      "band": [
+        0.994285084220464,
+        1.0057367725928603
+      ],
+      "pass": true
+    }
+  ]
+}
