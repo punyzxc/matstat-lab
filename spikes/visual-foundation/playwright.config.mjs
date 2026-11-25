@@ -8,7 +8,10 @@ export default defineConfig({
   use: {
     baseURL: `http://127.0.0.1:${port}`,
     ...devices['Desktop Chrome'],
-    channel: 'chrome',
+    channel: process.env.PW_CHROMIUM ? undefined : 'chrome',
+    launchOptions: process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : undefined,
+    // The lab opens in Russian; the specs read the English UI (tests/i18n.spec.mjs covers Russian and the switch).
+    storageState: { cookies: [], origins: [{ origin: `http://127.0.0.1:${port}`, localStorage: [{ name: 'statum-lab:lang', value: 'en' }] }] },
   },
   webServer: {
     command: `npm run dev -- --host 127.0.0.1 --port ${port} --strictPort`,

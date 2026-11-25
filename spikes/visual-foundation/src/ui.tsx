@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { MathText, mathToPlain } from './math';
 import { fitToRange, parseNumberInput } from './stations/autoplay-math.mjs';
+import { locale, t } from './i18n';
 
 export function Button({ children, variant = 'secondary', className = '', type = 'button', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' }) {
   return <button type={type} className={`button button--${variant} ${className}`} {...props}>{children}</button>;
@@ -38,12 +39,12 @@ export function Slider({ id, label, value, display, min, max, step, onChange }: 
   const commit = () => {
     if (text == null) return;
     if (parsed == null) {
-      flash(`“${text}” is not a number`);
+      flash(t(`“${text}” is not a number`, `«${text}» — не число`));
       setText(null);
       return;
     }
     const fitted = fitToRange(parsed, min, max, step);
-    flash(fitted !== parsed ? `Kept within ${fmtBound(min)} … ${fmtBound(max)}, step ${fmtBound(step)}` : null);
+    flash(fitted !== parsed ? t(`Kept within ${fmtBound(min)} … ${fmtBound(max)}, step ${fmtBound(step)}`, `Ограничено диапазоном ${fmtBound(min)} … ${fmtBound(max)}, шаг ${fmtBound(step)}`) : null);
     setText(null);
     if (fitted !== value) onChange(fitted);
   };
@@ -58,8 +59,8 @@ export function Slider({ id, label, value, display, min, max, step, onChange }: 
     <div className="field-line">
       <label htmlFor={id}><MathText text={label} /></label>
       <input className="range-typed" type="text" inputMode="decimal" autoComplete="off" spellCheck={false}
-        aria-label={`${plain}, typed value`} aria-invalid={text != null && parsed == null} aria-describedby={note ? noteId : undefined}
-        title="Type a value and press Enter · ↑/↓ to step, Shift for ×10"
+        aria-label={t(`${plain}, typed value`, `${plain}, введённое значение`)} aria-invalid={text != null && parsed == null} aria-describedby={note ? noteId : undefined}
+        title={t('Type a value and press Enter · ↑/↓ to step, Shift for ×10', 'Введите значение и нажмите Enter · ↑/↓ — шаг, с Shift — ×10')}
         value={text ?? display} size={Math.max(4, Math.min(10, (text ?? display).length + 1))}
         onFocus={(e) => { setText(String(value)); const el = e.currentTarget; requestAnimationFrame(() => el.select()); }}
         onChange={(e) => setText(e.currentTarget.value)}
@@ -78,8 +79,11 @@ export function Slider({ id, label, value, display, min, max, step, onChange }: 
     {note && <small id={noteId} className="range-note" aria-live="polite">{note}</small>}
   </div>;
 }
-const fmtBound = (v: number) => Number(v.toPrecision(6)).toLocaleString('en-US').replace(/,/g, '\u2009').replace('-', '\u2212');
+const fmtBound = (v: number) => {
+  const s = Number(v.toPrecision(6)).toLocaleString(locale(), { maximumFractionDigits: 6 });
+  return (locale() === 'en-US' ? s.replace(/,/g, '\u2009') : s.replace(/[\u00a0\u202f]/g, '\u2009')).replace('-', '\u2212');
+};
 
-export function Stat({ label, actual, theoretical, id, referenceLabel = 'Theory' }: { label: string; actual: string; theoretical: string; id?: string; referenceLabel?: string }) {
+export function Stat({ label, actual, theoretical, id, referenceLabel = t('Theory', 'Теория') }: { label: string; actual: string; theoretical: string; id?: string; referenceLabel?: string }) {
   return <div className="stat"><dt>{label}</dt><dd className="stat-value" data-testid={id}>{actual}</dd><dd className="stat-reference">{referenceLabel} <b>{theoretical}</b></dd></div>;
 }

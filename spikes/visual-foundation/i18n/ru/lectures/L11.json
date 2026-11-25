@@ -1,0 +1,11 @@
+{
+  "Point estimates and confidence intervals": "Точечные оценки и доверительные интервалы",
+  "Unbiased variance": "Несмещённая оценка дисперсии",
+  "Dividing by $n$ underestimates the variance; dividing by $n - 1$ removes the bias.": "При делении на $n$ дисперсия занижается; деление на $n - 1$ устраняет смещение.",
+  "Confidence interval for the mean": "Доверительный интервал для среднего",
+  "An interval built from the sample covers the true mean in a stated share of repeated samples.": "Интервал, построенный по выборке, накрывает истинное среднее в заданной доле повторных выборок.",
+  "Homogeneity of two series": "Однородность двух серий",
+  "Two series of trials give frequencies $m_1/n_1$ and $m_2/n_2$. Are they samples of one probability $p$? Pool them and compare the difference with its standard error.": "Две серии испытаний дают частоты $m_1/n_1$ и $m_2/n_2$. Являются ли они выборками для одной вероятности $p$? Объединим серии и сравним разность частот с её стандартной ошибкой.",
+  "Run the two-series test": "Проведите критерий для двух серий",
+  "\\text{reject homogeneity when}\\quad |z| > z_{1-\\alpha/2}": "\\text{однородность отвергается, если}\\quad |z| > z_{1-\\alpha/2}"
+}

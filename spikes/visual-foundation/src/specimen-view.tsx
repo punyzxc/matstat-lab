@@ -5,6 +5,7 @@ import { wovenPlate, etchedPlate } from './trefoil';
 import { earthPlate } from './globe';
 import { sources, type RunSettings } from './statistics';
 import { FigureCaption } from './lab-shell';
+import { dec, t } from './i18n';
 
 export function SpecimenView({
   playing,
@@ -29,7 +30,7 @@ export function SpecimenView({
   return (
     <figure className="specimen">
       <figcaption>
-        <FigureCaption number={knot ? '01' : '02'}>{knot ? 'Trefoil study' : 'Orbital study'}</FigureCaption>
+        <FigureCaption number={knot ? '01' : '02'}>{knot ? t('Trefoil study', 'Этюд «Трилистник»') : t('Orbital study', 'Этюд «Орбита»')}</FigureCaption>
       </figcaption>
       <div className="specimen-stage">
         <div className="register reg-nw" aria-hidden="true" />
@@ -39,8 +40,8 @@ export function SpecimenView({
           fallback={knot ? etchedPlate : undefined}
           label={
             knot
-              ? 'Trefoil knot, a rotating sculptural study of the (2, 3) torus knot'
-              : 'Earth point cloud with simulated links'
+              ? t('Trefoil knot, a rotating sculptural study of the (2, 3) torus knot', 'Узел-трилистник: вращающийся скульптурный этюд торического узла (2, 3)')
+              : t('Earth point cloud with simulated links', 'Облако точек Земли со смоделированными связями')
           }
           playing={playing}
           mesh={mesh}
@@ -49,15 +50,15 @@ export function SpecimenView({
         {knot && (
           <button
             className="draw-probe"
-            aria-label="Inspect next draw"
-            title="Advance the measured probability coordinate"
+            aria-label={t('Inspect next draw', 'Следующее значение')}
+            title={t('Advance the measured probability coordinate', 'Перейти к следующей вероятностной координате')}
             onClick={() => setDraw((i) => (i + 1) % sample.length)}
           >
             <span>
-              <i /> DRAW {String(index + 1).padStart(3, '0')} →
+              <i /> {t('DRAW', 'ЗНАЧЕНИЕ')} {String(index + 1).padStart(3, '0')} →
             </span>
-            <b>x = {value.toFixed(3)}</b>
-            <small>F(x) = {cue.toFixed(3)}</small>
+            <b>x = {dec(value.toFixed(3))}</b>
+            <small>F(x) = {dec(cue.toFixed(3))}</small>
           </button>
         )}
         <span className="object-tag" aria-hidden="true">
@@ -66,20 +67,20 @@ export function SpecimenView({
       </div>
       <div className="specimen-toolbar">
         <span className="drag-hint">
-          <ArrowLeftRight size={13} /> Drag to rotate
+          <ArrowLeftRight size={13} /> {t('Drag to rotate', 'Перетащите, чтобы повернуть')}
         </span>
-        <div className="scene-choice" role="group" aria-label="Geometric specimen">
+        <div className="scene-choice" role="group" aria-label={t('Geometric specimen', 'Геометрический образец')}>
           <button aria-pressed={knot} onClick={() => setSpecimen('knot')}>
-            Knot
+            {t('Knot', 'Узел')}
           </button>
           <button aria-pressed={!knot} onClick={() => setSpecimen('earth')}>
-            Earth
+            {t('Earth', 'Земля')}
           </button>
         </div>
         <button
           className="scene-control"
-          aria-label="Wireframe"
-          title="Toggle wireframe"
+          aria-label={t('Wireframe', 'Каркас')}
+          title={t('Toggle wireframe', 'Показать каркас')}
           aria-pressed={mesh}
           onClick={() => setMesh((v) => !v)}
         >
@@ -88,8 +89,8 @@ export function SpecimenView({
         <button
           className="scene-control"
           disabled={reduced}
-          aria-label={reduced ? 'Reduced motion enabled' : playing ? 'Pause rotation' : 'Resume rotation'}
-          title={reduced ? 'Reduced motion enabled' : playing ? 'Pause motion' : 'Resume motion'}
+          aria-label={reduced ? t('Reduced motion enabled', 'Включено уменьшение движения') : playing ? t('Pause rotation', 'Остановить вращение') : t('Resume rotation', 'Продолжить вращение')}
+          title={reduced ? t('Reduced motion enabled', 'Включено уменьшение движения') : playing ? t('Pause motion', 'Остановить движение') : t('Resume motion', 'Продолжить движение')}
           onClick={toggle}
         >
           {playing ? <Pause size={14} /> : <Play size={14} />}

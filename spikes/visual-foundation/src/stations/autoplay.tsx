@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pause, Play, RotateCcw, StepForward } from 'lucide-react';
 import { useStationReducedMotion } from '../motion-preference';
 import { SPEEDS } from './autoplay-math.mjs';
+import { t } from '../i18n';
 
 /**
  * The shared autoplay engine. Every experiment plays by itself as soon as it opens: it grows a fresh
@@ -87,7 +88,7 @@ export function AutoplayBar({
   onRestart,
   status,
   progress,
-  stepLabel = 'Next draw',
+  stepLabel = t('Next draw', 'Следующий прогон'),
   announce = false,
   progressLabel,
 }: {
@@ -107,19 +108,19 @@ export function AutoplayBar({
     <div className="autoplay" data-playing={playing}>
       <div className="autoplay-controls">
         <button type="button" className="autoplay-main" aria-pressed={!playing} onClick={() => setPlaying((p) => !p)}
-          aria-label={playing ? 'Stop the experiment' : 'Play the experiment'} title={playing ? 'Stop (Space)' : 'Play (Space)'}>
+          aria-label={playing ? t('Stop the experiment', 'Остановить эксперимент') : t('Play the experiment', 'Запустить эксперимент')} title={playing ? t('Stop (Space)', 'Стоп (пробел)') : t('Play (Space)', 'Пуск (пробел)')}>
           {playing ? <Pause size={15} aria-hidden /> : <Play size={15} aria-hidden />}
-          <span>{playing ? 'Stop' : 'Play'}</span>
+          <span>{playing ? t('Stop', 'Стоп') : t('Play', 'Пуск')}</span>
         </button>
         <button type="button" className="autoplay-icon" onClick={onStep} aria-label={stepLabel} title={`${stepLabel} (N)`}>
           <StepForward size={15} aria-hidden />
         </button>
         {onRestart && (
-          <button type="button" className="autoplay-icon" onClick={onRestart} aria-label="Start a fresh experiment" title="Start a fresh experiment">
+          <button type="button" className="autoplay-icon" onClick={onRestart} aria-label={t('Start a fresh experiment', 'Начать эксперимент заново')} title={t('Start a fresh experiment', 'Начать эксперимент заново')}>
             <RotateCcw size={14} aria-hidden />
           </button>
         )}
-        <div className="autoplay-speed" role="radiogroup" aria-label="Pace">
+        <div className="autoplay-speed" role="radiogroup" aria-label={t('Pace', 'Темп')}>
           {SPEEDS.map((s) => (
             <button key={s} type="button" role="radio" aria-checked={speed === s} onClick={() => setSpeed(s)}
               onKeyDown={(e) => {
@@ -140,7 +141,7 @@ export function AutoplayBar({
       <p className="autoplay-status">
         <span className={playing ? 'signal signal--active' : 'signal'} aria-hidden />
         <span role={announce ? 'status' : undefined} aria-live={announce ? 'polite' : 'off'}>{status}</span>
-        <kbd title="Space stops or plays, N draws once more">Space · N</kbd>
+        <kbd title={t('Space stops or plays, N draws once more', 'Пробел — стоп и пуск, N — ещё один прогон')}>{t('Space · N', 'Пробел · N')}</kbd>
       </p>
       {progress != null && (
         <span className="autoplay-progress" style={{ ['--p' as string]: progress }}

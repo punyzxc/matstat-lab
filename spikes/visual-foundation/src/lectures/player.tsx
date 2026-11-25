@@ -6,6 +6,7 @@ import { lectureHash, stationHash } from '../stations/route';
 import { fitPortrait, PORTRAIT, portraitScale, revealFrames, revealPortrait, type Lecture, type Scientist, type Step } from './script';
 import roster from '../../lectures/scientists.json';
 import { MathText, Tex, mathToPlain } from '../math';
+import { lectureFormula, lectureText, plural, scientistText, t } from '../i18n';
 import './lectures.css';
 
 /** Every lecture script in `spikes/visual-foundation/lectures/LNN.json`, bundled at build time. */
@@ -18,15 +19,15 @@ const findScientist = (slug: string) => scientists.find((s) => s.slug === slug);
 /** The quiet drawer: the twelve lectures, each opening at its first step. */
 export function LectureList({ present }: { present?: boolean }) {
   return (
-    <ol className="lecture-list" aria-label="Lectures">
+    <ol className="lecture-list" aria-label={t('Lectures', 'Лекции')}>
       {lectures.map((l) => (
         <li key={l.lecture}>
           <a href={lectureHash({ n: l.lecture, step: 1, present })}>
-            <span className="lecture-list-n">L{String(l.lecture).padStart(2, '0')}</span>
-            <span className="lecture-list-title"><MathText text={l.title} /></span>
+            <span className="lecture-list-n">{t('L', 'Л')}{String(l.lecture).padStart(2, '0')}</span>
+            <span className="lecture-list-title"><MathText text={lectureText(l.lecture, l.title)} /></span>
             <span className="lecture-list-meta">
-              {l.steps.length} {l.steps.length === 1 ? 'step' : 'steps'}
-              {l.status !== 'ready' && <i> · draft</i>}
+              {l.steps.length} {t(l.steps.length === 1 ? 'step' : 'steps', plural(l.steps.length, 'шаг', 'шага', 'шагов'))}
+              {l.status !== 'ready' && <i> · {t('draft', 'черновик')}</i>}
             </span>
           </a>
         </li>
@@ -78,13 +79,13 @@ export function LecturePlayer({ lecture, step, present }: { lecture: Lecture; st
     };
   }, [present]);
 
-  if (!current) return <p className="station-status" role="alert">This lecture script has no steps yet.</p>;
+  if (!current) return <p className="station-status" role="alert">{t('This lecture script has no steps yet.', 'В сценарии этой лекции пока нет шагов.')}</p>;
   return (
     <div className="lecture-player" data-testid="lecture-player">
-      <nav className="lecture-steps" aria-label="Steps">
+      <nav className="lecture-steps" aria-label={t('Steps', 'Шаги')}>
         {lecture.steps.map((s, i) => (
-          <a key={i} href={lectureHash({ n: lecture.lecture, step: i + 1, present })} aria-current={i + 1 === index ? 'step' : undefined} title={mathToPlain(s.title)}>
-            <span>{i + 1}</span> <MathText text={s.title} />
+          <a key={i} href={lectureHash({ n: lecture.lecture, step: i + 1, present })} aria-current={i + 1 === index ? 'step' : undefined} title={mathToPlain(lectureText(lecture.lecture, s.title))}>
+            <span>{i + 1}</span> <MathText text={lectureText(lecture.lecture, s.title)} />
           </a>
         ))}
       </nav>
@@ -92,20 +93,20 @@ export function LecturePlayer({ lecture, step, present }: { lecture: Lecture; st
         <StepView key={index} lecture={lecture} step={current} index={index} present={present} />
       </article>
       <footer className="lecture-controls">
-        <button type="button" className="lecture-nav" onClick={() => go(index - 1)} disabled={index === 1} aria-label="Previous step">
-          <ArrowLeft size={16} aria-hidden="true" /> <span>Previous</span>
+        <button type="button" className="lecture-nav" onClick={() => go(index - 1)} disabled={index === 1} aria-label={t('Previous step', 'Предыдущий шаг')}>
+          <ArrowLeft size={16} aria-hidden="true" /> <span>{t('Previous', 'Назад')}</span>
         </button>
         <p className="lecture-counter" data-testid="step-counter">
-          Step <b>{index}</b> / {total}
+          {t('Step', 'Шаг')} <b>{index}</b> / {total}
         </p>
         <p className="lecture-keys" aria-hidden="true">
-          <kbd>←</kbd> <kbd>→</kbd> steps · <kbd>P</kbd> presenter · <kbd>Esc</kbd> close
+          <kbd>←</kbd> <kbd>→</kbd> {t('steps', 'шаги')} · <kbd>P</kbd> {t('presenter', 'показ')} · <kbd>Esc</kbd> {t('close', 'закрыть')}
         </p>
-        <button type="button" className="lecture-nav lecture-present" aria-pressed={present} onClick={() => go(index, !present)} title="Presenter mode (P)">
-          <Presentation size={16} aria-hidden="true" /> <span>Presenter</span>
+        <button type="button" className="lecture-nav lecture-present" aria-pressed={present} onClick={() => go(index, !present)} title={t('Presenter mode (P)', 'Режим показа (P)')}>
+          <Presentation size={16} aria-hidden="true" /> <span>{t('Presenter', 'Показ')}</span>
         </button>
-        <button type="button" className="lecture-nav" onClick={() => go(index + 1)} disabled={index === total} aria-label="Next step">
-          <span>Next</span> <ArrowRight size={16} aria-hidden="true" />
+        <button type="button" className="lecture-nav" onClick={() => go(index + 1)} disabled={index === total} aria-label={t('Next step', 'Следующий шаг')}>
+          <span>{t('Next', 'Далее')}</span> <ArrowRight size={16} aria-hidden="true" />
         </button>
       </footer>
     </div>
@@ -115,32 +116,33 @@ export function LecturePlayer({ lecture, step, present }: { lecture: Lecture; st
 function StepView({ lecture, step, index, present }: { lecture: Lecture; step: Step; index: number; present: boolean }) {
   const e = step.experiment;
   const station = e ? findStation(e.station) : null;
+  const tx = (s: string | undefined) => lectureText(lecture.lecture, s);
   return (
     <>
       <div className="lecture-text">
-        <h3 id="lecture-step-title" tabIndex={-1}><MathText text={step.title} /></h3>
-        <p className="lecture-idea"><MathText text={step.idea} /></p>
+        <h3 id="lecture-step-title" tabIndex={-1}><MathText text={tx(step.title)} /></h3>
+        <p className="lecture-idea"><MathText text={tx(step.idea)} /></p>
         {step.formula?.length ? (
           <div className="lecture-formula" data-testid="lecture-formula">
-            {step.formula.map((line, i) => <Tex key={i} tex={line} display />)}
+            {step.formula.map((line, i) => <Tex key={i} tex={lectureFormula(lecture.lecture, line)} display />)}
           </div>
         ) : null}
         {step.example && (
-          <section className="lecture-example" aria-label="Worked example">
-            <h4>Example</h4>
-            <p><MathText text={step.example} /></p>
+          <section className="lecture-example" aria-label={t('Worked example', 'Разобранный пример')}>
+            <h4>{t('Example', 'Пример')}</h4>
+            <p><MathText text={tx(step.example)} /></p>
           </section>
         )}
         {e && station && (
           <a className="lecture-experiment" href={stationHash(e.station, e.seed ?? null, e.params ?? {}, { n: lecture.lecture, step: index, present })}>
-            <FlaskConical size={16} aria-hidden="true" /> {e.label ?? 'Open experiment'}
-            <span>{station.name}{e.seed != null ? ` · seed ${e.seed}` : ''}</span>
+            <FlaskConical size={16} aria-hidden="true" /> <b className="lecture-experiment-label">{e.label ? <MathText text={tx(e.label)} /> : t('Open experiment', 'Открыть эксперимент')}</b>
+            <span className="lecture-experiment-meta">{station.name}{e.seed != null ? ` · ${t('seed', 'зерно')} ${e.seed}` : ''}</span>
           </a>
         )}
-        {present && step.notes && <p className="lecture-notes"><b>Teacher notes.</b> <MathText text={step.notes} /></p>}
+        {present && step.notes && <p className="lecture-notes"><b>{t('Teacher notes.', 'Заметки преподавателя.')}</b> <MathText text={tx(step.notes)} /></p>}
       </div>
       {step.scientists?.length ? (
-        <aside className="lecture-portraits" aria-label="Scientists">
+        <aside className="lecture-portraits" aria-label={t('Scientists', 'Учёные')}>
           {step.scientists.map((slug) => <Portrait key={slug} slug={slug} />)}
         </aside>
       ) : null}
@@ -175,7 +177,7 @@ export function Portrait({ slug }: { slug: string }) {
       live = false;
     };
   }, [slug]);
-  const name = person?.name ?? slug;
+  const name = person ? scientistText(slug, 'name', person.name) : slug;
   return (
     <figure className="portrait" data-slug={slug} data-state={art ? 'art' : 'placeholder'} style={{ ['--cols' as string]: PORTRAIT.columns, ['--lines' as string]: PORTRAIT.lines }}>
       {art ? (
@@ -183,12 +185,12 @@ export function Portrait({ slug }: { slug: string }) {
       ) : (
         <div className="portrait-art portrait-placeholder" aria-hidden="true">
           <span>{initials(name)}</span>
-          <small>portrait · {slug}.txt</small>
+          <small>{t('portrait', 'портрет')} · {slug}.txt</small>
         </div>
       )}
       <figcaption>
         <b>{name}</b> {person && <span className="portrait-years">{person.years}</span>}
-        {person && <span className="portrait-line"><MathText text={person.contribution} /></span>}
+        {person && <span className="portrait-line"><MathText text={scientistText(slug, 'contribution', person.contribution)} /></span>}
       </figcaption>
     </figure>
   );
@@ -217,7 +219,7 @@ function PortraitArt({ art, name }: { art: string; name: string }) {
   const { scale } = portraitScale(art);
   const typing = k < frames;
   return (
-    <pre className="portrait-art" role="img" aria-label={`ASCII portrait of ${name}`} data-typing={typing || undefined}>
+    <pre className="portrait-art" role="img" aria-label={t(`ASCII portrait of ${name}`, `ASCII-портрет: ${name}`)} data-typing={typing || undefined}>
       <span className="portrait-text" style={{ ['--fit' as string]: scale }}>{typing ? revealPortrait(art, k) : art}</span>
     </pre>
   );

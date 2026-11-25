@@ -9,6 +9,7 @@ import { Chart } from './stations/chart';
 import { methodSeries } from './stations/method-series';
 import { collect, sources, type RunSettings } from './statistics';
 import { Button, Slider } from './ui';
+import { dec, kernelText, t, texDec, useLang } from './i18n';
 
 export function MethodPreview({
   id,
@@ -54,8 +55,13 @@ export function MethodPreview({
   useAutoplayKeys(() => playback.setPlaying((p) => !p), step);
   const all = useMemo(() => collect(settings), [settings]);
   const sample = useMemo(() => all.slice(0, size), [all, size]);
-  const data = moduleReadout(id, sample, settings);
-  const chart = useMemo(() => methodSeries(id, sample, settings), [id, sample, settings]);
+  const data = moduleReadout(id, sample, settings, t);
+  const lang = useLang();
+  const chart = useMemo(() => {
+    const c = methodSeries(id, sample, settings);
+    const k = (text: string) => kernelText('method-series', text);
+    return { ...c, x: k(c.x), y: k(c.y), series: c.series.map((s) => (s.label ? { ...s, label: k(s.label) } : s)) };
+  }, [id, sample, settings, lang]);
   const hasNewSample =
     settings.seed !== activeSettings.seed ||
     settings.count !== activeSettings.count ||
@@ -72,32 +78,32 @@ export function MethodPreview({
   }
   return (
     <div className="station-legacy method-station">
-      <section className="method-figure" aria-label="Experiment chart">
+      <section className="method-figure" aria-label={t('Experiment chart', 'График эксперимента')}>
         <FigureCaption number="A"><MathText text={chart.y} /></FigureCaption>
         <Chart series={chart.series} xLabel={chart.x} yLabel={chart.y} height={250} domain={chart.domain} />
       </section>
       <div className="method-desk">
         <section>
-          <FigureCaption number="B">Sample prefix</FigureCaption>
-          <AutoplayBar playback={playback} onStep={step} stepLabel="More observations"
-            status={growing ? `Adding observations · ${size} of ${target}` : `${size} of ${settings.count} observations`} progress={growing ? size / target : null} />
-          <Slider id="prefix-size" label="Observations" value={size} display={String(size)} min={8} max={settings.count} step={1}
+          <FigureCaption number="B">{t('Sample prefix', 'Начало выборки')}</FigureCaption>
+          <AutoplayBar playback={playback} onStep={step} stepLabel={t('More observations', 'Больше наблюдений')}
+            status={growing ? t(`Adding observations · ${size} of ${target}`, `Добавление наблюдений · ${size} из ${target}`) : t(`${size} of ${settings.count} observations`, `Наблюдений: ${size} из ${settings.count}`)} progress={growing ? size / target : null} />
+          <Slider id="prefix-size" label={t('Observations', 'Наблюдения')} value={size} display={String(size)} min={8} max={settings.count} step={1}
             onChange={(v) => analyze(v)} />
           <p className="session-source">
-            {sources[settings.distribution].label} · seed {settings.seed}
+            {sources[settings.distribution].label} · {t('seed', 'зерно')} {settings.seed}
           </p>
           <div className="method-result-actions">
-            {!recorded && <Button onClick={() => analyze(size)}>Save Result</Button>}
+            {!recorded && <Button onClick={() => analyze(size)}>{t('Save Result', 'Сохранить результат')}</Button>}
             {hasNewSample && (
-              <Button onClick={() => analyze(activeSettings.count, activeSettings)}>Use Active Sample</Button>
+              <Button onClick={() => analyze(activeSettings.count, activeSettings)}>{t('Use Active Sample', 'Взять активную выборку')}</Button>
             )}
           </div>
         </section>
         <section className="method-value" aria-live="polite">
           <FigureCaption number="C">{data.label}</FigureCaption>
-          <strong>{data.value}</strong>
-          <code><Tex tex={data.formula} /></code>
-          <p><MathText text={data.detail} /></p>
+          <strong>{dec(data.value)}</strong>
+          <code><Tex tex={texDec(data.formula)} /></code>
+          <p><MathText text={dec(data.detail)} /></p>
         </section>
       </div>
     </div>
