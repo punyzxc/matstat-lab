@@ -59,7 +59,14 @@
       ],
       "experiment": {
         "station": "bernoulli",
-        "seed": 909
+        "seed": 909,
+        "params": {
+          "n": 50,
+          "p": 0.2,
+          "k": 10,
+          "lo": 6,
+          "hi": 50
+        }
       }
     }
   ],
