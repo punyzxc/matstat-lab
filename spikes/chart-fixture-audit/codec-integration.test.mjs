@@ -54,6 +54,24 @@ test('existing v1 CSV exporter retains all values and provenance but omits units
   assert.deepEqual(result.issues, ['csv-units-missing']);
 });
 
+test('signed-zero probe exposes JSON and CSV normalization that needs a contract policy', () => {
+  const input = versionOne(saved);
+  input.spec.sampleSize = 1;
+  input.retained.values = [-0];
+  input.series = {
+    histogram: { edges: [-1, 1], counts: [1], underflow: 0, overflow: 0 },
+    ecdf: { x: [-0], cumulativeCounts: [1] },
+  };
+  assert.equal(decodeV1(input).ok, true);
+  assert.ok(Object.is(input.retained.values[0], -0));
+  const parsed = JSON.parse(exportJson(input));
+  assert.ok(Object.is(parsed.retained.values[0], 0));
+  assert.equal(Object.is(parsed.retained.values[0], -0), false);
+  const result = auditCsv(exportCsv(input), { observations: [-0], units: 's' }, input);
+  assert.deepEqual(result.issues, ['csv-values', 'csv-units-missing']);
+  assert.ok(Object.is(result.values[0], 0));
+});
+
 test('existing decoder independently rejects equal-total histogram/rank mutations', () => {
   const f = fixtures.find(f => f.id === 'unequal-widths');
   const input = structuredClone(saved);
