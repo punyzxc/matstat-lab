@@ -3,7 +3,8 @@ import { Activity, Box, CircleHelp, ExternalLink, SlidersHorizontal } from 'luci
 import { Panel, PanelHeading, Slider } from '../ui';
 import { applies, isKernel, resolveParams, resolveTexts, type Kernel, type KernelParam, type KernelResult, type Series } from './kernel-contract';
 import { AutoplayBar, useAutoplayKeys, usePlayback, useTicker } from './autoplay';
-import { choicesOf, grownSize, GROWTH, ridgeOf, sizeParamOf, tickDelay, traceSummary } from './autoplay-math.mjs';
+import { choicesOf, grownSize, GROWTH, ridgeOf, sizeParamOf, tickDelay, traceSummary, seedAtDraw, drawOfSeed, timelineAppend } from './autoplay-math.mjs';
+const originSeed = (seed: number, draws: number) => (seed - draws) >>> 0;
 import { useKernelRunner, type Job } from './kernel-runner';
 import type { KernelStation as KernelStationInfo } from './catalog';
 import { Chart } from './chart';
@@ -141,6 +142,10 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
   const [grow, setGrow] = useState(() => (playing && size ? 0 : GROWTH.length));
   const growing = Boolean(size) && grow < GROWTH.length;
   const [draws, setDraws] = useState(0);
+  /** The time machine (#113): draw d of this experiment is seed origin + d − 1; `reach` is the furthest draw seen. */
+  const origin = originSeed(seed, draws);
+  const [reach, setReach] = useState(1);
+  useEffect(() => setReach((r) => (draws === 0 ? 1 : Math.max(r, draws + 1))), [draws]);
 
   const job = useMemo<Job>(() => {
     const p = growing && size ? { ...params, [size.key]: grownSize(size, params[size.key], grow) } : params;
@@ -184,10 +189,19 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
   }, [setPlaying]);
   const restart = useCallback(() => {
     setSeed((s) => (s + 1) >>> 0);
+    setDraws(0);
     setGrow(size ? 0 : GROWTH.length);
     setPlaying(true);
   }, [size, setPlaying]);
-  useAutoplayKeys(() => setPlaying((p) => !p), step);
+  /** Jump to draw d of this experiment: the same seed a fresh run would use there, already grown. */
+  const goTo = useCallback((d: number) => {
+    const target = Math.max(1, Math.floor(d));
+    setPlaying(false);
+    setGrow(GROWTH.length);
+    setSeed(seedAtDraw(origin, target));
+    setDraws(target - 1);
+  }, [origin, setPlaying]);
+  useAutoplayKeys(() => setPlaying((p) => !p), step, (d) => { if (!playing) goTo(draws + 1 + d); });
   useTicker(playing && done && !failed, tickDelay(speed, outcome?.ms ?? 0, growing), job, advance);
 
   // History of draws of this exact experiment: the trace of one readout and the 3D ridge.
@@ -198,13 +212,17 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
     lastExp.current = expKey;
   }, [expKey]);
   const [history, setHistory] = useState<{ key: string; draws: Draw[] }>({ key: expKey, draws: [] });
+  const originRef = useRef(origin);
+  originRef.current = origin;
   useEffect(() => {
     if (!outcome?.ok || !result || 'error' in result || outcome.job.tag === 'grow') return;
     const k = keyOf(declared, outcome.job.params, outcome.job.texts);
     setHistory((h) => {
       const base = h.key === k ? h.draws : [];
       if (base.at(-1)?.seed === outcome.job.seed) return h.key === k ? h : { key: k, draws: base };
-      return { key: k, draws: [...base, { draw: (base.at(-1)?.draw ?? 0) + 1, seed: outcome.job.seed, result }].slice(-TRACE) };
+      // Draw numbers follow the seed, so stepping back drops the draws after it and the trace matches a fresh run.
+      const at = drawOfSeed(originRef.current, outcome.job.seed);
+      return { key: k, draws: timelineAppend(base, { draw: at, seed: outcome.job.seed, result }, originRef.current, TRACE) };
     });
   }, [outcome, result, declared]);
   const past = history.key === expKey ? history.draws : [];
@@ -249,7 +267,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
       </Panel>
       <Panel label={t('Station output', 'Результаты станции')} className="outputs">
         <AutoplayBar playback={playback} onStep={step} onRestart={size ? restart : undefined} status={status}
-          progress={growing ? (grow + 1) / GROWTH.length : null} />
+          progress={growing ? (grow + 1) / GROWTH.length : null} timeline={{ draw: draws + 1, reach, onDraw: goTo }} />
         {!view ? (
           <p className="station-status" role="status">{t('Running the first experiment…', 'Идёт первый эксперимент…')}</p>
         ) : 'error' in view ? (
