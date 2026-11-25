@@ -2,6 +2,9 @@
 // Pure data, no React, so the script validator and `node --test` can check lecture scripts against it.
 // Colours: one per variable across the whole scene (#109). Text with $…$ is typeset.
 
+/** A number as typed in a station's text field: at most four decimals, no trailing zeros. */
+const num = (v) => String(Number(v.toFixed(4)));
+
 export const PALETTE = Object.freeze({
   signal: '#e8e485', cyan: '#7fd6e8', coral: '#ff8a6b', violet: '#b9a2ff', mint: '#8fe3b0', ink: '#f4f4f2',
 });
@@ -191,6 +194,50 @@ export const FIGURES = Object.freeze({
       : beat === 'sigma'
         ? { station: 'moments', params: { law: Math.round(q.law), p: 0.3, m: 10, lambda: q.lambda, sigma: q.sigma, a: 2, b: 2, n: Math.round(q.n) } }
         : { station: 'convolution', params: { m: Math.round(q.m), R: Math.round(q.R) } }),
+  },
+  'geo-darts': {
+    title: 'Darts on a board',
+    seed: 404,
+    beats: ['additive', 'square', 'needle', 'chords'],
+    beatTitles: { additive: 'Events are regions of the square', square: 'Probability is area', needle: "Buffon's needle", chords: "Bertrand's three chords" },
+    params: {
+      N: { label: 'Throws $N$', min: 100, max: 20000, step: 100, default: 4000 },
+      a: { label: 'Width $a$ of the event $A = \\{x < a\\}$', min: 0, max: 1, step: 0.05, default: 0.3 },
+      b: { label: 'Width $b$ of the event $B = \\{x > 1 - b\\}$', min: 0, max: 1, step: 0.05, default: 0.4 },
+      l: { label: 'Needle length $l$', min: 0.1, max: 2, step: 0.05, default: 0.8 },
+      d: { label: 'Line spacing $d$', min: 0.2, max: 2, step: 0.1, default: 1 },
+    },
+    vars: {
+      n: { color: PALETTE.ink, hint: 'Throws so far.', digits: 0 },
+      N: { color: PALETTE.ink, hint: 'How many throws to make.', digits: 0 },
+      a: { color: PALETTE.coral, hint: 'The width of the coral strip $A$, which is its area $P(A)$. Type a new value.', digits: 2 },
+      b: { color: PALETTE.violet, hint: 'The width of the violet strip $B$, its area $P(B)$. Make $a + b > 1$ and the strips overlap.', digits: 2 },
+      pA: { color: PALETTE.coral, hint: 'Share of the darts in $A$.', digits: 3 },
+      pB: { color: PALETTE.violet, hint: 'Share of the darts in $B$.', digits: 3 },
+      pU: { color: PALETTE.signal, hint: 'Share of the darts in $A \\cup B$: the right bar.', digits: 3 },
+      pAB: { color: PALETTE.signal, hint: 'Share of the darts in both, $AB$: the part counted twice by $P(A) + P(B)$.', digits: 3 },
+      sumAB: { color: PALETTE.ink, hint: 'The left bar: the shares of $A$ and $B$ stacked.', digits: 3 },
+      exU: { color: PALETTE.signal, hint: 'The exact area of $A \\cup B$: the white tick on the bars.', digits: 3 },
+      exAB: { color: PALETTE.signal, hint: 'The exact area of the overlap $AB$.', digits: 3 },
+      share: { color: PALETTE.signal, hint: 'Share of the darts inside the quarter disc.', digits: 4 },
+      quarter: { color: PALETTE.signal, hint: 'The area of the quarter disc, $\\pi/4$.', digits: 4 },
+      pihat: { color: PALETTE.violet, hint: 'The estimate of $\\pi$ made from the throws so far: the violet trace.', digits: 4 },
+      l: { color: PALETTE.ink, hint: 'Needle length. Type a new value; the formula needs $l \\le d$, so a longer needle is cut to $d$.', digits: 2 },
+      d: { color: PALETTE.ink, hint: 'Distance between the lines.', digits: 2 },
+      cross: { color: PALETTE.coral, hint: 'Share of the needles that cross a line (coral).', digits: 4 },
+      P: { color: PALETTE.signal, hint: 'The exact probability of a crossing, $2l/(\\pi d)$.', digits: 4 },
+      m: { color: PALETTE.coral, hint: 'Needles that crossed a line so far.', digits: 0 },
+      radius: { color: PALETTE.signal, hint: 'Share of long chords when a point is chosen on a radius: it settles at $1/2$.', digits: 3 },
+      endpoints: { color: PALETTE.signal, hint: 'Share of long chords when both ends are random on the circle: it settles at $1/3$.', digits: 3 },
+      midpoint: { color: PALETTE.signal, hint: 'Share of long chords when the midpoint is random in the disc: it settles at $1/4$.', digits: 3 },
+    },
+    station: ({ N, a, b, l, d }, beat) => {
+      const n = Math.round(N);
+      if (beat === 'additive') return { station: 'darts', params: { view: 4, N: n }, texts: { region: `x < ${num(a)} or x > ${num(1 - b)}` } };
+      if (beat === 'square') return { station: 'darts', params: { view: 1, N: n } };
+      if (beat === 'needle') return { station: 'darts', params: { view: 3, N: n, l, d } };
+      return { station: 'darts', params: { view: 2, N: n } };
+    },
   },
   'sample-life': {
     title: 'The living population',
@@ -397,6 +444,41 @@ export const RU = Object.freeze({
       sumMth: 'Математическое ожидание суммы: ожидания складываются, $m \\cdot \\tfrac12$.',
       sumDth: 'Дисперсия суммы: для независимых слагаемых дисперсии складываются, $m \\cdot \\tfrac1{12}$.',
       count: 'Сколько сумм уже получено.',
+    },
+  },
+  'geo-darts': {
+    title: 'Дротики на доске',
+    beatTitles: { additive: 'События — области квадрата', square: 'Вероятность — это площадь', needle: 'Игла Бюффона', chords: 'Три хорды Бертрана' },
+    params: {
+      N: 'Число бросков $N$',
+      a: 'Ширина $a$ события $A = \\{x < a\\}$',
+      b: 'Ширина $b$ события $B = \\{x > 1 - b\\}$',
+      l: 'Длина иглы $l$',
+      d: 'Расстояние между прямыми $d$',
+    },
+    vars: {
+      n: 'Сколько бросков уже сделано.',
+      N: 'Сколько бросков сделать.',
+      a: 'Ширина коралловой полосы $A$, то есть её площадь $P(A)$. Введите новое значение.',
+      b: 'Ширина фиолетовой полосы $B$, её площадь $P(B)$. Сделайте $a + b > 1$, и полосы перекроются.',
+      pA: 'Доля дротиков в $A$.',
+      pB: 'Доля дротиков в $B$.',
+      pU: 'Доля дротиков в $A \\cup B$: правый столбец.',
+      pAB: 'Доля дротиков сразу в обоих, $AB$: часть, которую $P(A) + P(B)$ считает дважды.',
+      sumAB: 'Левый столбец: доли $A$ и $B$, поставленные друг на друга.',
+      exU: 'Точная площадь $A \\cup B$: белая отметка на столбцах.',
+      exAB: 'Точная площадь перекрытия $AB$.',
+      share: 'Доля дротиков внутри четверти круга.',
+      quarter: 'Площадь четверти круга, $\\pi/4$.',
+      pihat: 'Оценка $\\pi$ по уже сделанным броскам: фиолетовая линия.',
+      l: 'Длина иглы. Введите новое значение; формула требует $l \\le d$, поэтому более длинная игла обрезается до $d$.',
+      d: 'Расстояние между прямыми.',
+      cross: 'Доля игл, пересёкших прямую (коралловые).',
+      P: 'Точная вероятность пересечения, $2l/(\\pi d)$.',
+      m: 'Сколько игл уже пересекло прямую.',
+      radius: 'Доля длинных хорд, когда точка выбирается на радиусе: стремится к $1/2$.',
+      endpoints: 'Доля длинных хорд, когда оба конца случайны на окружности: стремится к $1/3$.',
+      midpoint: 'Доля длинных хорд, когда середина случайна в круге: стремится к $1/4$.',
     },
   },
   'sample-life': {
