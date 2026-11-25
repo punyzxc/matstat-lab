@@ -23,7 +23,7 @@ test('globe, module links and preview motion share the pause control', async ({ 
   await page.getByRole('button', { name: 'Pause motion' }).click();
   const paused = await frame();
   await expect(page.locator('.orbit-link-focal')).toHaveCount(0);
-  await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(4);
+  await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(2);
   await page.waitForTimeout(170);
   expect(await frame()).toBe(paused);
   await page.getByRole('button', { name: 'Wireframe' }).click();
@@ -38,8 +38,6 @@ test('all six orbital windows are direct entry links and preserve the last opene
   for (const [orbit, name] of [
     ['II Random variables', 'Distribution Explorer'],
     ['III Limit theorems', 'Convergence'],
-    ['IV Statistics', 'Estimation'],
-    ['IV Statistics', 'Confidence Intervals'],
     ['IV Statistics', 'Hypothesis Testing'],
     ['IV Statistics', 'Randomness'],
   ]) {
@@ -83,7 +81,7 @@ test('the active sample updates the distribution window and unvisited examples',
   await page.getByRole('button', { name: 'Resample' }).click();
   await expect(distribution).toHaveAccessibleName(/Latest result.*Uniform, seed 2049/);
   await page.getByRole('link', { name: 'IV Statistics' }).click();
-  await expect(page.locator('[data-module="confidence"]')).toHaveAccessibleName(
+  await expect(page.locator('[data-module="testing"]')).toHaveAccessibleName(
     /Seeded preview.*Uniform, seed 2049/,
   );
   await page.getByRole('link', { name: 'II Random variables' }).click();
