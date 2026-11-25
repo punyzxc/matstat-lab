@@ -8,7 +8,7 @@ This is the research for `lecture-walkthroughs-probability` ([#51](https://githu
 - The scripts `spikes/visual-foundation/lectures/L01.json`, `L02.json` and `L03.json`, now `"status": "ready"`, with 20, 8 and 12 steps. They replace the drafts, which had 7, 3 and 4 steps.
 - Their Russian text in `spikes/visual-foundation/i18n/ru/lectures/L01.json` … `L03.json`.
 - `spikes/lecture-walkthroughs-probability/`: `inventory.json` maps every formula and worked example of the lectures to a step, or gives a reason for skipping it. `expected.json` lists the station readouts each step states. `walkthroughs.test.mjs` (`node --test`, 5 tests) checks both against the scripts and the kernels.
-- The browser specs that opened steps by number (`lectures`, `combinatorics`, `bayes-tree`, `story`) now point to the new step numbers.
+- The browser specs that opened steps by number (`lectures`, `combinatorics`, `bayes-tree`, `story`, `bernoulli`) now point to the new step numbers.
 
 ## Sources and format
 
@@ -33,9 +33,9 @@ This is the research for `lecture-walkthroughs-probability` ([#51](https://githu
 
 27 steps open a station: 13 in L1, 5 in L2 and 9 in L3. They use `events`, `combinatorics`, `urn`, `darts`, `frequency`, `conditional`, `bayes`, `bayes-tree` and `bernoulli`.
 
-- **Fact.** For each of them, `expected.json` holds the readouts the step states (85 checks in all). The test runs the station's kernel with the step's seed and params, and checks four things: every param key is declared by that station; the run is deterministic; each readout matches its stated value to the stated digits; and the stated text appears in the step.
-- **Fact.** The kernels for `urn` (#38) and `bernoulli` (#39) are in their own PRs. Until they merge, the test reports those steps as "not landed yet" instead of failing. With both kernels in place (checked on the staging branch), all 5 tests pass.
-- **Fact.** Other checks pass too: `npm test` in `spikes/visual-foundation` (59 tests, including the KaTeX and Russian-translation checks), and the Playwright specs that touch lectures 1–3 (`lectures`, `combinatorics`, `bayes-tree`, `conditional`, `story`, `i18n`: 26 tests, Chromium, 1280×720). One `story` test on L8 live formulas failed once and then passed 3 times out of 3. It does not touch these lectures.
+- **Fact.** For each of them, `expected.json` holds the readouts the step states (83 checks in all). The test runs the station's kernel with the step's seed and params, and checks four things: every param key is declared by that station; the run is deterministic; each readout matches its stated value to the stated digits; and the stated text appears in the step.
+- **Fact.** The `bernoulli` kernel is the one merged for #39 (PR #174), and the L3 steps use its parameters (`n`, `p`, `k`, `lo`, `hi`, `R`, `view`). The `urn` kernel (#38) is in its own PR. Until it merges, the test reports those steps as "not landed yet" instead of failing. With it in place, all 5 tests pass.
+- **Fact.** Other checks pass too: `npm test` in `spikes/visual-foundation` (66 tests, including the KaTeX and Russian-translation checks), and the Playwright specs that touch lectures 1–3 (`lectures`, `combinatorics`, `bayes-tree`, `conditional`, `story`, `i18n`, `bernoulli`: 34 tests, Chromium, 1280×720).
 
 ## Correctness pins (AC3)
 

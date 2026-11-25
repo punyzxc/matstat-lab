@@ -534,18 +534,18 @@
    "step": 1,
    "checks": [
     {
-     "key": "exactPoint",
+     "key": "pk",
      "field": "theory",
      "value": 0.2461,
      "digits": 4,
      "shown": "0.2461"
     },
     {
-     "key": "exactPoint",
+     "key": "pk",
      "field": "observed",
-     "value": 0.2435,
+     "value": 0.2455,
      "digits": 4,
-     "shown": "0.2435"
+     "shown": "0.2455"
     }
    ]
   },
@@ -554,9 +554,9 @@
    "step": 3,
    "checks": [
     {
-     "key": "k0",
+     "key": "mode",
      "field": "theory",
-     "value": "4; 5",
+     "value": "4 and 5",
      "digits": 4,
      "shown": "4 and 5"
     }
@@ -567,18 +567,18 @@
    "step": 4,
    "checks": [
     {
-     "key": "exactPoint",
+     "key": "pk",
      "field": "theory",
      "value": 0.3115,
      "digits": 4,
      "shown": "0.3115"
     },
     {
-     "key": "lecture_exact",
+     "key": "mode",
      "field": "theory",
-     "value": 0.311,
-     "digits": 3,
-     "shown": "0.311"
+     "value": "5 and 6",
+     "digits": 4,
+     "shown": "5 and 6"
     }
    ]
   },
@@ -587,14 +587,14 @@
    "step": 5,
    "checks": [
     {
-     "key": "exactPoint",
+     "key": "pk",
      "field": "theory",
      "value": 0.0566,
      "digits": 4,
      "shown": "0.0566"
     },
     {
-     "key": "k0",
+     "key": "mode",
      "field": "theory",
      "value": "50",
      "digits": 4,
@@ -614,7 +614,7 @@
      "shown": "0.0567"
     },
     {
-     "key": "exactPoint",
+     "key": "pk",
      "field": "theory",
      "value": 0.0566,
      "digits": 4,
@@ -627,39 +627,25 @@
    "step": 8,
    "checks": [
     {
-     "key": "exactInt",
+     "key": "range",
      "field": "theory",
      "value": 0.5375,
      "digits": 4,
      "shown": "0.5375"
     },
     {
-     "key": "integral",
+     "key": "plain",
      "field": "theory",
      "value": 0.5,
      "digits": 4,
      "shown": "0.5000"
     },
     {
-     "key": "integralCC",
+     "key": "corrected",
      "field": "theory",
      "value": 0.5283,
      "digits": 4,
      "shown": "0.5283"
-    },
-    {
-     "key": "lecture_exact",
-     "field": "theory",
-     "value": 0.5033,
-     "digits": 4,
-     "shown": "0.5033"
-    },
-    {
-     "key": "lecture_integral",
-     "field": "theory",
-     "value": 0.5,
-     "digits": 4,
-     "shown": "0.5"
     }
    ]
   },
@@ -668,28 +654,28 @@
    "step": 9,
    "checks": [
     {
-     "key": "exactInt",
+     "key": "range",
      "field": "theory",
      "value": 0.8652,
      "digits": 4,
      "shown": "0.8652"
     },
     {
-     "key": "exactInt",
+     "key": "range",
      "field": "observed",
-     "value": 0.8685,
+     "value": 0.871,
      "digits": 4,
-     "shown": "0.8685"
+     "shown": "0.8710"
     },
     {
-     "key": "integral",
+     "key": "plain",
      "field": "theory",
      "value": 0.8448,
      "digits": 4,
      "shown": "0.8448"
     },
     {
-     "key": "integralCC",
+     "key": "corrected",
      "field": "theory",
      "value": 0.8644,
      "digits": 4,
@@ -702,25 +688,32 @@
    "step": 10,
    "checks": [
     {
-     "key": "exactInt",
+     "key": "pk",
+     "field": "theory",
+     "value": 0.9048,
+     "digits": 4,
+     "shown": "0.9048"
+    },
+    {
+     "key": "poisson",
+     "field": "theory",
+     "value": 0.9048,
+     "digits": 4,
+     "shown": "0.9048"
+    },
+    {
+     "key": "range",
      "field": "theory",
      "value": 0.0952,
      "digits": 4,
      "shown": "0.0952"
     },
     {
-     "key": "poissonInt",
-     "field": "theory",
-     "value": 0.0952,
-     "digits": 4,
-     "shown": "0.0952"
-    },
-    {
-     "key": "exactInt",
+     "key": "range",
      "field": "observed",
-     "value": 0.102,
+     "value": 0.092,
      "digits": 4,
-     "shown": "0.1020"
+     "shown": "0.0920"
     }
    ]
   },
@@ -729,32 +722,25 @@
    "step": 11,
    "checks": [
     {
-     "key": "z",
-     "field": "theory",
-     "value": 2.3263,
-     "digits": 4,
-     "shown": "2.3263"
-    },
-    {
-     "key": "nNormal",
+     "key": "normal",
      "field": "theory",
      "value": 13530,
      "digits": 0,
      "shown": "13530"
     },
     {
-     "key": "nCheb",
+     "key": "chebyshev",
      "field": "theory",
      "value": 125000,
      "digits": 0,
      "shown": "125000"
     },
     {
-     "key": "lectureTable",
+     "key": "inside",
      "field": "theory",
-     "value": 13225,
-     "digits": 0,
-     "shown": "13225"
+     "value": 0.9802,
+     "digits": 4,
+     "shown": "0.9802"
     }
    ]
   }

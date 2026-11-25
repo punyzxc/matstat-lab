@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11),
-// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards.
+// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court, #125 the living population (L10), the corridor of running means (L7).
 const fits = (page) => page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
 
 test.beforeEach(async ({ page }) => {
@@ -202,6 +202,109 @@ test('scientist cards sit in the figure while their step is read, open in place 
   await expect(page.getByTestId('step-counter')).toHaveText('Step 7 / 8');
   await expect(cards).toHaveCount(0);
   expect(await fits(page)).toBe(true);
+});
+
+test('L12 hypothesis court: a thousand verdicts reject as often as the Testing station; with H0 true the rate falls to alpha', async ({ page }) => {
+  await page.goto('/#lecture/12/2');
+  await expect(page.getByTestId('story-beat')).toHaveText('Two laws of one statistic');
+  const region = page.locator('[data-step="2"]').getByTestId('live-formula').first();
+  await expect(region.locator('[data-v="ucr"][data-role="res"]')).toHaveText('1.645');
+
+  await page.goto('/#lecture/12/4');
+  await expect(page.getByTestId('story-beat')).toHaveText('A thousand verdicts');
+  // reduced motion judges all 1000 samples at once: 660 of them reject H0 (seed 1212, n = 16, a = 0.5, alpha = 0.05)
+  await expect(page.getByTestId('court-rate')).toHaveText('66.0%');
+  const verdicts = page.locator('[data-step="4"]').getByTestId('live-formula').first();
+  await expect(verdicts.locator('[data-v="power"][data-role="res"]')).toHaveText('0.639');
+  await expect(verdicts.locator('[data-v="count"][data-role="res"]')).toHaveText('1000');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/testing\?seed=1212&sigmaKnown=1&a0=0&mu=0.5&sigma=1&n=16&alpha=0.05&tail=1&R=1000&view=0&truth=1&lecture=12&step=4$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/12/5');
+  await expect(page.getByTestId('court-rate')).toHaveText('5.6%');
+  const alpha = page.locator('[data-step="5"]').getByTestId('live-formula').first().locator('[data-v="alpha"][data-role="edit"]');
+  await alpha.click();
+  await page.locator('[data-step="5"]').getByRole('textbox').fill('0.01');
+  await page.locator('[data-step="5"]').getByRole('textbox').press('Enter');
+  await expect(alpha).toHaveText('0.010');
+  await expect(page.getByTestId('court-rate')).not.toHaveText('5.6%');
+  await expect.poll(async () => parseFloat(await page.getByTestId('court-rate').textContent())).toBeLessThan(3);
+
+  await page.goto('/#lecture/12/6');
+  await expect(page.getByTestId('story-beat')).toHaveText('The power curve');
+  await expect(page.locator('[data-step="6"]').getByTestId('live-formula').first().locator('[data-v="power"][data-role="res"]')).toHaveText('0.639');
+  expect(await fits(page)).toBe(true);
+});
+
+test('L10 living population: the sample becomes a table that sums to n, and a hovered observation lights up in all four portraits', async ({ page }) => {
+  await page.goto('/#lecture/10/1');
+  await expect(page.getByTestId('story-beat')).toHaveText('A sample leaves the population');
+  await expect(page.locator('[data-step="1"]').getByTestId('live-formula').first().locator('[data-v="xbar"][data-role="res"]')).toHaveText('1.125');
+
+  await page.goto('/#lecture/10/3');
+  await expect(page.getByTestId('story-beat')).toHaveText('The frequency table');
+  const step = page.locator('[data-step="3"]');
+  await expect(step.getByTestId('live-formula').nth(0).locator('[data-v="k"][data-role="res"]')).toHaveText('10');
+  await expect(step.getByTestId('live-formula').nth(2).locator('[data-v="sum"][data-role="res"]')).toHaveText('100');
+  const n = step.getByTestId('live-formula').first().locator('[data-v="n"][data-role="edit"]');
+  await n.click();
+  await step.getByRole('textbox').fill('1000');
+  await step.getByRole('textbox').press('Enter');
+  await expect(step.getByTestId('live-formula').nth(0).locator('[data-v="k"][data-role="res"]')).toHaveText('15');
+  await expect(step.getByTestId('live-formula').nth(2).locator('[data-v="sum"][data-role="res"]')).toHaveText('1000');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/sample\?seed=1010&law=0&n=1000&bins=0&digits=0&view=0&lecture=10&step=3$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/10/6');
+  await expect(page.getByTestId('story-beat')).toHaveText('One sample, four portraits');
+  const figure = page.locator('.figure--sample');
+  const box = await figure.boundingBox();
+  let found = false;
+  for (let dy = -40; dy <= 40 && !found; dy += 4)
+    for (let dx = 0; dx <= 160 && !found; dx += 3) {
+      await page.mouse.move(box.x + box.width * 0.2 + dx, box.y + box.height * 0.8 + dy);
+      found = (await page.getByTestId('sample-obs').count()) > 0;
+    }
+  expect(found).toBe(true);
+  await expect(page.getByTestId('sample-obs')).toContainText('F');
+  await page.mouse.move(box.x + 5, box.y + box.height - 5);
+  await expect(page.getByTestId('sample-obs')).toHaveCount(0);
+
+  await page.goto('/#lecture/10/7');
+  await expect(page.locator('[data-step="7"]').getByTestId('live-formula').first().locator('[data-v="dn"][data-role="res"]')).toHaveText('0.101');
+  expect(await fits(page)).toBe(true);
+});
+
+test('L7 corridor: Chebyshev against the real tails, then 200 running means whose share outside the corridor falls under the bound', async ({ page }) => {
+  await page.goto('/#lecture/7/1');
+  await expect(page.getByTestId('story-beat')).toHaveText('Chebyshev against the real tails');
+  const tail = page.locator('[data-step="1"]').getByTestId('live-formula');
+  // reduced motion draws all 20000 at once: 960 of them lie 2 sigma or more from the mean (seed 707), as on the LLN station
+  await expect(tail.nth(0).locator('[data-v="tailsim"][data-role="res"]')).toHaveText('0.048');
+  await expect(tail.nth(1).locator('[data-v="kbound"][data-role="res"]')).toHaveText('0.25');
+  const k = tail.nth(0).locator('[data-v="k"][data-role="edit"]');
+  await k.click();
+  await page.locator('[data-step="1"]').getByRole('textbox').fill('3');
+  await page.locator('[data-step="1"]').getByRole('textbox').press('Enter');
+  await expect(tail.nth(1).locator('[data-v="kbound"][data-role="res"]')).toHaveText('0.1111');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/lln\?seed=707&law=0&N=2000&k=3&view=1&lecture=7&step=1$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/7/3');
+  await expect(page.getByTestId('story-beat')).toHaveText('Running means in a corridor');
+  const corridor = page.locator('[data-step="3"]').getByTestId('live-formula');
+  await expect(corridor.nth(0).locator('[data-v="bound"][data-role="res"]')).toHaveText('0.013');
+  await expect(page.getByTestId('lln-count')).toContainText('0 of 200');
+  const eps = corridor.nth(0).locator('[data-v="eps"][data-role="edit"]');
+  await eps.click();
+  await page.locator('[data-step="3"]').getByRole('textbox').fill('0.02');
+  await page.locator('[data-step="3"]').getByRole('textbox').press('Enter');
+  await expect(page.getByTestId('lln-count')).not.toContainText(' 0 of 200');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/lln\?seed=707&law=2&N=2000&view=2&M=200&eps=0.02&lecture=7&step=3$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/7/5');
+  await expect(page.getByTestId('lln-count')).toContainText('no Chebyshev bound');
 });
 
 test('old step-by-step lectures keep their player', async ({ page }) => {

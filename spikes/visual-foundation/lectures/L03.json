@@ -18,7 +18,7 @@
         "\\sum_{k=0}^{n} C_n^k\\, p^k q^{\\,n-k} = (p+q)^n = 1 \\qquad (12)"
       ],
       "example": "$n = 10$ fair coins, exactly 5 heads: $C_{10}^5 / 2^{10} = 252/1024 \\approx 0.2461$. At least one success in $n$ trials: $1 - q^n$.",
-      "notes": "By Newton's binomial (12) the probabilities sum to 1, so (11) is called the binomial distribution. Station check (seed 7, 2000 series): $P_{10}(5) = 0.2461$ exact, frequency 0.2435.",
+      "notes": "By Newton's binomial (12) the probabilities sum to 1, so (11) is called the binomial distribution. Station check (seed 7, 2000 series): $P_{10}(5) = 0.2461$ exact, frequency 0.2455.",
       "scientists": [
         "bernoulli-jacob",
         "newton"
@@ -27,12 +27,12 @@
         "station": "bernoulli",
         "seed": 7,
         "params": {
-          "view": 1,
-          "example": 0,
+          "view": 0,
           "n": 10,
           "p": 0.5,
-          "k1": 5,
-          "k2": 5,
+          "k": 5,
+          "lo": 5,
+          "hi": 5,
           "R": 2000
         },
         "label": "Toss 10 coins many times"
@@ -58,12 +58,12 @@
         "station": "bernoulli",
         "seed": 9,
         "params": {
-          "view": 1,
-          "example": 0,
+          "view": 0,
           "n": 9,
           "p": 0.5,
-          "k1": 0,
-          "k2": 9,
+          "k": 4,
+          "lo": 0,
+          "hi": 9,
           "R": 2000
         },
         "label": "Find the two peaks"
@@ -76,13 +76,18 @@
         "P_7(5) = C_7^5 \\left(\\tfrac34\\right)^5 \\left(\\tfrac14\\right)^2 \\approx 0.3115"
       ],
       "example": "As computed, $P_7(5) \\approx 0.3115$ (the lecture rounds to 0.311). As worded, five days in a row: $(3/4)^5 \\approx 0.2373$. The station follows the computation.",
-      "notes": "Station check (seed 1): exact 0.3115, lecture value 0.311.",
+      "notes": "Station check (seed 1): exact 0.3115 (the lecture prints 0.311); the most probable numbers are 5 and 6.",
       "experiment": {
         "station": "bernoulli",
         "seed": 1,
         "params": {
-          "view": 1,
-          "example": 1
+          "view": 0,
+          "n": 7,
+          "p": 0.75,
+          "k": 5,
+          "lo": 5,
+          "hi": 5,
+          "R": 2000
         },
         "label": "Open example 1"
       }
@@ -100,8 +105,13 @@
         "station": "bernoulli",
         "seed": 1733,
         "params": {
-          "view": 1,
-          "example": 2
+          "view": 0,
+          "n": 5000,
+          "p": 0.01,
+          "k": 50,
+          "lo": 0,
+          "hi": 50,
+          "R": 2000
         },
         "label": "Open example 2a"
       }
@@ -124,8 +134,13 @@
         "station": "bernoulli",
         "seed": 1733,
         "params": {
-          "view": 1,
-          "example": 2
+          "view": 0,
+          "n": 5000,
+          "p": 0.01,
+          "k": 50,
+          "lo": 0,
+          "hi": 50,
+          "R": 2000
         },
         "label": "Lay the Gauss curve over the bars"
       }
@@ -158,8 +173,13 @@
         "station": "bernoulli",
         "seed": 5000,
         "params": {
-          "view": 1,
-          "example": 3
+          "view": 0,
+          "n": 5000,
+          "p": 0.01,
+          "k": 50,
+          "lo": 0,
+          "hi": 50,
+          "R": 2000
         },
         "label": "Open example 2b"
       }
@@ -170,17 +190,17 @@
       "formula": [
         "P(40 \\le k \\le 60) = 0.8652 \\quad (\\text{exact}), \\qquad \\Phi(1.49) - \\Phi(-1.49) \\approx 0.8644"
       ],
-      "notes": "Station check (seed 4060, 2000 series): exact 0.8652, frequency 0.8685, integral 0.8448, with correction 0.8644.",
+      "notes": "Station check (seed 4060, 2000 series): exact 0.8652, frequency 0.8710, integral 0.8448, with correction 0.8644.",
       "experiment": {
         "station": "bernoulli",
         "seed": 4060,
         "params": {
-          "view": 1,
-          "example": 0,
+          "view": 0,
           "n": 5000,
           "p": 0.01,
-          "k1": 40,
-          "k2": 60,
+          "k": 50,
+          "lo": 40,
+          "hi": 60,
           "R": 2000
         },
         "label": "Count the central band"
@@ -194,7 +214,7 @@
         "\\sum_{k=0}^{\\infty} \\dfrac{\\lambda^k}{k!}\\, e^{-\\lambda} = 1"
       ],
       "example": "A 1000-page book has 100 typos. A page holds at least one: $n = 100$, $p = 0.001$, $\\lambda = 0.1$, $1 - e^{-0.1} \\approx 0.0952$. Exactly: $1 - 0.999^{100} \\approx 0.0952$ too.",
-      "notes": "Station check (seed 1837, 2000 pages): exact 0.0952, Poisson 0.0952, frequency 0.1020; the normal formulas fail here.",
+      "notes": "Station check (seed 1837, 2000 pages): $P_{100}(0) = 0.9048$ exact and by Poisson, so $P(1 \\le k \\le 100) = 0.0952$; frequency 0.0920; the normal formulas fail here.",
       "scientists": [
         "poisson"
       ],
@@ -202,8 +222,13 @@
         "station": "bernoulli",
         "seed": 1837,
         "params": {
-          "view": 1,
-          "example": 4
+          "view": 0,
+          "n": 100,
+          "p": 0.001,
+          "k": 0,
+          "lo": 1,
+          "hi": 100,
+          "R": 2000
         },
         "label": "Open the typo example"
       }
@@ -216,7 +241,7 @@
         "P\\!\\left(\\left|\\dfrac{m}{n} - p\\right| \\le \\varepsilon\\right) \\approx 2\\Phi\\!\\left(\\varepsilon\\sqrt{\\dfrac{n}{pq}}\\right) - 1 \\qquad (20)"
       ],
       "example": "How many tosses of a fair coin make the frequency stay within 0.01 of 0.5 with probability 0.98? $\\Phi(z) = 0.99$, $z = 2.3263$, $n = (z/(2 \\cdot 0.01))^2 \\approx 13530$. The lecture reads $z \\approx 2.3$ from a table and gets 13225.",
-      "notes": "Chebyshev's inequality needs no normal approximation and asks for $pq/((1-\\gamma)\\varepsilon^2) = 125000$ tosses. Station check (seed 98): $z = 2.3263$, $n = 13530$, Chebyshev 125000, lecture table 13225.",
+      "notes": "Chebyshev's inequality needs no normal approximation and asks for $pq/((1-\\gamma)\\varepsilon^2) = 125000$ tosses. Station check (seed 98): $n = 13530$, Chebyshev 125000; at $n = 13530$ the exact probability is 0.9802.",
       "scientists": [
         "bernoulli-jacob"
       ],
@@ -224,10 +249,10 @@
         "station": "bernoulli",
         "seed": 98,
         "params": {
-          "view": 2,
+          "view": 1,
+          "p": 0.5,
           "eps": 0.01,
-          "gamma": 0.98,
-          "pFreq": 0.5
+          "gamma": 0.98
         },
         "label": "Find the number of tosses"
       }
