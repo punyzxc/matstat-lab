@@ -19,6 +19,8 @@ export type Surface = {
   zSample?: number[][];
   labels: { x: string; y: string; z: string };
   title?: string;
+  /** Legend text for the `zSample` stems; defaults to the 2D-histogram wording. */
+  sampleLabel?: string;
 };
 export type KernelResult = { readouts: Readout[]; series: Series[]; notes: string[]; axes?: { x?: string; y?: string }; surface?: Surface };
 export type Kernel = {

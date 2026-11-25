@@ -52,7 +52,6 @@ test('all six orbital windows are direct entry links and preserve the last opene
   for (const [orbit, name] of [
     ['II Random variables', 'Distribution Explorer'],
     ['III Limit theorems', 'Convergence'],
-    ['IV Statistics', 'Hypothesis Testing'],
   ]) {
     await page.getByRole('navigation', { name: 'Lecture orbits' }).getByRole('link', { name: orbit }).click();
     const node = page.locator('.orbital-nodes').getByRole('link', { name: new RegExp('^' + name) });
@@ -65,7 +64,7 @@ test('all six orbital windows are direct entry links and preserve the last opene
     await expect(node).toHaveAccessibleName(/Last opened/);
   }
   await page.reload();
-  await expect(page.locator('[data-module="testing"]')).toHaveAccessibleName(/Last opened/);
+  await expect(page.locator('[data-module="convergence"]')).toHaveAccessibleName(/Last opened/);
 });
 
 test('narrow screens keep all connected windows and immediate static previews', async ({ page }) => {
@@ -93,8 +92,8 @@ test('the active sample updates the distribution window and unvisited examples',
   await page.getByLabel('Model', { exact: true }).selectOption('uniform');
   await page.getByRole('button', { name: 'Resample' }).click();
   await expect(distribution).toHaveAccessibleName(/Latest result.*Uniform, seed 2049/);
-  await page.getByRole('link', { name: 'IV Statistics' }).click();
-  await expect(page.locator('[data-module="testing"]')).toHaveAccessibleName(
+  await page.getByRole('link', { name: 'III Limit theorems' }).click();
+  await expect(page.locator('[data-module="convergence"]')).toHaveAccessibleName(
     /Seeded preview.*Uniform, seed 2049/,
   );
   await page.getByRole('link', { name: 'II Random variables' }).click();
