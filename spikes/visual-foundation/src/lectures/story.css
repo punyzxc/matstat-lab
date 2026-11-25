@@ -1009,3 +1009,30 @@ html[data-present] .story {
 .figure--lln[data-beat='share'] .lln-count {
   left: 8%;
 }
+
+/* L6 centre of mass: the table of shares inside the sigma bands */
+.centre-table {
+  position: absolute;
+  right: 4%;
+  top: 52%;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 8px 18px;
+  align-items: baseline;
+  color: #bdbdb9;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.centre-table b {
+  color: var(--signal);
+  font-weight: 500;
+}
+.centre-table i {
+  color: var(--cyan, #7fd6e0);
+  font-style: normal;
+}
+.centre-table .is-hot {
+  color: #fff;
+  text-shadow: 0 0 12px rgb(232 228 133 / 0.6);
+}

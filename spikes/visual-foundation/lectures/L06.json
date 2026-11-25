@@ -1,42 +1,262 @@
 {
   "lecture": 6,
   "title": "Numerical characteristics, functions and sums of random variables",
-  "scientists": [],
+  "scientists": [
+    "huygens",
+    "gauss",
+    "laplace"
+  ],
+  "status": "draft",
+  "story": true,
   "steps": [
     {
-      "title": "Expectation and variance",
-      "idea": "The mean is the centre of mass of the distribution; the variance is the mean squared spread around it.",
-      "formula": [
-        "M\\xi = \\sum_i x_i\\, p_i \\quad \\text{or} \\quad M\\xi = \\int_{-\\infty}^{\\infty} x f(x)\\,dx",
-        "D\\xi = M(\\xi - M\\xi)^2"
+      "title": "Expectation is a centre of mass",
+      "idea": "Hang a weight $p_i$ at each value $x_i$ on a weightless beam. The beam balances at exactly one point, and that point is the expectation $M\\xi$. Throw the variable again and again: the mean of the throws slides to the fulcrum.",
+      "figure": {
+        "id": "centre-mass",
+        "beat": "beam",
+        "params": {
+          "x1": -3,
+          "x2": -1,
+          "x3": 1.5,
+          "x4": 4,
+          "p1": 0.2,
+          "p2": 0.3,
+          "p3": 0.4,
+          "p4": 0.1,
+          "n": 2000
+        }
+      },
+      "live": [
+        "\\lv{Mx}{M\\xi} = \\sum_i x_i\\,p_i = \\lres{Mx}, \\qquad x_4 = \\lval{x4}",
+        "\\lv{xbar}{\\bar x} = \\dfrac{1}{n}\\sum_{j=1}^{n} \\xi_j = \\lres{xbar}, \\qquad \\lv{throws}{n} = \\lres{throws}"
       ],
-      "experiment": {
-        "station": "moments",
-        "seed": 606
+      "whatIf": [
+        {
+          "label": "move $x_4$ to $5$",
+          "params": {
+            "x4": 5
+          }
+        },
+        {
+          "label": "a heavy left weight",
+          "params": {
+            "p1": 0.6
+          }
+        },
+        {
+          "label": "equal weights",
+          "params": {
+            "p1": 0.25,
+            "p2": 0.25,
+            "p3": 0.25,
+            "p4": 0.25
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Each weight pulls its end of the beam down with a force $p_i$ at the arm $x_i - M\\xi$. At the fulcrum the pulls cancel: $\\sum_i (x_i - M\\xi)\\,p_i = 0$.",
+        "definition": "For a discrete variable $M\\xi = \\sum_i x_i p_i$; for a continuous one $M\\xi = \\int_{-\\infty}^{\\infty} x f(x)\\,dx$. Properties: $MC = C$, $M(C\\xi) = C\\,M\\xi$, $M(\\xi + \\eta) = M\\xi + M\\eta$, and $M(\\xi\\eta) = M\\xi\\,M\\eta$ for independent $\\xi, \\eta$.",
+        "details": "Huygens called it the value of a chance: what a fair player should pay to take part in a game. The law of large numbers (lecture 7) explains why the mean of the throws settles on it."
+      },
+      "scientists": [
+        "huygens"
+      ],
+      "portals": [
+        {
+          "lecture": 7,
+          "step": 2
+        }
+      ]
+    },
+    {
+      "title": "Variance is the spread",
+      "idea": "The mean says where the mass sits, not how far it is spread. The variance is the mean squared distance from the fulcrum, the beam's moment of inertia. Move one weight further out: the fulcrum shifts a little, the variance grows a lot.",
+      "figure": {
+        "id": "centre-mass",
+        "beat": "beam",
+        "params": {
+          "x1": -3,
+          "x2": -1,
+          "x3": 1.5,
+          "x4": 4,
+          "p1": 0.2,
+          "p2": 0.3,
+          "p3": 0.4,
+          "p4": 0.1,
+          "n": 2000
+        }
+      },
+      "live": [
+        "\\lv{Dx}{D\\xi} = M(\\xi - M\\xi)^2 = \\sum_i (x_i - M\\xi)^2\\,p_i = \\lres{Dx}",
+        "\\lv{sd}{\\sigma} = \\sqrt{D\\xi} = \\lres{sd}, \\qquad \\lv{s2}{s^2} = \\lres{s2}, \\qquad x_1 = \\lval{x1}"
+      ],
+      "whatIf": [
+        {
+          "label": "move $x_1$ to $-5$",
+          "params": {
+            "x1": -5
+          }
+        },
+        {
+          "label": "weights near the centre",
+          "params": {
+            "x1": -1,
+            "x2": -0.5,
+            "x3": 0.5,
+            "x4": 1
+          }
+        },
+        {
+          "label": "one heavy weight",
+          "params": {
+            "p3": 0.97,
+            "p1": 0.01,
+            "p2": 0.01,
+            "p4": 0.01
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "The coral bracket under the beam spans $M\\xi \\pm \\sigma$. A weight far out counts by the square of its distance, so it widens the bracket much more than it moves the fulcrum.",
+        "definition": "$D\\xi = M(\\xi - M\\xi)^2 = M\\xi^2 - (M\\xi)^2$. Properties: $DC = 0$, $D(C\\xi) = C^2 D\\xi$, $D(\\xi + C) = D\\xi$, and $D(\\xi + \\eta) = D\\xi + D\\eta$ for independent $\\xi, \\eta$."
       }
     },
     {
       "title": "The $3\\sigma$ rule",
-      "idea": "For a normal variable almost all values lie within three standard deviations of the mean.",
-      "formula": [
-        "P\\bigl(|\\xi - a| < 3\\sigma\\bigr) = 1 - 2\\Phi(-3) \\approx 0.9973"
+      "idea": "Draw a normal variable many times and mark the bands one, two and three standard deviations around the mean. About two thirds of the values fall in the first, 95% in the second, and outside the third only about three in a thousand.",
+      "figure": {
+        "id": "centre-mass",
+        "beat": "sigma",
+        "params": {
+          "law": 5,
+          "n": 2000,
+          "sigma": 1,
+          "lambda": 1
+        }
+      },
+      "live": [
+        "\\lv{ex3}{P\\bigl(|\\xi - a| < 3\\sigma\\bigr)} = \\lres{ex3}",
+        "\\lv{in3}{\\hat p} = \\lres{in3}, \\qquad \\lv{out3}{1 - \\hat p} = \\lres{out3}, \\qquad n = \\lval{n}"
       ],
-      "experiment": {
-        "station": "moments",
-        "seed": 3
+      "whatIf": [
+        {
+          "label": "exponential law",
+          "params": {
+            "law": 4
+          }
+        },
+        {
+          "label": "uniform law",
+          "params": {
+            "law": 3
+          }
+        },
+        {
+          "label": "$n = 20000$",
+          "params": {
+            "n": 20000
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Values beyond $3\\sigma$ turn coral. For the normal law they are rare; for the exponential law, with its long right tail, there are several times more of them.",
+        "definition": "For $\\xi \\sim N(a, \\sigma)$: $P(|\\xi - a| < \\sigma) \\approx 0.6827$, $P(|\\xi - a| < 2\\sigma) \\approx 0.9545$, $P(|\\xi - a| < 3\\sigma) \\approx 0.9973$.",
+        "details": "The rule is about the normal law. For an arbitrary law with a variance, Chebyshev's inequality guarantees only $P(|\\xi - M\\xi| < 3\\sigma) \\ge 1 - 1/9 \\approx 0.889$."
+      },
+      "scientists": [
+        "gauss"
+      ],
+      "portals": [
+        {
+          "lecture": 7,
+          "step": 1
+        }
+      ]
+    },
+    {
+      "title": "Convolution: the box slides",
+      "idea": "Add two independent uniforms on $[0, 1]$. To get the density of the sum at $z$, slide the box $f(z - x)$ along $f(x)$ and measure the area where they overlap. As $z$ runs from $0$ to $2$ the area rises and falls: the density of the sum is a triangle.",
+      "figure": {
+        "id": "centre-mass",
+        "beat": "slide",
+        "params": {
+          "m": 2,
+          "R": 5000
+        }
+      },
+      "live": [
+        "f_{\\xi+\\eta}(z) = \\int_{-\\infty}^{\\infty} f_\\xi(x)\\, f_\\eta(z - x)\\,dx",
+        "\\lv{fz}{f_m(z)} = \\lres{fz}, \\qquad \\lv{z}{z} = \\lres{z}, \\qquad m = \\lval{m}"
+      ],
+      "whatIf": [
+        {
+          "label": "$m = 3$",
+          "params": {
+            "m": 3
+          }
+        },
+        {
+          "label": "$m = 4$",
+          "params": {
+            "m": 4
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "With $m = 3$ the box slides along the triangle, the density of two uniforms, and the overlap traces three pieces of parabola. Each new term smooths the shape.",
+        "definition": "If $\\xi$ and $\\eta$ are independent with densities $f_\\xi$ and $f_\\eta$, the sum $\\zeta = \\xi + \\eta$ has the density $f_\\zeta(z) = \\int_{-\\infty}^{\\infty} f_\\xi(x)\\,f_\\eta(z - x)\\,dx$, the convolution $f_\\xi * f_\\eta$.",
+        "details": "The triangle for two uniforms is Simpson's law. The density of $m$ uniforms is the Irwin–Hall density, made of pieces of polynomials of degree $m - 1$."
       }
     },
     {
-      "title": "Sums and convolution",
-      "idea": "The density of a sum of independent variables is the convolution of their densities.",
-      "formula": [
-        "f_{\\xi+\\eta}(z) = \\int_{-\\infty}^{\\infty} f_\\xi(x)\\, f_\\eta(z - x)\\,dx"
+      "title": "Sums pile into a bell",
+      "idea": "Draw thousands of sums of $m$ uniforms. The expectations add, and for independent terms the variances add too. The histogram follows the exact density, and already at $m = 3$ it is hard to tell from the normal curve.",
+      "figure": {
+        "id": "centre-mass",
+        "beat": "sums",
+        "params": {
+          "m": 3,
+          "R": 5000
+        }
+      },
+      "live": [
+        "M(\\xi_1 + \\dots + \\xi_m) = \\lv{sumMth}{\\dfrac{m}{2}} = \\lres{sumMth} \\approx \\lv{summean}{\\bar z} = \\lres{summean}",
+        "D(\\xi_1 + \\dots + \\xi_m) = \\lv{sumDth}{\\dfrac{m}{12}} = \\lres{sumDth} \\approx \\lv{sumvar}{s^2} = \\lres{sumvar}, \\qquad m = \\lval{m}"
       ],
-      "experiment": {
-        "station": "convolution",
-        "seed": 616
-      }
+      "whatIf": [
+        {
+          "label": "$m = 1$",
+          "params": {
+            "m": 1
+          }
+        },
+        {
+          "label": "$m = 2$",
+          "params": {
+            "m": 2
+          }
+        },
+        {
+          "label": "$m = 6$",
+          "params": {
+            "m": 6
+          }
+        }
+      ],
+      "layers": {
+        "definition": "For any $\\xi_1, \\dots, \\xi_m$: $M\\sum \\xi_i = \\sum M\\xi_i$. For independent ones also $D\\sum \\xi_i = \\sum D\\xi_i$. A uniform on $[0, 1]$ has $M\\xi = 1/2$ and $D\\xi = 1/12$.",
+        "details": "That the bell appears for almost any terms is the central limit theorem of lecture 8. Laplace first saw it in sums of errors of observation."
+      },
+      "scientists": [
+        "laplace"
+      ],
+      "portals": [
+        {
+          "lecture": 8,
+          "step": 3
+        }
+      ]
     }
-  ],
-  "status": "draft"
+  ]
 }
