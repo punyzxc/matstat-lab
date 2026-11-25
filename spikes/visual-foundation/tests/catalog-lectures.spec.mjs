@@ -4,9 +4,9 @@ import { expect, test } from '@playwright/test';
 // Course titles for L11/L12 disagree with parts of their extracted body text;
 // this task fixes the catalog's index tags, not lecture scripts or kernel content.
 const expected = {
-  urn: 'L1', events: 'L1', combinatorics: 'L1', conditional: 'L2', frequency: 'L1', darts: 'L1 · L4', bayes: 'L1 · L2', bernoulli: 'L3 · L9',
+  urn: 'L1', events: 'L1', combinatorics: 'L1', conditional: 'L2', 'bayes-tree': 'L2', frequency: 'L1', darts: 'L1 · L4', bayes: 'L1 · L2', bernoulli: 'L3 · L9',
   distribution: 'L5', cdf: 'L5', moments: 'L6', balance: 'L6', transform: 'L6', scatter: 'L6',
-  convolution: 'L6', convergence: 'L7', lln: 'L7', clt: 'L8 · L9',
+  convolution: 'L6', convergence: 'L7', lln: 'L7', clt: 'L8 · L9', charfn: 'L9',
   sample: 'L10', fit: 'L10 · L11', estimation: 'L12', confidence: 'L12',
   testing: 'L11', homogeneity: 'L11', randomness: 'extra', 'contract-fixture': 'L1',
 };

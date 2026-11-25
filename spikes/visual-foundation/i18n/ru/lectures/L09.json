@@ -4,5 +4,6 @@
   "The characteristic function of a sum of independent variables is the product of their characteristic functions.": "Характеристическая функция суммы независимых случайных величин равна произведению их характеристических функций.",
   "Exact versus approximate": "Точное и приближённое значения",
   "The normal approximation of a binomial probability has an error you can measure.": "У нормального приближения биномиальной вероятности есть погрешность, которую можно измерить.",
-  "Lecture answer 0.92135 (normal), exact binomial 0.9520.": "Ответ в лекции 0.92135 (нормальное приближение), точное биномиальное значение 0.9520."
+  "Lecture answer 0.92135 (normal), exact binomial 0.9520.": "Ответ в лекции 0.92135 (нормальное приближение), точное биномиальное значение 0.9520.",
+  "Spin the unit vectors of the characteristic function": "Покрутите единичные векторы характеристической функции"
 }
