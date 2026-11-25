@@ -38,7 +38,7 @@ test('A typed region: darts land in it, an invalid region is explained and the l
 
   await field.fill('y < z');
   await field.press('Enter');
-  await expect(dock.getByRole('alert')).toContainText('Unknown name “z”');
+  await expect(dock.getByRole('alert')).toContainText('z needs the cube'); // #119: z is a coordinate of the cube
   await expect(dock.getByRole('alert')).toContainText('Still playing: x^2 + y^2 < 1');
   await expect(field).toHaveAttribute('aria-invalid', 'true');
   await expect(dock.getByRole('table', { name: 'Readouts' })).toContainText('0.7854');

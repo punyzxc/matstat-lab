@@ -143,12 +143,15 @@ test('#90 typed regions: exact areas within the grid error, hit shares within th
 });
 
 test('#90 invalid regions are explained and never run; nothing typed is executed as code', () => {
-  for (const bad of ['', 'x +', 'y = x', 'y < z', 'x + y', '(y < x) + 1', '2 > 1', 'y < (x', 'alert(1) < x', 'constructor < 1', 'x.y < 1', 'y < x;', 'sin < x', '__proto__ > x']) {
+  for (const bad of ['', 'x +', 'y = x', 'x + y', '(y < x) + 1', '2 > 1', 'y < (x', 'alert(1) < x', 'constructor < 1', 'x.y < 1', 'y < x;', 'sin < x', '__proto__ > x']) {
     const c = k.checkText('darts', 'region', bad);
     assert.ok(c && c.message && c.template, `${JSON.stringify(bad)} should be rejected`);
     assert.equal(c.values.reduce((s, v, i) => s.replace(`[[${i + 1}]]`, v), c.template), c.message);
     assert.throws(() => R.parseRegion(bad), R.RegionError);
   }
+  // z is a coordinate of the cube (#119): the square rejects it with a reason, the cube takes it.
+  assert.match(k.checkText('darts', 'region', 'y < z').message, /z needs the cube/);
+  assert.equal(k.checkText('darts', 'region3', 'y < z'), null);
   for (const good of ['y < x^2', 'xy > 0.1', 'y<sinx', 'y < e^(-3x)', '√x > y', 'x² + y² ≤ 1', 'y > x and y < 2x or x > 0.9']) assert.equal(k.checkText('darts', 'region', good), null, good);
   assert.equal(k.checkText('darts', 'other', 'anything'), null);
   // Precedence: and binds tighter than or; powers are right-associative; unary minus below the power.
@@ -200,4 +203,56 @@ test('#124 with 10 000 chords per method each share lies in the predeclared 3-SE
     }
     assert.equal(JSON.stringify(res), JSON.stringify(darts({ view: 2, N: 10000 }, seed)));
   }
+});
+
+// #119: the same typed region on a segment, in the square or in the cube.
+test('#119 lengths and volumes by quadrature match the exact values; the share of hits sits in its band', () => {
+  const cases = [
+    [1, 'region1', 'x^2 < 0.5', Math.SQRT1_2],
+    [1, 'region1', '|x - 0.5| < 0.2', 0.4],
+    [3, 'region3', 'x^2 + y^2 + z^2 < 1', Math.PI / 6],
+    [3, 'region3', 'x + y + z < 1', 1 / 6],
+    [3, 'region3', 'z < x y', 1 / 4],
+    [3, 'region3', 'x^2 + y^2 < z^2', Math.PI / 12],
+  ];
+  for (const [dim, key, region, exact] of cases) {
+    const out = k.run({ view: 4, N: 20000, dim, [key]: region }, { seed: 11, station: 'darts' });
+    const area = out.readouts.find((r) => r.key === 'area');
+    const err = R[dim === 1 ? 'regionLength' : 'regionVolume'](R.compileRegion(R.parseRegion(region))).error;
+    assert.ok(Math.abs(area.theory - exact) <= 3 * err + 1e-6, `${region}: ${area.theory} vs ${exact} (± ${err})`);
+    const share = out.readouts.find((r) => r.key === 'share');
+    assert.ok(Math.abs(share.observed - exact) <= k.band3(exact, 20000) + err, `${region}: share ${share.observed}`);
+    assert.equal(out.board.kind, dim === 1 ? 'segment' : 'cube');
+    assert.equal(out.board.darts[0].length, dim === 1 ? 2 : 3);
+    assert.equal(out.board.darts.length, dim === 1 ? k.DARTS : k.DARTS_3D);
+  }
+});
+
+test('#119 every drawn point is lit exactly when it is inside; the same seed gives the same hits', () => {
+  const inside = R.compileRegion(R.parseRegion('x^2 + y^2 + z^2 < 1'));
+  const a = k.run({ view: 4, N: 3000, dim: 3, region3: 'x^2 + y^2 + z^2 < 1' }, { seed: 9, station: 'darts' });
+  a.board.darts.forEach(([x, y, z], i) => {
+    // Coordinates are rounded to 6 digits for the picture; only points on the very boundary could flip.
+    if (Math.abs(x * x + y * y + z * z - 1) > 1e-5) assert.equal(a.board.hits[i], inside(x, y, z), `point ${i}`);
+  });
+  const b = k.run({ view: 4, N: 3000, dim: 3, region3: 'x^2 + y^2 + z^2 < 1' }, { seed: 9, station: 'darts' });
+  assert.deepEqual(a, b);
+  const seg = k.run({ view: 4, N: 3000, dim: 1, region1: 'x < 0.3 or x > 0.9' }, { seed: 9, station: 'darts' });
+  assert.deepEqual(seg.board.intervals, [[0, 0.3], [0.9, 0.1]]);
+  seg.board.darts.forEach(([x], i) => assert.equal(seg.board.hits[i], x < 0.3 || x > 0.9));
+  // The square keeps the #90 darts: dim 2 is the old view.
+  assert.deepEqual(k.run({ view: 4, N: 3000, dim: 2, region: 'y < x^2' }, { seed: 9, station: 'darts' }).board,
+    k.run({ view: 4, N: 3000, region: 'y < x^2' }, { seed: 9, station: 'darts' }).board);
+});
+
+test('#119 each space takes only its own coordinates, with a reason', () => {
+  assert.match(k.checkText('darts', 'region1', 'y < x').message, /segment use x only/);
+  assert.match(k.checkText('darts', 'region', 'z < x').message, /z needs the cube/);
+  assert.equal(k.checkText('darts', 'region3', 'z < x'), null);
+  for (const t of k.stations.darts.texts) {
+    assert.equal(k.checkText('darts', t.key, t.default), null, t.default);
+    for (const p of t.presets) assert.equal(k.checkText('darts', t.key, p), null, p);
+  }
+  assert.equal(R.regionTex(R.parseRegion('x^2 + y^2 < z^2')), 'x^{2} + y^{2} < z^{2}');
+  assert.equal(R.regionTex(R.parseRegion('z < xy')), 'z < x \\cdot y');
 });

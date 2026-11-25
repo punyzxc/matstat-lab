@@ -1498,6 +1498,60 @@ html:has(.orbital-lab) body {
 .board[data-reduced] .board-dart {
   animation: none;
 }
+/* #119: the segment and the cube */
+.board--segment svg {
+  max-height: 140px;
+}
+.board-axis {
+  stroke: #5a5a5a;
+}
+.board--cube svg {
+  max-width: 400px;
+  max-height: 380px;
+  cursor: grab;
+  touch-action: none;
+}
+.board--cube svg:active {
+  cursor: grabbing;
+}
+.board--cube svg:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: 2px;
+}
+.cube-edge {
+  stroke: #6a6a6a;
+  stroke-width: 1;
+}
+.cube-edge[data-back] {
+  stroke: #353535;
+  stroke-dasharray: 3 3;
+}
+.board .cube-dot {
+  animation: none;
+  fill: #6f6f6f;
+  opacity: 0.45;
+}
+.board .cube-dot[data-hit] {
+  fill: var(--signal);
+  opacity: 0.95;
+}
+.board--cube g {
+  animation: cube-in 0.35s ease-out both;
+}
+.board[data-reduced].board--cube g {
+  animation: none;
+}
+.cube-axis-label {
+  font-style: italic;
+  font-family: var(--serif);
+  font-size: 13px;
+  fill: #b0b0b0;
+}
+@keyframes cube-in {
+  from {
+    opacity: 0.25;
+  }
+}
 .text-param {
   display: grid;
   gap: 6px;

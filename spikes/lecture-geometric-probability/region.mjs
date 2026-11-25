@@ -1,4 +1,5 @@
-// A region of the unit square typed as inequalities in x and y (#90), for example `y < x^2`,
+// A region of the unit square typed as inequalities in x and y (#90), for example `y < x^2`, or of the unit
+// segment (x only) or cube (x, y and z, #119),
 // `x^2 + y^2 < 1 and y > x` or `0.2 < x < 0.8`. A small parser builds a tree and compiles it into a
 // closure: no eval, no Function, so nothing typed can run as code. Pure ES module: no DOM.
 //
@@ -11,7 +12,7 @@
 //   product:= unary (('*' | '·' | '×' | '/' | implicit) unary)*      2x, 3(x + 1), xy
 //   unary  := ('-' | '+') unary | power
 //   power  := atom ('^' unary | '²' | '³')?    right-associative
-//   atom   := number | x | y | pi | π | e | function '(' or ')' | '(' or ')' | '|' sum '|'
+//   atom   := number | x | y | z | pi | π | e | function '(' or ')' | '(' or ')' | '|' sum '|'
 // A decimal comma between digits is a decimal point (0,5 = 0.5). Where a function is undefined (sqrt of a
 // negative number, ln of 0) the comparison is false, so the point is outside the region.
 
@@ -33,7 +34,7 @@ export class RegionError extends Error {
   }
 }
 
-const fnPrefix = (w) => Object.keys(FUNCTIONS).sort((p, q) => q.length - p.length).find((f) => w.startsWith(f) && /^[xy]+$/.test(w.slice(f.length)));
+const fnPrefix = (w) => Object.keys(FUNCTIONS).sort((p, q) => q.length - p.length).find((f) => w.startsWith(f) && /^[xyz]+$/.test(w.slice(f.length)));
 
 function tokenize(src) {
   const out = [];
@@ -47,10 +48,10 @@ function tokenize(src) {
     if (word) {
       const w = word[0].toLowerCase();
       if (WORDS[w]) out.push({ t: WORDS[w], at: i });
-      else if (FUNCTIONS[w] || CONSTANTS[w] || w === 'x' || w === 'y') out.push({ t: 'name', v: w, at: i });
-      else if (/^[xy]+$/.test(w)) for (const ch of w) out.push({ t: 'name', v: ch, at: i }); // xy = x·y
+      else if (FUNCTIONS[w] || CONSTANTS[w] || w === 'x' || w === 'y' || w === 'z') out.push({ t: 'name', v: w, at: i });
+      else if (/^[xyz]+$/.test(w)) for (const ch of w) out.push({ t: 'name', v: ch, at: i }); // xy = x·y
       else if (fnPrefix(w)) { out.push({ t: 'name', v: fnPrefix(w), at: i }); for (const ch of w.slice(fnPrefix(w).length)) out.push({ t: 'name', v: ch, at: i }); } // sinx = sin x
-      else throw new RegionError('Unknown name “[[1]]”: use x, y, numbers, pi and functions such as sin, sqrt, ln.', word[0]);
+      else throw new RegionError('Unknown name “[[1]]”: use x, y, z, numbers, pi and functions such as sin, sqrt, ln.', word[0]);
       i += word[0].length;
       continue;
     }
@@ -142,7 +143,7 @@ export function parseRegion(src) {
     if (!tok) throw new RegionError('The region ends too early: a number, x or y is missing.');
     if (take('num')) return { op: 'num', v: tok.v };
     if (take('name')) {
-      if (tok.v === 'x' || tok.v === 'y') return { op: tok.v };
+      if (tok.v === 'x' || tok.v === 'y' || tok.v === 'z') return { op: tok.v };
       if (tok.v in CONSTANTS) return { op: 'num', v: CONSTANTS[tok.v] };
       // A function takes a bracketed argument, or a single factor as in sin x, sqrt 2.
       if (take('(')) {
@@ -178,7 +179,7 @@ export function parseRegion(src) {
       case 'cmp':
         if (kind(n.a) !== 'num' || kind(n.b) !== 'num') throw new RegionError('Compare numbers, not conditions.');
         return 'bool';
-      case 'num': case 'x': case 'y': return 'num';
+      case 'num': case 'x': case 'y': case 'z': return 'num';
       case 'fn': case 'neg':
         if (kind(n.a) !== 'num') throw new RegionError('A function takes a number, not a condition.');
         return 'num';
@@ -188,37 +189,38 @@ export function parseRegion(src) {
     }
   };
   if (kind(tree) !== 'bool') throw new RegionError('Write an inequality, for example y < x^2: an expression alone is not a region.');
-  if (!uses(tree, 'x') && !uses(tree, 'y')) throw new RegionError('The region does not depend on x or y.');
+  if (!uses(tree, 'x') && !uses(tree, 'y') && !uses(tree, 'z')) throw new RegionError('The region does not depend on x or y.');
   return tree;
 }
 const uses = (n, v) => n.op === v || (n.a != null && uses(n.a, v)) || (n.b != null && uses(n.b, v));
 
-/** Compiles a tree into `(x, y) => boolean`. */
+/** Compiles a tree into `(x, y, z) => boolean`. */
 export function compileRegion(tree) {
   const num = (n) => {
     switch (n.op) {
       case 'num': { const v = n.v; return () => v; }
       case 'x': return (x) => x;
       case 'y': return (_x, y) => y;
-      case 'neg': { const a = num(n.a); return (x, y) => -a(x, y); }
-      case 'fn': { const f = FUNCTIONS[n.f], a = num(n.a); return (x, y) => f(a(x, y)); }
-      case '+': { const a = num(n.a), b = num(n.b); return (x, y) => a(x, y) + b(x, y); }
-      case '-': { const a = num(n.a), b = num(n.b); return (x, y) => a(x, y) - b(x, y); }
-      case '*': { const a = num(n.a), b = num(n.b); return (x, y) => a(x, y) * b(x, y); }
-      case '/': { const a = num(n.a), b = num(n.b); return (x, y) => a(x, y) / b(x, y); }
-      case '^': { const a = num(n.a), b = num(n.b); return (x, y) => a(x, y) ** b(x, y); }
+      case 'z': return (_x, _y, z) => z;
+      case 'neg': { const a = num(n.a); return (x, y, z) => -a(x, y, z); }
+      case 'fn': { const f = FUNCTIONS[n.f], a = num(n.a); return (x, y, z) => f(a(x, y, z)); }
+      case '+': { const a = num(n.a), b = num(n.b); return (x, y, z) => a(x, y, z) + b(x, y, z); }
+      case '-': { const a = num(n.a), b = num(n.b); return (x, y, z) => a(x, y, z) - b(x, y, z); }
+      case '*': { const a = num(n.a), b = num(n.b); return (x, y, z) => a(x, y, z) * b(x, y, z); }
+      case '/': { const a = num(n.a), b = num(n.b); return (x, y, z) => a(x, y, z) / b(x, y, z); }
+      case '^': { const a = num(n.a), b = num(n.b); return (x, y, z) => a(x, y, z) ** b(x, y, z); }
       default: throw new Error(`not a number: ${n.op}`);
     }
   };
   const bool = (n) => {
     switch (n.op) {
-      case 'or': { const a = bool(n.a), b = bool(n.b); return (x, y) => a(x, y) || b(x, y); }
-      case 'and': { const a = bool(n.a), b = bool(n.b); return (x, y) => a(x, y) && b(x, y); }
-      case 'not': { const a = bool(n.a); return (x, y) => !a(x, y); }
+      case 'or': { const a = bool(n.a), b = bool(n.b); return (x, y, z) => a(x, y, z) || b(x, y, z); }
+      case 'and': { const a = bool(n.a), b = bool(n.b); return (x, y, z) => a(x, y, z) && b(x, y, z); }
+      case 'not': { const a = bool(n.a); return (x, y, z) => !a(x, y, z); }
       case 'cmp': {
         const a = num(n.a), b = num(n.b), r = RELATIONS[n.rel];
         // NaN (outside a function's domain) makes every comparison false: the point is outside.
-        return (x, y) => r(a(x, y), b(x, y));
+        return (x, y, z) => r(a(x, y, z), b(x, y, z));
       }
       default: throw new Error(`not a condition: ${n.op}`);
     }
@@ -238,7 +240,7 @@ export function regionTex(tree) {
   const tex = (n) => {
     switch (n.op) {
       case 'num': return numText(n.v);
-      case 'x': case 'y': return n.op;
+      case 'x': case 'y': case 'z': return n.op;
       case 'or': return `${wrap(n.a, 1)} \\lor ${wrap(n.b, 2)}`;
       case 'and': return `${wrap(n.a, 2)} \\land ${wrap(n.b, 3)}`;
       case 'not': return `\\neg ${wrap(n.a, 9)}`;
@@ -246,7 +248,7 @@ export function regionTex(tree) {
       case '+': return `${wrap(n.a, 5)} + ${wrap(n.b, 6)}`;
       case '-': return `${wrap(n.a, 5)} - ${wrap(n.b, 6)}`;
       case '*': {
-        const implicit = n.b.op === 'x' || n.b.op === 'y' || n.b.op === 'fn' || (n.b.op === '^' && n.b.a.op !== 'num');
+        const implicit = n.b.op === 'x' || n.b.op === 'y' || n.b.op === 'z' || n.b.op === 'fn' || (n.b.op === '^' && n.b.a.op !== 'num');
         const numeral = n.a.op === 'num' || (n.a.op === 'neg' && n.a.a.op === 'num');
         return `${wrap(n.a, 6)}${implicit && numeral ? ' ' : ' \\cdot '}${wrap(n.b, 7)}`;
       }
@@ -256,7 +258,7 @@ export function regionTex(tree) {
       case 'fn':
         if (n.f === 'sqrt') return `\\sqrt{${tex(n.a)}}`;
         if (n.f === 'abs') return `\\left|${tex(n.a)}\\right|`;
-        return `${FN[n.f]}${n.a.op === 'x' || n.a.op === 'y' || n.a.op === 'num' ? ' ' + tex(n.a) : `\\left(${tex(n.a)}\\right)`}`;
+        return `${FN[n.f]}${n.a.op === 'x' || n.a.op === 'y' || n.a.op === 'z' || n.a.op === 'num' ? ' ' + tex(n.a) : `\\left(${tex(n.a)}\\right)`}`;
       default: return '?';
     }
   };
@@ -313,4 +315,48 @@ export function regionRuns(inside, cells = 72) {
     }
   }
   return runs;
+}
+
+// ---------------------------------------------------------------- the segment and the cube (#119)
+/** The dimension a region needs: 3 if it uses z, 2 if it uses y, else 1. */
+export const regionDim = (tree) => (uses(tree, 'z') ? 3 : uses(tree, 'y') ? 2 : 1);
+
+/**
+ * Length of a region of [0, 1] by the midpoint rule on G cells. The error is how much the answer moves from a grid
+ * twice as coarse (at least one cell): a measured error, not a worst-case bound.
+ */
+export function regionLength(inside, G = 200000) {
+  const at = (g) => {
+    let count = 0;
+    for (let i = 0; i < g; i++) if (inside((i + 0.5) / g, 0, 0)) count++;
+    return count / g;
+  };
+  const fine = at(G), coarse = at(G / 2);
+  return { area: fine, error: Math.max(Math.abs(fine - coarse), 1 / G), grid: G };
+}
+
+/** Volume of a region of [0, 1]³ by the midpoint rule on a G × G × G grid, with the same measured error. */
+export function regionVolume(inside, G = 100) {
+  const at = (g) => {
+    let count = 0;
+    const h = 1 / g;
+    for (let k = 0; k < g; k++)
+      for (let j = 0; j < g; j++)
+        for (let i = 0; i < g; i++) if (inside((i + 0.5) * h, (j + 0.5) * h, (k + 0.5) * h)) count++;
+    return count / g ** 3;
+  };
+  const fine = at(G), coarse = at(G / 2);
+  return { area: fine, error: Math.max(Math.abs(fine - coarse), 1 / G ** 3), grid: G };
+}
+
+/** The region of [0, 1] as intervals [x0, width] of `cells` cells. */
+export function regionIntervals(inside, cells = 600) {
+  const out = [];
+  let start = -1;
+  for (let i = 0; i <= cells; i++) {
+    const on = i < cells && inside((i + 0.5) / cells, 0, 0);
+    if (on && start < 0) start = i;
+    if (!on && start >= 0) { out.push([start / cells, (i - start) / cells]); start = -1; }
+  }
+  return out;
 }
