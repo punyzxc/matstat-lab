@@ -22,7 +22,14 @@
       ],
       "experiment": {
         "station": "bernoulli",
-        "seed": 7
+        "seed": 7,
+        "params": {
+          "n": 7,
+          "p": 0.5,
+          "k": 5,
+          "lo": 0,
+          "hi": 7
+        }
       }
     },
     {
@@ -38,7 +45,14 @@
       ],
       "experiment": {
         "station": "bernoulli",
-        "seed": 1733
+        "seed": 1733,
+        "params": {
+          "n": 5000,
+          "p": 0.01,
+          "k": 50,
+          "lo": 0,
+          "hi": 50
+        }
       }
     },
     {
@@ -53,7 +67,14 @@
       ],
       "experiment": {
         "station": "bernoulli",
-        "seed": 5000
+        "seed": 5000,
+        "params": {
+          "n": 5000,
+          "p": 0.01,
+          "k": 50,
+          "lo": 0,
+          "hi": 50
+        }
       }
     },
     {
@@ -67,7 +88,14 @@
       ],
       "experiment": {
         "station": "bernoulli",
-        "seed": 1837
+        "seed": 1837,
+        "params": {
+          "n": 100,
+          "p": 0.02,
+          "k": 2,
+          "lo": 0,
+          "hi": 4
+        }
       }
     }
   ],
