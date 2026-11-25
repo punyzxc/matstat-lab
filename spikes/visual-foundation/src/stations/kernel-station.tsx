@@ -34,7 +34,7 @@ function localizeResult(kernel: string, r: KernelResult): KernelResult {
     series: r.series.map((s) => (s.label ? { ...s, label: k(s.label) } : s)),
     notes: r.notes.map((n) => k(n)),
     axes: r.axes && { x: k(r.axes.x), y: k(r.axes.y) },
-    surface: r.surface && { ...r.surface, title: k(r.surface.title), labels: { x: k(r.surface.labels.x), y: k(r.surface.labels.y), z: k(r.surface.labels.z) } },
+    surface: r.surface && { ...r.surface, title: k(r.surface.title), sampleLabel: k(r.surface.sampleLabel), labels: { x: k(r.surface.labels.x), y: k(r.surface.labels.y), z: k(r.surface.labels.z) } },
   };
 }
 /** A readout cell: numbers formatted, text with `$…$` formulas typeset. */

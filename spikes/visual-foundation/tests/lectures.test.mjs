@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import katex from 'katex';
 import { splitMath } from '../src/math-text.mjs';
-import { fitPortrait, PORTRAIT, validateLecture, validateRoster } from '../src/lectures/script.ts';
+import { fitPortrait, PORTRAIT, PORTRAIT_LIMIT, portraitScale, revealFrames, revealPortrait, validateLecture, validateRoster } from '../src/lectures/script.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = (p) => JSON.parse(readFileSync(root + p, 'utf8'));
@@ -85,8 +85,32 @@ test('portraits are fitted to the slot; empty files and HTML fallbacks become pl
   assert.equal(fitPortrait(null), null);
   assert.equal(fitPortrait('<!doctype html><html></html>'), null);
   assert.equal(fitPortrait('﻿ /\\\r\n(oo)\r\n'), ' /\\\n(oo)');
+  // #98: art wider or taller than the slot keeps every line whole and is scaled down to fit, never wrapped.
   const big = Array.from({ length: 30 }, () => 'x'.repeat(60)).join('\n');
-  const fitted = fitPortrait(big).split('\n');
-  assert.equal(fitted.length, PORTRAIT.lines);
-  assert.ok(fitted.every((l) => l.length === PORTRAIT.columns));
+  const fitted = fitPortrait(big);
+  assert.equal(fitted, big);
+  const { columns, lines, scale } = portraitScale(fitted);
+  assert.deepEqual([columns, lines], [60, 30]);
+  assert.equal(scale, Math.min(PORTRAIT.columns / 60, PORTRAIT.lines / 30));
+  assert.ok(columns * scale <= PORTRAIT.columns && lines * scale <= PORTRAIT.lines);
+  assert.equal(portraitScale('ab\ncd').scale, 1, 'small art is never enlarged');
+  // A pasted log is cut at a sane limit so the page never freezes.
+  const huge = fitPortrait(Array.from({ length: 500 }, () => 'y'.repeat(1000)).join('\n')).split('\n');
+  assert.equal(huge.length, PORTRAIT_LIMIT.lines);
+  assert.ok(huge.every((l) => l.length === PORTRAIT_LIMIT.columns));
+});
+
+test('the typewriter reveal sweeps in without shifting the art and ends on the art itself', () => {
+  const art = ' .---.\n( o o )\n |   |';
+  const frames = revealFrames(art);
+  assert.equal(revealPortrait(art, 0).replace(/\s/g, ''), '');
+  assert.equal(revealPortrait(art, frames), art);
+  let shown = 0;
+  for (let k = 0; k <= frames; k++) {
+    const r = revealPortrait(art, k);
+    r.split('\n').forEach((line, i) => Array.from(line).forEach((ch, c) => ch !== ' ' && assert.equal(ch, Array.from(art.split('\n')[i])[c], 'never shifted')));
+    const count = r.replace(/\s/g, '').length;
+    assert.ok(count >= shown, 'only grows');
+    shown = count;
+  }
 });

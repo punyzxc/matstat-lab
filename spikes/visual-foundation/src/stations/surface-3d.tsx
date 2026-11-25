@@ -182,7 +182,7 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
       </svg>
       <figcaption>
         <span className="chart-key chart-key--line tone-signal"><i /><MathText text={keyLabel ?? t(`Theory ${labels.z}`, `Теория ${labels.z}`)} /></span>
-        {zSample && <span className="surface-key-sample"><i />{t('Sample density (2D histogram)', 'Выборочная плотность (двумерная гистограмма)')}</span>}
+        {zSample && <span className="surface-key-sample"><i /><MathText text={shown.sampleLabel ?? t('Sample density (2D histogram)', 'Выборочная плотность (двумерная гистограмма)')} /></span>}
         <span id={hintId} className="surface-hint">{t('Drag or use arrow keys to rotate.', 'Поворачивайте перетаскиванием или стрелками.')}</span>
       </figcaption>
     </figure>

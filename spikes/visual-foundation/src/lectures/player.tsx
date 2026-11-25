@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useStationReducedMotion } from '../motion-preference';
 import { ArrowLeft, ArrowRight, FlaskConical, Presentation } from 'lucide-react';
 import { findStation } from '../stations/catalog';
 import { lectureHash, stationHash } from '../stations/route';
-import { fitPortrait, PORTRAIT, type Lecture, type Scientist, type Step } from './script';
+import { fitPortrait, PORTRAIT, portraitScale, revealFrames, revealPortrait, type Lecture, type Scientist, type Step } from './script';
 import roster from '../../lectures/scientists.json';
 import { MathText, Tex, mathToPlain } from '../math';
 import { lectureFormula, lectureText, plural, scientistText, t } from '../i18n';
@@ -180,7 +181,7 @@ export function Portrait({ slug }: { slug: string }) {
   return (
     <figure className="portrait" data-slug={slug} data-state={art ? 'art' : 'placeholder'} style={{ ['--cols' as string]: PORTRAIT.columns, ['--lines' as string]: PORTRAIT.lines }}>
       {art ? (
-        <pre className="portrait-art" role="img" aria-label={t(`ASCII portrait of ${name}`, `ASCII-портрет: ${name}`)}>{art}</pre>
+        <PortraitArt art={art} name={name} />
       ) : (
         <div className="portrait-art portrait-placeholder" aria-hidden="true">
           <span>{initials(name)}</span>
@@ -194,6 +195,36 @@ export function Portrait({ slug }: { slug: string }) {
     </figure>
   );
 }
+/**
+ * The art types itself in with a short diagonal sweep (about 0.8 s), then stays. Art larger than the slot is
+ * scaled down as a whole, so no line ever wraps. Reduced motion shows it at once.
+ */
+function PortraitArt({ art, name }: { art: string; name: string }) {
+  const reduced = useStationReducedMotion();
+  const frames = revealFrames(art);
+  const [k, setK] = useState(() => (reduced ? frames : 0));
+  useEffect(() => {
+    if (reduced) return setK(frames);
+    setK(0);
+    const t0 = performance.now(), duration = 800;
+    let raf = 0;
+    const tick = (now: number) => {
+      const next = Math.ceil((frames * (now - t0)) / duration);
+      setK(next);
+      if (next < frames) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [art, frames, reduced]);
+  const { scale } = portraitScale(art);
+  const typing = k < frames;
+  return (
+    <pre className="portrait-art" role="img" aria-label={t(`ASCII portrait of ${name}`, `ASCII-портрет: ${name}`)} data-typing={typing || undefined}>
+      <span className="portrait-text" style={{ ['--fit' as string]: scale }}>{typing ? revealPortrait(art, k) : art}</span>
+    </pre>
+  );
+}
+
 const initials = (name: string) =>
   name
     .replace(/\(.*?\)/g, '')

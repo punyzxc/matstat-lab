@@ -119,6 +119,8 @@ test('presenter mode enlarges type, reduces the scene chrome and keeps the count
   await expect(page).toHaveURL(/lecture=1&step=5&present=1$/);
   await page.keyboard.press('Escape');
   await expect(page).toHaveURL(/#lecture\/1\/5\?present=1$/);
+  // The address changes a frame before the lecture dock mounts; wait for it before the next key.
+  await expect(page.getByTestId('step-counter')).toHaveText(/Step 5 \//);
 
   await page.keyboard.press('p');
   await expect(page).toHaveURL(/#lecture\/1\/5$/);
@@ -169,4 +171,30 @@ test('lectures load no network fonts or other external resources', async ({ page
     expect(await fits(page), `lecture ${n}`).toBe(true);
   }
   expect(external).toEqual([]);
+});
+
+test('#98: a portrait types itself in, and art larger than the slot is scaled down without wrapping', async ({ page }) => {
+  const wide = Array.from({ length: 30 }, (_, i) => String(i % 10).repeat(70)).join('\n');
+  await page.route('**/portraits/bayes.txt', (r) => r.fulfill({ status: 200, contentType: 'text/plain', body: wide }));
+  await page.emulateMedia({ reducedMotion: 'no-preference' }); // the file's beforeEach reduces motion
+  await page.goto('/#lecture/2/3');
+  const art = page.locator('.portrait[data-slug="bayes"] pre.portrait-art');
+  // It types in over a few frames, then settles on the art itself.
+  await expect(art).toHaveAttribute('data-typing', 'true');
+  await expect(art).not.toHaveAttribute('data-typing', 'true');
+  await expect(art).toHaveText(wide);
+  const fit = await art.evaluate((pre) => {
+    const text = pre.querySelector('.portrait-text');
+    const a = pre.getBoundingClientRect(), t = text.getBoundingClientRect();
+    const lineHeight = parseFloat(getComputedStyle(text).lineHeight);
+    return { inside: t.width <= a.width + 0.5 && t.height <= a.height + 0.5, lines: Math.round(t.height / lineHeight) };
+  });
+  expect(fit.inside).toBe(true);
+  expect(fit.lines).toBe(30); // 30 source lines, 30 rendered lines: nothing wrapped
+
+  // Reduced motion: the art is there at once.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?again=1#lecture/2/3');
+  await expect(page.locator('.portrait[data-slug="bayes"] pre.portrait-art')).toHaveText(wide);
+  await expect(page.locator('.portrait[data-slug="bayes"] pre.portrait-art')).not.toHaveAttribute('data-typing', 'true');
 });

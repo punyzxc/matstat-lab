@@ -133,8 +133,7 @@
   top: 50%;
   transform: translate(50%, -50%);
 }
-.orbital-legend,
-.orbital-controls {
+.orbital-legend {
   position: absolute;
   z-index: 2;
   color: #c1c1c1;
@@ -163,27 +162,6 @@
 }
 .orbital-legend span {
   color: #747474;
-}
-.orbital-controls {
-  top: 5%;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: auto;
-  border-radius: 3px;
-}
-.orbital-controls button {
-  width: 36px;
-  height: 33px;
-  display: grid;
-  place-items: center;
-}
-.orbital-controls button + button {
-  border-left: 1px solid #363636;
-}
-.orbital-controls button:hover:not(:disabled),
-.orbital-controls button[aria-pressed='true'] {
-  color: var(--signal);
-  background: #222;
 }
 .orbit-links {
   position: absolute;
@@ -499,12 +477,6 @@
   .orbital-reticle {
     width: min(80%, 400px);
     height: 85%;
-  }
-  .orbital-controls {
-    left: auto;
-    right: 0;
-    top: 10px;
-    transform: none;
   }
   .orbital-legend {
     bottom: 0;

@@ -60,7 +60,9 @@ export function PlateCanvas({
       visible = true,
       slowFrames = 0;
     let interval = small ? 45 : 32;
-    let pointer: { id: number; start: number; yaw: number } | null = null;
+    let pointer: { id: number; start: number; yaw: number; x: number; t: number } | null = null;
+    // A released drag keeps a little spin that eases out, so a nudge feels physical.
+    let spin = 0;
     function draw() {
       if (!frame.width || !frame.height) return;
       frame.mesh = state.current.mesh;
@@ -73,7 +75,13 @@ export function PlateCanvas({
       if (now - last >= interval || !last) {
         if (last) {
           const delta = now - last;
-          frame.time += Math.min(delta / 1000, 0.12);
+          const step = Math.min(delta / 1000, 0.12);
+          frame.time += step;
+          if (spin && !pointer) {
+            frame.yaw += spin * step;
+            spin *= Math.exp(-step * 2.6);
+            if (Math.abs(spin) < 0.01) spin = 0;
+          }
           if (delta > 80 && ++slowFrames > 6) interval = 64;
         }
         last = now;
@@ -99,15 +107,22 @@ export function PlateCanvas({
     }
     function down(e: PointerEvent) {
       if (!e.isPrimary || e.button !== 0) return;
-      pointer = { id: e.pointerId, start: e.clientX, yaw: frame.yaw };
+      pointer = { id: e.pointerId, start: e.clientX, yaw: frame.yaw, x: e.clientX, t: e.timeStamp };
+      spin = 0;
       box.setPointerCapture(e.pointerId);
     }
     function move(e: PointerEvent) {
       if (pointer?.id !== e.pointerId) return;
-      frame.yaw = pointer.yaw + (e.clientX - pointer.start) * 0.009;
-      draw();
+      frame.yaw = pointer.yaw + (e.clientX - pointer.start) * 0.006;
+      const dt = Math.max(8, e.timeStamp - pointer.t);
+      spin = Math.max(-2.4, Math.min(2.4, ((e.clientX - pointer.x) * 0.006 * 1000) / dt));
+      pointer.x = e.clientX;
+      pointer.t = e.timeStamp;
+      if (!state.current.playing) draw();
     }
-    function up() {
+    function up(e: PointerEvent) {
+      // A drag that stopped before release leaves no spin.
+      if (!state.current.playing || (pointer && e.timeStamp - pointer.t > 90)) spin = 0;
       pointer = null;
     }
     function key(e: KeyboardEvent) {

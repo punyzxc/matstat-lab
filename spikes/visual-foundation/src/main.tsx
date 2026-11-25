@@ -317,9 +317,11 @@ function StationApp() {
 
   const backHash = back ? lectureHash(back) : null;
   const close = useCallback(() => {
-    // A station opened from a lecture step closes back to that step.
-    window.location.hash = backHash ?? orbitHash(orbit);
-  }, [orbit, backHash]);
+    // A station opened from a lecture step closes back to that step. Read the live address, not the
+    // rendered route: an Escape pressed in the same instant as a link click must follow the new hash.
+    const live = parseRoute(window.location.hash);
+    window.location.hash = live.back ? lectureHash({ ...live.back, present: live.present }) : orbitHash(orbit);
+  }, [orbit]);
 
   let overlay = null;
   if (station) {

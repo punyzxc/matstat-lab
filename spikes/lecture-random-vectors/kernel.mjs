@@ -327,8 +327,9 @@ function runTransform(params, seed) {
 
 const scatterParams = [
   { key: 'mode', label: 'Experiment (0 bivariate normal · 1 uniform disc · 2 matching problem)', min: 0, max: 2, step: 1, default: 0 },
-  { key: 'rho', label: 'Correlation $\\rho$ (experiment 0)', min: -0.95, max: 0.95, step: 0.05, default: 0.6 },
-  { key: 'sigma2', label: '$\\sigma$ of $\\eta$ (experiment 0; $\\sigma$ of $\\xi$ is 1)', min: 0.5, max: 2, step: 0.1, default: 1 },
+  { key: 'rho', label: 'Correlation $\\rho$ (experiment 0)', min: -1, max: 1, step: 0.05, default: 0.6 },
+  { key: 'sigma1', label: '$\\sigma_X$ of $\\xi$ (experiment 0)', min: 0.5, max: 2, step: 0.1, default: 1 },
+  { key: 'sigma2', label: '$\\sigma_Y$ of $\\eta$ (experiment 0)', min: 0.5, max: 2, step: 0.1, default: 1 },
   { key: 'n', label: 'Points $n$ (experiments 0, 1)', min: 200, max: 20000, step: 100, default: 2000 },
   { key: 'players', label: 'Players $n$ (experiment 2)', min: 2, max: 40, step: 1, default: 6 },
   { key: 'reps', label: 'Lottery draws (experiment 2)', min: 200, max: 10000, step: 100, default: 4000 },
@@ -367,13 +368,29 @@ function surfaceGrid(xs, ys, [x0, x1], [y0, y1], N, density, labels) {
   };
 }
 
-function runVector({ mode, rho, sigma2, n }, seed) {
+/**
+ * Degenerate case |ρ| = 1: η = ±(σ_Y/σ_X)ξ exactly, so all probability lies on one line and there is no density
+ * in the plane. The ridge spreads the line's density over one grid cell across it, so its volume is still 1.
+ */
+function ridgeGrid(xs, ys, [x0, x1], [y0, y1], N, slope, s1) {
+  const gx = grid(x0, x1, N), gy = grid(y0, y1, N), dy = gy[1] - gy[0];
+  const out = surfaceGrid(xs, ys, [x0, x1], [y0, y1], N, () => 0, { x: '$\\xi$', y: '$\\eta$', z: 'density along the line' });
+  out.z = gy.map((y) => gx.map((x) => {
+    // The line's density per unit length of x, shared by the cell rows it crosses within this column.
+    const on = Math.abs(y - slope * x) <= dy / 2 + 1e-12;
+    return on ? r6(Math.exp(-(x * x) / (2 * s1 * s1)) / (Math.sqrt(2 * Math.PI) * s1 * dy)) : 0;
+  }));
+  return out;
+}
+
+function runVector({ mode, rho, sigma1 = 1, sigma2, n }, seed) {
   const xs = new Array(n), ys = new Array(n);
+  const s1 = sigma1, degenerate = mode === 0 && Math.abs(rho) === 1;
   if (mode === 0) {
-    const c = Math.sqrt(1 - rho * rho);
+    const c = Math.sqrt(Math.max(0, 1 - rho * rho));
     for (let i = 0; i < n; i++) {
       const z1 = gauss(seed, 80, i), z2 = gauss(seed, 82, i);
-      xs[i] = z1; ys[i] = sigma2 * (rho * z1 + c * z2);
+      xs[i] = s1 * z1; ys[i] = sigma2 * (rho * z1 + c * z2);
     }
   } else {
     for (let i = 0; i < n; i++) {
@@ -384,8 +401,8 @@ function runVector({ mode, rho, sigma2, n }, seed) {
   const st = vectorStats(xs, ys);
   const theoryR = mode === 0 ? rho : 0;
   const zr = Math.atanh(theoryR), half = Z99 / Math.sqrt(n - 3);
-  const band = [Math.tanh(zr - half), Math.tanh(zr + half)];
-  const X = mode === 0 ? 3.5 : 1.1, Y = mode === 0 ? 3.5 * sigma2 : 1.1;
+  const band = degenerate ? [rho, rho] : [Math.tanh(zr - half), Math.tanh(zr + half)];
+  const X = mode === 0 ? 3.5 * s1 : 1.1, Y = mode === 0 ? 3.5 * sigma2 : 1.1;
   const xl = grid(-X, X, 2), yl = grid(-Y, Y, 2);
   const series = [
     { id: 'points', kind: 'points', label: `Sample (first ${Math.min(n, SHOWN_POINTS)} of ${n})`, x: xs.slice(0, SHOWN_POINTS).map(r6), y: ys.slice(0, SHOWN_POINTS).map(r6) },
@@ -393,9 +410,9 @@ function runVector({ mode, rho, sigma2, n }, seed) {
   // Line (63): y = r σ₂/σ₁ (x − Mξ) + Mη. Line (64): x = r σ₁/σ₂ (y − Mη) + Mξ, drawn as points (x(y), y).
   const yOnX = (k, mx, my) => ({ x: xl, y: xl.map((x) => my + k * (x - mx)) });
   const xOnY = (k, mx, my) => ({ x: yl.map((y) => mx + k * (y - my)), y: yl });
-  const thY = yOnX(mode === 0 ? (rho * sigma2) : 0, 0, 0);
-  series.push({ id: 'reg-yx-theory', kind: 'line', tone: 'signal', label: 'Line (63), theory: $\\eta$ on $\\xi$', ...thY });
-  if (mode === 0 && rho !== 0) series.push({ id: 'reg-xy-theory', kind: 'line', tone: 'signal', label: 'Line (64), theory: $\\xi$ on $\\eta$', ...xOnY(rho / sigma2, 0, 0) });
+  const thY = yOnX(mode === 0 ? (rho * sigma2) / s1 : 0, 0, 0);
+  series.push({ id: 'reg-yx-theory', kind: 'line', tone: 'signal', label: 'Line (63), theory: $y = \\rho\\,\\dfrac{\\sigma_Y}{\\sigma_X}\\,x$', ...thY });
+  if (mode === 0 && rho !== 0) series.push({ id: 'reg-xy-theory', kind: 'line', tone: 'signal', label: 'Line (64), theory: $\\xi$ on $\\eta$', ...xOnY((rho * s1) / sigma2, 0, 0) });
   else series.push({ id: 'reg-xy-theory-rule', kind: 'rule', tone: 'signal', label: 'Line (64), theory: $x = M\\xi$ (vertical, $r = 0$)', x: [0], y: [] });
   series.push({ id: 'reg-yx', kind: 'line', tone: 'accent', label: 'Line (63) from the sample', ...yOnX(st.slopeYonX, st.mx, st.my) });
   series.push({ id: 'reg-xy', kind: 'line', tone: 'accent', label: 'Line (64) from the sample', ...xOnY(st.slopeXonY, st.mx, st.my) });
@@ -403,24 +420,37 @@ function runVector({ mode, rho, sigma2, n }, seed) {
   let readouts, notes, surface, inside;
   if (mode === 0) {
     // Ellipse of dispersion Q(x, y) = c² with c = 2: P(inside) = 1 − e^(−c²/2) for a bivariate normal.
-    const t = grid(0, 2 * Math.PI, 121), c = 2, L = Math.sqrt(1 - rho * rho);
-    series.push({ id: 'ellipse', kind: 'line', tone: 'muted', label: 'Ellipse of dispersion, $c = 2$', x: t.map((a) => c * Math.cos(a)), y: t.map((a) => sigma2 * c * (rho * Math.cos(a) + L * Math.sin(a))) });
-    const Q = (x, y) => (x * x - (2 * rho * x * y) / sigma2 + (y * y) / (sigma2 * sigma2)) / (1 - rho * rho);
-    inside = xs.reduce((k, x, i) => (Q(x, ys[i]) < c * c ? k + 1 : k), 0) / n;
-    const dens = (x, y) => Math.exp(-Q(x, y) / 2) / (2 * Math.PI * sigma2 * L);
-    surface = surfaceGrid(xs, ys, [-X, X], [-Y, Y], 31, dens, { x: '$\\xi$', y: '$\\eta$', z: 'density $f(x, y)$' });
-    surface.title = `Joint density of $(\\xi, \\eta)$, $\\rho = ${rho}$`;
+    const t = grid(0, 2 * Math.PI, 121), c = 2, L = Math.sqrt(Math.max(0, 1 - rho * rho));
+    series.push({ id: 'ellipse', kind: 'line', tone: 'muted', label: degenerate ? 'Ellipse of dispersion, $c = 2$: flattened to a segment' : 'Ellipse of dispersion, $c = 2$', x: t.map((a) => s1 * c * Math.cos(a)), y: t.map((a) => sigma2 * c * (rho * Math.cos(a) + L * Math.sin(a))) });
+    const slope = (rho * sigma2) / s1;
+    if (degenerate) {
+      // Every point lies on the line, inside the flattened ellipse exactly when |ξ| < c·σ_X: P = 2Φ(2) − 1.
+      inside = xs.reduce((k, x) => (Math.abs(x) < c * s1 ? k + 1 : k), 0) / n;
+      surface = ridgeGrid(xs, ys, [-X, X], [-Y, Y], 31, slope, s1);
+      surface.title = `$\\rho = ${rho}$: no density in the plane, all probability on the line $y = ${rho < 0 ? '-' : ''}\\dfrac{\\sigma_Y}{\\sigma_X}\\,x$`;
+    } else {
+      const u = (x) => x / s1, v = (y) => y / sigma2;
+      const Q = (x, y) => (u(x) ** 2 - 2 * rho * u(x) * v(y) + v(y) ** 2) / (1 - rho * rho);
+      inside = xs.reduce((k, x, i) => (Q(x, ys[i]) < c * c ? k + 1 : k), 0) / n;
+      const dens = (x, y) => Math.exp(-Q(x, y) / 2) / (2 * Math.PI * s1 * sigma2 * L);
+      surface = surfaceGrid(xs, ys, [-X, X], [-Y, Y], 31, dens, { x: '$\\xi$', y: '$\\eta$', z: 'density $f(x, y)$' });
+      surface.title = `Joint density of $(\\xi, \\eta)$, $\\rho = ${rho}$`;
+    }
+    surface.sampleLabel = 'Sample 2D histogram (the points so far)';
+    const b = st.my - st.slopeYonX * st.mx, signed = (v) => (v < 0 ? `- ${r6(-v)}` : `+ ${r6(v)}`);
     readouts = [
-      { key: 'cov', label: '$\\operatorname{Cov}(\\xi, \\eta)$', observed: r6(st.cov), theory: r6(rho * sigma2), convention: 'divisor $n - 1$' },
-      { key: 'r', label: 'Correlation $r(\\xi, \\eta)$', observed: r6(st.r), theory: rho, convention: `99 % band ${r6(band[0])} … ${r6(band[1])} (Fisher $z$)` },
-      { key: 'slope63', label: 'Slope of (63): $r\\,\\sigma_2/\\sigma_1$', observed: r6(st.slopeYonX), theory: r6(rho * sigma2) },
-      { key: 'slope64', label: 'Slope of (64) as $dx/dy$: $r\\,\\sigma_1/\\sigma_2$', observed: r6(st.slopeXonY), theory: r6(rho / sigma2) },
-      { key: 'angle', label: 'Acute angle between (63) and (64)', observed: r6(regressionAngle(st.r, st.sx, st.sy)), theory: r6(regressionAngle(rho, 1, sigma2)), unit: '°' },
-      { key: 'ellipse', label: 'Share inside the $c = 2$ ellipse', observed: r6(inside), theory: r6(1 - Math.exp(-2)) },
+      { key: 'r', label: 'Correlation: sample $r$ against $\\rho$', observed: r6(st.r), theory: rho, convention: degenerate ? 'with $|\\rho| = 1$ every sample has $r = \\rho$ exactly' : `99 % band ${r6(band[0])} … ${r6(band[1])} (Fisher $z$)` },
+      { key: 'line', label: 'Regression line (63): $y = \\rho\\,\\dfrac{\\sigma_Y}{\\sigma_X}\\,x$', observed: `$y = ${r6(st.slopeYonX)}\\,x ${signed(b)}$`, theory: `$y = ${r6(slope)}\\,x$`, convention: 'sample: $y = r\\,\\dfrac{s_Y}{s_X}\\,(x - \\bar{x}) + \\bar{y}$' },
+      { key: 'cov', label: '$\\operatorname{Cov}(\\xi, \\eta) = \\rho\\,\\sigma_X\\sigma_Y$', observed: r6(st.cov), theory: r6(rho * s1 * sigma2), convention: 'divisor $n - 1$' },
+      { key: 'slope63', label: 'Slope of (63): $r\\,\\sigma_Y/\\sigma_X$', observed: r6(st.slopeYonX), theory: r6(slope) },
+      { key: 'slope64', label: 'Slope of (64) as $dx/dy$: $r\\,\\sigma_X/\\sigma_Y$', observed: r6(st.slopeXonY), theory: r6((rho * s1) / sigma2) },
+      { key: 'angle', label: 'Acute angle between (63) and (64)', observed: r6(regressionAngle(st.r, st.sx, st.sy)), theory: r6(regressionAngle(rho, s1, sigma2)), unit: '°' },
+      { key: 'ellipse', label: 'Share inside the $c = 2$ ellipse', observed: r6(inside), theory: r6(degenerate ? 0.954499736104 : 1 - Math.exp(-2)), convention: degenerate ? 'the ellipse is a segment: $P(|\\xi| < 2\\sigma_X) = 2\\Phi(2) - 1$' : undefined },
     ];
     notes = [
+      ...(degenerate ? [`$|\\rho| = 1$: $\\eta = ${rho < 0 ? '-' : ''}\\dfrac{\\sigma_Y}{\\sigma_X}\\,\\xi$ exactly, so every point lies on one line. The joint law has no density in the plane (the formula divides by $1 - \\rho^2 = 0$); the surface collapses to a ridge along the line, and both regression lines coincide with it.`] : []),
       'Lines (63) and (64) differ unless $|r| = 1$; the angle between them shrinks as $|r|$ grows and is $90^\\circ$ at $r = 0$.',
-      'The 3D view puts the theoretical density $f(x, y)$ and the sample\'s 2D histogram on the same grid.',
+      'The 3D view puts the theoretical density $f(x, y)$ and the sample\'s 2D histogram on the same grid; the stems grow as points arrive.',
       'L6 leaves the least-squares check as an exercise; the sample lines here are the least-squares fits, and they coincide with (63)–(64) built from sample moments.',
     ];
   } else {
