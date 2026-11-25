@@ -331,3 +331,36 @@ test('#126 on fixtures, the random mean error falls as 1/√n while the biased o
     assert.ok(E.biased.at(-1) > 0.95 * E.biased[0], `law ${law}: the biased error does not shrink`);
   }
 });
+
+// ---------------------------------------------------------------- #88: a typed law as the source and as H0
+test('#88: the Sample station draws from a typed law, with its formula and preview', () => {
+  const r = K.run({ law: K.TYPED, n: 1000, view: 0, custom: '0 1 2 | 0.2 0.5 0.3' }, { seed: 6, station: 'sample' });
+  const mean = r.readouts.find((x) => x.key === 'mean');
+  assert.ok(Math.abs(mean.theory - 1.1) < 1e-12 && Math.abs(mean.observed - 1.1) < 0.08, JSON.stringify(mean));
+  assert.equal(r.series.find((s) => s.id === 'pdf').kind, 'pmf', 'a discrete law is drawn as masses over h');
+  assert.match(r.formula[0], /begin\{array\}/);
+  const c = K.run({ law: K.TYPED, n: 1000, view: 1, custom: '2x on [0, 1]' }, { seed: 6, station: 'sample' });
+  assert.deepEqual(c.linked.series.map((s) => s.kind), ['pdf', 'cdf']);
+  const biased = K.run({ law: K.TYPED, n: 200, view: 2, lo: 0.5, hi: 1, reps: 40, custom: '2x on [0, 1]' }, { seed: 6, station: 'sample' });
+  assert.ok(biased.readouts.length > 0);
+});
+
+test('#88: the Fit station tests a sample against a typed H0, discrete or continuous, at the right level', () => {
+  for (const custom of ['3x^2 on [0, 1]', '0 1 2 | 0.2 0.5 0.3', '1 2 3 4 5 6 | 1/6 1/6 1/6 1/6 1/6 1/6']) {
+    const r = K.run({ law: K.TYPED, h0: K.TYPED, n: 300, view: 1, reps: 300, alpha: 0.05, custom }, { seed: 6, station: 'fit' });
+    const ro = Object.fromEntries(r.readouts.map((x) => [x.key, x]));
+    // Pearson's false-rejection rate under H0 sits near alpha; Kolmogorov's is at most alpha (exact for a continuous law).
+    assert.ok(Math.abs(ro.mcchi.observed - 0.05) < 0.04, `${custom}: Pearson ${ro.mcchi.observed}`);
+    assert.ok(ro.mcks.observed < 0.05 + 0.04, `${custom}: Kolmogorov ${ro.mcks.observed}`);
+  }
+  // A normal sample is told apart from a typed discrete H0: values the law does not have make chi^2 infinite.
+  const far = K.run({ law: 0, h0: K.TYPED, n: 200, view: 1, reps: 0, custom: '0 1 2 | 0.2 0.5 0.3' }, { seed: 6, station: 'fit' });
+  assert.equal(far.readouts.find((x) => x.key === 'chidecision').observed, 'reject $H_0$');
+});
+
+test('#88: against a discrete F the Kolmogorov statistic uses F(x−) on the lower side', () => {
+  const F = Object.assign((x) => (x < 0 ? 0 : x < 1 ? 0.5 : 1), { left: (x) => (x <= 0 ? 0 : x <= 1 ? 0.5 : 1) });
+  const s = K.kolmogorovStatistic([0, 0, 1, 1], F);
+  assert.equal(s.d, 0, 'a sample that matches the law exactly has D = 0');
+  assert.equal(K.kolmogorovStatistic([0, 0, 0, 1], F).d, 0.25);
+});

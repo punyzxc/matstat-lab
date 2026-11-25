@@ -5,6 +5,7 @@ import { fixtureUint32 } from '../simulation-engine/engine.mjs';
 import {
   chiSquareQuantile, chiSquareSf, kolmogorovExactCdf, kolmogorovK, kolmogorovQuantile, normalCdf, normalPdf,
 } from './special.mjs';
+import { lawOf, checkLaw, lawPreview, DEFAULT_LAW, LAW_PRESETS, LAW_HINT } from '../custom-distributions/law.mjs';
 
 // ---------------------------------------------------------------- laws
 // The three laws of L12 (normal, uniform, exponential), all with mean 1 and variance 1,
@@ -31,18 +32,50 @@ export const LAWS = [
     family: { r: 1, label: '$\\mathrm{Exp}(\\lambda^*)$', cdf: ([l]) => (x) => (x <= 0 ? 0 : -Math.expm1(-l * x)) },
   },
 ];
-const lawLabel = LAWS.map((l, i) => `${i} ${l.id}`).join(', ');
+const lawLabel = [...LAWS.map((l, i) => `${i} ${l.id}`), '3 typed'].join(', ');
+/** #88: the index of the typed law, next to the three built-in ones. */
+export const TYPED = 3;
+const typedEntries = new WeakMap();
+/**
+ * A typed law (#88) in the shape of LAWS: its CDF, density (or masses over the bin width for a discrete law, see
+ * `pmf`), moments and a plotting range. It has no parametric family, so "estimate parameters" does not apply to it.
+ */
+export function typedEntry(text) {
+  const t = lawOf(text ?? DEFAULT_LAW);
+  let e = typedEntries.get(t);
+  if (e) return e;
+  const discrete = t.kind === 'discrete';
+  // Central moments for the skewness and the excess kurtosis.
+  let m3 = 0, m4 = 0;
+  if (discrete) t.values.forEach((v, i) => { const d = v - t.mean; m3 += t.probs[i] * d ** 3; m4 += t.probs[i] * d ** 4; });
+  else {
+    const N = 4000, h = (t.hi - t.lo) / N;
+    for (let i = 0; i < N; i++) { const x = t.lo + (i + 0.5) * h, w = t.cdf(t.lo + (i + 1) * h) - t.cdf(t.lo + i * h), d = x - t.mean; m3 += w * d ** 3; m4 += w * d ** 4; }
+  }
+  const pad = (t.hi - t.lo) * 0.08 || 0.5;
+  e = {
+    id: 'typed', label: 'typed law', mean: t.mean, variance: t.variance, skew: m3 / t.sd ** 3, exKurt: m4 / t.variance ** 2 - 3,
+    cdf: discrete ? Object.assign((x) => t.cdf(x), { left: t.cdfLeft }) : t.cdf, pdf: discrete ? () => 0 : t.pdf, range: [t.lo - pad, t.hi + pad], family: null, discrete, typed: t,
+  };
+  typedEntries.set(t, e);
+  return e;
+}
+/** The typed law of the current run (set by `run`; the kernel runs one experiment at a time). */
+let typedNow = null;
+/** LAWS[i] for the built-in laws, the typed law for TYPED. */
+export const lawAt = (i) => (i === TYPED ? typedNow ?? typedEntry(DEFAULT_LAW) : LAWS[i]);
 
 const NAMESPACE = 0x45;
 const unit = (seed, stream, index) => (fixtureUint32(seed, stream, index, NAMESPACE) + 0.5) / 2 ** 32;
 
-/** n draws from LAWS[law], stream `stream`; inverse transform (uniform, exponential), Box–Muller (normal). */
+/** n draws from lawAt(law), stream `stream`; inverse transform (uniform, exponential), Box–Muller (normal). */
 export function drawSample(law, n, seed, stream = 0) {
   const x = new Array(n);
   for (let i = 0; i < n; i++) {
     const u = unit(seed, stream, 2 * i);
     if (law === 0) x[i] = 1 + Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * unit(seed, stream, 2 * i + 1));
     else if (law === 1) x[i] = 1 - R3 + 2 * R3 * u;
+    else if (law === TYPED) x[i] = lawAt(TYPED).typed.quantile(u);
     else x[i] = -Math.log1p(-u);
   }
   return x;
@@ -109,10 +142,12 @@ export function shapeMoments(sample) {
 export function kolmogorovStatistic(sample, F) {
   const sorted = [...sample].sort((a, b) => a - b);
   const n = sorted.length;
+  // #88: against a discrete F the lower side compares F(x−) with Fₙ(x−); for a continuous F the two coincide.
+  const left = F.left ?? F;
   let dPlus = 0, dMinus = 0, at = sorted[0];
   for (let i = 0; i < n; i++) {
     const f = F(sorted[i]);
-    const up = (i + 1) / n - f, down = f - i / n;
+    const up = (i + 1) / n - f, down = left(sorted[i]) - i / n;
     if (up > dPlus) dPlus = up;
     if (down > dMinus) dMinus = down;
     if (Math.max(up, down) >= Math.max(dPlus, dMinus)) at = sorted[i];
@@ -158,11 +193,12 @@ export function kolmogorovTest(sample, F, alpha, critical = kolmogorovCritical(s
  */
 export function pearsonTest(sample, law, { cells, alpha, estimate, merge }) {
   const n = sample.length;
+  if (lawAt(law).discrete) return pearsonDiscrete(sample, lawAt(law).typed, { alpha, merge });
   const table = frequencyTable(sample, cells);
   const mids = table.edges.slice(0, -1).map((e) => e + table.h / 2);
-  let F = LAWS[law].cdf, params = null, r = 0;
-  if (estimate) {
-    const fam = LAWS[law].family;
+  let F = lawAt(law).cdf, params = null, r = 0;
+  if (estimate && lawAt(law).family) {
+    const fam = lawAt(law).family;
     const mean = mids.reduce((s, m, i) => s + m * table.counts[i], 0) / n;
     const sigma = Math.sqrt(mids.reduce((s, m, i) => s + (m - mean) ** 2 * table.counts[i], 0) / n);
     params = law === 0 ? [mean, sigma] : law === 1 ? [mean - R3 * sigma, mean + R3 * sigma] : [1 / mean];
@@ -187,15 +223,44 @@ export function pearsonTest(sample, law, { cells, alpha, estimate, merge }) {
     warning: small > 0 ? `${small} cell${small === 1 ? '' : 's'} with expected count below 5: the $\\chi^2$ approximation is unreliable.` : null,
   };
 }
+/**
+ * #88: Pearson against a discrete typed law: one cell per value of the law (merged while an expected count is below 5),
+ * and one more for observed values the law does not have (expected 0, so any such value makes χ² infinite). No
+ * parameters are estimated: df = s − 1.
+ */
+function pearsonDiscrete(sample, t, { alpha, merge }) {
+  const n = sample.length;
+  const index = new Map(t.values.map((v, i) => [v, i]));
+  const observed = new Array(t.values.length).fill(0);
+  let other = 0;
+  for (const v of sample) { const i = index.get(v); if (i == null) other++; else observed[i]++; }
+  let groups = t.values.map((v, i) => ({ from: v, to: v, values: [v], observed: observed[i], expected: n * t.probs[i] }));
+  const smallBefore = groups.filter((g) => g.expected < 5).length;
+  if (merge) groups = mergeCells(groups);
+  if (other) groups.push({ from: NaN, to: NaN, values: t.values, other: true, observed: other, expected: 0 });
+  const small = groups.filter((g) => g.expected < 5 && !g.other).length;
+  const s = groups.length, r = 0, df = s - 1;
+  let chi2 = 0;
+  for (const g of groups) chi2 += g.expected > 0 ? (g.observed - g.expected) ** 2 / g.expected : g.observed > 0 ? Infinity : 0;
+  const valid = df >= 1;
+  const critical = valid ? chiSquareQuantile(1 - alpha, df) : null;
+  return {
+    groups, s, r, df, chi2, params: null, smallBefore, small, valid, critical,
+    p: valid ? chiSquareSf(chi2, df) : null,
+    reject: valid ? chi2 >= critical : null,
+    warning: small > 0 ? `${small} cell${small === 1 ? '' : 's'} with expected count below 5: the $\\chi^2$ approximation is unreliable.` : null,
+  };
+}
 function mergeCells(cells) {
+  const join = (a, b) => ({ from: a.from, to: b.to, observed: a.observed + b.observed, expected: a.expected + b.expected, ...(a.values ? { values: [...a.values, ...b.values] } : {}) });
   const out = [];
   let cur = null;
   for (const c of cells) {
-    cur = cur ? { from: cur.from, to: c.to, observed: cur.observed + c.observed, expected: cur.expected + c.expected } : { ...c };
+    cur = cur ? join(cur, c) : { ...c };
     if (cur.expected >= 5) { out.push(cur); cur = null; }
   }
   if (cur) {
-    if (out.length) { const last = out.pop(); out.push({ from: last.from, to: cur.to, observed: last.observed + cur.observed, expected: last.expected + cur.expected }); }
+    if (out.length) out.push(join(out.pop(), cur));
     else out.push(cur);
   }
   return out;
@@ -216,7 +281,7 @@ export function falseRejection(h0, n, seed, reps, opts, crit = kolmogorovCritica
     const p = pearsonTest(x, h0, opts);
     if (p.valid) { pearsonRuns++; if (p.reject) pearson++; }
     // Kolmogorov always against the fully specified H₀ law; with estimated parameters, against the fitted one (to show why that is invalid).
-    const F = opts.estimate ? fittedCdf(x, h0) : LAWS[h0].cdf;
+    const F = opts.estimate ? fittedCdf(x, h0) : lawAt(h0).cdf;
     if (kolmogorovStatistic(x, F).d >= crit) kolm++;
   }
   const half = R > 0 ? 3 * Math.sqrt((opts.alpha * (1 - opts.alpha)) / R) : 0;
@@ -227,9 +292,10 @@ export function falseRejection(h0, n, seed, reps, opts, crit = kolmogorovCritica
 }
 /** Maximum-likelihood fit from the raw sample (used only to show the Kolmogorov test with estimated parameters). */
 function fittedCdf(x, law) {
+  if (!lawAt(law).family) return lawAt(law).cdf;
   const { mean, m2 } = shapeMoments(x);
   const sd = Math.sqrt(m2);
-  return LAWS[law].family.cdf(law === 0 ? [mean, sd] : law === 1 ? [Math.min(...x), Math.max(...x)] : [1 / mean]);
+  return lawAt(law).family.cdf(law === 0 ? [mean, sd] : law === 1 ? [Math.min(...x), Math.max(...x)] : [1 / mean]);
 }
 
 // ---------------------------------------------------------------- #127: the statistics drawn
@@ -237,14 +303,14 @@ function fittedCdf(x, law) {
 export function gapEnds(sample, F, at) {
   let le = 0, lt = 0;
   for (const v of sample) { if (v <= at) le++; if (v < at) lt++; }
-  const n = sample.length, f = F(at), upper = le / n, lower = lt / n;
-  return Math.abs(upper - f) >= Math.abs(f - lower) ? [f, upper] : [f, lower];
+  const n = sample.length, f = F(at), fl = (F.left ?? F)(at), upper = le / n, lower = lt / n;
+  return Math.abs(upper - f) >= Math.abs(fl - lower) ? [f, upper] : [fl, lower];
 }
 /** Pearson cell by cell: each cell's term (mᵢ − npᵢ)²/npᵢ as a bar; the bars add up to χ². */
 export function pearsonTerms(pearson) {
   return pearson.groups.map((g) => (g.expected > 0 ? (g.observed - g.expected) ** 2 / g.expected : g.observed > 0 ? Infinity : 0));
 }
-const cellTex = (g) => `(${Number.isFinite(g.from) ? fmt(g.from, 2) : '-\\infty'}, ${Number.isFinite(g.to) ? `${fmt(g.to, 2)}]` : '\\infty)'}`;
+const cellTex = (g) => (g.other ? `x \\notin \\{${g.values.map((v) => fmt(v, 3)).join(', ')}\\}` : g.values ? `\\{${g.values.map((v) => fmt(v, 3)).join(', ')}\\}` : `(${Number.isFinite(g.from) ? fmt(g.from, 2) : '-\\infty'}, ${Number.isFinite(g.to) ? `${fmt(g.to, 2)}]` : '\\infty)'}`);
 const texNum = (v, d) => (Number.isFinite(v) ? fmt(v, d) : '\\infty');
 function pearsonView(pearson, n, alpha) {
   const terms = pearsonTerms(pearson), idx = terms.map((_, i) => i + 1);
@@ -300,15 +366,22 @@ export function fastNormalQuantile(p) {
   const q = p - 0.5, r = q * q;
   return ((((((AC[0] * r + AC[1]) * r + AC[2]) * r + AC[3]) * r + AC[4]) * r + AC[5]) * q) / (((((AD[0] * r + AD[1]) * r + AD[2]) * r + AD[3]) * r + AD[4]) * r + 1);
 }
-/** F⁻¹(p) of LAWS[law]. */
+/** F⁻¹(p) of lawAt(law). */
 export function quantile(law, p) {
   if (law === 0) return 1 + fastNormalQuantile(p);
   if (law === 1) return 1 - R3 + 2 * R3 * p;
+  if (law === TYPED) return lawAt(TYPED).typed.quantile(p);
   return -Math.log1p(-p);
 }
 /** The law of ξ given lo ≤ ξ ≤ hi: its probability, mean and variance (Simpson on the support, 4000 intervals). */
 export function truncatedMoments(law, lo, hi) {
-  const L = LAWS[law], [s0, s1] = SUPPORT[law];
+  const L = lawAt(law), [s0, s1] = law === TYPED ? [L.typed.lo, L.typed.hi] : SUPPORT[law];
+  if (L.discrete) {
+    // A discrete typed law: the values inside [lo, hi] and their masses.
+    let mass = 0, m1 = 0, q2 = 0;
+    L.typed.values.forEach((v, i) => { if (v >= lo && v <= hi) { mass += L.typed.probs[i]; m1 += v * L.typed.probs[i]; q2 += v * v * L.typed.probs[i]; } });
+    return mass > 0 ? { mass, mean: m1 / mass, variance: q2 / mass - (m1 / mass) ** 2 } : { mass: 0, mean: NaN, variance: NaN };
+  }
   const a = Math.max(lo, s0), b = Math.min(hi, s1);
   const mass = b > a ? L.cdf(b) - L.cdf(a) : 0;
   if (!(mass > 0)) return { mass: 0, mean: NaN, variance: NaN };
@@ -323,9 +396,10 @@ export function truncatedMoments(law, lo, hi) {
   m2 *= h / 3 / mass;
   return { mass, mean: m1, variance: m2 - m1 * m1 };
 }
-/** n draws from LAWS[law] given lo ≤ ξ ≤ hi, by the inverse transform on [F(lo), F(hi)]; `at(i)` gives the i-th uniform. */
+/** n draws from lawAt(law) given lo ≤ ξ ≤ hi, by the inverse transform on [F(lo), F(hi)]; `at(i)` gives the i-th uniform. */
 function drawWindow(law, n, lo, hi, at) {
-  const L = LAWS[law], f0 = Number.isFinite(lo) ? L.cdf(lo) : 0, f1 = Number.isFinite(hi) ? L.cdf(hi) : 1;
+  // F(lo−): a discrete law keeps its mass at lo inside the window.
+  const L = lawAt(law), f0 = Number.isFinite(lo) ? L.cdf(L.discrete ? lo - 1e-12 * Math.max(1, Math.abs(lo)) : lo) : 0, f1 = Number.isFinite(hi) ? L.cdf(hi) : 1;
   const x = new Array(n);
   for (let i = 0; i < n; i++) x[i] = Math.min(hi, Math.max(lo, quantile(law, f0 + (f1 - f0) * at(i))));
   return x;
@@ -338,7 +412,7 @@ export const ERROR_NS = [10, 20, 50, 100, 200, 500, 1000];
  * (streams 2 and 3; sample r at size index j uses indices (j·reps + r)·1000 + i).
  */
 export function errorCurve(law, lo, hi, reps, seed) {
-  const a = LAWS[law].mean;
+  const a = lawAt(law).mean;
   const curve = (stream, l, h) => ERROR_NS.map((n, j) => {
     let total = 0;
     for (let r = 0; r < reps; r++) {
@@ -361,7 +435,7 @@ function heightsOn(sample, edges) {
 }
 
 function runRepresentative({ law = 0, n = 100, bins = 0, lo: lo0 = 1.5, hi: hi0 = 4, reps = 100 }, seed) {
-  const L = LAWS[law];
+  const L = lawAt(law);
   const lo = Math.min(lo0, hi0), hi = Math.max(lo0, hi0);
   const T = truncatedMoments(law, lo, hi);
   if (!(T.mass > 1e-6)) throw new Error('The region holds almost none of the population: widen it.');
@@ -430,11 +504,13 @@ function runRepresentative({ law = 0, n = 100, bins = 0, lo: lo0 = 1.5, hi: hi0 
 
 // ---------------------------------------------------------------- contract
 const P = {
-  law: { key: 'law', label: `True law (${lawLabel})`, min: 0, max: 2, step: 1, default: 0 },
+  law: { key: 'law', label: `True law (${lawLabel})`, min: 0, max: 3, step: 1, default: 0 },
   n: { key: 'n', label: 'Sample size $n$', min: 10, max: 1000, step: 10, default: 100 },
 };
+const customText = (when) => ({ key: 'custom', label: 'Your law: values | probabilities, or a density on $[a, b]$', default: DEFAULT_LAW, presets: [...LAW_PRESETS], hint: LAW_HINT, when });
 export const stations = {
   sample: {
+    texts: [customText({ law: [TYPED] })],
     params: [
       P.law, P.n,
       { key: 'bins', label: 'Intervals $k$ ($0 = 5 \\lg n$)', min: 0, max: 40, step: 1, default: 0 },
@@ -446,10 +522,11 @@ export const stations = {
     ],
   },
   fit: {
+    texts: [customText([{ law: [TYPED] }, { h0: [TYPED] }])],
     params: [
       { key: 'view', label: 'Show (0 Kolmogorov: the largest gap, 1 Pearson: cell by cell)', min: 0, max: 1, step: 1, default: 0 },
       P.law,
-      { key: 'h0', label: `Hypothesis $H_0$ (${lawLabel})`, min: 0, max: 2, step: 1, default: 0 },
+      { key: 'h0', label: `Hypothesis $H_0$ (${lawLabel})`, min: 0, max: 3, step: 1, default: 0 },
       { ...P.n, default: 200 },
       { key: 'alpha', label: 'Significance level $\\alpha$', min: 0.01, max: 0.2, step: 0.01, default: 0.05 },
       { key: 'cells', label: 'Pearson intervals $s$', min: 3, max: 30, step: 1, default: 10 },
@@ -469,13 +546,27 @@ export const meta = {
 const fmt = (v, d = 4) => (Number.isFinite(v) ? Number(v.toFixed(d)).toString() : String(v));
 const grid = ([a, b], count = 200) => Array.from({ length: count + 1 }, (_, i) => a + ((b - a) * i) / count);
 
-export function run(params, { seed, station } = {}) {
-  return station === 'fit' ? runFit(params, seed) : runSample(params, seed);
+/** #88: checks the typed law before the host runs it. */
+export function checkText(station, key, value) {
+  return key === 'custom' && (station === 'sample' || station === 'fit') ? checkLaw(value) : null;
+}
+export function run(params = {}, { seed, station } = {}) {
+  typedNow = typedEntry(params.custom ?? DEFAULT_LAW);
+  const out = station === 'fit' ? runFit(params, seed) : runSample(params, seed);
+  const typed = params.law === TYPED || (station === 'fit' && params.h0 === TYPED);
+  if (!typed) return out;
+  // The typed law's formula on top, and its pmf or pdf with the CDF as a linked chart where the view has none.
+  const t = typedNow.typed, pv = lawPreview(t);
+  return {
+    ...out,
+    formula: [t.tex, ...(out.formula ?? [])],
+    ...(out.linked ? {} : { linked: { series: pv.series, axes: { x: '$x$', y: t.kind === 'discrete' ? '$p_i$, $F(x)$' : '$f(x)$, $F(x)$' }, ...(pv.domain ? { domain: pv.domain } : {}) } }),
+  };
 }
 
 function runSample({ law = 0, n = 100, bins = 0, digits = 0, view = 0, ...rest }, seed) {
   if (view === 2) return runRepresentative({ law, n, bins, lo: rest.lo, hi: rest.hi, reps: rest.reps }, seed);
-  const L = LAWS[law];
+  const L = lawAt(law);
   const sample = drawSample(law, n, seed).map((v) => roundTo(v, digits));
   const k = bins > 0 ? bins : defaultBinCount(n);
   const table = frequencyTable(sample, k);
@@ -491,7 +582,9 @@ function runSample({ law = 0, n = 100, bins = 0, digits = 0, view = 0, ...rest }
     ]
     : [
       { id: 'hist', kind: 'hist', tone: 'default', label: `Histogram $H_r = W_r/h$, $k = ${k}$`, x: table.edges.slice(0, -1), y: table.height },
-      { id: 'pdf', kind: 'pdf', tone: 'signal', label: `$f(x)$, ${L.label}`, x: xs, y: xs.map(L.pdf) },
+      L.discrete
+        ? { id: 'pdf', kind: 'pmf', tone: 'signal', label: '$p_i/h$, typed law', x: L.typed.values, y: L.typed.probs.map((q) => q / table.h) }
+        : { id: 'pdf', kind: 'pdf', tone: 'signal', label: `$f(x)$, ${L.label}`, x: xs, y: xs.map(L.pdf) },
     ];
   const ties = vs.values.length < n;
   const rows = table.counts.map((m, r) => `[${fmt(table.edges[r], 3)}, ${fmt(table.edges[r + 1], 3)}${r === k - 1 ? ']' : ')'}: m = ${m}, W = ${fmt(table.freq[r])}, H = ${fmt(table.height[r])}`);
@@ -523,9 +616,9 @@ function runSample({ law = 0, n = 100, bins = 0, digits = 0, view = 0, ...rest }
 }
 
 function runFit({ view = 0, law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, estimate = 0, merge = 1, reps = 300 }, seed) {
-  const L = LAWS[law], H = LAWS[h0];
+  const L = lawAt(law), H = lawAt(h0);
   const sample = drawSample(law, n, seed);
-  const opts = { cells, alpha, estimate: estimate === 1, merge: merge === 1 };
+  const opts = { cells, alpha, estimate: estimate === 1 && Boolean(H.family), merge: merge === 1 };
   const pearson = pearsonTest(sample, h0, opts);
   const F0 = opts.estimate ? fittedCdf(sample, h0) : H.cdf;
   const critical = kolmogorovCritical(n, alpha);
@@ -586,13 +679,15 @@ function runFit({ view = 0, law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, 
       ksValid
         ? 'The test needs a continuous $F$ with every parameter known in advance. Here $H_0$ is fully specified.'
         : '$H_0$ parameters were estimated from this sample. The Kolmogorov critical values then no longer hold: for the normal and exponential laws the test becomes far too lenient (compare the false-rejection rate with $\\alpha$). Use Pearson with $r$ estimated parameters instead, and read its own false-rejection rate: the L12 midpoint estimates hold $\\alpha$ only roughly.',
-      `Pearson (L12): ${pearson.s} cells after ${opts.merge ? 'merging' : 'no merging'}, $r = ${pearson.r}$ estimated parameter${pearson.r === 1 ? '' : 's'}${pearson.params ? ` (${pearson.params.map((v) => fmt(v)).join(', ')} from interval midpoints)` : ''}, $k = s - 1 - r = ${pearson.df}$. The outer cells are open to $\\pm\\infty$ so that $\\sum_i p_i = 1$.`,
+      `Pearson (L12): ${pearson.s} cells after ${opts.merge ? 'merging' : 'no merging'}, $r = ${pearson.r}$ estimated parameter${pearson.r === 1 ? '' : 's'}${pearson.params ? ` (${pearson.params.map((v) => fmt(v)).join(', ')} from interval midpoints)` : ''}, $k = s - 1 - r = ${pearson.df}$. ${H.discrete ? 'Each cell is one value of the typed law, merged while an expected count is below 5.' : 'The outer cells are open to $\\pm\\infty$ so that $\\sum_i p_i = 1$.'}`,
       pearson.valid
         ? pearson.warning ?? 'Every expected count is at least 5.'
         : `Too few cells: $k = s - 1 - r = ${pearson.s} - 1 - ${pearson.r} = ${pearson.df} < 1$, so the $\\chi^2$ test cannot run. Increase $s$${opts.merge ? ' or $n$ (merging joined cells)' : ''}.`,
       'L10 gives the degrees of freedom as "number of intervals − 1" and counts parameters from there. The general rule is the one in L12: $k = s - 1 - r$.',
       `Monte Carlo: ${mc.R} samples were drawn from $H_0$ itself (${H.label}) with the same seed and different streams. A correct level-$\\alpha$ test rejects about $\\alpha$ of them.${mc.R < reps ? ` Replicates were capped at ${mc.R} to keep $nR \\le ${MC_BUDGET}$.` : ''}`,
       'Skewness and excess kurtosis (L12): both are 0 for a normal law. Values far beyond about two standard errors argue against normality.',
+      ...(estimate === 1 && !H.family ? ['A typed law has no parameters to estimate: $H_0$ is used exactly as typed.'] : []),
+      ...(H.discrete ? ['$H_0$ is discrete: Kolmogorov\'s critical values assume a continuous $F$, so for a discrete law the test is conservative (it rejects less often than $\\alpha$). Pearson\'s test has no such restriction.'] : []),
     ],
   };
 }

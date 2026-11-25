@@ -47,3 +47,21 @@ test('a typed law is hidden where it does not apply', async ({ page }) => {
   await dock.getByRole('radio', { name: 'typed' }).click();
   await expect(dock.getByRole('textbox', { name: /^Your law/ })).toBeVisible();
 });
+
+test('Sample and Fit: a typed law is the true law and the hypothesis', async ({ page }) => {
+  await page.goto('/#station/sample?seed=6&law=3&n=500&custom=2x%20on%20%5B0%2C%201%5D');
+  const dock = page.getByTestId('station-dock');
+  await expect(dock.getByRole('textbox', { name: /^Your law/ })).toHaveValue('2x on [0, 1]');
+  await expect(dock.getByRole('group', { name: 'Live formula' }).locator('.katex').first()).toBeVisible();
+  await expect(dock.getByRole('table', { name: 'Readouts' }).getByRole('row', { name: /^Sample mean/ })).toContainText('0.66667');
+
+  await page.goto('about:blank');
+  await page.goto('/#station/fit?seed=6&view=1&law=3&h0=3&n=300&custom=0%201%202%20%7C%200.2%200.5%200.3');
+  const readouts = dock.getByRole('table', { name: 'Readouts' });
+  await expect(readouts.getByRole('row', { name: /^Pearson decision/ })).toContainText('do not reject');
+  await expect(dock.getByText(/Each cell is one value of the typed law/).first()).toBeVisible();
+  // The field shows for H0 = typed alone, too.
+  await page.goto('about:blank');
+  await page.goto('/#station/fit?seed=6&law=0&h0=3');
+  await expect(dock.getByRole('textbox', { name: /^Your law/ })).toBeVisible();
+});
