@@ -186,9 +186,9 @@ function runConvergence({ law: li, k, N, view }, seed) {
     return {
       readouts: [
         { key: 'exact', label: cauchy ? `Exact P(|X| ≥ ${k})` : `Exact P(|X − MX| ≥ ${k}σ)`, observed: r6(hits / R), theory: r6(exact),
-          convention: `simulated with R = ${R}; ± ${fmt(4 * se, 4)} (4 SE)` },
+          convention: exact > 0 ? `simulated with R = ${R}; ± ${fmt(4 * se, 4)} (4 SE)` : `simulated with R = ${R}; the tail is exactly 0 here` },
         { key: 'chebyshev', label: 'Chebyshev bound 1/k²', observed: null, theory: cauchy ? 'does not apply' : r6(Math.min(1, 1 / (k * k))),
-          convention: cauchy ? 'the Cauchy law has no variance' : `the bound is ${fmt(Math.min(1, 1 / (k * k)) / Math.max(exact, 1e-300), 1)} times the real tail` },
+          convention: cauchy ? 'the Cauchy law has no variance' : exact > 0 ? `the bound is ${fmt(Math.min(1, 1 / (k * k)) / exact, 1)} times the real tail` : 'the real tail is 0: no value of X lies this far from the mean' },
       ],
       series,
       axes: { x: 'k (in standard deviations)', y: 'probability' },
@@ -249,7 +249,8 @@ function runClt({ law: li, n, R, view }, seed) {
     'Lindeberg–Lévy (L8): for i.i.d. terms with finite variance, (Sₙ − n·MX)/(σ√n) tends in law to N(0, 1), whatever the shape of one term.',
     law.discrete
       ? 'For a lattice law (Poisson) the standardized sum takes isolated values, so the Kolmogorov distance falls only like 1/√n: the CDF keeps jumps of that size.'
-      : law.id === 'exponential' ? 'A skewed term (exponential) converges more slowly than a symmetric one (uniform): Berry–Esseen puts the error at order 1/√n.' : 'A symmetric term converges fast: already n = 3 uniforms look normal.',
+      : law.id === 'exponential' ? 'A skewed term (exponential) converges more slowly than a symmetric one (uniform): Berry–Esseen puts the error at order 1/√n.'
+        : law.id === 'normal' ? 'A normal term gives an exactly normal sum for every n: the distance is pure Monte Carlo noise.' : 'A symmetric term converges fast: already n = 3 uniforms look normal.',
   ];
   if (view === 2) {
     const ns = Array.from({ length: 200 }, (_, i) => i + 1);

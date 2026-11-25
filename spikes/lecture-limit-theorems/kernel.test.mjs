@@ -58,6 +58,12 @@ test('AC2: exact tails next to the Chebyshev bound (normal k = 3: 0.0027, Poisso
   assert.ok(r.series.some((s) => s.id === 'bound'));
 });
 
+test('AC2: a zero tail (uniform, k ≥ √3) gives a readable readout, not a huge ratio', () => {
+  const r = k.run({ law: 1, N: 100, k: 2, view: 1 }, { seed: 1, station: 'lln' });
+  for (const x of r.readouts) assert.doesNotMatch(String(x.convention), /e\+|Infinity|NaN/);
+  assert.equal(r.readouts.find((x) => x.key === 'exact').theory, 0);
+});
+
 test('AC2: uniform and exponential tails agree with simulation (4 SE)', () => {
   for (const li of [1, 2]) for (const t of [0.8, 1.5]) {
     const r = k.run({ law: li, N: 100, k: t, view: 1 }, { seed: 11, station: 'lln' });
