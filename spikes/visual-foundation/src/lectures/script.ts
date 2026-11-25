@@ -13,6 +13,12 @@ export type Experiment = {
   /** Button text. Default: "Open experiment". */
   label?: string;
 };
+/** A live figure state for a story step (#110). Steps without one keep the previous step's figure and beat. */
+export type FigureRef = { id: string; beat: string; params?: Record<string, number> };
+/** A "what if?" invitation: one click sets these figure parameters. */
+export type WhatIf = { label: string; params: Record<string, number> };
+/** Layered explanation: the reader opens as much depth as they want. Text with inline `$…$`. */
+export type Layers = { intuition?: string; definition?: string; details?: string };
 export type Step = {
   title: string;
   /** One idea, a sentence or a short paragraph. */
@@ -26,6 +32,12 @@ export type Step = {
   experiment?: Experiment;
   /** Optional notes for the teacher; shown only in presenter mode. */
   notes?: string;
+  /** Story lectures: what the live figure shows while this step is read. */
+  figure?: FigureRef;
+  /** Live formula lines: TeX with \\lv{key}{…}, \\lval{key}, \\lres{key} bound to the figure (#109). */
+  live?: string[];
+  layers?: Layers;
+  whatIf?: WhatIf[];
 };
 export type Lecture = {
   lecture: number;
@@ -34,6 +46,8 @@ export type Lecture = {
   scientists?: string[];
   /** "draft" until the script task (#51–#53) fills it in. */
   status?: 'draft' | 'ready';
+  /** true: the lecture reads as one scrolling story next to a live figure (#110). */
+  story?: boolean;
   steps: Step[];
 };
 export type Scientist = { slug: string; name: string; years: string; lectures: number[]; contribution: string };
@@ -46,7 +60,16 @@ const SEED_MAX = 4294967295;
  * Checks one lecture script. Returns a list of problems; an empty list means the script is valid.
  * `stations` and `scientists` are the known ids; pass them to check references.
  */
-export function validateLecture(value: unknown, known: { stations?: string[]; scientists?: string[] } = {}): string[] {
+type KnownFigure = { beats: string[]; params: Record<string, { min: number; max: number }>; vars: Record<string, unknown> };
+type Known = {
+  stations?: string[];
+  scientists?: string[];
+  /** Figure specs (src/lectures/figures/specs.mjs) to check story steps against. */
+  figures?: Record<string, KnownFigure>;
+  /** Extracts the keys of a live formula (src/lectures/live-tex.mjs liveTexKeys); throws on bad syntax. */
+  liveKeys?: (tex: string) => { symbols: Set<string>; values: Set<string>; results: Set<string> };
+};
+export function validateLecture(value: unknown, known: Known = {}): string[] {
   const errors: string[] = [];
   const l = value as Lecture;
   if (!l || typeof l !== 'object') return ['the script is not an object'];
@@ -62,10 +85,13 @@ export function validateLecture(value: unknown, known: { stations?: string[]; sc
     }
   };
   slugRef('lecture', l.scientists);
+  if (l.story != null && typeof l.story !== 'boolean') errors.push('story must be true or false');
   if (!Array.isArray(l.steps) || l.steps.length === 0) {
     errors.push('steps must be a non-empty list');
     return errors;
   }
+  if (l.story && !l.steps[0]?.figure) errors.push('step 1: a story lecture starts with a figure');
+  let figure: KnownFigure | null = null;
   l.steps.forEach((s, i) => {
     const at = `step ${i + 1}`;
     if (!s || typeof s !== 'object') return errors.push(`${at}: not an object`);
@@ -77,6 +103,61 @@ export function validateLecture(value: unknown, known: { stations?: string[]; sc
     slugRef(at, s.scientists);
     if (Array.isArray(s.scientists) && Array.isArray(l.scientists)) {
       for (const slug of s.scientists) if (!l.scientists.includes(slug)) errors.push(`${at}: "${slug}" is missing from the lecture's scientists`);
+    }
+    if (!l.story && (s.figure || s.live || s.whatIf)) errors.push(`${at}: figure, live and whatIf need "story": true`);
+    if (s.figure != null) {
+      const f = s.figure;
+      if (!f || typeof f !== 'object' || !isText(f.id) || !isText(f.beat)) errors.push(`${at}: figure needs an id and a beat`);
+      else if (known.figures) {
+        figure = known.figures[f.id] ?? null;
+        if (!figure) errors.push(`${at}: unknown figure "${f.id}"`);
+        else if (!figure.beats.includes(f.beat)) errors.push(`${at}: figure "${f.id}" has no beat "${f.beat}"`);
+      }
+    }
+    const paramsOk = (where: string, params: unknown) => {
+      if (params == null) return;
+      if (typeof params !== 'object' || Array.isArray(params)) return errors.push(`${at}: ${where} must be an object`);
+      for (const [k, v] of Object.entries(params as Record<string, unknown>)) {
+        if (typeof v !== 'number' || !Number.isFinite(v)) errors.push(`${at}: ${where} "${k}" must be a finite number`);
+        else if (figure) {
+          const p = figure.params[k];
+          if (!p) errors.push(`${at}: ${where} "${k}" is not a parameter of the figure`);
+          else if (v < p.min || v > p.max) errors.push(`${at}: ${where} "${k}" = ${v} is outside ${p.min} … ${p.max}`);
+        }
+      }
+    };
+    paramsOk('figure.params', s.figure?.params);
+    if (s.live != null) {
+      if (!Array.isArray(s.live) || !s.live.every(isText)) errors.push(`${at}: live must be a list of TeX lines`);
+      else if (known.liveKeys)
+        for (const line of s.live) {
+          try {
+            const keys = known.liveKeys(line);
+            if (figure) {
+              for (const k of keys.values) if (!figure.params[k]) errors.push(`${at}: \\lval{${k}} is not a parameter of the figure`);
+              for (const k of [...keys.symbols, ...keys.results]) if (!figure.vars[k] && !figure.params[k]) errors.push(`${at}: "${k}" is not a variable of the figure`);
+            }
+          } catch (err) {
+            errors.push(`${at}: ${(err as Error).message}`);
+          }
+        }
+    }
+    if (s.layers != null) {
+      if (typeof s.layers !== 'object' || Array.isArray(s.layers)) errors.push(`${at}: layers must be an object`);
+      else
+        for (const [k, v] of Object.entries(s.layers)) {
+          if (!['intuition', 'definition', 'details'].includes(k)) errors.push(`${at}: unknown layer "${k}"`);
+          else if (!isText(v)) errors.push(`${at}: layer "${k}" must be text`);
+        }
+    }
+    if (s.whatIf != null) {
+      if (!Array.isArray(s.whatIf)) errors.push(`${at}: whatIf must be a list`);
+      else
+        s.whatIf.forEach((w, j) => {
+          if (!w || !isText(w.label)) errors.push(`${at}: whatIf ${j + 1} needs a label`);
+          if (!w?.params || !Object.keys(w.params).length) errors.push(`${at}: whatIf ${j + 1} needs params`);
+          else paramsOk(`whatIf ${j + 1}`, w.params);
+        });
     }
     const e = s.experiment;
     if (e == null) return;

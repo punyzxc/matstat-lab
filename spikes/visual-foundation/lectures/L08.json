@@ -1,6 +1,8 @@
 {
   "lecture": 8,
   "title": "The central limit theorem",
+  "status": "draft",
+  "story": true,
   "scientists": [
     "lindeberg",
     "levy",
@@ -8,27 +10,260 @@
   ],
   "steps": [
     {
-      "title": "Standardised sums",
-      "idea": "A sum of many independent draws, centred and scaled, is close to the standard normal law.",
-      "formula": [
-        "\\dfrac{S_n - na}{\\sigma\\sqrt{n}} \\;\\xrightarrow[\\;n\\to\\infty\\;]{}\\; N(0,1)"
+      "title": "One term",
+      "idea": "Start with one random variable $X$, here an exponential waiting time. Its law is lopsided: most values are small, a few are large.",
+      "figure": {
+        "id": "clt-factory",
+        "beat": "source",
+        "params": {
+          "n": 12,
+          "src": 1,
+          "p": 0.3
+        }
+      },
+      "live": [
+        "\\lv{X}{X} \\sim \\operatorname{Exp}(1), \\qquad \\lv{a}{a} = MX = \\lres{mean}, \\qquad \\lv{sigma}{\\sigma} = \\sqrt{DX} = \\lres{sd}"
       ],
+      "whatIf": [
+        {
+          "label": "a uniform term",
+          "params": {
+            "src": 0
+          }
+        },
+        {
+          "label": "a coin with $p = 0.3$",
+          "params": {
+            "src": 2,
+            "p": 0.3
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Each dot that falls is one value of $X$. They pile up near zero, exactly where the density is high.",
+        "definition": "All the theorem asks of one term: an expectation $a = MX$ and a finite variance $\\sigma^2 = DX > 0$."
+      }
+    },
+    {
+      "title": "Many independent terms",
+      "idea": "Take $n$ independent copies $X_1, \\dots, X_n$ of the same law. Each one falls into its own slot of the machine.",
+      "figure": {
+        "id": "clt-factory",
+        "beat": "terms"
+      },
+      "live": [
+        "\\lv{X}{X_1},\\ \\lv{X}{X_2},\\ \\dots,\\ \\lv{X}{X_n} \\quad \\text{independent}, \\qquad n = \\lval{n}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 3$",
+          "params": {
+            "n": 3
+          }
+        },
+        {
+          "label": "$n = 8$",
+          "params": {
+            "n": 8
+          }
+        },
+        {
+          "label": "$n = 50$",
+          "params": {
+            "n": 50
+          }
+        }
+      ]
+    },
+    {
+      "title": "The sum",
+      "idea": "The machine adds the terms up. The sum $S_n$ drifts away and spreads out as $n$ grows: its mean is $na$ and its variance $n\\sigma^2$.",
+      "figure": {
+        "id": "clt-factory",
+        "beat": "sum",
+        "params": {
+          "n": 8
+        }
+      },
+      "live": [
+        "\\lv{S}{S_n} = \\lv{X}{X_1} + \\dots + \\lv{X}{X_n} = \\lres{sum}",
+        "M\\lv{S}{S_n} = n\\,\\lv{a}{a}, \\qquad D\\lv{S}{S_n} = n\\,\\lv{sigma}{\\sigma}^2"
+      ],
+      "layers": {
+        "details": "Expectation is always additive. Variance is additive for independent terms: $D(X_1 + \\dots + X_n) = DX_1 + \\dots + DX_n = n\\sigma^2$, so the spread of $S_n$ grows like $\\sigma\\sqrt{n}$."
+      }
+    },
+    {
+      "title": "Centre and scale",
+      "idea": "To compare sums of different length, subtract the mean and divide by the standard deviation. The result $z$ always has mean $0$ and variance $1$; only its shape can change.",
+      "figure": {
+        "id": "clt-factory",
+        "beat": "standardize",
+        "params": {
+          "n": 8
+        }
+      },
+      "live": [
+        "\\lv{z}{z} = \\dfrac{\\lv{S}{S_n} - \\lval{n}\\,\\lv{a}{a}}{\\lv{sigma}{\\sigma}\\sqrt{\\lval{n}}} = \\lres{zlast}"
+      ],
+      "layers": {
+        "intuition": "The gate in the middle of the machine does exactly this: it shifts every bead by $na$ and shrinks it by $\\sigma\\sqrt{n}$."
+      }
+    },
+    {
+      "title": "Thousands of sums",
+      "idea": "Repeat the whole experiment thousands of times. Every standardized sum drops into the histogram. Its shape no longer looks like the exponential law.",
+      "figure": {
+        "id": "clt-factory",
+        "beat": "histogram",
+        "params": {
+          "n": 12
+        }
+      },
+      "live": [
+        "\\text{sums so far: } \\lres{count}, \\qquad n = \\lval{n}"
+      ],
+      "whatIf": [
+        {
+          "label": "just one term, $n = 1$",
+          "params": {
+            "n": 1
+          }
+        },
+        {
+          "label": "$n = 3$",
+          "params": {
+            "n": 3
+          }
+        },
+        {
+          "label": "$n = 30$",
+          "params": {
+            "n": 30
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "With $n = 1$ the histogram is the exponential law itself, only shifted and scaled. Add terms and the long right tail melts away."
+      }
+    },
+    {
+      "title": "The central limit theorem",
+      "idea": "As $n$ grows, the law of $z$ approaches the standard normal law, whatever the law of one term, as long as its variance is finite. This is the Lindeberg–Lévy theorem.",
+      "figure": {
+        "id": "clt-factory",
+        "beat": "normal",
+        "params": {
+          "n": 12
+        }
+      },
+      "live": [
+        "\\sup_{x}\\,\\bigl|\\,P(\\lv{z}{z} < x) - \\lv{Phi}{\\Phi}(x)\\bigr| = \\lres{ks} \\qquad \\text{at } n = \\lval{n}"
+      ],
+      "formula": [
+        "P\\!\\left(\\alpha < \\dfrac{S_n - na}{\\sigma\\sqrt{n}} < \\beta\\right) \\xrightarrow[\\;n\\to\\infty\\;]{} \\dfrac{1}{\\sqrt{2\\pi}} \\int_{\\alpha}^{\\beta} e^{-x^2/2}\\, dx"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 1$",
+          "params": {
+            "n": 1
+          }
+        },
+        {
+          "label": "$n = 5$",
+          "params": {
+            "n": 5
+          }
+        },
+        {
+          "label": "$n = 100$",
+          "params": {
+            "n": 100
+          }
+        },
+        {
+          "label": "a rare coin, $p = 0.05$",
+          "params": {
+            "src": 2,
+            "p": 0.05
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Every term pushes the sum a little left or right. With many small independent pushes the details of one push wash out; only its mean and variance survive. That is why the bell is universal.",
+        "definition": "Lindeberg–Lévy: if $X_1, X_2, \\dots$ are independent, identically distributed, $MX_k = a$ and $0 < DX_k = \\sigma^2 < \\infty$, then $P\\left(\\frac{S_n - na}{\\sigma\\sqrt{n}} < x\\right) \\to \\Phi(x)$ for every $x$.",
+        "details": "Through characteristic functions (lecture 9): $\\varphi_z(t) = \\left(\\varphi_{X - a}\\!\\left(\\frac{t}{\\sigma\\sqrt{n}}\\right)\\right)^{n} = \\left(1 - \\frac{t^2}{2n} + o\\!\\left(\\frac{1}{n}\\right)\\right)^{n} \\to e^{-t^2/2}$, the characteristic function of $N(0, 1)$. The yellow number is the Kolmogorov distance; it falls toward the Monte Carlo noise of 4000 sums, about $0.03$."
+      },
       "scientists": [
         "lindeberg",
         "levy"
       ],
-      "experiment": {
-        "station": "clt",
-        "seed": 808
+      "notes": "Ask the room to predict the histogram for $n = 1$ before clicking the chip."
+    },
+    {
+      "title": "Three sources, one limit",
+      "idea": "Run three factories side by side: a uniform term, an exponential term and a coin. Single terms look nothing alike, yet the standardized sums meet at the same bell. The skewed ones arrive later.",
+      "figure": {
+        "id": "clt-factory",
+        "beat": "race",
+        "params": {
+          "n": 5
+        }
+      },
+      "live": [
+        "n = \\lval{n}, \\qquad p = \\lval{p}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 2$",
+          "params": {
+            "n": 2
+          }
+        },
+        {
+          "label": "$n = 10$",
+          "params": {
+            "n": 10
+          }
+        },
+        {
+          "label": "$n = 60$",
+          "params": {
+            "n": 60
+          }
+        },
+        {
+          "label": "a rare coin, $p = 0.02$",
+          "params": {
+            "p": 0.02
+          }
+        }
+      ],
+      "layers": {
+        "details": "Berry–Esseen: the distance to $\\Phi$ is at most $C\\,\\dfrac{M|X - a|^3}{\\sigma^3\\sqrt{n}}$. A skewed or rare-event term has a large third moment, so it needs a larger $n$."
       }
     },
     {
       "title": "Lyapunov condition",
-      "idea": "Different laws can be added as long as no single term dominates the sum.",
+      "idea": "The terms need not share one law, as long as no single term dominates the sum.",
+      "formula": [
+        "\\dfrac{1}{B_n^{3}} \\sum_{k=1}^{n} M\\left|X_k - a_k\\right|^{3} \\xrightarrow[\\;n\\to\\infty\\;]{} 0, \\qquad B_n^2 = \\sum_{k=1}^{n} DX_k"
+      ],
       "scientists": [
         "lyapunov"
-      ]
+      ],
+      "experiment": {
+        "station": "clt",
+        "seed": 808,
+        "params": {
+          "law": 1,
+          "n": 30,
+          "R": 4000,
+          "view": 1
+        },
+        "label": "Distance to the normal law against $n$"
+      }
     }
-  ],
-  "status": "draft"
+  ]
 }

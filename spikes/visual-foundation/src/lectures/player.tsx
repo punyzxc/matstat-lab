@@ -8,6 +8,7 @@ import roster from '../../lectures/scientists.json';
 import { MathText, Tex, mathToPlain } from '../math';
 import { lectureFormula, lectureText, plural, scientistText, t } from '../i18n';
 import './lectures.css';
+import { StoryPlayer } from './story';
 
 /** Every lecture script in `spikes/visual-foundation/lectures/LNN.json`, bundled at build time. */
 const files = import.meta.glob<Lecture>('../../lectures/L[0-9][0-9].json', { eager: true, import: 'default' });
@@ -42,7 +43,11 @@ const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isConte
  * One lecture, one step at a time. The hash is the state: `#lecture/<n>/<step>[?present=1]`.
  * ← → (and PageUp/PageDown, which presentation clickers send) move between steps, Home/End jump, P toggles presenter mode.
  */
-export function LecturePlayer({ lecture, step, present }: { lecture: Lecture; step: number; present: boolean }) {
+export function LecturePlayer(props: { lecture: Lecture; step: number; present: boolean }) {
+  return props.lecture.story ? <StoryPlayer {...props} /> : <StepPlayer {...props} />;
+}
+
+function StepPlayer({ lecture, step, present }: { lecture: Lecture; step: number; present: boolean }) {
   const total = lecture.steps.length;
   const index = Math.min(Math.max(step, 1), total);
   const current = lecture.steps[index - 1];

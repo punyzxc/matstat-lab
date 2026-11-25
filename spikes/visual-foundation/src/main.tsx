@@ -348,7 +348,7 @@ function StationApp() {
     );
   } else if (lecture && route.lecture) {
     overlay = (
-      <SceneDock key="lecture" className="scene-dock--lecture" title={lectureText(lecture.lecture, lecture.title)} testId="lecture-dock"
+      <SceneDock key="lecture" className={`scene-dock--lecture${lecture.story ? ' scene-dock--story' : ''}`} title={lectureText(lecture.lecture, lecture.title)} testId="lecture-dock"
         eyebrow={<><i /> {t('LECTURE', 'ЛЕКЦИЯ')} {lecture.lecture}{lecture.status !== 'ready' ? t(' · DRAFT SCRIPT', ' · ЧЕРНОВИК СЦЕНАРИЯ') : ''}</>} onClose={close}>
         <LecturePlayer lecture={lecture} step={route.lecture.step} present={route.present} />
       </SceneDock>

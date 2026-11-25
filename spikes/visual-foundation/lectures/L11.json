@@ -1,10 +1,47 @@
 {
   "lecture": 11,
   "title": "Point estimates and confidence intervals",
+  "status": "draft",
+  "story": true,
   "scientists": [
     "gosset"
   ],
   "steps": [
+    {
+      "title": "A sample and its mean",
+      "idea": "The true mean $a$ of the population is unknown. One sample of $n$ observations gives a point estimate of it: the sample mean $\\bar{x}$.",
+      "figure": {
+        "id": "ci-wall",
+        "beat": "sample",
+        "params": {
+          "n": 10,
+          "gamma": 0.95,
+          "law": 0,
+          "method": 0
+        }
+      },
+      "live": [
+        "\\lv{xbar}{\\bar{x}} = \\dfrac{1}{\\lval{n}} \\sum_{i=1}^{n} x_i = \\lres{xbar}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 3$",
+          "params": {
+            "n": 3
+          }
+        },
+        {
+          "label": "$n = 50$",
+          "params": {
+            "n": 50
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Each violet dot is one observation. They collapse into their centre of mass: that point is $\\bar{x}$. A new sample gives a new $\\bar{x}$.",
+        "definition": "An estimate $\\tilde{a}$ is unbiased if $M\\tilde{a} = a$ and consistent if $\\tilde{a} \\to a$ in probability as $n \\to \\infty$. The sample mean is both."
+      }
+    },
     {
       "title": "Unbiased variance",
       "idea": "Dividing by $n$ underestimates the variance; dividing by $n - 1$ removes the bias.",
@@ -21,29 +58,112 @@
           "R": 2000,
           "view": 0
         }
+      },
+      "live": [
+        "\\lv{s}{s} = \\sqrt{\\dfrac{1}{n-1} \\sum_{i=1}^{n} \\left(x_i - \\lv{xbar}{\\bar{x}}\\right)^2} = \\lres{s}"
+      ],
+      "layers": {
+        "details": "With divisor $n$ the expectation is $\\frac{n-1}{n}\\sigma^2$: the spread around $\\bar{x}$ is smaller than around the true $a$, because $\\bar{x}$ is fitted to the same data. Dividing by $n - 1$ cancels that factor."
       }
     },
     {
       "title": "Confidence interval for the mean",
-      "idea": "An interval built from the sample covers the true mean in a stated share of repeated samples.",
+      "idea": "Widen the point into an interval that covers the true mean with a stated probability $\\gamma$. Its half-width grows with the spread $s$ and shrinks like $1/\\sqrt{n}$.",
+      "figure": {
+        "id": "ci-wall",
+        "beat": "interval"
+      },
+      "live": [
+        "\\lv{xbar}{\\bar{x}} \\pm \\lv{t}{t_{\\gamma}}\\,\\dfrac{\\lv{s}{s}}{\\sqrt{\\lval{n}}}, \\qquad \\lv{t}{t_{\\gamma}} = \\lres{t}",
+        "P\\!\\left(\\bar{x} - \\delta < \\lv{a}{a} < \\bar{x} + \\delta\\right) = \\lval{gamma}"
+      ],
       "formula": [
         "\\bar{x} \\pm t_{\\gamma,\\,n-1}\\, \\dfrac{s}{\\sqrt{n}}"
       ],
       "scientists": [
         "gosset"
       ],
-      "experiment": {
-        "station": "confidence",
-        "seed": 1908,
-        "params": {
-          "n": 10,
-          "gamma": 0.95,
-          "target": 0,
-          "law": 0,
-          "R": 1000,
-          "view": 1
-        }
+      "layers": {
+        "definition": "For normal data $\\frac{\\bar{x} - a}{s/\\sqrt{n}}$ has Student's law with $n - 1$ degrees of freedom; $t_{\\gamma}$ is its two-sided quantile, so the interval covers $a$ with probability exactly $\\gamma$."
       }
+    },
+    {
+      "title": "A wall of intervals",
+      "idea": "Draw a new sample again and again. Each gives its own interval; some miss the true mean $a$ and turn coral. The share that covers $a$ settles near $\\gamma$: this is what “confidence” means.",
+      "figure": {
+        "id": "ci-wall",
+        "beat": "wall"
+      },
+      "live": [
+        "\\dfrac{\\lres{hits}}{\\lres{count}} = \\lv{cover}{\\lres{cover}} \\;\\approx\\; \\lv{gamma}{\\gamma} = \\lval{gamma}",
+        "\\text{mean width } = \\lres{width}"
+      ],
+      "whatIf": [
+        {
+          "label": "$\\gamma = 0.80$",
+          "params": {
+            "gamma": 0.8
+          }
+        },
+        {
+          "label": "$\\gamma = 0.99$",
+          "params": {
+            "gamma": 0.99
+          }
+        },
+        {
+          "label": "$n = 3$",
+          "params": {
+            "n": 3
+          }
+        },
+        {
+          "label": "$n = 100$",
+          "params": {
+            "n": 100
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "The interval is random, the mean $a$ is not. “95%” is a promise about the procedure: of many intervals built this way, about 95 in 100 catch $a$.",
+        "details": "A thousand intervals here use exactly the samples of the Confidence Intervals station with the same seed, $n$ and $\\gamma$, so the two coverage counts agree to the last interval."
+      }
+    },
+    {
+      "title": "When the promise breaks",
+      "idea": "The $t$ interval is exact only for normal data. With a skewed law and a small sample its coverage drops below $\\gamma$. The normal quantile $z_{\\gamma}$ in place of $t_{\\gamma}$ makes small samples worse still.",
+      "figure": {
+        "id": "ci-wall",
+        "beat": "wall",
+        "params": {
+          "n": 5,
+          "law": 1
+        }
+      },
+      "live": [
+        "\\text{coverage } \\lv{cover}{\\lres{cover}} \\quad \\text{vs} \\quad \\lv{gamma}{\\gamma} = \\lval{gamma}, \\qquad n = \\lval{n}"
+      ],
+      "whatIf": [
+        {
+          "label": "normal data",
+          "params": {
+            "law": 0
+          }
+        },
+        {
+          "label": "skewed, $n = 50$",
+          "params": {
+            "law": 1,
+            "n": 50
+          }
+        },
+        {
+          "label": "$z_{\\gamma}$ instead of $t_{\\gamma}$",
+          "params": {
+            "method": 1
+          }
+        }
+      ]
     },
     {
       "title": "Homogeneity of two series",
@@ -58,6 +178,5 @@
         "label": "Run the two-series test"
       }
     }
-  ],
-  "status": "draft"
+  ]
 }

@@ -5,6 +5,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import katex from 'katex';
+import { stripLiveTex } from '../src/lectures/live-tex.mjs';
 import { splitMath } from '../src/math-text.mjs';
 import { choicesOf } from '../src/stations/autoplay-math.mjs';
 import { kernelTexts } from './i18n-kernel-texts.mjs';
@@ -107,7 +108,9 @@ function lectureTexts(script) {
     if (s.example) texts.push(s.example);
     if (s.notes) texts.push(s.notes);
     if (s.experiment?.label) texts.push(s.experiment.label);
-    for (const line of s.formula ?? []) if (/\\text\{[^}]*[A-Za-z]{2,}/.test(line)) formulas.push(line);
+    // story lectures (#110): layered explanations, "what if" chips, live formula lines with words
+    texts.push(...Object.values(s.layers ?? {}), ...(s.whatIf ?? []).map((w) => w.label));
+    for (const line of [...(s.formula ?? []), ...(s.live ?? [])]) if (/\\text\{[^}]*[A-Za-z]{2,}/.test(line)) formulas.push(line);
   }
   return { texts, formulas };
 }
@@ -125,7 +128,7 @@ test('every lecture script has a complete Russian translation with valid formula
     }
     for (const line of formulas) {
       if (!(line in own)) { bad.push(`${f}: no translation for formula "${line}"`); continue; }
-      bad.push(...problems(`$${own[line]}$`, `${f} formula`).map((p) => p.replace(/^/, '')));
+      bad.push(...problems(`$${stripLiveTex(own[line])}$`, `${f} formula`));
     }
     const known = new Set([...texts, ...formulas]);
     for (const key of Object.keys(own)) if (!key.startsWith('//') && !known.has(key)) bad.push(`${f}: unused entry "${key}"`);

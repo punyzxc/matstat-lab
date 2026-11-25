@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "test": "node --test tests/statistics.test.mjs tests/lectures.test.mjs tests/surface-math.test.mjs tests/autoplay-math.test.mjs tests/math-text.test.mjs tests/kernel-math.test.mjs tests/i18n.test.mjs",
+    "test": "node --test tests/statistics.test.mjs tests/lectures.test.mjs tests/surface-math.test.mjs tests/autoplay-math.test.mjs tests/math-text.test.mjs tests/kernel-math.test.mjs tests/i18n.test.mjs tests/story.test.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {
