@@ -150,17 +150,20 @@ export function machineRows(counts, n, seed, rows = MACHINE_ROWS) {
 }
 
 // ---------------------------------------------------------------- stations
-const VIEW = { key: 'view', label: 'Show (0 the law and its approximations, 1 how many trials pin the frequency)', min: 0, max: 1, step: 1, default: 0 };
+const VIEW = { key: 'view', label: 'Show (0 the law and its approximations, 1 how many trials pin the frequency, 2 the field of $P_n(k)$ over $n$)', min: 0, max: 2, step: 1, default: 0 };
 const params = [
   VIEW,
-  { key: 'n', label: 'Trials $n$', min: 1, max: 10000, step: 1, default: 5000 },
-  { key: 'p', label: 'Success probability $p$', min: 0.001, max: 0.999, step: 0.001, default: 0.01 },
+  { key: 'n', label: 'Trials $n$', min: 1, max: 10000, step: 1, default: 5000, when: { view: [0, 1] } },
+  { key: 'p', label: 'Success probability $p$', min: 0.001, max: 0.999, step: 0.001, default: 0.01, when: { view: [0, 1] } },
+  { key: 'pf', label: 'Success probability $p$', min: 0.01, max: 0.99, step: 0.01, default: 0.3, when: { view: [2] } },
+  { key: 'N', label: 'Largest number of trials $N$', min: 1, max: 50, step: 1, default: 30, when: { view: [2] } },
+  { key: 'approx', label: 'Approximation (0 Poisson, 1 local de Moivre–Laplace)', min: 0, max: 1, step: 1, default: 1, when: { view: [2] } },
   { key: 'k', label: 'Number of successes $k$ for $P_n(k)$', min: 0, max: 10000, step: 1, default: 50, when: { view: [0] } },
   { key: 'lo', label: 'Interval from $k_1$', min: 0, max: 10000, step: 1, default: 0, when: { view: [0] } },
   { key: 'hi', label: 'Interval to $k_2$', min: 0, max: 10000, step: 1, default: 50, when: { view: [0] } },
   { key: 'eps', label: 'Accuracy $\\varepsilon$ of the frequency', min: 0.001, max: 0.2, step: 0.001, default: 0.01, when: { view: [1] } },
   { key: 'gamma', label: 'Confidence $\\gamma$', min: 0.5, max: 0.999, step: 0.001, default: 0.98, when: { view: [1] } },
-  { key: 'R', label: 'Series $R$ of $n$ trials', min: 50, max: 20000, step: 50, default: 4000 },
+  { key: 'R', label: 'Series $R$ of $n$ trials', min: 50, max: 20000, step: 50, default: 4000, when: { view: [0, 1] } },
 ];
 
 export const meta = {
@@ -305,11 +308,91 @@ function runFrequency({ n, p, eps, gamma, R }, seed) {
   };
 }
 
+// ---------------------------------------------------------------- the field of P_n(k) over n (#85)
+/**
+ * Exact P_n(k) for n = 1..N and k = 0..K as bars, with the chosen approximation as a translucent sheet over them and
+ * max_k |P_n(k) − approximation| per n beside. K is the last k any row reaches with P ≥ 10⁻³ of the tallest bar, so
+ * the field is not mostly empty floor. No randomness: every height is exact.
+ */
+export function bernoulliField(N, p) {
+  const rows = Array.from({ length: N }, (_, i) => binomialLaw(i + 1, p));
+  const top = Math.max(...rows.map((r) => Math.max(...r)));
+  let K = 1;
+  rows.forEach((r) => r.forEach((v, k) => { if (v >= top * 1e-3 && k > K) K = k; }));
+  return { rows, K: Math.min(K + 1, N) };
+}
+export function maxError(n, p, approx) {
+  const law = binomialLaw(n, p);
+  let m = 0;
+  // Over every k ≥ 0: past n the law is 0 but an approximation is not (Poisson's tail, the normal curve).
+  for (let k = 0; k <= Math.max(n, Math.ceil(n * p + 10 * Math.sqrt(n * p * (1 - p)) + 10)); k++) {
+    const a = approx === 0 ? poissonPmf(n * p, k) : localNormal(n, p, k);
+    m = Math.max(m, Math.abs((law[k] ?? 0) - a));
+  }
+  return m;
+}
+
+function runField({ pf: p, N, approx }) {
+  const q = 1 - p;
+  const { rows, K } = bernoulliField(N, p);
+  const ks = Array.from({ length: K + 1 }, (_, k) => k), ns = Array.from({ length: N }, (_, i) => i + 1);
+  const z = rows.map((r) => ks.map((k) => r6(r[k] ?? 0)));
+  const approxAt = (a, n, k) => (a === 0 ? poissonPmf(n * p, k) : localNormal(n, p, k));
+  const overlay = ns.map((n) => ks.map((k) => r6(approxAt(approx, n, k))));
+  const errs = [0, 1].map((a) => ns.map((n) => r6(maxError(n, p, a))));
+  const chosen = errs[approx], other = errs[1 - approx];
+  const name = ['Poisson', 'local de Moivre–Laplace'];
+  const worst = chosen.indexOf(Math.max(...chosen));
+  const lam = d4(N * p), sq = d4(Math.sqrt(N * p * q));
+  const formula = [
+    `P_n(k) = C_n^k\\, p^k q^{\\,n-k}, \\qquad p = ${d4(p)},\\; q = ${d4(q)},\\; n = 1, \\dots, ${N}`,
+    approx === 0
+      ? `P_n(k) \\approx \\tilde P_n(k) = \\dfrac{\\lambda^k e^{-\\lambda}}{k!}, \\qquad \\lambda = np \\quad (n = ${N}{:}\\ \\lambda = ${lam})`
+      : `P_n(k) \\approx \\tilde P_n(k) = \\dfrac{1}{\\sqrt{npq}}\\,\\varphi\\!\\left(\\dfrac{k - np}{\\sqrt{npq}}\\right) \\quad (n = ${N}{:}\\ \\sqrt{npq} = ${sq})`,
+  ];
+  const notes = [
+    'L3: each row of bars is the binomial law $P_n(k) = C_n^k p^k q^{n-k}$ of one $n$; together they show the law drifting to the right like $np$ and spreading like $\\sqrt{npq}$. The translucent sheet is the chosen approximation on the same grid.',
+    approx === 0
+      ? 'The Poisson formula keeps $\\lambda = np$ and needs $p$ small: its error stays of order $p$ however large $n$ grows, so it does not vanish unless $p \\to 0$.'
+      : 'The local theorem needs $npq$ large: its largest error falls roughly like $1/(npq)$, slowest when $p$ is near 0 or 1, where the law is skewed.',
+  ];
+  return {
+    readouts: [
+      { key: 'err-last', label: `${name[approx]}: $\\max_k |P_n(k) - \\tilde P_n(k)|$ at $n = ${N}$`, observed: null, theory: chosen.at(-1) },
+      { key: 'err-other', label: `The same for ${name[1 - approx]} at $n = ${N}$`, observed: null, theory: other.at(-1) },
+      { key: 'worst', label: 'Largest error over the field, at $n$', observed: null, theory: ns[worst], convention: `error $${d4(chosen[worst])}$` },
+      { key: 'mode', label: `Most probable $k_0$ at $n = ${N}$, $np - q \\le k_0 \\le np + p$`, observed: null, theory: mostProbable(N, p).join(' and ') },
+    ],
+    series: [
+      { id: 'err', kind: 'line', tone: 'signal', label: `${name[approx]}: $\\max_k |P_n(k) - \\tilde P_n(k)|$`, x: ns, y: chosen },
+      { id: 'err-dots', kind: 'points', tone: 'signal', x: ns, y: chosen },
+      { id: 'err-other', kind: 'line', tone: 'muted', thin: true, label: `${name[1 - approx]}, for comparison`, x: ns, y: other },
+    ],
+    axes: { x: 'trials $n$', y: 'largest error over $k$' },
+    surface: {
+      x: ks, y: ns, z, bars: true,
+      labels: { x: '$k$', y: '$n$', z: '$P_n(k)$' },
+      title: `Exact $P_n(k)$ for $n \\le ${N}$, $p = ${d4(p)}$`,
+      keyLabel: 'exact $P_n(k) = C_n^k p^k q^{n-k}$',
+      overlay,
+      overlayLabel: approx === 0 ? 'Poisson $\\dfrac{\\lambda^k e^{-\\lambda}}{k!}$, $\\lambda = np$' : 'local normal $\\dfrac{\\varphi(x)}{\\sqrt{npq}}$',
+      rowNotes: chosen.map((e) => `$\\max_k |\\text{error}| = ${d4(e)}$`),
+    },
+    formula,
+    notes,
+  };
+}
+
 export function run(params = {}, { seed = 1, station = 'bernoulli' } = {}) {
   if (station !== 'bernoulli') throw new Error(`Unknown station ${station}.`);
   const q = Object.fromEntries(stations.bernoulli.params.map((d) => [d.key, Number.isFinite(params?.[d.key]) ? params[d.key] : d.default]));
   if (!Number.isInteger(q.n) || q.n < 1) throw new Error('n must be a positive integer.');
   if (!(q.p > 0 && q.p < 1)) throw new Error('p must lie strictly between 0 and 1.');
   for (const key of ['k', 'lo', 'hi', 'R']) if (!Number.isInteger(q[key]) || q[key] < 0) throw new Error(`${key} must be a whole number.`);
+  if (q.view === 2) {
+    if (!Number.isInteger(q.N) || q.N < 1) throw new Error('N must be a positive integer.');
+    if (!(q.pf > 0 && q.pf < 1)) throw new Error('p must lie strictly between 0 and 1.');
+    return runField(q);
+  }
   return q.view === 1 ? runFrequency(q, seed >>> 0) : runLaw(q, seed >>> 0);
 }

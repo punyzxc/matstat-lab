@@ -82,7 +82,7 @@ test('#115 prerequisite: Poisson wins at n = 100, p = 0.02 and the normal at n =
 test('contract: seeded runs repeat byte for byte, defaults and extremes run, series are finite', () => {
   const params = k.stations.bernoulli.params;
   const cases = [{}, Object.fromEntries(params.map((p) => [p.key, p.min])), Object.fromEntries(params.map((p) => [p.key, p.max]))];
-  for (const base of cases) for (const view of [0, 1]) {
+  for (const base of cases) for (const view of [0, 1, 2]) {
     const q = { ...base, view, ...(base.p === 0.999 ? { eps: 0.2 } : {}) };
     const a = k.run(q, { seed: 42 }), b = k.run(q, { seed: 42 });
     assert.equal(JSON.stringify(a), JSON.stringify(b));
@@ -131,4 +131,44 @@ test('#128 the meeting strip: exact, approximate and simulated P(lo ≤ k ≤ hi
   assert.equal(out.meet.exact.value, out.readouts.find((r) => r.key === 'range').theory);
   assert.equal(out.meet.approx.value, out.readouts.find((r) => r.key === 'corrected').theory);
   assert.ok(gap(20000) < gap(100) / 4, `${gap(100)} → ${gap(20000)}`);
+});
+
+// ---------------------------------------------------------------- #85: the field of P_n(k) over n
+test('#85: bars are the exact P_n(k), each row sums to 1 and is zero past k = n', () => {
+  const r = k.run({ view: 2, pf: 0.3, N: 20, approx: 1 }, { seed: 1 });
+  const { x, y, z, bars, overlay } = r.surface;
+  assert.equal(bars, true);
+  assert.equal(y.length, 20);
+  assert.equal(z.length, 20);
+  close(z[0][0], 0.7, 1e-9, 'P_1(0) = q');
+  close(z[0][1], 0.3, 1e-9, 'P_1(1) = p');
+  close(z[9][3], 120 * 0.3 ** 3 * 0.7 ** 7, 1e-6, 'P_10(3)');
+  for (let i = 0; i < 20; i++) {
+    z[i].forEach((v, j) => { if (x[j] > y[i]) assert.equal(v, 0); });
+    const tail = k.binomialLaw(y[i], 0.3).slice(x.length).reduce((a, v) => a + v, 0);
+    close(z[i].reduce((a, v) => a + v, 0) + tail, 1, 1e-5, `row n = ${y[i]}`);
+  }
+  assert.equal(overlay.length, 20);
+  close(overlay[9][3], k.localNormal(10, 0.3, 3), 1e-6, 'the sheet is the local normal');
+});
+
+test('#85: the error strip has one value per n, and each approximation wins where it should', () => {
+  const pois = k.run({ view: 2, pf: 0.03, N: 50, approx: 0 }, { seed: 1 });
+  const lap = k.run({ view: 2, pf: 0.5, N: 50, approx: 1 }, { seed: 1 });
+  const err = (r) => r.series.find((s) => s.id === 'err').y;
+  const other = (r) => r.series.find((s) => s.id === 'err-other').y;
+  assert.equal(err(pois).length, 50);
+  assert.ok(err(pois).at(-1) < other(pois).at(-1), 'small p: Poisson beats the normal curve');
+  assert.ok(err(lap).at(-1) < other(lap).at(-1), 'p = 1/2: the normal curve beats Poisson');
+  assert.ok(err(lap).at(-1) < err(lap)[4], 'the local theorem improves with n');
+  close(err(lap)[9], k.maxError(10, 0.5, 1), 1e-6);
+});
+
+test('#85: the formula panel typesets the Bernoulli formula and the chosen approximation', () => {
+  const a = k.run({ view: 2, pf: 0.3, N: 30, approx: 0 }, { seed: 1 }).formula.join(' ');
+  const b = k.run({ view: 2, pf: 0.3, N: 30, approx: 1 }, { seed: 1 }).formula.join(' ');
+  assert.match(a, /C_n\^k/);
+  assert.match(a, /\\lambda\^k e\^\{-\\lambda\}/);
+  assert.match(b, /\\varphi/);
+  assert.equal(JSON.stringify(k.run({ view: 2, pf: 0.3, N: 30 }, { seed: 1 })), JSON.stringify(k.run({ view: 2, pf: 0.3, N: 30 }, { seed: 99 })), 'heights do not depend on the seed');
 });

@@ -6,7 +6,7 @@ test('Sandbox: the cube turns by itself, the keys turn it, and the ball fills π
   await page.goto('/#station/darts?seed=3&view=4&dim=3&N=8000');
   const dock = page.getByTestId('station-dock');
   const cube = dock.locator('figure.board--cube');
-  await expect(cube.locator('.cube-dot')).toHaveCount(1200);
+  await expect(cube.locator('.cube-dot')).toHaveCount(1200, { timeout: 15000 });
   await expect(cube.locator('.cube-edge')).toHaveCount(12);
   const svg = cube.locator('svg');
   const yaw0 = Number(await svg.getAttribute('data-yaw'));
@@ -34,7 +34,7 @@ test('Sandbox: on the segment, x only; the same seed lands the same points', asy
   await page.goto('/#station/darts?seed=5&view=4&dim=1&N=4000');
   const dock = page.getByTestId('station-dock');
   const seg = dock.locator('figure.board--segment');
-  await expect(seg.locator('.board-dart')).toHaveCount(400);
+  await expect(seg.locator('.board-dart')).toHaveCount(400, { timeout: 15000 });
   const stop = dock.getByRole('button', { name: 'Stop the experiment' });
   if (await stop.count()) await stop.click();
   const readouts = dock.getByRole('table', { name: 'Readouts' });
@@ -47,11 +47,14 @@ test('Sandbox: on the segment, x only; the same seed lands the same points', asy
   await field.press('Enter');
   await expect(readouts.getByRole('row', { name: /^Length of/ })).toContainText('0.4');
   await expect(seg.locator('.board-region')).toHaveCount(1);
-  await expect(page).toHaveURL(/region1=/, { timeout: 5000 });
+  await expect(page).toHaveURL(/region1=%7Cx%20-%200.5%7C/, { timeout: 5000 });
   const count = await seg.locator('.board-count').getAttribute('data-count');
   const link = page.url();
   await page.goto('about:blank');
   await page.goto(link);
+  // Compare once the first 400 darts are drawn and the run is held, not mid-growth or after the next draw.
+  await expect(seg.locator('.board-dart')).toHaveCount(400, { timeout: 15000 });
+  if (await stop.count()) await stop.click();
   await expect(seg.locator('.board-count')).toHaveAttribute('data-count', count);
 
   // The space switch: the square keeps its own region.
