@@ -30,9 +30,9 @@ test('Combinatorics: constructions rebuild live, hover highlights, large values 
 
 test('Combinatorics opens on the main scene from the lecture 1 step', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/#lecture/1/7');
+  await page.goto('/#lecture/1/8');
   await page.getByRole('link', { name: /Open the Combinatorics station/ }).click();
-  await expect(page).toHaveURL(/#station\/combinatorics\?seed=130&scheme=1&n=4&k=2&lecture=1&step=7$/);
+  await expect(page).toHaveURL(/#station\/combinatorics\?seed=130&scheme=1&n=4&k=2&lecture=1&step=8$/);
   await expect(page.getByTestId('station-dock')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Combinatorics' })).toBeVisible();
   // It stays off the globe: orbit I keeps its six stations.

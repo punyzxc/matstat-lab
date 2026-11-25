@@ -29,7 +29,7 @@ test('Bayes tree: forward widths, inverse posteriors, a typed prior updates the 
 
 test('Bayes tree opens on the main scene from the total-probability step of lecture 2', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/#lecture/2/2');
+  await page.goto('/#lecture/2/4');
   await page.getByRole('link', { name: /Watch the particles in the Bayes tree/ }).first().click();
   await expect(page).toHaveURL(/#station\/bayes-tree\?seed=118&/);
   await expect(page.getByTestId('station-dock').getByRole('heading', { name: 'Bayes tree', exact: true })).toBeVisible();

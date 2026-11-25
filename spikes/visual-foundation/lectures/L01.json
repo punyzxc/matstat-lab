@@ -1,120 +1,149 @@
 {
   "lecture": 1,
-  "title": "Combinatorics and the classical definition of probability",
+  "title": "The notion of probability",
   "scientists": [
     "pascal",
     "fermat",
-    "gauss",
+    "bernoulli-jacob",
+    "de-moivre",
     "laplace",
+    "gauss",
+    "poisson",
+    "chebyshev",
+    "markov",
+    "lyapunov",
+    "bernstein",
+    "khinchin",
+    "kolmogorov",
+    "newton",
     "buffon",
     "pearson",
-    "bertrand",
-    "bernstein",
-    "newton"
+    "bertrand"
   ],
   "steps": [
     {
+      "title": "What a random event is",
+      "idea": "A random event is an outcome of an observation that may or may not happen; it always has at least one alternative. Probability theory studies the regularities of mass random phenomena.",
+      "example": "Sasha and Masha draw lots for one concert ticket. \"Only Sasha wins\" and \"only Masha wins\" are random. \"Sasha or Masha wins\" is certain, \"both win\" is impossible; both are still events.\nThe lecture's other examples: a lucky exam ticket, customers arriving at a canteen, Brownian motion of a pollen grain (more than $10^{15}$ molecular hits per second)."
+    },
+    {
       "title": "Where probability began",
-      "idea": "Probability theory grew out of questions about games of chance, in the 1654 letters between Pascal and Fermat.",
+      "idea": "The theory grew out of games of chance and insurance: the 1654 letters between Pascal and Fermat. Bernoulli, de Moivre and Laplace laid its foundations, Gauss and Poisson gave it its central laws, Chebyshev, Markov and Lyapunov its limit theorems, and Kolmogorov its axioms.",
+      "notes": "The lecture also names Bunyakovsky (the first Russian textbook), Bernstein, Khinchin, Gnedenko and Borovkov.",
       "scientists": [
         "pascal",
         "fermat"
       ]
     },
     {
-      "title": "The urn scheme",
-      "idea": "Choosing $k$ balls out of $n$ can be ordered or not, with or without replacement. Each of the four cases has its own count.",
+      "title": "Outcomes and operations on events",
+      "idea": "The space $\\Omega$ consists of elementary outcomes $\\omega_1, \\omega_2, \\ldots$. An event is a set of outcomes; it happens when one of its outcomes happens. Events combine like sets.",
       "formula": [
-        "\\text{ordered, with replacement:}\\quad \\bar{A}_n^{\\,k} = n^k",
-        "\\text{ordered, without replacement:}\\quad A_n^k = \\dfrac{n!}{(n-k)!}",
-        "\\text{unordered, without replacement:}\\quad C_n^k = \\dfrac{n!}{k!\\,(n-k)!}",
-        "\\text{unordered, with replacement:}\\quad \\bar{C}_n^{\\,k} = C_{n+k-1}^{\\,k}",
-        "(a+b)^n = \\sum_{k=0}^{n} C_n^k\\, a^k b^{\\,n-k} \\qquad \\text{(Newton’s binomial)}"
+        "A \\cup B, \\qquad AB = A \\cap B, \\qquad A \\setminus B, \\qquad \\bar{A} = \\Omega \\setminus A",
+        "A_i A_j = \\varnothing \\ (i \\ne j), \\qquad \\bigcup_{i=1}^{n} A_i = \\Omega"
       ],
-      "example": "$n = 3,\\ k = 2$: 9 ordered pairs with replacement, 6 without, 3 unordered without, 6 unordered with.",
+      "example": "Two dice, $A$: the sum is at least 9, $B$: the first die shows 6. Then $A \\cup B$ holds 12 of the 36 outcomes, $AB$ holds 4.",
+      "notes": "Disjoint events have no common outcome; a complete group of pairwise disjoint events covers $\\Omega$. Station check (seed 101, 3600 throws): $P(A \\cup B) = 0.3333$ exact, simulated frequency 0.3319.",
       "experiment": {
-        "station": "urn",
+        "station": "events",
         "seed": 101,
-        "label": "Open the Urn station"
-      },
+        "params": {
+          "experiment": 0,
+          "relA": 0,
+          "a": 9,
+          "relB": 1,
+          "b": 6,
+          "op": 2,
+          "n": 3600
+        },
+        "label": "Light up $A \\cup B$ on two dice"
+      }
+    },
+    {
+      "title": "Kolmogorov's axioms",
+      "idea": "A probability is a number attached to every event of an algebra (or $\\sigma$-algebra) $\\mathcal{F}$ of subsets of $\\Omega$, obeying three axioms. The triple $(\\Omega, \\mathcal{F}, P)$ is a probability space.",
+      "formula": [
+        "P(A) \\ge 0, \\qquad P(\\Omega) = 1",
+        "P\\Big(\\bigcup_{i=1}^{\\infty} A_i\\Big) = \\sum_{i=1}^{\\infty} P(A_i) \\quad \\text{for pairwise disjoint } A_i"
+      ],
+      "notes": "An algebra is closed under finitely many unions, intersections and complements, a $\\sigma$-algebra under countably many. In this course every subset of $\\Omega$ is an event.",
       "scientists": [
-        "newton"
+        "kolmogorov"
       ]
     },
     {
-      "title": "Classical probability",
-      "idea": "When all elementary outcomes are equally likely, the probability of an event is the share of outcomes that favour it.",
+      "title": "Consequences of the axioms",
+      "idea": "Five facts follow at once; the addition theorem is the one used every day.",
       "formula": [
-        "P(A) = \\dfrac{m}{n}"
+        "P(\\varnothing) = 0, \\qquad P(\\bar{A}) = 1 - P(A), \\qquad 0 \\le P(A) \\le 1",
+        "P(A \\cup B) = P(A) + P(B) - P(AB) \\le P(A) + P(B)"
       ],
-      "scientists": [
-        "laplace"
-      ]
-    },
-    {
-      "title": "Statistical definition",
-      "idea": "Repeat the experiment many times: the relative frequency of the event settles near its probability.",
-      "formula": [
-        "W(A) = \\dfrac{m}{n} \\;\\xrightarrow[\\;n\\to\\infty\\;]{}\\; P(A)"
-      ],
-      "example": "Buffon tossed a coin 4040 times and got 2048 heads ($W = 0.5069$). Pearson tossed it 24 000 times and got 12 012 heads ($W = 0.5005$).",
-      "scientists": [
-        "buffon",
-        "pearson"
-      ],
+      "example": "Two dice as before: $P(A \\cup B) = \\dfrac{10}{36} + \\dfrac{6}{36} - \\dfrac{4}{36} = \\dfrac{12}{36} = \\dfrac13$.",
+      "notes": "Station check (seed 101): $P(A) = 0.2778$, $P(B) = 0.1667$, $P(AB) = 0.1111$, $P(A \\cup B) = 0.3333$ exact.",
       "experiment": {
-        "station": "frequency",
-        "seed": 4040,
-        "label": "Watch the frequency settle",
+        "station": "events",
+        "seed": 101,
         "params": {
-          "p": 0.5,
-          "N": 10000
-        }
+          "experiment": 0,
+          "relA": 0,
+          "a": 9,
+          "relB": 1,
+          "b": 6,
+          "op": 2,
+          "n": 3600
+        },
+        "label": "Check the addition theorem"
       }
     },
     {
-      "title": "Bertrand paradox",
-      "idea": "\"A random chord\" has no single meaning. Three natural sampling schemes give three different probabilities that the chord is longer than the side of the inscribed triangle.",
+      "title": "Independent events",
+      "idea": "$A$ and $B$ are independent when the probability of both is the product of their probabilities. Disjoint events with positive probabilities are always dependent.",
       "formula": [
-        "\\text{random midpoint on a radius:}\\quad p = \\tfrac{1}{2}",
-        "\\text{random endpoints:}\\quad p = \\tfrac{1}{3}",
-        "\\text{random midpoint in the disc:}\\quad p = \\tfrac{1}{4}"
+        "P(AB) = P(A)\\,P(B)"
       ],
-      "scientists": [
-        "bertrand"
-      ],
+      "example": "Two dice, $A$: the sum is 7, $B$: the first die shows 6. $P(AB) = \\dfrac{1}{36} = \\dfrac16 \\cdot \\dfrac16$, so they are independent, although the sum depends on the first die.",
+      "notes": "Also from the definition: any $A$ is independent of $\\Omega$; an event is independent of itself only if its probability is 0 or 1. Station check (seed 7, 3600 throws): $P(AB) = 0.0278$ exact, equal to $P(A)\\,P(B)$; frequency 0.0264.",
       "experiment": {
-        "station": "darts",
-        "seed": 1889,
-        "label": "Throw the three chord schemes",
+        "station": "events",
+        "seed": 7,
         "params": {
-          "view": 2,
-          "N": 20000
-        }
+          "experiment": 0,
+          "relA": 1,
+          "a": 7,
+          "relB": 1,
+          "b": 6,
+          "op": 3,
+          "n": 3600
+        },
+        "label": "Compare $P(AB)$ with $P(A)\\,P(B)$"
       }
     },
     {
-      "title": "Pairwise is not mutual independence",
-      "idea": "Three events can be independent in pairs and still depend on each other as a triple.",
+      "title": "Counting: vectors, arrangements, permutations",
+      "idea": "Fill $k$ places from $n$ symbols. With repeats allowed there are $n^k$ ways; without repeats $A_n^k$; when all $n$ are placed, $n!$ permutations.",
       "formula": [
-        "P(AB) = P(A)P(B), \\quad P(AC) = P(A)P(C), \\quad P(BC) = P(B)P(C)",
-        "\\text{but}\\quad P(ABC) \\ne P(A)\\,P(B)\\,P(C)"
+        "n^k, \\qquad A_n^k = n(n-1)\\cdots(n-k+1), \\qquad P_n = n!"
       ],
-      "scientists": [
-        "bernstein"
-      ],
+      "example": "Three-digit numbers: $9 \\cdot 10^2 = 900$ (the first digit is not 0). Three volumes on a shelf: $3! = 6$ orders.",
+      "notes": "Station check: the Combinatorics station lists all 6 permutations of 3 objects; count 6.",
       "experiment": {
-        "station": "bayes",
-        "seed": 1928
+        "station": "combinatorics",
+        "seed": 3,
+        "params": {
+          "scheme": 0,
+          "n": 3
+        },
+        "label": "List the permutations of three volumes"
       }
     },
     {
-      "title": "Every construction, counted",
-      "idea": "Type $n$ and $k$. While there are at most 120 constructions, every one is laid out; above that only the exact count is shown, with a few sampled constructions.",
+      "title": "Combinations",
+      "idea": "If the order of the $k$ chosen items does not matter, each set is counted $k!$ times among the arrangements.",
       "formula": [
-        "A_n^k = C_n^k \\cdot k!"
+        "C_n^k = \\dfrac{A_n^k}{k!} = \\dfrac{n!}{k!\\,(n-k)!}, \\qquad C_n^k = 0 \\ (k > n)"
       ],
       "example": "$n = 4,\\ k = 2$: 12 arrangements, 6 combinations; each combination gives $2! = 2$ orders.",
+      "notes": "Station check: $A_4^2 = 12$ and $C_4^2 \\cdot 2! = 12$.",
       "experiment": {
         "station": "combinatorics",
         "seed": 130,
@@ -125,7 +154,219 @@
         },
         "label": "Open the Combinatorics station"
       }
+    },
+    {
+      "title": "The urn scheme",
+      "idea": "Draw $k$ balls one at a time from an urn of $n$ numbered balls. Two choices give four counts: with or without replacement, order important or not.",
+      "formula": [
+        "\\text{ordered, with replacement:}\\quad \\bar{A}_n^{\\,k} = n^k",
+        "\\text{ordered, without replacement:}\\quad A_n^k = \\dfrac{n!}{(n-k)!}",
+        "\\text{unordered, without replacement:}\\quad C_n^k = \\dfrac{n!}{k!\\,(n-k)!}",
+        "\\text{unordered, with replacement:}\\quad \\bar{C}_n^{\\,k} = C_{n+k-1}^{\\,k}"
+      ],
+      "example": "$n = 3,\\ k = 2$: 9 ordered samples with replacement, 6 without, 3 unordered without, 6 unordered with.",
+      "notes": "Station check (seed 101): 6 unordered samples with replacement, all listed; $P(\\text{both balls equal}) = 1/3$ exact, frequency 0.3405 in 2000 draws.",
+      "experiment": {
+        "station": "urn",
+        "seed": 101,
+        "params": {
+          "view": 1,
+          "scheme": 3,
+          "n": 3,
+          "k": 2,
+          "R": 2000
+        },
+        "label": "Open the Urn station"
+      }
+    },
+    {
+      "title": "Combinations with repetition: the lecture's slip",
+      "idea": "Choosing $k$ balls from $n$ with replacement, order ignored, gives $C_{n+k-1}^{\\,k}$ samples. The lecture writes $C_{n+k-1}^{\\,k-1}$: its stars-and-bars picture puts $n$ balls among $k-1$ bars, so it counts $n$ identical balls in $k$ boxes. That is another problem; the two agree only when $n = k$.",
+      "formula": [
+        "\\bar{C}_n^{\\,k} = C_{n+k-1}^{\\,k} \\qquad \\text{vs} \\qquad C_{n+k-1}^{\\,k-1} = \\#\\{x_1 + \\dots + x_k = n,\\ x_i \\ge 0\\}"
+      ],
+      "example": "$n = 2$ numbers, $k = 3$ draws: 4 multisets $\\{1,1,1\\}, \\{1,1,2\\}, \\{1,2,2\\}, \\{2,2,2\\}$, but $C_4^2 = 6$ ways to put 2 identical balls into 3 boxes.\nCounted is not equally likely: drawn one at a time, \"all three equal\" has probability $2/8 = 1/4$, not $2/4$.",
+      "notes": "The lecture's remark is right for its own problem: $C_{n+k-1}^{\\,k-1}$ is the number of non-negative integer solutions of $x_1 + \\dots + x_k = n$. The number of partial derivatives of order $k$ of a function of $n$ variables is $C_{n+k-1}^{\\,k}$. Station check (seed 6, 4000 draws): count 4, lecture formula 6, $P = 0.25$ exact against 0.5 for the equally-likely model, frequency 0.2478.",
+      "experiment": {
+        "station": "urn",
+        "seed": 6,
+        "params": {
+          "view": 1,
+          "scheme": 3,
+          "n": 2,
+          "k": 3,
+          "R": 4000
+        },
+        "label": "Count multisets and placements"
+      }
+    },
+    {
+      "title": "Newton's binomial and binomial coefficients",
+      "idea": "The counts $C_n^k$ are the coefficients of the binomial expansion, hence the name binomial coefficients. Setting $a$ and $b$ gives their sums.",
+      "formula": [
+        "(a+b)^n = \\sum_{k=0}^{n} C_n^k\\, a^k b^{\\,n-k} \\qquad (1)",
+        "\\sum_{k=0}^{n} C_n^k = 2^n, \\qquad \\sum_{k=0}^{n} (-1)^k C_n^k = 0",
+        "C_n^k = C_n^{\\,n-k}, \\qquad C_n^{k-1} + C_n^k = C_{n+1}^{\\,k}"
+      ],
+      "example": "$n = 4$: $1 + 4 + 6 + 4 + 1 = 16 = 2^4$ and $1 - 4 + 6 - 4 + 1 = 0$.",
+      "scientists": [
+        "newton"
+      ]
+    },
+    {
+      "title": "Classical probability",
+      "idea": "If $\\Omega$ has $n$ equally likely outcomes and $A$ consists of $m$ of them, the probability of $A$ is the share $m/n$. It depends only on how many outcomes favour $A$.",
+      "formula": [
+        "P(A) = \\dfrac{m}{n} \\qquad (2)"
+      ],
+      "example": "Two dice, the sum is at least 9: $m = 10$ of $n = 36$, $P = 10/36 \\approx 0.2778$.",
+      "notes": "Station check (seed 36, 3600 throws): $P(A) = 0.2778$ exact, frequency 0.2800.",
+      "scientists": [
+        "laplace"
+      ],
+      "experiment": {
+        "station": "events",
+        "seed": 36,
+        "params": {
+          "experiment": 0,
+          "relA": 0,
+          "a": 9,
+          "relB": 1,
+          "b": 6,
+          "op": 0,
+          "n": 3600
+        },
+        "label": "Count $m$ out of $n$"
+      }
+    },
+    {
+      "title": "Samples with a given number of red balls",
+      "idea": "An urn holds $n$ balls, $k$ red. A sample of $r$ without replacement contains $s$ red balls in $C_k^s C_{n-k}^{r-s}$ ways; summed over $s$ this gives all $C_n^r$ samples.",
+      "formula": [
+        "\\sum_{s=0}^{r} C_k^s\\, C_{n-k}^{\\,r-s} = C_n^r"
+      ],
+      "example": "$n = 10$, $k = 4$, $r = 4$: $1 \\cdot 15 + 4 \\cdot 20 + 6 \\cdot 15 + 4 \\cdot 6 + 1 \\cdot 1 = 210 = C_{10}^4$."
+    },
+    {
+      "title": "The hypergeometric law",
+      "idea": "Dividing by $C_n^r$ turns the counts into probabilities of the disjoint events $A_s$: \"the sample holds $s$ red balls\". They form a complete group, so they sum to 1: a probability distribution.",
+      "formula": [
+        "P(A_s) = \\dfrac{C_k^s\\, C_{n-k}^{\\,r-s}}{C_n^r}, \\qquad s = 0, 1, \\ldots, r \\qquad (3)"
+      ],
+      "example": "$n = 10$, $k = 4$, $r = 4$: $P(A_0), \\ldots, P(A_4) = \\tfrac{1}{14}, \\tfrac{8}{21}, \\tfrac{3}{7}, \\tfrac{4}{35}, \\tfrac{1}{210}$. Knowing the urn, we predict the sample (a problem of probability); knowing samples, we judge the urn (a problem of statistics).",
+      "notes": "$P(A_s) = 0$ outside $\\max(0, r-n+k) \\le s \\le \\min(r, k)$, so the lecture's range $s = 0, \\ldots, r$ is safe. Station check (seed 8, 4000 draws): $P(A_2) = 3/7 = 0.4286$ exact, frequency 0.4348; the sum is exactly 1.",
+      "experiment": {
+        "station": "urn",
+        "seed": 8,
+        "params": {
+          "view": 2,
+          "N": 10,
+          "K": 4,
+          "r": 4,
+          "s": 2,
+          "R": 4000
+        },
+        "label": "Draw from the urn of example 8"
+      }
+    },
+    {
+      "title": "Polynomial coefficients",
+      "idea": "Put $n$ numbered balls into $k$ boxes so that box $i$ gets $r_i$ balls. Choose the balls box by box: the count is the polynomial coefficient, the coefficient of $a_1^{r_1} \\cdots a_k^{r_k}$ in $(a_1 + \\dots + a_k)^n$.",
+      "formula": [
+        "A_n(r_1, \\ldots, r_k) = \\dfrac{n!}{r_1!\\, r_2! \\cdots r_k!}, \\qquad r_1 + \\dots + r_k = n \\qquad (4)"
+      ],
+      "example": "5 balls into boxes with occupancies $(2, 1, 1, 1, 0)$: $\\dfrac{5!}{2!} = 60$ placements."
+    },
+    {
+      "title": "Balls in boxes: how many stay empty",
+      "idea": "Throw $n$ distinguishable balls into $n$ boxes; all $n^n$ placements are equally likely. Group them by occupancy patterns and add polynomial coefficients.",
+      "formula": [
+        "P(A_0) = \\dfrac{n!}{n^n}, \\qquad P(A_1) = \\dfrac{n!\\, C_n^2}{n^n}, \\qquad P(A_{n-1}) = \\dfrac{n}{n^n}"
+      ],
+      "example": "$n = 5$: no empty box $24/625$, one $48/125$, two $12/25$, three $12/125$, four $1/625$; the five add up to 1.",
+      "notes": "All five lecture answers are right (enumeration of $5^5 = 3125$ placements gives 120, 1200, 1500, 300, 5). The lecture's general sums for two and three empty boxes list patterns such as $2211\\ldots100$ that need $n \\ge 6$; for $n = 5$ those terms vanish. Station check (seed 5, 5000 throws): $P(e = 2) = 0.48$ exact, frequency 0.4792.",
+      "experiment": {
+        "station": "urn",
+        "seed": 5,
+        "params": {
+          "view": 3,
+          "balls": 5,
+          "boxes": 5,
+          "R": 5000
+        },
+        "label": "Throw 5 balls into 5 boxes"
+      }
+    },
+    {
+      "title": "Geometric probability",
+      "idea": "When the outcomes fill a region $D$ (a segment, a figure, a body) and a point is thrown \"at random\", the probability of hitting $A$ is the ratio of measures: length, area or volume.",
+      "formula": [
+        "P(A) = \\dfrac{\\operatorname{mes} A}{\\operatorname{mes} D}"
+      ],
+      "example": "For which $x \\in [0, \\pi]$ does $y = \\sqrt{0.5 - \\sin^2 x}$ exist? For $x \\in [0, \\pi/4] \\cup [3\\pi/4, \\pi]$, half of the segment: $P = 0.5$.",
+      "notes": "The text extraction of the lecture reads $\\sin x$; the original has $\\sin^2 x$. Station check (seed 27, 4000 throws): exact 0.5, frequency 0.5048.",
+      "experiment": {
+        "station": "darts",
+        "seed": 27,
+        "params": {
+          "view": 0,
+          "N": 4000
+        },
+        "label": "Throw points on $[0, \\pi]$"
+      }
+    },
+    {
+      "title": "Bertrand's paradox",
+      "idea": "\"A random chord\" has no single meaning. Each way of drawing it gives its own probability that the chord is longer than the side of the inscribed triangle.",
+      "formula": [
+        "\\text{random point on a radius:}\\quad p = \\tfrac{1}{2}",
+        "\\text{random endpoints:}\\quad p = \\tfrac{1}{3}",
+        "\\text{random midpoint in the disc:}\\quad p = \\tfrac{1}{4}"
+      ],
+      "example": "The lecture solves the first two schemes and then declares 0.5 the answer because it is the largest. That is not correct: each scheme is a different experiment, and none of the three answers is privileged until the experiment is specified.",
+      "notes": "Station check (seed 1889, 20000 chords each): exact $1/2$, $1/3$, $1/4$; frequencies 0.5088, 0.3347, 0.2505.",
+      "scientists": [
+        "bertrand"
+      ],
+      "experiment": {
+        "station": "darts",
+        "seed": 1889,
+        "params": {
+          "view": 2,
+          "N": 20000
+        },
+        "label": "Throw the three chord schemes"
+      }
+    },
+    {
+      "title": "Statistical definition",
+      "idea": "Repeat the experiment $n$ times; the relative frequency of $A$ is $m/n$. When the trials are independent and identical, the frequency settles near a number, and that number is taken as the probability.",
+      "formula": [
+        "W_n(A) = \\dfrac{m}{n} \\qquad (5)",
+        "p = \\lim_{n\\to\\infty} W_n(A)"
+      ],
+      "example": "450 heads in 1000 tosses: $W = 0.45$, 5 percentage points off 0.5. Is the coin fair? Buffon: 2048 heads in 4040 tosses ($W = 0.5069$); Pearson: 12012 in 24000 ($W = 0.5005$).",
+      "notes": "The limit is not an ordinary limit of numbers; lecture 3 makes it precise (Bernoulli's theorem), and lecture 3's formula (20) answers the coin question. Station check (seed 4040, 10000 tosses): the first sequence ends at 0.4983, all 5 sequences inside the band $\\pm 0.0150$.",
+      "scientists": [
+        "buffon",
+        "pearson"
+      ],
+      "experiment": {
+        "station": "frequency",
+        "seed": 4040,
+        "params": {
+          "p": 0.5,
+          "N": 10000
+        },
+        "label": "Watch the frequency settle"
+      }
+    },
+    {
+      "title": "Check yourself",
+      "idea": "Three questions for the class.",
+      "example": "1. How many ways are there to choose 3 scoops from 5 flavours of ice cream, repeats allowed?\n2. Two dice: are \"the sum is 8\" and \"the first die shows 6\" independent?\n3. Why does the lecture's answer 0.5 to Bertrand's question not settle it?",
+      "notes": "Answers. 1: $C_7^3 = 35$ (not $C_7^2 = 21$). 2: no: $P(AB) = 1/36$, but $P(A)\\,P(B) = \\dfrac{5}{36} \\cdot \\dfrac16 = \\dfrac{5}{216}$. 3: \"at random\" is not specified; each sampling scheme is its own experiment with its own answer."
     }
   ],
-  "status": "draft"
+  "status": "ready"
 }

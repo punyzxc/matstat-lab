@@ -1,16 +1,19 @@
 {
   "lecture": 2,
-  "title": "Conditional probability, total probability and Bayes",
+  "title": "Conditional probability and independence",
   "scientists": [
-    "bayes"
+    "bayes",
+    "bernstein"
   ],
   "steps": [
     {
       "title": "Conditional probability",
-      "idea": "Knowing that $B$ happened shrinks the space of outcomes to $B$.",
+      "idea": "Knowing that $B$ happened shrinks the space of outcomes to $B$. The probability of $A$ given $B$ is the share of $B$ taken by $AB$.",
       "formula": [
-        "P(A \\mid B) = \\dfrac{P(AB)}{P(B)}"
+        "P(A \\mid B) = \\dfrac{P(AB)}{P(B)}, \\qquad P(B) > 0 \\qquad (6)"
       ],
+      "example": "$n$ equally likely points, $k$ of them in $B$, $r$ in $AB$: $P(A \\mid B) = \\dfrac{r}{k} = \\dfrac{r/n}{k/n}$.",
+      "notes": "Formula (6) is a definition, not a theorem. Station check (seed 202, 4000 points): $P(A \\mid B) = 0.4$ exact, frequency 0.4110.",
       "experiment": {
         "station": "conditional",
         "seed": 202,
@@ -24,11 +27,44 @@
       }
     },
     {
-      "title": "Total probability",
-      "idea": "Split the space into hypotheses $H_1, \\ldots, H_n$ and add up the paths that lead to $A$.",
+      "title": "Multiplication theorem",
+      "idea": "Rewriting (6) gives the probability of both events through a condition; it also holds when $P(B) = 0$.",
       "formula": [
-        "P(A) = \\sum_{i=1}^{n} P(H_i)\\, P(A \\mid H_i)"
+        "P(AB) = P(B)\\,P(A \\mid B) = P(A)\\,P(B \\mid A) \\qquad (7)"
       ],
+      "example": "Two cards from a 36-card deck: $P(\\text{both aces}) = \\dfrac{4}{36} \\cdot \\dfrac{3}{35} = \\dfrac{1}{105}$."
+    },
+    {
+      "title": "Independence, pairwise and mutual",
+      "idea": "$A$ does not depend on $B$ when the condition changes nothing; by (7) this is the product rule of lecture 1. Events are mutually independent when the product rule holds for every subfamily. Pairwise independence is not enough (Bernstein's example).",
+      "formula": [
+        "P(A \\mid B) = P(A) \\qquad (8)",
+        "P(AB) = P(A)P(B), \\quad P(AC) = P(A)P(C), \\quad P(BC) = P(B)P(C)",
+        "\\text{but}\\quad P(ABC) = \\tfrac14 \\ne P(A)\\,P(B)\\,P(C) = \\tfrac18"
+      ],
+      "example": "A tetrahedron with faces red, green, blue and one face in all three colours. Each colour shows with probability $1/2$, each pair with $1/4$, all three also with $1/4$.",
+      "notes": "The lecture only names the example; the tetrahedron is Bernstein's own. Station check (seed 1928, 4000 throws): pairwise yes, mutual no; $P(ABC) = 0.25$ exact, frequency 0.2575.",
+      "scientists": [
+        "bernstein"
+      ],
+      "experiment": {
+        "station": "bayes",
+        "seed": 1928,
+        "params": {
+          "view": 2,
+          "model": 1
+        },
+        "label": "Throw Bernstein's tetrahedron"
+      }
+    },
+    {
+      "title": "Total probability",
+      "idea": "Split $A$ by pairwise disjoint hypotheses $B_1, \\ldots, B_n$ such that $A$ happens together with exactly one of them, and add up the paths that lead to $A$.",
+      "formula": [
+        "P(A) = \\sum_{k=1}^{n} P(B_k)\\, P(A \\mid B_k) \\qquad (9)"
+      ],
+      "example": "Priors $0.5, 0.3, 0.2$ and likelihoods $0.2, 0.5, 0.9$: $P(A) = 0.1 + 0.15 + 0.18 = 0.43$.",
+      "notes": "The hypotheses need not form a complete group; it is enough that their union contains $A$. When they do, $\\sum_k P(B_k) = 1$ is a useful check. Station check (seed 118, 4000 particles): $P(A) = 0.43$ exact, share 0.4188.",
       "experiment": {
         "station": "bayes-tree",
         "seed": 118,
@@ -44,21 +80,58 @@
       }
     },
     {
-      "title": "Bayes formula",
-      "idea": "After $A$ is observed, the weights of the hypotheses are updated.",
+      "title": "An even face, two ways",
+      "idea": "A fair die. Formula (9) gives the same answer for different choices of hypotheses, as long as they cover $A$.",
       "formula": [
-        "P(H_k \\mid A) = \\dfrac{P(H_k)\\, P(A \\mid H_k)}{\\sum\\limits_{i=1}^{n} P(H_i)\\, P(A \\mid H_i)}"
+        "P(\\text{even}) = \\tfrac16 \\cdot 1 + \\tfrac16 \\cdot 1 + \\tfrac16 \\cdot 1 = \\tfrac16 \\cdot 1 + \\tfrac16 \\cdot 1 + \\tfrac23 \\cdot \\tfrac14 = \\tfrac12"
       ],
-      "example": "A student knows the answer with probability $p$ and otherwise guesses among 5 options. Given a correct answer, the chance that it was a guess is $\\dfrac{1 - p}{4p + 1}$.",
+      "example": "Way 1: $B_2, B_4, B_6$ are the faces 2, 4, 6 (their probabilities add up to $1/2$, not 1). Way 2: $B_2 = \\{2\\}$, $B_4 = \\{4\\}$, $B_6 = \\{1, 3, 5, 6\\}$, a complete group."
+    },
+    {
+      "title": "Bayes formula",
+      "idea": "After $A$ is observed, the prior weights of the hypotheses are replaced by posterior ones: each path to $A$ divided by all of them.",
+      "formula": [
+        "P(B_k \\mid A) = \\dfrac{P(B_k)\\, P(A \\mid B_k)}{\\sum\\limits_{i=1}^{n} P(B_i)\\, P(A \\mid B_i)}, \\qquad k = 1, \\ldots, n \\qquad (10)"
+      ],
+      "example": "Priors $0.5, 0.3, 0.2$ and likelihoods $0.02, 0.05, 0.1$: $P(A) = 0.045$, posteriors $2/9, 1/3, 4/9$. The least likely hypothesis a priori becomes the most likely.",
+      "notes": "Station check (seed 1763, 4000 trials): $P(B_3 \\mid A) = 0.4444$ exact, observed 0.4351; posteriors sum to 1.",
       "scientists": [
         "bayes"
       ],
       "experiment": {
         "station": "bayes",
         "seed": 1763,
+        "params": {
+          "view": 3
+        },
         "label": "Count the posterior"
       }
+    },
+    {
+      "title": "The guessing student",
+      "idea": "A student solves the problem with probability $p$; otherwise picks one of 5 answers at random. Given a correct answer, how likely is it that it was a guess?",
+      "formula": [
+        "P(B_2 \\mid A) = \\dfrac{(1-p)\\cdot\\frac15}{p \\cdot 1 + (1-p)\\cdot\\frac15} = \\dfrac{1-p}{4p+1}"
+      ],
+      "example": "$p = 0.6$: $\\dfrac{0.4}{3.4} \\approx 0.1176$. The lecture derives $\\dfrac{1-p}{4p+1}$ correctly but prints $\\dfrac{p}{4p+1}$ in the last line: a typo.",
+      "notes": "Checks: $p = 0$ gives 1 (always a guess), $p = 1$ gives 0. Station check (seed 7, 4000 students): exact 0.1176, observed 0.1148.",
+      "experiment": {
+        "station": "bayes",
+        "seed": 7,
+        "params": {
+          "view": 4,
+          "skill": 0.6,
+          "m": 5
+        },
+        "label": "Simulate the class"
+      }
+    },
+    {
+      "title": "Check yourself",
+      "idea": "Three questions for the class.",
+      "example": "1. $P(A) = 0.5$, $P(B) = 0.4$, $P(AB) = 0.1$. Find $P(A \\mid B)$; are $A$ and $B$ independent?\n2. Two urns: the first has 2 white and 3 black balls, the second 4 white and 1 black. An urn is chosen by a coin toss and a ball is drawn. Find $P(\\text{white})$.\n3. In question 2 the ball is white. Which urn is more likely now?",
+      "notes": "Answers. 1: $0.25$; dependent, since $0.1 \\ne 0.2$. 2: $\\tfrac12 \\cdot \\tfrac25 + \\tfrac12 \\cdot \\tfrac45 = 0.6$. 3: the second: $P = 0.4/0.6 = 2/3$."
     }
   ],
-  "status": "draft"
+  "status": "ready"
 }

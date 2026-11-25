@@ -310,5 +310,5 @@ test('L7 corridor: Chebyshev against the real tails, then 200 running means whos
 test('old step-by-step lectures keep their player', async ({ page }) => {
   await page.goto('/#lecture/3/1');
   await expect(page.getByTestId('lecture-dock')).not.toHaveClass(/scene-dock--story/);
-  await expect(page.getByTestId('step-counter')).toHaveText('Step 1 / 4');
+  await expect(page.getByTestId('step-counter')).toHaveText('Step 1 / 12');
 });
