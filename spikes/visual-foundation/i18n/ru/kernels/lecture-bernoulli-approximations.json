@@ -1,6 +1,5 @@
 {
  "The Bernoulli scheme: the exact binomial law against the de Moivre–Laplace and Poisson approximations": "Схема Бернулли: точный биномиальный закон и приближения Муавра — Лапласа и Пуассона",
- "Show (0 the law and its approximations, 1 how many trials pin the frequency)": "Показать (0 закон и его приближения, 1 сколько испытаний нужно для частоты)",
  "Trials $n$": "Испытаний $n$",
  "Success probability $p$": "Вероятность успеха $p$",
  "Number of successes $k$ for $P_n(k)$": "Число успехов $k$ для $P_n(k)$",
@@ -50,5 +49,24 @@
  "n_{\\text{Chebyshev}} = \\dfrac{pq}{(1 - \\gamma)\\,\\varepsilon^2} = [[1]]": "n_{\\text{Чебышёв}} = \\dfrac{pq}{(1 - \\gamma)\\,\\varepsilon^2} = [[1]]",
  "exact Bernoulli sum": "точная сумма по формуле Бернулли",
  "integral theorem, $k \\pm \\tfrac12$": "интегральная теорема, $k \\pm \\tfrac12$",
- "share of $R = [[1]]$ series": "доля из $R = [[1]]$ серий"
+ "share of $R = [[1]]$ series": "доля из $R = [[1]]$ серий",
+ "Show (0 the law and its approximations, 1 how many trials pin the frequency, 2 the field of $P_n(k)$ over $n$)": "Показать (0 закон и его приближения, 1 сколько нужно испытаний для частоты, 2 поле $P_n(k)$ по $n$)",
+ "Largest number of trials $N$": "Наибольшее число испытаний $N$",
+ "Approximation (0 Poisson, 1 local de Moivre–Laplace)": "Приближение (0 Пуассона, 1 локальная Муавра — Лапласа)",
+ "Poisson": "Пуассон",
+ "local de Moivre–Laplace": "локальная Муавра — Лапласа",
+ "[[1]]: $\\max_k |P_n(k) - \\tilde P_n(k)|$ at $n = [[2]]$": "[[1]]: $\\max_k |P_n(k) - \\tilde P_n(k)|$ при $n = [[2]]$",
+ "[[1]]: $\\max_k |P_n(k) - \\tilde P_n(k)|$": "[[1]]: $\\max_k |P_n(k) - \\tilde P_n(k)|$",
+ "The same for [[1]] at $n = [[2]]$": "То же для приближения «[[1]]» при $n = [[2]]$",
+ "Largest error over the field, at $n$": "Наибольшая погрешность по полю, при $n$",
+ "Most probable $k_0$ at $n = [[1]]$, $np - q \\le k_0 \\le np + p$": "Наивероятнейшее $k_0$ при $n = [[1]]$, $np - q \\le k_0 \\le np + p$",
+ "[[1]], for comparison": "[[1]], для сравнения",
+ "L3: each row of bars is the binomial law $P_n(k) = C_n^k p^k q^{n-k}$ of one $n$; together they show the law drifting to the right like $np$ and spreading like $\\sqrt{npq}$. The translucent sheet is the chosen approximation on the same grid.": "Л3: каждый ряд столбиков — биномиальный закон $P_n(k) = C_n^k p^k q^{n-k}$ для одного $n$; вместе они показывают, как закон сдвигается вправо как $np$ и расплывается как $\\sqrt{npq}$. Полупрозрачная поверхность — выбранное приближение на той же сетке.",
+ "The local theorem needs $npq$ large: its largest error falls roughly like $1/(npq)$, slowest when $p$ is near 0 or 1, where the law is skewed.": "Локальной теореме нужно большое $npq$: её наибольшая погрешность убывает примерно как $1/(npq)$, медленнее всего при $p$ около 0 или 1, где закон скошен.",
+ "The Poisson formula keeps $\\lambda = np$ and needs $p$ small: its error stays of order $p$ however large $n$ grows, so it does not vanish unless $p \\to 0$.": "Формула Пуассона сохраняет $\\lambda = np$ и требует малого $p$: её погрешность остаётся порядка $p$, как бы ни росло $n$, и исчезает, только если $p \\to 0$.",
+ "trials $n$": "испытаний $n$",
+ "largest error over $k$": "наибольшая погрешность по $k$",
+ "Exact $P_n(k)$ for $n \\le [[1]]$, $p = [[2]]$": "Точные $P_n(k)$ при $n \\le [[1]]$, $p = [[2]]$",
+ "exact $P_n(k) = C_n^k p^k q^{n-k}$": "точно, $P_n(k) = C_n^k p^k q^{n-k}$",
+ "local normal $\\dfrac{\\varphi(x)}{\\sqrt{npq}}$": "локальная нормальная $\\dfrac{\\varphi(x)}{\\sqrt{npq}}$"
 }

@@ -136,9 +136,10 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
   const declared = kernel.stations?.[station.id]?.params ?? kernel.meta.params;
   /** Parameter labels in the current language, for display only (keys and ranges are the kernel's). */
   const labelled = useMemo(() => declared.map((p) => ({ ...p, label: kernelText(station.kernel, p.label) })), [declared, station.kernel, lang]);
-  const size = useMemo(() => sizeParamOf(declared), [declared]);
   const resolved = useMemo(() => resolveParams(declared, paramsProp), [declared, paramsProp]);
   const [params, setParams] = useState(resolved);
+  /** The size that grows live: only among the parameters the current view uses (#85: the field grows N, not a hidden R). */
+  const size = useMemo(() => sizeParamOf(declared.filter((p) => applies(p.when, params))), [declared, params]);
   const [seed, setSeed] = useState(seedProp);
   // A link opened from outside (a lecture step, the address bar) replaces the experiment.
   useEffect(() => setParams(resolved), [resolved]);
