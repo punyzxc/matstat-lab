@@ -2294,3 +2294,111 @@ html:has(.orbital-lab) body {
     animation: none;
   }
 }
+
+/* ---- #128: exact, approximate and simulated values, and the chart series they light */
+.meet {
+  margin: 4px 0 14px;
+  padding: 10px 12px 4px;
+  border: 1px solid var(--rule);
+  background: rgb(255 255 255 / 0.015);
+}
+.meet-head {
+  margin: 0 0 8px;
+  color: var(--grey);
+  font: 12px var(--mono);
+}
+.meet-cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.meet-cell {
+  display: grid;
+  gap: 2px;
+  padding: 6px 8px;
+  border-left: 2px solid var(--rule);
+  outline: none;
+  cursor: default;
+  transition: background var(--quick) ease, border-color var(--quick) ease;
+}
+.meet-cell[data-kind='exact'] {
+  border-left-color: var(--signal);
+}
+.meet-cell[data-kind='approx'] {
+  border-left-color: var(--ink);
+}
+.meet-cell[data-kind='sim'] {
+  border-left-color: #8a8a8a;
+}
+.meet-cell:hover,
+.meet-cell:focus-visible {
+  background: rgb(255 255 255 / 0.05);
+}
+.meet-cell:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--signal);
+}
+.meet-kind {
+  color: var(--quiet);
+  font: 10.5px var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.meet-value {
+  color: var(--ink);
+  font: 500 20px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.meet-cell[data-kind='exact'] .meet-value {
+  color: var(--signal);
+}
+.meet-note {
+  color: #9a9a9a;
+  font-size: 12px;
+}
+.meet-gap {
+  color: var(--quiet);
+  font: 11px var(--mono);
+}
+.meet-line {
+  display: block;
+  width: 100%;
+  height: 34px;
+  margin-top: 4px;
+}
+.meet-axis {
+  stroke: #3a3a3a;
+}
+.meet-span {
+  stroke-width: 2;
+  stroke: #6a6a6a;
+}
+.meet-span[data-kind='approx'] {
+  stroke: #cfcfcf;
+}
+.meet-mark {
+  transition: transform 420ms var(--ease);
+}
+.meet-mark[data-kind='exact'] path {
+  fill: var(--signal);
+}
+.meet-mark[data-kind='approx'] circle {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+}
+.meet-mark[data-kind='sim'] circle {
+  fill: #a8a8a8;
+}
+@media (prefers-reduced-motion: reduce) {
+  .meet-mark {
+    transition: none;
+  }
+}
+.chart svg[data-focus] .chart-series {
+  opacity: 0.16;
+  transition: opacity var(--quick) ease;
+}
+.chart svg[data-focus] .chart-series.chart-series--lit {
+  opacity: 1;
+  stroke-width: 2.4;
+}

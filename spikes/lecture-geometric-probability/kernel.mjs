@@ -158,10 +158,17 @@ function runDarts({ view, N, l, d, dim = 2, region, region1, region3 }, seed) {
       convention: `± ${fmt(half)} (3 SE); ${Math.abs(freq - exact) <= half ? 'inside' : 'outside'} the band` },
     { key: 'measure', label: 'Exact measure ratio $\\operatorname{mes} A / \\operatorname{mes} D$', observed: null, theory: view === 0 ? '$\\dfrac{\\pi/4 + \\pi/4}{\\pi} = \\dfrac12$' : '$\\dfrac{\\pi/4}{1} \\approx 0.7854$' },
   ];
+  // #128: no approximation here; the exact measure ratio and the share of hits.
+  const meet = {
+    label: view === 0 ? '$P(\\sin^2 x \\le \\tfrac12)$' : '$P(x^2 + y^2 \\le 1)$',
+    exact: { value: r6(exact), label: view === 0 ? 'exact, $\\tfrac12$' : 'exact, $\\pi/4$', series: view === 0 ? 'curve' : 'arc' },
+    sim: { value: r6(freq), label: `share of $n = ${N}$ throws`, series: 'hits' },
+  };
   if (view === 1) readouts.push({ key: 'pi', label: 'Estimate of $\\pi = 4 \\cdot \\text{share}$', observed: r6(4 * freq), theory: r6(Math.PI), convention: `± ${fmt(4 * half)}` });
   const fine = view === 0 ? grid(0, Math.PI, 181) : grid(0, 1, 101);
   return {
     readouts,
+    meet,
     series: view === 0 ? [
       { id: 'curve', kind: 'line', tone: 'signal', label: '$y = 0.5 - \\sin^2 x$ ($\\sqrt{y}$ exists where $y \\ge 0$)', x: fine, y: fine.map((x) => 0.5 - Math.sin(x) ** 2) },
       { id: 'zero', kind: 'line', tone: 'muted', x: [0, Math.PI], y: [0, 0] },
@@ -355,6 +362,11 @@ function runRegion({ N, dim, region }, seed) {
     ],
     board,
     notes,
+    meet: {
+      label: '$P = \\operatorname{mes} A / \\operatorname{mes} G$',
+      exact: { value: r6(a), label: `quadrature, $\\pm ${R.error >= 1e-4 ? Number(R.error.toPrecision(2)) : '10^{-4}'}$`, series: 'area' },
+      sim: { value: r6(share), label: `share of $n = ${N}$ throws`, series: 'freq' },
+    },
   };
 }
 

@@ -256,3 +256,19 @@ test('#119 each space takes only its own coordinates, with a reason', () => {
   assert.equal(R.regionTex(R.parseRegion('x^2 + y^2 < z^2')), 'x^{2} + y^{2} < z^{2}');
   assert.equal(R.regionTex(R.parseRegion('z < xy')), 'z < x \\cdot y');
 });
+
+// #128: the exact measure and the share of hits meet as n grows; no approximation is reported.
+test('#128 darts: exact and simulated only, the gap shrinking with the throws', () => {
+  const gap = (N, view) => {
+    let s = 0;
+    for (let seed = 1; seed <= 12; seed++) {
+      const m = k.run({ view, N }, { seed, station: 'darts' }).meet;
+      assert.equal(m.approx, undefined);
+      s += Math.abs(m.sim.value - m.exact.value);
+    }
+    return s / 12;
+  };
+  for (const view of [0, 1]) assert.ok(gap(20000, view) < gap(100, view) / 4, `view ${view}`);
+  const r = k.run({ view: 4, N: 4000, region: 'y < x^2' }, { seed: 3, station: 'darts' });
+  assert.deepEqual([r.meet.exact.series, r.meet.sim.series], ['area', 'freq']);
+});

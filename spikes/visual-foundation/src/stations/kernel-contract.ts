@@ -73,6 +73,12 @@ export type Constructions = { n: number; size: number; ordered: boolean; repetit
  * angle, `hits[i]` whether it crosses a line), or darts in the unit square over a typed region drawn as `runs` of
  * grid cells [x0, y0, width, height].
  */
+/**
+ * #128: one quantity three ways: its exact value, an approximation (a limit theorem, a formula) and the simulated
+ * estimate. Each part is optional; `series` names the chart series that shows it, lit while the value is hovered.
+ */
+export type MeetValue = { value: number; label: string; series?: string };
+export type Meet = { label: string; exact?: MeetValue; approx?: MeetValue; sim?: MeetValue };
 export type Board =
   | { kind: 'needles'; d: number; l: number; strips: number; width: number; needles: number[][]; hits: boolean[] }
   | { kind: 'region'; runs: number[][]; darts: number[][]; hits: boolean[] }
@@ -131,6 +137,7 @@ export type KernelResult = {
   space?: Space;
   constructions?: Constructions;
   board?: Board;
+  meet?: Meet;
   square?: EventSquare;
   tree?: BayesTree;
   phasor?: Phasor;

@@ -20,6 +20,7 @@ import { EventSquare } from './event-square';
 import { BayesTree } from './bayes-tree';
 import { Phasor } from './phasor';
 import { TrialsMachine } from './trials-machine';
+import { MeetStrip } from './meet-strip';
 import { TextField } from './text-field';
 import { SnapshotStrip, type SnapView } from './snapshots';
 import { decodeSnaps, encodeSnap, freeSlot, ghostSeries, sameAxes, sameSnap, SNAP_SLOTS, type Snap } from './snapshot-math.mjs';
@@ -61,6 +62,10 @@ function localizeResult(kernel: string, r: KernelResult): KernelResult {
     tree: r.tree,
     phasor: r.phasor,
     machine: r.machine,
+    meet: r.meet && {
+      label: k(r.meet.label),
+      ...(['exact', 'approx', 'sim'] as const).reduce((o, key) => (r.meet![key] ? { ...o, [key]: { ...r.meet![key]!, label: k(r.meet![key]!.label) } } : o), {}),
+    },
     linked: r.linked && { ...r.linked, series: r.linked.series.map((s) => (s.label ? { ...s, label: k(s.label) } : s)), axes: r.linked.axes && { x: k(r.linked.axes.x), y: k(r.linked.axes.y) } },
   };
 }
@@ -191,7 +196,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
     if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series)) return { error: t('The kernel returned no readouts or series.', 'Ядро не вернуло ни показаний, ни графиков.') };
     return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface,
       formula: Array.isArray(out.formula) ? out.formula.filter((l) => typeof l === 'string') : undefined, decisions: out.decisions, beam: out.beam,
-      domain: out.domain, linked: out.linked && Array.isArray(out.linked.series) ? out.linked : undefined, outcomes: out.outcomes, space: out.space, constructions: out.constructions, board: out.board, square: out.square, tree: out.tree, phasor: out.phasor, machine: out.machine };
+      domain: out.domain, linked: out.linked && Array.isArray(out.linked.series) ? out.linked : undefined, outcomes: out.outcomes, space: out.space, constructions: out.constructions, board: out.board, square: out.square, tree: out.tree, phasor: out.phasor, machine: out.machine, meet: out.meet };
   }, [outcome]);
   /** What is on screen: the same result with its texts in the current language. */
   const view = useMemo(() => (result && !('error' in result) ? localizeResult(station.kernel, result) : result), [result, station.kernel, lang]);
@@ -261,6 +266,8 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
   const [tracked, setTracked] = useState<string | null>(null);
   /** A line of the live formula lit by the picture (#124: hovering a circle lights its method's formula). */
   const [lineFocus, setLineFocus] = useState<number | null>(null);
+  /** A chart series lit from the exact / approximate / simulated strip (#128). */
+  const [seriesFocus, setSeriesFocus] = useState<string | null>(null);
   const [ridgeOn, setRidgeOn] = useState(false);
   const shown = result && !('error' in result) ? result : null;
   const trackable = shown?.readouts.filter((r) => numeric(r.observed)) ?? [];
@@ -361,6 +368,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
                 {view.formula.map((line, i) => <div key={i} className="live-formula-line" data-on={lineFocus === i || undefined}><Tex tex={line} display /></div>)}
               </div>
             )}
+            {view.meet && <MeetStrip meet={view.meet} onFocus={setSeriesFocus} />}
             {view.beam && <Beam beam={view.beam} onParam={(key, v) => setParams((p) => ({ ...p, [key]: v }))} />}
             {view.outcomes && outcome?.ok && <OutcomeFlight outcomes={view.outcomes} drawKey={outcome.job.seed} />}
             {view.space && outcome?.ok && <OutcomeSpace space={view.space} drawKey={outcome.job.seed} />}
@@ -373,8 +381,8 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
             {view.surface && <Surface3D surface={view.surface} />}
             {view.series.length > 0 && (
               <div className="chart-stage">
-                <Chart series={chartSeries} xLabel={view.axes?.x} yLabel={view.axes?.y} domain={view.domain} />
-                {view.linked && <Chart series={view.linked.series} xLabel={view.linked.axes?.x} yLabel={view.linked.axes?.y} domain={view.linked.domain} height={200} />}
+                <Chart series={chartSeries} xLabel={view.axes?.x} yLabel={view.axes?.y} domain={view.domain} focus={seriesFocus} />
+                {view.linked && <Chart series={view.linked.series} xLabel={view.linked.axes?.x} yLabel={view.linked.axes?.y} domain={view.linked.domain} height={200} focus={seriesFocus} />}
                 <RidgeToggle draws={past} on={ridgeOn} onToggle={() => setRidgeOn((v) => !v)} />
               </div>
             )}

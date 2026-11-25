@@ -146,5 +146,14 @@
  "$\\operatorname{Re}\\hat\\varphi_{X+Y}$ of the sums, $n = [[1]]$": "$\\operatorname{Re}\\hat\\varphi_{X+Y}$ по суммам, $n = [[1]]$",
  "share": "доля",
  "L9: for independent $X$ and $Y$, $\\varphi_{X+Y}(t) = M e^{it(X+Y)} = M e^{itX} \\cdot M e^{itY} = \\varphi_X(t)\\,\\varphi_Y(t)$. Adding variables convolves their laws, but multiplies their characteristic functions.": "Лекция 9: для независимых $X$ и $Y$ $\\varphi_{X+Y}(t) = M e^{it(X+Y)} = M e^{itX} \\cdot M e^{itY} = \\varphi_X(t)\\,\\varphi_Y(t)$. Сложение величин даёт композицию законов, но произведение характеристических функций.",
- "On the plane, multiplying complex numbers multiplies their lengths and adds their angles: the arrow of the product turns by the angles of $\\varphi_X(t)$ and $\\varphi_Y(t)$ together. The mean of the vectors $e^{it(x_j + y_j)}$ of the simulated sums lands on it.": "На плоскости при умножении комплексных чисел длины перемножаются, а углы складываются: стрелка произведения поворачивается на углы $\\varphi_X(t)$ и $\\varphi_Y(t)$ вместе. Среднее векторов $e^{it(x_j + y_j)}$ смоделированных сумм попадает в неё."
+ "On the plane, multiplying complex numbers multiplies their lengths and adds their angles: the arrow of the product turns by the angles of $\\varphi_X(t)$ and $\\varphi_Y(t)$ together. The mean of the vectors $e^{it(x_j + y_j)}$ of the simulated sums lands on it.": "На плоскости при умножении комплексных чисел длины перемножаются, а углы складываются: стрелка произведения поворачивается на углы $\\varphi_X(t)$ и $\\varphi_Y(t)$ вместе. Среднее векторов $e^{it(x_j + y_j)}$ смоделированных сумм попадает в неё.",
+ "$MX$ and the mean of $n = [[1]]$ terms": "$MX$ и среднее $n = [[1]]$ слагаемых",
+ "exact $MX$": "точно, $MX$",
+ "running mean, first sequence": "текущее среднее, первая последовательность",
+ "exact: Erlang law": "точно: закон Эрланга",
+ "exact: Irwin–Hall law": "точно: закон Ирвина — Холла",
+ "exact: Poisson law of the sum": "точно: сумма распределена по Пуассону",
+ "exact: the sum is normal": "точно: сумма нормальна",
+ "CLT limit $2\\Phi(1) - 1$": "предел по ЦПТ $2\\Phi(1) - 1$",
+ "share of $R = [[1]]$ sums": "доля из $R = [[1]]$ сумм"
 }

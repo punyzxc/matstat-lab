@@ -244,6 +244,13 @@ function runLaw({ n, p, k, lo, hi, R }, seed) {
     axes: { x: 'number of successes $k$', y: 'probability' },
     formula,
     notes,
+    // #128: the exact sum, the integral theorem with the continuity correction, and the share of R series.
+    meet: {
+      label: `$P(${lo} \\le k \\le ${hi})$`,
+      exact: { value: r6(exactI), label: 'exact Bernoulli sum', series: 'exact' },
+      approx: { value: r6(corrected), label: 'integral theorem, $k \\pm \\tfrac12$', series: 'local' },
+      sim: { value: r6(simI), label: `share of $R = ${R}$ series`, series: 'sim' },
+    },
     machine: { n, p, rows: machineRows(counts, n, seed), window: [a, b], exact: ks.map((j) => r6(law[j])) },
   };
 }

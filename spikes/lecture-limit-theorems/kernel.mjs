@@ -277,6 +277,12 @@ function runConvergence({ law: li, k, N, view, M, eps }, seed) {
         theory: cauchy ? 'does not shrink' : `$\\approx ${fmt(law.sd / Math.sqrt(N), 4)}$ per sequence ($\\sigma/\\sqrt{n}$)` },
     ],
     series,
+    // #128: the expectation and the running mean of the first sequence (none for Cauchy: it has no mean).
+    ...(cauchy ? {} : { meet: {
+      label: `$MX$ and the mean of $n = ${N}$ terms`,
+      exact: { value: r6(law.mean), label: 'exact $MX$', series: 'mean' },
+      sim: { value: r6(finals[0]), label: 'running mean, first sequence', series: 'path0' },
+    } }),
     axes: { x: '$\\lg n$ ($n = 10, 100, 1000$ at 1, 2, 3)', y: 'running mean $(X_1 + \\ldots + X_n)/n$' },
     notes: cauchy
       ? ['The Cauchy law has no expectation: $\\displaystyle\\int_{-\\infty}^{\\infty} \\frac{|x|\\,dx}{\\pi(1 + x^2)}$ diverges (L7, example after Khinchin\'s theorem).',
@@ -369,7 +375,40 @@ function runClt({ law: li, n, R, view }, seed) {
     ],
     axes: { x: '$z = (S_n - n\\,MX)/(\\sigma\\sqrt{n})$', y: 'density' },
     notes,
+    // #128: the exact law of the sum where it has a closed form, the CLT limit, and the share of the R sums.
+    meet: {
+      label: `$P(|Z| \\le 1)$, $n = ${n}$`,
+      ...(within1Exact(law, n) == null ? {} : { exact: { value: r6(within1Exact(law, n)), label: EXACT_SUM[law.id] } }),
+      approx: { value: r6(1 - 2 * normalCdf(-1)), label: 'CLT limit $2\\Phi(1) - 1$', series: 'pdf' },
+      sim: { value: r6(inside / R), label: `share of $R = ${R}$ sums`, series: 'hist' },
+    },
   };
+}
+
+const EXACT_SUM = { normal: 'exact: the sum is normal', uniform: 'exact: Irwin–Hall law', exponential: 'exact: Erlang law', poisson: 'exact: Poisson law of the sum' };
+/**
+ * P(|Z| ≤ 1) for Z = (Sₙ − n·MX)/(σ√n), exactly from the law of the sum: normal, Irwin–Hall (n ≤ 30, where the
+ * alternating sum is still exact in doubles), Erlang (gamma with integer shape) and Poisson(n).
+ */
+export function within1Exact(law, n) {
+  const lo = n * law.mean - law.sd * Math.sqrt(n), hi = n * law.mean + law.sd * Math.sqrt(n);
+  if (law.id === 'normal') return 1 - 2 * normalCdf(-1);
+  if (law.id === 'uniform') return n <= 30 ? irwinHallCdf(hi, n) - irwinHallCdf(lo, n) : null;
+  if (law.id === 'exponential') return erlangCdf(hi, n) - erlangCdf(lo, n);
+  if (law.id === 'poisson') {
+    let s = 0;
+    for (let k = Math.max(0, Math.ceil(lo - 1e-12)); k <= Math.floor(hi + 1e-12); k++) s += Math.exp(k * Math.log(n) - n - logFactorial(k));
+    return s;
+  }
+  return null;
+}
+const logFactorial = (k) => { let s = 0; for (let j = 2; j <= k; j++) s += Math.log(j); return s; };
+/** P(S ≤ x) for S a sum of n Exp(1): 1 − e^{−x} Σ_{k<n} x^k/k!, summed in log space. */
+export function erlangCdf(x, n) {
+  if (x <= 0) return 0;
+  let s = 0;
+  for (let k = 0; k < n; k++) s += Math.exp(k * Math.log(x) - x - logFactorial(k));
+  return Math.min(1, Math.max(0, 1 - s));
 }
 
 // ---------------------------------------------------------------- characteristic function (L9, #121)
