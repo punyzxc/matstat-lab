@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { MathText, mathToPlain } from './math';
 import { fitToRange, parseNumberInput } from './stations/autoplay-math.mjs';
 
 export function Button({ children, variant = 'secondary', className = '', type = 'button', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' }) {
@@ -22,6 +23,8 @@ export function Slider({ id, label, value, display, min, max, step, onChange }: 
   id: string; label: string; value: number; display: string; min: number; max: number; step: number; onChange: (value: number) => void;
 }) {
   const percent = (value - min) / (max - min) * 100;
+  /** Labels may carry `$…$` formulas: typeset on screen, plain Unicode for assistive technology. */
+  const plain = mathToPlain(label);
   const [text, setText] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const noteTimer = useRef(0);
@@ -53,9 +56,9 @@ export function Slider({ id, label, value, display, min, max, step, onChange }: 
   const noteId = `${id}-note`;
   return <div className="range-field">
     <div className="field-line">
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id}><MathText text={label} /></label>
       <input className="range-typed" type="text" inputMode="decimal" autoComplete="off" spellCheck={false}
-        aria-label={`${label}, typed value`} aria-invalid={text != null && parsed == null} aria-describedby={note ? noteId : undefined}
+        aria-label={`${plain}, typed value`} aria-invalid={text != null && parsed == null} aria-describedby={note ? noteId : undefined}
         title="Type a value and press Enter · ↑/↓ to step, Shift for ×10"
         value={text ?? display} size={Math.max(4, Math.min(10, (text ?? display).length + 1))}
         onFocus={(e) => { setText(String(value)); const el = e.currentTarget; requestAnimationFrame(() => el.select()); }}
@@ -70,7 +73,7 @@ export function Slider({ id, label, value, display, min, max, step, onChange }: 
           }
         }} />
     </div>
-    <input id={id} name={id} type="range" min={min} max={max} step={step} value={value} onChange={event => onChange(event.currentTarget.valueAsNumber)}
+    <input id={id} name={id} type="range" aria-label={plain} min={min} max={max} step={step} value={value} onChange={event => onChange(event.currentTarget.valueAsNumber)}
       aria-valuetext={display} style={{ background: `linear-gradient(90deg, var(--accent) ${percent}%, var(--track) ${percent}%)` }} />
     {note && <small id={noteId} className="range-note" aria-live="polite">{note}</small>}
   </div>;

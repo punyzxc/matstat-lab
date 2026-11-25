@@ -47,7 +47,7 @@ export function makeLaw(index, { p, m, lambda, sigma }) {
     const isInt = Math.abs(top - Math.round(top)) < 1e-9;
     const mode = isInt && Math.round(top) >= 1 && Math.round(top) <= trials ? [Math.round(top) - 1, Math.round(top)] : [Math.min(trials, Math.floor(top))];
     return {
-      name: index === 0 ? `Bernoulli(p = ${p})` : `Binomial(m = ${trials}, p = ${p})`, discrete: true, support, pmf,
+      name: index === 0 ? `Bernoulli ($p = ${p}$)` : `Binomial ($m = ${trials}$, $p = ${p}$)`, discrete: true, support, pmf,
       mean: trials * p, variance: npq, skew: (q - p) / Math.sqrt(npq), exkurt: (1 - 6 * p * q) / npq, mode,
       sample: (seed, i) => {
         let s = 0;
@@ -63,7 +63,7 @@ export function makeLaw(index, { p, m, lambda, sigma }) {
     for (let k = 0; k < top; k++) pmf.push((pmf[k] * lambda) / (k + 1));
     const isInt = Math.abs(lambda - Math.round(lambda)) < 1e-9;
     return {
-      name: `Poisson(λ = ${lambda})`, discrete: true, support, pmf,
+      name: `Poisson ($\\lambda = ${lambda}$)`, discrete: true, support, pmf,
       mean: lambda, variance: lambda, skew: 1 / Math.sqrt(lambda), exkurt: 1 / lambda,
       mode: isInt ? [Math.round(lambda) - 1, Math.round(lambda)] : [Math.floor(lambda)],
       sample: (seed, i) => {
@@ -77,23 +77,23 @@ export function makeLaw(index, { p, m, lambda, sigma }) {
   if (index === 3) {
     const h = sigma * Math.sqrt(3); // uniform on [−h, h] with standard deviation σ
     return {
-      name: `Uniform[−${r6(h)}, ${r6(h)}] (σ = ${sigma})`, discrete: false, range: [-6.5, 6.5], bins: 65,
+      name: `Uniform on $[-${r6(h)}, ${r6(h)}]$ ($\\sigma = ${sigma}$)`, discrete: false, range: [-6.5, 6.5], bins: 65,
       pdf: (x) => (Math.abs(x) <= h ? 1 / (2 * h) : 0), cdf: (x) => Math.min(1, Math.max(0, (x + h) / (2 * h))),
-      mean: 0, variance: sigma * sigma, skew: 0, exkurt: -6 / 5, median: 0, mode: 'every point of [−h, h]',
+      mean: 0, variance: sigma * sigma, skew: 0, exkurt: -6 / 5, median: 0, mode: 'every point of $[-h, h]$',
       pdfPolyline: () => ({ x: [-6.5, -h, -h, h, h, 6.5], y: [0, 0, 1 / (2 * h), 1 / (2 * h), 0, 0] }),
       sample: (seed, i) => -h + 2 * h * uni(seed, 40, i),
     };
   }
   if (index === 4) {
     return {
-      name: `Exponential(λ = ${lambda})`, discrete: false, range: [0, 10], bins: 100,
+      name: `Exponential ($\\lambda = ${lambda}$)`, discrete: false, range: [0, 10], bins: 100,
       pdf: (x) => (x < 0 ? 0 : lambda * Math.exp(-lambda * x)), cdf: (x) => (x < 0 ? 0 : 1 - Math.exp(-lambda * x)),
       mean: 1 / lambda, variance: 1 / lambda ** 2, skew: 2, exkurt: 6, median: Math.LN2 / lambda, mode: [0],
       sample: (seed, i) => -Math.log(uni(seed, 50, i)) / lambda,
     };
   }
   return {
-    name: `Normal(a = 0, σ = ${sigma})`, discrete: false, range: [-9, 9], bins: 90,
+    name: `Normal ($a = 0$, $\\sigma = ${sigma}$)`, discrete: false, range: [-9, 9], bins: 90,
     pdf: (x) => normPdf(x / sigma) / sigma, cdf: (x) => Phi(x / sigma),
     mean: 0, variance: sigma * sigma, skew: 0, exkurt: 0, median: 0, mode: [0],
     sample: (seed, i) => sigma * gauss(seed, 60, i),
@@ -153,11 +153,11 @@ function histogram(xs, lo, hi, bins) {
 const lawParam = { key: 'law', label: 'Law (0 Bernoulli · 1 Binomial · 2 Poisson · 3 Uniform · 4 Exponential · 5 Normal)', min: 0, max: 5, step: 1, default: 5 };
 const momentsParams = [
   lawParam,
-  { key: 'p', label: 'Success probability p (laws 0–1)', min: 0.05, max: 0.95, step: 0.05, default: 0.3 },
-  { key: 'm', label: 'Trials m (law 1)', min: 1, max: 30, step: 1, default: 10 },
-  { key: 'lambda', label: 'Rate λ (laws 2, 4)', min: 0.2, max: 8, step: 0.1, default: 2 },
-  { key: 'sigma', label: 'Standard deviation σ (laws 3, 5)', min: 0.5, max: 3, step: 0.1, default: 1 },
-  { key: 'n', label: 'Sample size n', min: 100, max: 20000, step: 100, default: 5000 },
+  { key: 'p', label: 'Success probability $p$ (laws 0–1)', min: 0.05, max: 0.95, step: 0.05, default: 0.3 },
+  { key: 'm', label: 'Trials $m$ (law 1)', min: 1, max: 30, step: 1, default: 10 },
+  { key: 'lambda', label: 'Rate $\\lambda$ (laws 2, 4)', min: 0.2, max: 8, step: 0.1, default: 2 },
+  { key: 'sigma', label: 'Standard deviation $\\sigma$ (laws 3, 5)', min: 0.5, max: 3, step: 0.1, default: 1 },
+  { key: 'n', label: 'Sample size $n$', min: 100, max: 20000, step: 100, default: 5000 },
 ];
 
 /** Lecture Table 3 (L6, 3σ rule) as printed, for the normal law. */
@@ -176,71 +176,71 @@ function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
     for (const x of xs) freq[x]++;
     // Fixed support per law (Poisson: 0…27, enough for λ ≤ 8), so bars glide as the parameter moves.
     const shown = law.support.filter((k) => k <= 27);
-    series.push({ id: 'freq', kind: 'hist', label: 'Sample frequency nₖ/n', x: shown.map((k) => k - 0.5), y: shown.map((k) => freq[k] / n) });
-    series.push({ id: 'pmf', kind: 'pmf', tone: 'signal', label: 'P(ξ = k)', x: shown, y: shown.map((k) => law.pmf[k]) });
+    series.push({ id: 'freq', kind: 'hist', label: 'Sample frequency $n_k/n$', x: shown.map((k) => k - 0.5), y: shown.map((k) => freq[k] / n) });
+    series.push({ id: 'pmf', kind: 'pmf', tone: 'signal', label: '$P(\\xi = k)$', x: shown, y: shown.map((k) => law.pmf[k]) });
     const best = Math.max(...freq);
     modeObserved = freq.flatMap((f, k) => (f === best ? [k] : [])).join(' and ');
     const med = discreteMedian(law);
     medTheory = med.value;
-    medConvention = med.flat ? 'F(x) = 1/2 on a whole step: every point up to the next value is a median; shown is the smallest' : 'smallest x with F(x) ≥ 1/2';
+    medConvention = med.flat ? '$F(x) = \\tfrac12$ on a whole step: every point up to the next value is a median; shown is the smallest' : 'smallest $x$ with $F(x) \\ge \\tfrac12$';
   } else {
     const [lo, hi] = law.range, bins = law.bins;
     const h = histogram(xs, lo, hi, bins);
     series.push({ id: 'hist', kind: 'hist', label: 'Sample histogram (density scale)', x: h.x, y: h.y });
     const curve = law.pdfPolyline ? law.pdfPolyline() : (() => { const x = grid(lo, hi, 241); return { x, y: x.map(law.pdf) }; })();
-    series.push({ id: 'pdf', kind: 'pdf', tone: 'signal', label: 'Density f(x)', x: curve.x, y: curve.y });
+    series.push({ id: 'pdf', kind: 'pdf', tone: 'signal', label: 'Density $f(x)$', x: curve.x, y: curve.y });
     const top = h.counts.indexOf(Math.max(...h.counts));
     modeObserved = r6(lo + (top + 0.5) * h.w);
     medTheory = law.median;
-    if (h.outside) extraNote = `${h.outside} of ${n} draws fall outside the fixed display range [${lo}, ${hi}]; the readouts use all of them.`;
-    medConvention = 'F(x) = 1/2';
+    if (h.outside) extraNote = `${h.outside} of ${n} draws fall outside the fixed display range $[${lo}, ${hi}]$; the readouts use all of them.`;
+    medConvention = '$F(x) = \\tfrac12$';
   }
-  series.push({ id: 'sigma-rules', kind: 'rule', tone: 'muted', label: 'M ± σ, 2σ, 3σ', x: [-3, -2, -1, 1, 2, 3].map((k) => law.mean + k * sd), y: [] });
-  series.push({ id: 'mean', kind: 'rule', tone: 'accent', label: 'Mξ', x: [law.mean], y: [] });
+  series.push({ id: 'sigma-rules', kind: 'rule', tone: 'muted', label: '$M\\xi \\pm \\sigma,\\ 2\\sigma,\\ 3\\sigma$', x: [-3, -2, -1, 1, 2, 3].map((k) => law.mean + k * sd), y: [] });
+  series.push({ id: 'mean', kind: 'rule', tone: 'accent', label: '$M\\xi$', x: [law.mean], y: [] });
 
   const within = (k) => xs.reduce((c, x) => (Math.abs(x - law.mean) < k * sd ? c + 1 : c), 0) / n;
   const readouts = [
-    { key: 'mean', label: 'Expectation Mξ', observed: r6(sm.mean), theory: r6(law.mean), convention: 'sample mean x̄' },
-    { key: 'variance', label: 'Variance Dξ', observed: r6(sm.s2), theory: r6(law.variance), convention: 's², divisor n − 1' },
-    { key: 'sd', label: 'Standard deviation σ', observed: r6(Math.sqrt(sm.s2)), theory: r6(sd) },
+    { key: 'mean', label: 'Expectation $M\\xi$', observed: r6(sm.mean), theory: r6(law.mean), convention: 'sample mean $\\bar{x}$' },
+    { key: 'variance', label: 'Variance $D\\xi$', observed: r6(sm.s2), theory: r6(law.variance), convention: '$s^2$, divisor $n - 1$' },
+    { key: 'sd', label: 'Standard deviation $\\sigma$', observed: r6(Math.sqrt(sm.s2)), theory: r6(sd) },
     { key: 'median', label: 'Median', observed: r6(sampleMedian(sorted)), theory: r6(medTheory), convention: medConvention },
     { key: 'mode', label: 'Mode', observed: modeObserved, theory: modeText(law.mode), convention: law.discrete ? 'most frequent sample value' : `centre of the tallest of ${law.bins} histogram bins` },
-    { key: 'skew', label: 'Skewness Sk = μ₃/σ³', observed: r6(sm.skew), theory: r6(law.skew), convention: 'm₃/m₂^1.5, central moments with divisor n' },
-    { key: 'exkurt', label: 'Excess kurtosis Ek = μ₄/σ⁴ − 3', observed: r6(sm.exkurt), theory: r6(law.exkurt), convention: 'm₄/m₂² − 3, divisor n' },
+    { key: 'skew', label: 'Skewness $Sk = \\mu_3/\\sigma^3$', observed: r6(sm.skew), theory: r6(law.skew), convention: '$m_3/m_2^{3/2}$, central moments with divisor $n$' },
+    { key: 'exkurt', label: 'Excess kurtosis $Ek = \\mu_4/\\sigma^4 - 3$', observed: r6(sm.exkurt), theory: r6(law.exkurt), convention: '$m_4/m_2^2 - 3$, divisor $n$' },
   ];
   for (const k of [1, 2, 3, 4])
-    readouts.push({ key: `rule${k}`, label: `P(|ξ − Mξ| < ${k}σ)`, observed: r6(within(k)), theory: r6(sigmaRule(law, k)), convention: 'sample share; theory exact' });
+    readouts.push({ key: `rule${k}`, label: `$P(|\\xi - M\\xi| < ${k}\\sigma)$`, observed: r6(within(k)), theory: r6(sigmaRule(law, k)), convention: 'sample share; theory exact' });
 
   const notes = [
-    `${law.name}: Mξ, Dξ, Sk and Ek are the closed forms of L6; the sample uses n = ${n}, seed ${seed}.`,
-    'The 3σ rule (formula (40)): for the normal law P(|ξ − a| < 3σ) = 1 − 2Φ(−3) = 0.9973. Both tails count: 2 · 0.00135 = 0.0027 (L6 writes "1 − 0.00135").',
+    `${law.name}: $M\\xi$, $D\\xi$, $Sk$ and $Ek$ are the closed forms of L6; the sample uses $n = ${n}$, seed ${seed}.`,
+    'The $3\\sigma$ rule (formula (40)): for the normal law $P(|\\xi - a| < 3\\sigma) = 1 - 2\\Phi(-3) = 0.9973$. Both tails count: $2 \\cdot 0.00135 = 0.0027$ (L6 writes "$1 - 0.00135$").',
   ];
-  if (li === 5) notes.push('L6 Table 3 prints 0.9997 for 4σ; the exact value is 0.99994. Its "% outside" column (32 %, 5 %, 0.7 %, 0.07 %) should read 31.7 %, 4.6 %, 0.27 %, 0.006 %.');
-  if (li !== 5) notes.push('The 3σ rule is a property of the normal law. For this law the exact share inside 3σ is shown in the table and may differ from 0.9973.');
+  if (li === 5) notes.push('L6 Table 3 prints 0.9997 for $4\\sigma$; the exact value is 0.99994. Its "% outside" column (32 %, 5 %, 0.7 %, 0.07 %) should read 31.7 %, 4.6 %, 0.27 %, 0.006 %.');
+  if (li !== 5) notes.push('The $3\\sigma$ rule is a property of the normal law. For this law the exact share inside $3\\sigma$ is shown in the table and may differ from 0.9973.');
   if (extraNote) notes.push(extraNote);
-  if (law.discrete) notes.push('For a discrete law the bars are sample frequencies at each value k, the stems are P(ξ = k).');
-  return { axes: { x: 'value x', y: law.discrete ? 'probability' : 'density f(x)' }, readouts, series, notes };
+  if (law.discrete) notes.push('For a discrete law the bars are sample frequencies at each value $k$, the stems are $P(\\xi = k)$.');
+  return { axes: { x: 'value $x$', y: law.discrete ? 'probability' : 'density $f(x)$' }, readouts, series, notes };
 }
 
 // ---------------------------------------------------------------- Transform (L6 §Functions of a random variable)
 
 const transformParams = [
-  { key: 'phi', label: 'Function (0 αx + b · 1 eˣ · 2 e^(−βx) · 3 x², x ≥ 0)', min: 0, max: 3, step: 1, default: 2 },
-  { key: 'alpha', label: 'Slope α (function 0)', min: -3, max: 3, step: 0.5, default: 2 },
-  { key: 'b', label: 'Shift b (function 0)', min: -2, max: 2, step: 0.5, default: 1 },
-  { key: 'beta', label: 'Exponent β (function 2)', min: 0.25, max: 4, step: 0.25, default: 1 },
-  { key: 'lambda', label: 'Rate λ of ξ ~ Exp(λ) (functions 2, 3)', min: 0.2, max: 4, step: 0.1, default: 2 },
-  { key: 'sigma', label: 'σ of ξ ~ N(0, σ) (functions 0, 1)', min: 0.2, max: 1.5, step: 0.1, default: 0.5 },
-  { key: 'n', label: 'Sample size n', min: 100, max: 20000, step: 100, default: 5000 },
+  { key: 'phi', label: 'Function (0 $\\alpha x + b$ · 1 $e^{x}$ · 2 $e^{-\\beta x}$ · 3 $x^2,\\ x \\ge 0$)', min: 0, max: 3, step: 1, default: 2 },
+  { key: 'alpha', label: 'Slope $\\alpha$ (function 0)', min: -3, max: 3, step: 0.5, default: 2 },
+  { key: 'b', label: 'Shift $b$ (function 0)', min: -2, max: 2, step: 0.5, default: 1 },
+  { key: 'beta', label: 'Exponent $\\beta$ (function 2)', min: 0.25, max: 4, step: 0.25, default: 1 },
+  { key: 'lambda', label: 'Rate $\\lambda$ of $\\xi \\sim \\mathrm{Exp}(\\lambda)$ (functions 2, 3)', min: 0.2, max: 4, step: 0.1, default: 2 },
+  { key: 'sigma', label: '$\\sigma$ of $\\xi \\sim N(0, \\sigma)$ (functions 0, 1)', min: 0.2, max: 1.5, step: 0.1, default: 0.5 },
+  { key: 'n', label: 'Sample size $n$', min: 100, max: 20000, step: 100, default: 5000 },
 ];
 
 /** η = φ(ξ) for strictly monotone φ: density by formula (44), f_η(y) = f_ξ(φ⁻¹(y)) · |dφ⁻¹/dy|. */
 export function makeTransform({ phi, alpha, b, beta, lambda, sigma }) {
   if (phi === 0) {
-    if (alpha === 0) throw new Error('α = 0 makes η constant: formula (44) needs a strictly monotone φ.');
+    if (alpha === 0) throw new Error('$\\alpha = 0$ makes $\\eta$ constant: formula (44) needs a strictly monotone $\\varphi$.');
     const s = Math.abs(alpha) * sigma;
     return {
-      name: `η = ${alpha}ξ ${b < 0 ? '−' : '+'} ${Math.abs(b)}, ξ ~ N(0, ${sigma})`, source: 'normal',
+      name: `$\\eta = ${alpha}\\xi ${b < 0 ? '-' : '+'} ${Math.abs(b)}$, $\\xi \\sim N(0, ${sigma})$`, source: 'normal',
       map: (x) => alpha * x + b, range: [-8, 8],
       pdf: (y) => normPdf((y - b) / alpha / sigma) / sigma / Math.abs(alpha),
       cdf: (y) => Phi((y - b) / s), mean: b,
@@ -248,20 +248,20 @@ export function makeTransform({ phi, alpha, b, beta, lambda, sigma }) {
   }
   if (phi === 1)
     return {
-      name: `η = e^ξ, ξ ~ N(0, ${sigma})`, source: 'normal', map: Math.exp, range: [0, 6],
+      name: `$\\eta = e^{\\xi}$, $\\xi \\sim N(0, ${sigma})$`, source: 'normal', map: Math.exp, range: [0, 6],
       pdf: (y) => (y <= 0 ? 0 : normPdf(Math.log(y) / sigma) / (sigma * y)), cdf: (y) => (y <= 0 ? 0 : Phi(Math.log(y) / sigma)),
       mean: Math.exp((sigma * sigma) / 2),
     };
   if (phi === 2) {
     const g = lambda / beta;
     return {
-      name: `η = e^(−${beta}ξ), ξ ~ Exp(${lambda})`, source: 'exponential', map: (x) => Math.exp(-beta * x), range: [0, 1],
+      name: `$\\eta = e^{-${beta}\\xi}$, $\\xi \\sim \\mathrm{Exp}(${lambda})$`, source: 'exponential', map: (x) => Math.exp(-beta * x), range: [0, 1],
       pdf: (y) => (y <= 0 || y > 1 ? 0 : g * y ** (g - 1)), cdf: (y) => (y <= 0 ? 0 : y >= 1 ? 1 : y ** g),
       mean: lambda / (lambda + beta), unboundedAtZero: g < 1,
     };
   }
   return {
-    name: `η = ξ², ξ ~ Exp(${lambda}) (monotone on ξ ≥ 0)`, source: 'exponential', map: (x) => x * x, range: [0, 6],
+    name: `$\\eta = \\xi^2$, $\\xi \\sim \\mathrm{Exp}(${lambda})$ (monotone on $\\xi \\ge 0$)`, source: 'exponential', map: (x) => x * x, range: [0, 6],
     pdf: (y) => (y <= 0 ? 0 : (lambda * Math.exp(-lambda * Math.sqrt(y))) / (2 * Math.sqrt(y))),
     cdf: (y) => (y <= 0 ? 0 : 1 - Math.exp(-lambda * Math.sqrt(y))), mean: 2 / lambda ** 2, unboundedAtZero: true,
   };
@@ -271,10 +271,10 @@ function runTransform(params, seed) {
   if (params.phi === 0 && params.alpha === 0) {
     // Degenerate case the slider passes through: η = b with probability 1, so η has no density.
     return {
-      axes: { x: 'value y of η', y: 'probability' },
-      readouts: [{ key: 'mean', label: 'Mη', observed: params.b, theory: params.b, convention: 'η = b with probability 1' }],
-      series: [{ id: 'atom', kind: 'pmf', tone: 'signal', label: 'P(η = b) = 1', x: [params.b], y: [1] }],
-      notes: ['α = 0 makes η = b a constant: φ is not strictly monotone, so formula (44) does not apply and η has no density. Move α away from 0.'],
+      axes: { x: 'value $y$ of $\\eta$', y: 'probability' },
+      readouts: [{ key: 'mean', label: '$M\\eta$', observed: params.b, theory: params.b, convention: '$\\eta = b$ with probability 1' }],
+      series: [{ id: 'atom', kind: 'pmf', tone: 'signal', label: '$P(\\eta = b) = 1$', x: [params.b], y: [1] }],
+      notes: ['$\\alpha = 0$ makes $\\eta = b$ a constant: $\\varphi$ is not strictly monotone, so formula (44) does not apply and $\\eta$ has no density. Move $\\alpha$ away from 0.'],
     };
   }
   const t = makeTransform(params);
@@ -297,27 +297,27 @@ function runTransform(params, seed) {
   }
   const sm = sampleMoments(ys);
   const readouts = [
-    { key: 'mean', label: 'Mη', observed: r6(sm.mean), theory: r6(t.mean), convention: 'sample mean' },
-    { key: 'ks', label: 'Kolmogorov distance sup|Fₙ(y) − F(y)|', observed: r6(D), theory: r6(1.358 / Math.sqrt(n)), convention: 'theory column: 95 % critical value 1.358/√n' },
-    { key: 'bins', label: 'Largest bin deviation, in standard errors', observed: r6(worst), theory: '≤ 4.0 in 99 % of runs', convention: 'max over ≤ 40 bins with expected count ≥ 5 (Bonferroni); expected mass from F' },
-    { key: 'mass', label: 'Share of η inside the shown range', observed: r6(1 - h.outside / n), theory: r6(t.cdf(hi) - t.cdf(lo)) },
+    { key: 'mean', label: '$M\\eta$', observed: r6(sm.mean), theory: r6(t.mean), convention: 'sample mean' },
+    { key: 'ks', label: 'Kolmogorov distance $\\sup_y |F_n(y) - F(y)|$', observed: r6(D), theory: r6(1.358 / Math.sqrt(n)), convention: 'theory column: 95 % critical value $1.358/\\sqrt{n}$' },
+    { key: 'bins', label: 'Largest bin deviation, in standard errors', observed: r6(worst), theory: '$\\le 4.0$ in 99 % of runs', convention: 'max over $\\le 40$ bins with expected count $\\ge 5$ (Bonferroni); expected mass from $F$' },
+    { key: 'mass', label: 'Share of $\\eta$ inside the shown range', observed: r6(1 - h.outside / n), theory: r6(t.cdf(hi) - t.cdf(lo)) },
   ];
   if (params.phi === 2) {
     const y0 = 0.5, g = params.lambda / params.beta;
-    readouts.push({ key: 'F05', label: 'F(0.5) = 0.5^(λ/β) (L6 example)', observed: r6(ys.filter((y) => y < y0).length / n), theory: r6(y0 ** g), convention: 'share of η < 0.5' });
+    readouts.push({ key: 'F05', label: '$F(0.5) = 0.5^{\\lambda/\\beta}$ (L6 example)', observed: r6(ys.filter((y) => y < y0).length / n), theory: r6(y0 ** g), convention: 'share of $\\eta < 0.5$' });
   }
   const notes = [
-    `${t.name}. The curve is formula (44): f_η(y) = f_ξ(φ⁻¹(y)) · |dφ⁻¹(y)/dy|, valid for strictly monotone φ.`,
-    'The dots are the expected bin heights (F(b) − F(a))/width, so the comparison stays exact where the density is unbounded.',
+    `${t.name}. The curve is formula (44): $f_\\eta(y) = f_\\xi\\bigl(\\varphi^{-1}(y)\\bigr) \\cdot \\left|\\dfrac{d\\varphi^{-1}(y)}{dy}\\right|$, valid for strictly monotone $\\varphi$.`,
+    'The dots are the expected bin heights $\\dfrac{F(b) - F(a)}{\\text{width}}$, so the comparison stays exact where the density is unbounded.',
   ];
-  if (params.phi === 2) notes.push(`L6 example: η = e^(−βξ), ξ ~ Exp(λ) gives F(y) = y^(λ/β) on [0, 1]; here λ/β = ${r6(params.lambda / params.beta)}.`);
-  if (t.unboundedAtZero) notes.push(`f_η(y) → ∞ as y → 0; the drawn curve is cut at ${r6(cap)}.`);
-  if (params.phi === 3) notes.push('x² is not monotone on ℝ; it is monotone on the support x ≥ 0 of Exp(λ), so (44) applies with one branch.');
+  if (params.phi === 2) notes.push(`L6 example: $\\eta = e^{-\\beta\\xi}$, $\\xi \\sim \\mathrm{Exp}(\\lambda)$ gives $F(y) = y^{\\lambda/\\beta}$ on $[0, 1]$; here $\\lambda/\\beta = ${r6(params.lambda / params.beta)}$.`);
+  if (t.unboundedAtZero) notes.push(`$f_\\eta(y) \\to \\infty$ as $y \\to 0$; the drawn curve is cut at ${r6(cap)}.`);
+  if (params.phi === 3) notes.push('$x^2$ is not monotone on $\\mathbb{R}$; it is monotone on the support $x \\ge 0$ of $\\mathrm{Exp}(\\lambda)$, so (44) applies with one branch.');
   return {
-    axes: { x: 'value y of η', y: 'density' }, readouts, notes,
+    axes: { x: 'value $y$ of $\\eta$', y: 'density' }, readouts, notes,
     series: [
-      { id: 'hist', kind: 'hist', label: 'Histogram of η = φ(ξ)', x: h.x, y: h.y },
-      { id: 'pdf', kind: 'pdf', tone: 'signal', label: 'f_η(y), formula (44)', x: xg, y: fy },
+      { id: 'hist', kind: 'hist', label: 'Histogram of $\\eta = \\varphi(\\xi)$', x: h.x, y: h.y },
+      { id: 'pdf', kind: 'pdf', tone: 'signal', label: '$f_\\eta(y)$, formula (44)', x: xg, y: fy },
       { id: 'expected', kind: 'points', tone: 'signal', label: 'Expected bin height', x: h.x.map((a) => a + h.w / 2), y: expected },
     ],
   };
@@ -327,10 +327,10 @@ function runTransform(params, seed) {
 
 const scatterParams = [
   { key: 'mode', label: 'Experiment (0 bivariate normal · 1 uniform disc · 2 matching problem)', min: 0, max: 2, step: 1, default: 0 },
-  { key: 'rho', label: 'Correlation ρ (experiment 0)', min: -0.95, max: 0.95, step: 0.05, default: 0.6 },
-  { key: 'sigma2', label: 'σ of η (experiment 0; σ of ξ is 1)', min: 0.5, max: 2, step: 0.1, default: 1 },
-  { key: 'n', label: 'Points n (experiments 0, 1)', min: 200, max: 20000, step: 100, default: 2000 },
-  { key: 'players', label: 'Players n (experiment 2)', min: 2, max: 40, step: 1, default: 6 },
+  { key: 'rho', label: 'Correlation $\\rho$ (experiment 0)', min: -0.95, max: 0.95, step: 0.05, default: 0.6 },
+  { key: 'sigma2', label: '$\\sigma$ of $\\eta$ (experiment 0; $\\sigma$ of $\\xi$ is 1)', min: 0.5, max: 2, step: 0.1, default: 1 },
+  { key: 'n', label: 'Points $n$ (experiments 0, 1)', min: 200, max: 20000, step: 100, default: 2000 },
+  { key: 'players', label: 'Players $n$ (experiment 2)', min: 2, max: 40, step: 1, default: 6 },
   { key: 'reps', label: 'Lottery draws (experiment 2)', min: 200, max: 10000, step: 100, default: 4000 },
 ];
 const SHOWN_POINTS = 1500;
@@ -394,9 +394,9 @@ function runVector({ mode, rho, sigma2, n }, seed) {
   const yOnX = (k, mx, my) => ({ x: xl, y: xl.map((x) => my + k * (x - mx)) });
   const xOnY = (k, mx, my) => ({ x: yl.map((y) => mx + k * (y - my)), y: yl });
   const thY = yOnX(mode === 0 ? (rho * sigma2) : 0, 0, 0);
-  series.push({ id: 'reg-yx-theory', kind: 'line', tone: 'signal', label: 'Line (63), theory: η on ξ', ...thY });
-  if (mode === 0 && rho !== 0) series.push({ id: 'reg-xy-theory', kind: 'line', tone: 'signal', label: 'Line (64), theory: ξ on η', ...xOnY(rho / sigma2, 0, 0) });
-  else series.push({ id: 'reg-xy-theory-rule', kind: 'rule', tone: 'signal', label: 'Line (64), theory: x = Mξ (vertical, r = 0)', x: [0], y: [] });
+  series.push({ id: 'reg-yx-theory', kind: 'line', tone: 'signal', label: 'Line (63), theory: $\\eta$ on $\\xi$', ...thY });
+  if (mode === 0 && rho !== 0) series.push({ id: 'reg-xy-theory', kind: 'line', tone: 'signal', label: 'Line (64), theory: $\\xi$ on $\\eta$', ...xOnY(rho / sigma2, 0, 0) });
+  else series.push({ id: 'reg-xy-theory-rule', kind: 'rule', tone: 'signal', label: 'Line (64), theory: $x = M\\xi$ (vertical, $r = 0$)', x: [0], y: [] });
   series.push({ id: 'reg-yx', kind: 'line', tone: 'accent', label: 'Line (63) from the sample', ...yOnX(st.slopeYonX, st.mx, st.my) });
   series.push({ id: 'reg-xy', kind: 'line', tone: 'accent', label: 'Line (64) from the sample', ...xOnY(st.slopeXonY, st.mx, st.my) });
 
@@ -404,23 +404,23 @@ function runVector({ mode, rho, sigma2, n }, seed) {
   if (mode === 0) {
     // Ellipse of dispersion Q(x, y) = c² with c = 2: P(inside) = 1 − e^(−c²/2) for a bivariate normal.
     const t = grid(0, 2 * Math.PI, 121), c = 2, L = Math.sqrt(1 - rho * rho);
-    series.push({ id: 'ellipse', kind: 'line', tone: 'muted', label: 'Ellipse of dispersion, c = 2', x: t.map((a) => c * Math.cos(a)), y: t.map((a) => sigma2 * c * (rho * Math.cos(a) + L * Math.sin(a))) });
+    series.push({ id: 'ellipse', kind: 'line', tone: 'muted', label: 'Ellipse of dispersion, $c = 2$', x: t.map((a) => c * Math.cos(a)), y: t.map((a) => sigma2 * c * (rho * Math.cos(a) + L * Math.sin(a))) });
     const Q = (x, y) => (x * x - (2 * rho * x * y) / sigma2 + (y * y) / (sigma2 * sigma2)) / (1 - rho * rho);
     inside = xs.reduce((k, x, i) => (Q(x, ys[i]) < c * c ? k + 1 : k), 0) / n;
     const dens = (x, y) => Math.exp(-Q(x, y) / 2) / (2 * Math.PI * sigma2 * L);
-    surface = surfaceGrid(xs, ys, [-X, X], [-Y, Y], 31, dens, { x: 'ξ', y: 'η', z: 'density f(x, y)' });
-    surface.title = `Joint density of (ξ, η), ρ = ${rho}`;
+    surface = surfaceGrid(xs, ys, [-X, X], [-Y, Y], 31, dens, { x: '$\\xi$', y: '$\\eta$', z: 'density $f(x, y)$' });
+    surface.title = `Joint density of $(\\xi, \\eta)$, $\\rho = ${rho}$`;
     readouts = [
-      { key: 'cov', label: 'Cov(ξ, η)', observed: r6(st.cov), theory: r6(rho * sigma2), convention: 'divisor n − 1' },
-      { key: 'r', label: 'Correlation r(ξ, η)', observed: r6(st.r), theory: rho, convention: `99 % band ${r6(band[0])} … ${r6(band[1])} (Fisher z)` },
-      { key: 'slope63', label: 'Slope of (63): r σ₂/σ₁', observed: r6(st.slopeYonX), theory: r6(rho * sigma2) },
-      { key: 'slope64', label: 'Slope of (64) as dx/dy: r σ₁/σ₂', observed: r6(st.slopeXonY), theory: r6(rho / sigma2) },
+      { key: 'cov', label: '$\\operatorname{Cov}(\\xi, \\eta)$', observed: r6(st.cov), theory: r6(rho * sigma2), convention: 'divisor $n - 1$' },
+      { key: 'r', label: 'Correlation $r(\\xi, \\eta)$', observed: r6(st.r), theory: rho, convention: `99 % band ${r6(band[0])} … ${r6(band[1])} (Fisher $z$)` },
+      { key: 'slope63', label: 'Slope of (63): $r\\,\\sigma_2/\\sigma_1$', observed: r6(st.slopeYonX), theory: r6(rho * sigma2) },
+      { key: 'slope64', label: 'Slope of (64) as $dx/dy$: $r\\,\\sigma_1/\\sigma_2$', observed: r6(st.slopeXonY), theory: r6(rho / sigma2) },
       { key: 'angle', label: 'Acute angle between (63) and (64)', observed: r6(regressionAngle(st.r, st.sx, st.sy)), theory: r6(regressionAngle(rho, 1, sigma2)), unit: '°' },
-      { key: 'ellipse', label: 'Share inside the c = 2 ellipse', observed: r6(inside), theory: r6(1 - Math.exp(-2)) },
+      { key: 'ellipse', label: 'Share inside the $c = 2$ ellipse', observed: r6(inside), theory: r6(1 - Math.exp(-2)) },
     ];
     notes = [
-      'Lines (63) and (64) differ unless |r| = 1; the angle between them shrinks as |r| grows and is 90° at r = 0.',
-      'The 3D view puts the theoretical density f(x, y) and the sample\'s 2D histogram on the same grid.',
+      'Lines (63) and (64) differ unless $|r| = 1$; the angle between them shrinks as $|r|$ grows and is $90^\\circ$ at $r = 0$.',
+      'The 3D view puts the theoretical density $f(x, y)$ and the sample\'s 2D histogram on the same grid.',
       'L6 leaves the least-squares check as an exercise; the sample lines here are the least-squares fits, and they coincide with (63)–(64) built from sample moments.',
     ];
   } else {
@@ -430,23 +430,23 @@ function runVector({ mode, rho, sigma2, n }, seed) {
     const a = 0.75, tail = (2 / Math.PI) * (Math.acos(a) - a * Math.sqrt(1 - a * a));
     const both = xs.reduce((k, x, i) => (Math.abs(x) > a && Math.abs(ys[i]) > a ? k + 1 : k), 0) / n;
     const t = grid(0, 2 * Math.PI, 121);
-    series.push({ id: 'disc', kind: 'line', tone: 'muted', label: 'Disc x² + y² = 1', x: t.map(Math.cos), y: t.map(Math.sin) });
-    surface = surfaceGrid(xs, ys, [-X, X], [-Y, Y], 31, (x, y) => (x * x + y * y <= 1 ? 1 / Math.PI : 0), { x: 'ξ', y: 'η', z: 'density f(x, y)' });
+    series.push({ id: 'disc', kind: 'line', tone: 'muted', label: 'Disc $x^2 + y^2 = 1$', x: t.map(Math.cos), y: t.map(Math.sin) });
+    surface = surfaceGrid(xs, ys, [-X, X], [-Y, Y], 31, (x, y) => (x * x + y * y <= 1 ? 1 / Math.PI : 0), { x: '$\\xi$', y: '$\\eta$', z: 'density $f(x, y)$' });
     surface.title = 'Uniform density on the unit disc';
     readouts = [
-      { key: 'cov', label: 'Cov(ξ, η)', observed: r6(st.cov), theory: 0, convention: 'divisor n − 1' },
-      { key: 'r', label: 'Correlation r(ξ, η)', observed: r6(st.r), theory: 0, convention: `99 % band ${r6(band[0])} … ${r6(band[1])}` },
-      { key: 'r2', label: 'Correlation of ξ² and η²', observed: r6(sq.r), theory: r6(-1 / 3), convention: 'nonzero: ξ and η are dependent' },
-      { key: 'joint', label: 'P(|ξ| > 0.75 and |η| > 0.75)', observed: r6(both), theory: 0, convention: 'the corner lies outside the disc' },
-      { key: 'product', label: 'P(|ξ| > 0.75) · P(|η| > 0.75)', observed: r6((xs.filter((x) => Math.abs(x) > a).length / n) * (ys.filter((y) => Math.abs(y) > a).length / n)), theory: r6(tail * tail), convention: 'what independence would require' },
+      { key: 'cov', label: '$\\operatorname{Cov}(\\xi, \\eta)$', observed: r6(st.cov), theory: 0, convention: 'divisor $n - 1$' },
+      { key: 'r', label: 'Correlation $r(\\xi, \\eta)$', observed: r6(st.r), theory: 0, convention: `99 % band ${r6(band[0])} … ${r6(band[1])}` },
+      { key: 'r2', label: 'Correlation of $\\xi^2$ and $\\eta^2$', observed: r6(sq.r), theory: r6(-1 / 3), convention: 'nonzero: $\\xi$ and $\\eta$ are dependent' },
+      { key: 'joint', label: '$P(|\\xi| > 0.75,\\ |\\eta| > 0.75)$', observed: r6(both), theory: 0, convention: 'the corner lies outside the disc' },
+      { key: 'product', label: '$P(|\\xi| > 0.75) \\cdot P(|\\eta| > 0.75)$', observed: r6((xs.filter((x) => Math.abs(x) > a).length / n) * (ys.filter((y) => Math.abs(y) > a).length / n)), theory: r6(tail * tail), convention: 'what independence would require' },
     ];
     notes = [
-      'L6: for the uniform disc Cov(ξ, η) = 0, yet ξ and η are dependent: |ξ| close to 1 forces η close to 0.',
+      'L6: for the uniform disc $\\operatorname{Cov}(\\xi, \\eta) = 0$, yet $\\xi$ and $\\eta$ are dependent: $|\\xi|$ close to 1 forces $\\eta$ close to 0.',
       'The joint probability of the corners is 0, while the product of the marginals is not: the definition of independence fails.',
-      `Mean of ξ² is ${r6(ex2 / n)} (theory 1/4), of η² ${r6(ey2 / n)} (theory 1/4).`,
+      `Mean of $\\xi^2$ is ${r6(ex2 / n)} (theory $\\tfrac14$), of $\\eta^2$ ${r6(ey2 / n)} (theory $\\tfrac14$).`,
     ];
   }
-  return { axes: { x: 'x (value of ξ)', y: 'y (value of η)' }, readouts, series, notes, surface };
+  return { axes: { x: '$x$ (value of $\\xi$)', y: '$y$ (value of $\\eta$)' }, readouts, series, notes, surface };
 }
 
 /** Exact P(M = k) for the number of fixed points of a random permutation of n: (1/k!) Σⱼ₌₀ⁿ⁻ᵏ (−1)ʲ/j!. */
@@ -493,21 +493,21 @@ function runMatching({ players: n, reps }, seed) {
   const fact = (k) => (k <= 1 ? 1 : k * fact(k - 1));
   const poisson = shown.map((k) => Math.exp(-1) / fact(k));
   return {
-    axes: { x: 'number of matches k', y: 'probability' },
+    axes: { x: 'number of matches $k$', y: 'probability' },
     readouts: [
-      { key: 'mean', label: 'Mean number of prizes Mμ', observed: r6(sm.mean), theory: 1, convention: `band ±${r6(bands.mean)}` },
-      { key: 'variance', label: 'Variance Dμ', observed: r6(sm.s2), theory: 1, convention: `s², divisor K − 1; band ±${r6(bands.variance)}` },
-      { key: 'p0', label: 'P(no prize)', observed: r6(counts[0] / reps), theory: r6(pmf[0]), convention: `→ 1/e = ${r6(Math.exp(-1))}` },
-      { key: 'draws', label: 'Lottery draws K', observed: reps, theory: null },
+      { key: 'mean', label: 'Mean number of prizes $M\\mu$', observed: r6(sm.mean), theory: 1, convention: `band $\\pm ${r6(bands.mean)}$` },
+      { key: 'variance', label: 'Variance $D\\mu$', observed: r6(sm.s2), theory: 1, convention: `$s^2$, divisor $K - 1$; band $\\pm ${r6(bands.variance)}$` },
+      { key: 'p0', label: '$P(\\text{no prize})$', observed: r6(counts[0] / reps), theory: r6(pmf[0]), convention: `$\\to 1/e = ${r6(Math.exp(-1))}$` },
+      { key: 'draws', label: 'Lottery draws $K$', observed: reps, theory: null },
     ],
     series: [
-      { id: 'freq', kind: 'hist', label: 'Share of draws with k matches', x: shown.map((k) => k - 0.5), y: shown.map((k) => counts[k] / reps) },
-      { id: 'pmf', kind: 'pmf', tone: 'signal', label: 'Exact P(μ = k)', x: shown, y: shown.map((k) => pmf[k]) },
-      { id: 'poisson', kind: 'points', tone: 'muted', label: 'Poisson(1) limit', x: shown, y: poisson },
+      { id: 'freq', kind: 'hist', label: 'Share of draws with $k$ matches', x: shown.map((k) => k - 0.5), y: shown.map((k) => counts[k] / reps) },
+      { id: 'pmf', kind: 'pmf', tone: 'signal', label: 'Exact $P(\\mu = k)$', x: shown, y: shown.map((k) => pmf[k]) },
+      { id: 'poisson', kind: 'points', tone: 'muted', label: '$\\mathrm{Poisson}(1)$ limit', x: shown, y: poisson },
     ],
     notes: [
-      `L6 lottery: μ = Σ μₖ, Mμₖ = 1/n, so Mμ = 1 for every n; with Cov(μᵢ, μⱼ) = 1/(n²(n − 1)) the variance is also 1 (n = ${n}, ${reps} seeded shuffles).`,
-      'L6 then adds "M + D = 1 + 1 = 2 prizes". Mean plus variance mixes units; the usual allowance is M + σ = 1 + 1 = 2, which gives the same number only because D = σ = 1.',
+      `L6 lottery: $\\mu = \\sum_k \\mu_k$, $M\\mu_k = 1/n$, so $M\\mu = 1$ for every $n$; with $\\operatorname{Cov}(\\mu_i, \\mu_j) = \\dfrac{1}{n^2(n-1)}$ the variance is also 1 ($n = ${n}$, ${reps} seeded shuffles).`,
+      'L6 then adds "$M + D = 1 + 1 = 2$ prizes". Mean plus variance mixes units; the usual allowance is $M + \\sigma = 1 + 1 = 2$, which gives the same number only because $D = \\sigma = 1$.',
     ],
   };
 }
@@ -517,7 +517,7 @@ function runMatching({ players: n, reps }, seed) {
 export const meta = {
   id: 'lecture-random-vectors',
   lectures: ['L5', 'L6'],
-  title: 'Moments, the 3σ rule, functions of a random variable, correlation and regression',
+  title: 'Moments, the $3\\sigma$ rule, functions of a random variable, correlation and regression',
   params: momentsParams,
 };
 

@@ -8,6 +8,7 @@ import { useKernelRunner, type Job } from './kernel-runner';
 import type { KernelStation as KernelStationInfo } from './catalog';
 import { Chart } from './chart';
 import { Surface3D } from './surface-3d';
+import { MathText, mathToPlain } from '../math';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
 const sources = import.meta.glob('../../../*/kernel.mjs');
@@ -17,6 +18,8 @@ export const kernelAvailable = (kernel: string) => keyFor(kernel) in sources;
 const format = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 5 });
 const show = (v: number | string | null | undefined) =>
   v == null ? '—' : typeof v === 'number' ? (Number.isFinite(v) ? format.format(v) : String(v)) : v;
+/** A readout cell: numbers formatted, text with `$…$` formulas typeset. */
+const cell = (v: number | string | null | undefined) => <MathText text={show(v)} />;
 
 type Load = { state: 'loading' } | { state: 'missing' } | { state: 'error'; message: string } | { state: 'ready'; kernel: Kernel };
 
@@ -155,7 +158,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
     : (trackable.find((r) => numeric(r.theory)) ?? trackable[0])?.key ?? null;
 
   const status = failed ? 'Stopped: the kernel rejected these parameters'
-    : growing && size ? `Growing the sample · ${size.label.replace(/\s*\(.*\)$/, '')} ${fmtInt(job.params[size.key])} of ${fmtInt(params[size.key])}`
+    : growing && size ? `Growing the sample · ${mathToPlain(size.label).replace(/\s*\(.*\)$/, '')} ${fmtInt(job.params[size.key])} of ${fmtInt(params[size.key])}`
     : `${playing ? 'Live' : 'Stopped'} · draw ${draws + 1} · seed ${seed}`;
 
   return (
@@ -199,12 +202,12 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
               <tbody>
                 {result.readouts.map((r, i) => (
                   <tr key={r.key + i} data-tracked={r.key === trackKey || undefined}>
-                    <th scope="row">{r.label}{r.convention && <small>{r.convention}</small>}</th>
-                    <td>{show(r.observed)}{r.unit && r.observed != null ? ` ${r.unit}` : ''}</td>
-                    <td>{show(r.theory)}{r.unit && r.theory != null ? ` ${r.unit}` : ''}</td>
+                    <th scope="row"><MathText text={r.label} />{r.convention && <small><MathText text={r.convention} /></small>}</th>
+                    <td>{cell(r.observed)}{r.unit && r.observed != null ? ` ${r.unit}` : ''}</td>
+                    <td>{cell(r.theory)}{r.unit && r.theory != null ? ` ${r.unit}` : ''}</td>
                     <td className="readout-track">
                       {numeric(r.observed) && (
-                        <button type="button" aria-pressed={r.key === trackKey} aria-label={`Follow ${r.label} across draws`}
+                        <button type="button" aria-pressed={r.key === trackKey} aria-label={`Follow ${mathToPlain(r.label)} across draws`}
                           title="Follow this quantity across draws" onClick={() => setTracked(r.key)}><Activity size={13} aria-hidden /></button>
                       )}
                     </td>
@@ -216,7 +219,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
             {result.notes.length > 0 && (
               <div className="station-notes">
                 <PanelHeading icon={<CircleHelp size={16} aria-hidden />} title="Reading the result" />
-                {result.notes.map((n, i) => <p key={i}>{n}</p>)}
+                {result.notes.map((n, i) => <p key={i}><MathText text={n} /></p>)}
               </div>
             )}
           </>
@@ -258,7 +261,7 @@ function Choice({ id, title, options, value, onChange }: {
   const at = options.findIndex((o) => o.value === value);
   return (
     <div className="choice-field">
-      <span className="choice-title" id={`${id}-title`}>{title}</span>
+      <span className="choice-title" id={`${id}-title`}><MathText text={title} /></span>
       <div className="choice-chips" role="radiogroup" aria-labelledby={`${id}-title`}>
         {options.map((o, i) => (
           <button key={o.value} type="button" role="radio" aria-checked={o.value === value} tabIndex={i === Math.max(0, at) ? 0 : -1}
@@ -272,7 +275,7 @@ function Choice({ id, title, options, value, onChange }: {
               onChange(next.value);
               (e.currentTarget.parentElement?.children[options.indexOf(next)] as HTMLElement | undefined)?.focus();
             }}>
-            {o.label}
+            <MathText text={o.label} />
           </button>
         ))}
       </div>
@@ -298,9 +301,9 @@ function Trace({ draws, readoutKey }: { draws: Draw[]; readoutKey: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draws, readoutKey]);
   return (
-    <section className="trace" aria-label={`${label} across draws`}>
+    <section className="trace" aria-label={`${mathToPlain(label)} across draws`}>
       <p className="trace-head">
-        <b>Across draws</b> · {label}
+        <b>Across draws</b> · <MathText text={label} />
         {sum.count > 0 && <span> · mean {show(sum.mean)}{sum.sd != null && <> ± {show(sum.sd)}</>} over {sum.count} draw{sum.count === 1 ? '' : 's'}{sum.theory != null && <> · theory {show(sum.theory)}</>}</span>}
       </p>
       {draws.length < 2 ? (
@@ -354,7 +357,7 @@ export function PendingStation({ station }: { station: KernelStationInfo }) {
   return (
     <div className="station-pending">
       <p className="edition"><i /> KERNEL IN PROGRESS</p>
-      <p>{station.summary}</p>
+      <p><MathText text={station.summary} /></p>
       <p>
         The station appears here as soon as <code translate="no">spikes/{station.kernel}/kernel.mjs</code> lands.
       </p>

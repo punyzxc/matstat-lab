@@ -14,7 +14,7 @@
       "title": "Chebyshev inequality",
       "idea": "A finite variance bounds the chance of a large deviation from the mean, whatever the law.",
       "formula": [
-        "P(|ξ − Mξ| ≥ ε) ≤ Dξ / ε²"
+        "P\\bigl(|\\xi - M\\xi| \\ge \\varepsilon\\bigr) \\le \\dfrac{D\\xi}{\\varepsilon^2}"
       ],
       "scientists": [
         "chebyshev"
@@ -32,9 +32,9 @@
     },
     {
       "title": "Running means settle",
-      "idea": "The mean of n independent draws with finite variance converges in probability to the expectation.",
+      "idea": "The mean of $n$ independent draws with finite variance converges in probability to the expectation.",
       "formula": [
-        "(ξ₁ + … + ξₙ) / n  →  a"
+        "\\dfrac{\\xi_1 + \\ldots + \\xi_n}{n} \\;\\xrightarrow[\\;n\\to\\infty\\;]{P}\\; a"
       ],
       "scientists": [
         "chebyshev",

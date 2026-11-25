@@ -5,10 +5,10 @@ import { fixtureUint32 } from '../simulation-engine/engine.mjs';
 export const meta = {
   id: 'scene-module-host',
   lectures: ['L1'],
-  title: 'Contract fixture: frequency of an event with probability p',
+  title: 'Contract fixture: frequency of an event with probability $p$',
   params: [
-    { key: 'p', label: 'Probability p', min: 0, max: 1, step: 0.05, default: 0.3 },
-    { key: 'n', label: 'Trials n', min: 100, max: 5000, step: 100, default: 1000 },
+    { key: 'p', label: 'Probability $p$', min: 0, max: 1, step: 0.05, default: 0.3 },
+    { key: 'n', label: 'Trials $n$', min: 100, max: 5000, step: 100, default: 1000 },
   ],
 };
 
@@ -23,12 +23,12 @@ export function run({ p, n }, { seed }) {
   return {
     axes: { x: 'trials k', y: 'relative frequency' },
     readouts: [
-      { key: 'freq', label: 'Relative frequency m/n', observed: hits / n, theory: p },
-      { key: 'hits', label: 'Hits m', observed: hits, theory: p * n },
+      { key: 'freq', label: 'Relative frequency $m/n$', observed: hits / n, theory: p },
+      { key: 'hits', label: 'Hits $m$', observed: hits, theory: p * n },
     ],
     series: [
-      { id: 'band', kind: 'band', tone: 'signal', label: 'p ± 2√(p(1−p)/k)', x, y: x.map((k) => p - 2 * Math.sqrt((p * (1 - p)) / k)), y2: x.map((k) => p + 2 * Math.sqrt((p * (1 - p)) / k)) },
-      { id: 'freq', kind: 'line', label: 'm/k', x, y },
+      { id: 'band', kind: 'band', tone: 'signal', label: '$p \\pm 2\\sqrt{p(1-p)/k}$', x, y: x.map((k) => p - 2 * Math.sqrt((p * (1 - p)) / k)), y2: x.map((k) => p + 2 * Math.sqrt((p * (1 - p)) / k)) },
+      { id: 'freq', kind: 'line', label: '$m/k$', x, y },
     ],
     notes: [`At n = ${n} the band half-width is ${half.toFixed(4)}.`],
   };

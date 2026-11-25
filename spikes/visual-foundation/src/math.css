@@ -1,0 +1,63 @@
+/* KaTeX on the dark scene: formulas take the surrounding ink, never a white box. */
+.tex .katex {
+  color: inherit;
+  font-size: 1.12em;
+  text-rendering: optimizeLegibility;
+}
+.tex .katex-error {
+  color: #ff8a7a !important;
+}
+.tex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+.tex-display .katex-display {
+  margin: 0;
+  text-align: left;
+}
+.tex-display .katex-display > .katex {
+  text-align: left;
+  font-size: 1.32em;
+  padding: 0.12em 0;
+}
+/* Inline formulas inside small mono UI labels: keep them readable without breaking the line height. */
+.tex:not(.tex-display) {
+  white-space: nowrap;
+  line-height: 1;
+}
+.svg-math {
+  overflow: visible;
+}
+.svg-math-box {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  color: #c9c9c9;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.svg-math-middle {
+  justify-content: center;
+}
+.svg-math-end {
+  justify-content: flex-end;
+}
+/* The scene footer's running-mean formula: large enough to read at a glance. */
+.orbit-formula .tex .katex {
+  font-size: 1.45em;
+  color: #c9c9c9;
+}
+/* Radicals and stretchy delimiters are inline SVG: keep chart/scene SVG styles (fill: none, strokes) off them. */
+.tex .katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  max-width: none;
+}
+.tex .katex svg,
+.tex .katex svg path {
+  fill: currentColor;
+  stroke: none;
+}

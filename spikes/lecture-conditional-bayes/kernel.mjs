@@ -46,10 +46,10 @@ function runEvents(p, seed) {
     axes: { x: 'x (unit square)', y: 'y (unit square)' },
     readouts: [
       ro('pA', 'P(A)', cnt.A, P.A), ro('pB', 'P(B)', cnt.B, P.B), ro('pC', 'P(C)', cnt.C, P.C),
-      ro('pAB', 'P(AB)', cnt.AB, P.AB), ro('pAuB', 'P(A∪B) = P(A)+P(B)−P(AB)', cnt.AuB, P.AuB),
-      ro('pAuBuC', 'P(A∪B∪C), inclusion–exclusion', cnt.AuBuC, P.AuBuC),
+      ro('pAB', 'P(AB)', cnt.AB, P.AB), ro('pAuB', '$P(A \\cup B) = P(A) + P(B) - P(AB)$', cnt.AuB, P.AuB),
+      ro('pAuBuC', '$P(A \\cup B \\cup C)$, inclusion–exclusion', cnt.AuBuC, P.AuBuC),
       { ...ro('pAgB', 'P(A|B) = P(AB)/P(B)', cnt.AB, P.AgB, cnt.B), band: P.AgB == null ? null : band(P.AgB, n * P.B) },
-      { key: 'indep', label: 'P(AB) − P(A)P(B) (0 ⇔ independent)', observed: cnt.AB / n - (cnt.A / n) * (cnt.B / n), theory: P.AB - P.A * P.B },
+      { key: 'indep', label: '$P(AB) - P(A)P(B)$ ($0 \\Leftrightarrow$ independent)', observed: cnt.AB / n - (cnt.A / n) * (cnt.B / n), theory: P.AB - P.A * P.B },
     ],
     series: [
       { id: 'none', kind: 'points', tone: 'muted', label: 'outside A and B', x: cls.none[0], y: cls.none[1] },
@@ -59,10 +59,10 @@ function runEvents(p, seed) {
       outline('rA', rect.A, 'A'), outline('rB', rect.B, 'B'), outline('rC', rect.C, 'C'),
     ],
     notes: [
-      'Addition theorem (L1, corollary 4): P(A∪B) = P(A) + P(B) − P(AB).',
-      'Conditional probability (L2, formula 6): P(A|B) = P(AB)/P(B); observed value is (#AB)/(#B) over simulated points.',
-      `Bands are ±${BAND_Z} standard errors around the exact value (for P(A|B) over the expected count of B), clipped to [0, 1]; no band is given when the expected spread m·p(1−p) is below ${MIN_SPREAD}.`,
-      'A and C are independent for any sliders (a vertical and a horizontal strip); A and B are independent only when their overlap equals a·|B|.',
+      'Addition theorem (L1, corollary 4): $P(A \\cup B) = P(A) + P(B) - P(AB)$.',
+      'Conditional probability (L2, formula 6): $P(A \\mid B) = \\dfrac{P(AB)}{P(B)}$; the observed value is $\\#AB / \\#B$ over simulated points.',
+      `Bands are $\\pm${BAND_Z}$ standard errors around the exact value (for $P(A \\mid B)$ over the expected count of $B$), clipped to $[0, 1]$; no band is given when the expected spread $m\\,p(1-p)$ is below ${MIN_SPREAD}.`,
+      '$A$ and $C$ are independent for any sliders (a vertical and a horizontal strip); $A$ and $B$ are independent only when their overlap equals $a \\cdot |B|$.',
     ],
   };
 }
@@ -97,7 +97,7 @@ function runBernstein(p, seed) {
   return {
     axes: { x: 'event: 1 A, 2 B, 3 C, 4 AB, 5 AC, 6 BC, 7 ABC', y: 'probability' },
     readouts: [
-      ...labels.map((l) => ({ key: 'p' + l, label: `P(${l})`, observed: hits[l] / p.n, theory: exact(l), band: band(exact(l), p.n), count: hits[l] })),
+      ...labels.map((l) => ({ key: 'p' + l, label: `$P(${l})$`, observed: hits[l] / p.n, theory: exact(l), band: band(exact(l), p.n), count: hits[l] })),
       { key: 'pairwise', label: 'Pairwise independent (exact)', observed: null, theory: chk.pairwise ? 'yes' : 'no' },
       { key: 'mutual', label: 'Mutually independent (exact)', observed: null, theory: chk.mutual ? 'yes' : 'no' },
     ],
@@ -107,8 +107,8 @@ function runBernstein(p, seed) {
       { id: 'observed', kind: 'points', tone: 'default', label: 'simulated frequency', x, y: labels.map((l) => hits[l] / p.n) },
     ],
     notes: key === 'bernstein'
-      ? ['Bernstein: P(AB) = 1/4 = P(A)P(B) for every pair, but P(ABC) = 1/4 ≠ 1/8. Pairwise independence does not give mutual independence (L2).']
-      : ['Counterexample: P(ABC) = 1/8 = P(A)P(B)P(C), yet P(AB) = 1/2 ≠ 1/4. A product over the whole family alone does not define independence in aggregate; every sub-family must factor.'],
+      ? ['Bernstein: $P(AB) = \\frac14 = P(A)P(B)$ for every pair, but $P(ABC) = \\frac14 \\ne \\frac18$. Pairwise independence does not give mutual independence (L2).']
+      : ['Counterexample: $P(ABC) = \\frac18 = P(A)P(B)P(C)$, yet $P(AB) = \\frac12 \\ne \\frac14$. A product over the whole family alone does not define independence in aggregate; every sub-family must factor.'],
   };
 }
 
@@ -143,18 +143,18 @@ function runHypotheses(p, seed) {
   return {
     axes: { x: 'hypothesis Bk', y: 'probability' },
     readouts: [
-      { key: 'pA', label: 'P(A) = Σ P(Bk)P(A|Bk)', observed: hits / p.n, theory: pA, band: band(pA, p.n), count: hits },
-      ...post.map((q, k) => ({ key: `post${k + 1}`, label: `P(B${k + 1}|A), Bayes`, observed: ratio(hitsBy[k], hits), theory: q, band: band(q, p.n * pA), count: hitsBy[k] })),
-      { key: 'sum', label: 'Σ P(Bk|A)', observed: hits > 0 ? hitsBy.reduce((m, h) => m + h / hits, 0) : null, theory: post.reduce((m, v) => m + v, 0) },
+      { key: 'pA', label: '$P(A) = \\sum_k P(B_k)\\,P(A \\mid B_k)$', observed: hits / p.n, theory: pA, band: band(pA, p.n), count: hits },
+      ...post.map((q, k) => ({ key: `post${k + 1}`, label: `$P(B_{${k + 1}} \\mid A)$, Bayes`, observed: ratio(hitsBy[k], hits), theory: q, band: band(q, p.n * pA), count: hitsBy[k] })),
+      { key: 'sum', label: '$\\sum_k P(B_k \\mid A)$', observed: hits > 0 ? hitsBy.reduce((m, h) => m + h / hits, 0) : null, theory: post.reduce((m, v) => m + v, 0) },
     ],
     series: [
-      { id: 'prior', kind: 'pmf', tone: 'muted', label: 'prior P(Bk)', x: x.map((v) => v - 0.12), y: priors },
-      { id: 'posterior', kind: 'pmf', tone: 'signal', label: 'posterior P(Bk|A)', x: x.map((v) => v + 0.12), y: post },
-      { id: 'observed', kind: 'points', tone: 'default', label: 'share of A-outcomes from Bk', x: x.map((v) => v + 0.12), y: hitsBy.map((h) => (hits ? h / hits : 0)) },
+      { id: 'prior', kind: 'pmf', tone: 'muted', label: 'prior $P(B_k)$', x: x.map((v) => v - 0.12), y: priors },
+      { id: 'posterior', kind: 'pmf', tone: 'signal', label: 'posterior $P(B_k \\mid A)$', x: x.map((v) => v + 0.12), y: post },
+      { id: 'observed', kind: 'points', tone: 'default', label: 'share of $A$-outcomes from $B_k$', x: x.map((v) => v + 0.12), y: hitsBy.map((h) => (hits ? h / hits : 0)) },
     ],
     notes: [
       'Total probability (L2, formula 9) and Bayes (L2, formula 10). The kernel requires a complete group: priors summing to 1.',
-      'L2 also allows disjoint hypotheses that only cover A (Σ P(Bk) ≤ 1). Adding the hypothesis "none of them" with P(A|·) = 0 makes a complete group and changes no number.',
+      'L2 also allows disjoint hypotheses that only cover $A$ ($\\sum_k P(B_k) \\le 1$). Adding the hypothesis "none of them" with $P(A \\mid \\cdot) = 0$ makes a complete group and changes no number.',
     ],
   };
 }
@@ -178,28 +178,28 @@ function runGuessing(p, seed) {
   return {
     axes: { x: 'probability p that the student solves the problem', y: 'P(guessed | correct answer)' },
     readouts: [
-      { key: 'post', label: 'P(guessed | correct)', observed: ratio(guessedCorrect, correct), theory, band: band(theory, n * pCorrect), count: guessedCorrect },
-      { key: 'pCorrect', label: 'P(correct answer)', observed: correct / n, theory: pCorrect, band: band(pCorrect, n), count: correct },
+      { key: 'post', label: '$P(\\text{guessed} \\mid \\text{correct})$', observed: ratio(guessedCorrect, correct), theory, band: band(theory, n * pCorrect), count: guessedCorrect },
+      { key: 'pCorrect', label: '$P(\\text{correct answer})$', observed: correct / n, theory: pCorrect, band: band(pCorrect, n), count: correct },
     ],
     series: [
-      { id: 'band', kind: 'band', tone: 'muted', label: `±${BAND_Z} s.e. at this n`, x: grid, y: bands.map((b) => b[0]), y2: bands.map((b) => b[1]) },
-      { id: 'curve', kind: 'line', tone: 'signal', label: `(1 − p)/((m − 1)p + 1); m = 5 gives (1 − p)/(4p + 1)`, x: grid, y: curve },
+      { id: 'band', kind: 'band', tone: 'muted', label: `$\\pm${BAND_Z}$ s.e. at this $n$`, x: grid, y: bands.map((b) => b[0]), y2: bands.map((b) => b[1]) },
+      { id: 'curve', kind: 'line', tone: 'signal', label: `$\\dfrac{1 - p}{(m - 1)p + 1}$; $m = 5$ gives $\\dfrac{1 - p}{4p + 1}$`, x: grid, y: curve },
       { id: 'observed', kind: 'points', tone: 'accent', label: 'simulated', x: [skill], y: [ratio(guessedCorrect, correct) ?? 0] },
     ],
-    notes: ['L2 example: five options, one correct. With m = 5 the posterior is (1 − p)/(4p + 1). In the lecture the letter A names "guessed" in the question but "answered correctly" in the solution; here A = correct answer.'],
+    notes: ['L2 example: five options, one correct. With $m = 5$ the posterior is $\\dfrac{1 - p}{4p + 1}$. In the lecture the letter $A$ names "guessed" in the question but "answered correctly" in the solution; here $A$ = correct answer.'],
   };
 }
 
 // ---------- Contract ----------
 const P = (key, label, min, max, step, def) => ({ key, label, min, max, step, default: def });
-const common = [P('view', 'View: 1 events, 2 independence, 3 Bayes, 4 guessing student', 1, 4, 1, 1), P('n', 'Simulated outcomes n', 100, 20000, 100, 4000)];
+const common = [P('view', 'View: 1 events, 2 independence, 3 Bayes, 4 guessing student', 1, 4, 1, 1), P('n', 'Simulated outcomes $n$', 100, 20000, 100, 4000)];
 const groups = {
-  events: [P('a', 'Events: width of A', 0, 1, 0.01, 0.5), P('s', 'Events: left edge of B', 0, 1, 0.01, 0.3), P('b', 'Events: width of B', 0, 1, 0.01, 0.5),
-    P('h', 'Events: height of B', 0, 1, 0.01, 0.6), P('c', 'Events: height of C', 0, 1, 0.01, 0.4)],
+  events: [P('a', 'Events: width of $A$', 0, 1, 0.01, 0.5), P('s', 'Events: left edge of $B$', 0, 1, 0.01, 0.3), P('b', 'Events: width of $B$', 0, 1, 0.01, 0.5),
+    P('h', 'Events: height of $B$', 0, 1, 0.01, 0.6), P('c', 'Events: height of $C$', 0, 1, 0.01, 0.4)],
   independence: [P('model', 'Independence: 1 Bernstein, 2 product-only', 1, 2, 1, 1)],
-  bayes: [P('q1', 'Bayes: prior P(B1)', 0, 1, 0.01, 0.5), P('q2', 'Bayes: prior P(B2)', 0, 1, 0.01, 0.3), P('q3', 'Bayes: prior P(B3)', 0, 1, 0.01, 0.2),
-    P('l1', 'Bayes: P(A|B1)', 0, 1, 0.01, 0.02), P('l2', 'Bayes: P(A|B2)', 0, 1, 0.01, 0.05), P('l3', 'Bayes: P(A|B3)', 0, 1, 0.01, 0.1)],
-  guessing: [P('skill', 'Student: probability p of solving', 0, 1, 0.01, 0.6), P('m', 'Student: number of options m', 2, 10, 1, 5)],
+  bayes: [P('q1', 'Bayes: prior $P(B_1)$', 0, 1, 0.01, 0.5), P('q2', 'Bayes: prior $P(B_2)$', 0, 1, 0.01, 0.3), P('q3', 'Bayes: prior $P(B_3)$', 0, 1, 0.01, 0.2),
+    P('l1', 'Bayes: $P(A \\mid B_1)$', 0, 1, 0.01, 0.02), P('l2', 'Bayes: $P(A \\mid B_2)$', 0, 1, 0.01, 0.05), P('l3', 'Bayes: $P(A \\mid B_3)$', 0, 1, 0.01, 0.1)],
+  guessing: [P('skill', 'Student: probability $p$ of solving', 0, 1, 0.01, 0.6), P('m', 'Student: number of options $m$', 2, 10, 1, 5)],
 };
 const all = [...common, ...Object.values(groups).flat()];
 

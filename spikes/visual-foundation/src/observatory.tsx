@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Tex } from './math';
 import { ChevronDown, Grid2X2, Pause, Play, RotateCw } from 'lucide-react';
 import { FigureCaption, LabHeader } from './lab-shell';
 import { orbits, stationsOf, type OrbitId } from './stations/catalog';
@@ -227,7 +228,7 @@ export function Observatory({
               <RotateCw size={13} aria-hidden="true" /> Resample
             </button>
             <div className="orbit-formula" aria-hidden="true">
-              x̄ₙ = Σ xᵢ / n <span>·· / ···</span>
+              <Tex tex={String.raw`\bar{x}_n = \frac{1}{n}\sum_{i=1}^{n} x_i`} /> <span className="orbit-formula-dots">·· / ···</span>
             </div>
           </div>
         </section>

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import katex from 'katex';
+import { splitMath } from '../src/math-text.mjs';
 import { fitPortrait, PORTRAIT, validateLecture, validateRoster } from '../src/lectures/script.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -23,6 +25,24 @@ test('every script is valid and references known stations and scientists', () =>
     assert.deepEqual(validateLecture(script, { stations, scientists: slugs }), [], f);
     assert.equal(`L${String(script.lecture).padStart(2, '0')}.json`, f, `${f}: lecture number matches the file name`);
   }
+});
+
+test('every formula line and every $…$ in the text is valid TeX that KaTeX typesets', () => {
+  let formulas = 0;
+  for (const f of files) {
+    const script = read('lectures/' + f);
+    const check = (tex, where) => {
+      formulas++;
+      assert.doesNotThrow(() => katex.renderToString(tex, { throwOnError: true, strict: 'error', displayMode: true }), `${f} ${where}: ${tex}`);
+      assert.doesNotMatch(tex, /[ₙᵢᵏⁿ₀₁₂²√Σ∫]/u, `${f} ${where}: write TeX (x_i, x^2, \\sqrt, \\sum), not Unicode look-alikes`);
+    };
+    script.steps.forEach((s, i) => {
+      for (const line of s.formula ?? []) check(line, `step ${i + 1} formula`);
+      for (const key of ['title', 'idea', 'example', 'notes'])
+        for (const part of splitMath(s[key] ?? '')) if (part.math) check(part.value, `step ${i + 1} ${key}`);
+    });
+  }
+  assert.ok(formulas >= 44, 'the lectures carry their formulas');
 });
 
 test('the validator reports broken scripts', () => {

@@ -1,4 +1,5 @@
 import '@fontsource-variable/space-grotesk';
+import { MathText, Tex } from './math';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import './style.css';
@@ -49,8 +50,8 @@ const number = new Intl.NumberFormat('en-US');
 const fixed = (value: number | null | undefined) => value == null ? '—' : (Math.abs(value) < 0.0005 ? 0 : value).toFixed(3);
 const modes = ['Histogram', 'ECDF', 'ASCII'] as const;
 const guide = {
-  Histogram: 'Frequency density · count / (n × bin width)',
-  ECDF: 'Cumulative probability · observations ≤ x / n',
+  Histogram: String.raw`Frequency density · $\dfrac{\text{count}}{n \times \text{bin width}}$`,
+  ECDF: String.raw`Cumulative probability · $F_n(x) = \dfrac{\#\{x_i \le x\}}{n}$`,
   ASCII: 'Relative bin counts · @ marks occupied levels',
 };
 
@@ -189,7 +190,7 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
           <PanelHeading icon={<Activity size={17} aria-hidden />} title="Distribution output"
             trailing={<Tabs.List aria-label="Data view" className="tabs">{modes.map(item => <Tabs.Trigger key={item} value={item}>{item}</Tabs.Trigger>)}</Tabs.List>} />
           <div className="plot-toolbar">
-            <span className="plot-model">{run.settings.distribution === 'normal' ? 'Normal' : model.label} distribution <b>{model.notation}</b></span>
+            <span className="plot-model">{run.settings.distribution === 'normal' ? 'Normal' : model.label} distribution <b><Tex tex={model.notation} /></b></span>
             <label className="theory-toggle">
               <input type="checkbox" checked={theory} disabled={mode === 'ASCII'} onChange={event => setTheory(event.currentTarget.checked)} />
               <span aria-hidden /><span>Theory overlay</span>
@@ -197,7 +198,7 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
           </div>
           {modes.map(item => <Tabs.Content key={item} value={item} className="tab-content">
             <motion.div initial={reduced ? false : { opacity: 0.45 }} animate={{ opacity: 1 }} transition={{ duration: reduced ? 0 : 0.16 }}>
-              <p className="plot-axis">{item === 'Histogram' && run.phase !== 'complete' ? 'Accumulating density · count / (target n × bin width)' : guide[item]}</p>
+              <p className="plot-axis"><MathText text={item === 'Histogram' && run.phase !== 'complete' ? String.raw`Accumulating density · $\dfrac{\text{count}}{\text{target } n \times \text{bin width}}$` : guide[item]} /></p>
               {item === 'ASCII' ?
                 <div className="ascii"><pre aria-hidden data-testid="ascii-data">{asciiHistogram(hist.counts, 12, Math.max(1, ...finalBins.counts))}</pre>
                   <p>Bin counts · {number.format(sample.length)} observations</p></div>
@@ -317,7 +318,7 @@ function StationApp() {
   let overlay = null;
   if (station) {
     const legacy = route.seed == null && !pinned(route) ? settings : legacySettings(settings, route.seed, route.params);
-    const lead = <>{station.summary} <span className="dock-lecture">Lecture {station.lectures}</span>
+    const lead = <><MathText text={station.summary} /> <span className="dock-lecture">Lecture {station.lectures}</span>
       {backHash && <a className="dock-back" href={backHash}>← Back to lecture {back!.n}, step {back!.step}</a>}</>;
     overlay = (
       <SceneDock key={station.id} title={station.name} eyebrow={<><i /> STATION · ORBIT {orbits.find(o => o.id === station.orbit)!.numeral}</>} lead={lead} onClose={close} testId="station-dock">

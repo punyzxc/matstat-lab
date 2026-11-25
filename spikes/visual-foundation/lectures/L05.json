@@ -5,17 +5,17 @@
   "steps": [
     {
       "title": "Distribution function",
-      "idea": "The distribution function gives the probability that the variable falls to the left of x.",
+      "idea": "The distribution function gives the probability that the variable falls to the left of $x$.",
       "formula": [
-        "F(x) = P(ξ < x)  (lecture convention)",
-        "the lab plots P(ξ ≤ x); they differ only at the jumps"
+        "F(x) = P(\\xi < x) \\qquad \\text{(lecture convention)}",
+        "\\text{the lab plots } P(\\xi \\le x)\\text{; they differ only at the jumps}"
       ]
     },
     {
       "title": "Density",
       "idea": "For a continuous variable the density is the derivative of F, and probabilities are areas under it.",
       "formula": [
-        "f(x) = F′(x),  P(a < ξ < b) = ∫ₐᵇ f(x) dx"
+        "f(x) = F'(x), \\qquad P(a < \\xi < b) = \\int_a^b f(x)\\,dx"
       ],
       "experiment": {
         "station": "distribution",
@@ -32,7 +32,7 @@
       "title": "Exponential law",
       "idea": "Waiting times without memory follow the exponential law.",
       "formula": [
-        "f(x) = λ e^(−λx),  x ≥ 0"
+        "f(x) = \\lambda e^{-\\lambda x}, \\qquad x \\ge 0"
       ],
       "experiment": {
         "station": "distribution",

@@ -4,6 +4,7 @@ import { findStation } from '../stations/catalog';
 import { lectureHash, stationHash } from '../stations/route';
 import { fitPortrait, PORTRAIT, type Lecture, type Scientist, type Step } from './script';
 import roster from '../../lectures/scientists.json';
+import { MathText, Tex, mathToPlain } from '../math';
 import './lectures.css';
 
 /** Every lecture script in `spikes/visual-foundation/lectures/LNN.json`, bundled at build time. */
@@ -21,7 +22,7 @@ export function LectureList({ present }: { present?: boolean }) {
         <li key={l.lecture}>
           <a href={lectureHash({ n: l.lecture, step: 1, present })}>
             <span className="lecture-list-n">L{String(l.lecture).padStart(2, '0')}</span>
-            <span className="lecture-list-title">{l.title}</span>
+            <span className="lecture-list-title"><MathText text={l.title} /></span>
             <span className="lecture-list-meta">
               {l.steps.length} {l.steps.length === 1 ? 'step' : 'steps'}
               {l.status !== 'ready' && <i> · draft</i>}
@@ -81,8 +82,8 @@ export function LecturePlayer({ lecture, step, present }: { lecture: Lecture; st
     <div className="lecture-player" data-testid="lecture-player">
       <nav className="lecture-steps" aria-label="Steps">
         {lecture.steps.map((s, i) => (
-          <a key={i} href={lectureHash({ n: lecture.lecture, step: i + 1, present })} aria-current={i + 1 === index ? 'step' : undefined} title={s.title}>
-            <span>{i + 1}</span> {s.title}
+          <a key={i} href={lectureHash({ n: lecture.lecture, step: i + 1, present })} aria-current={i + 1 === index ? 'step' : undefined} title={mathToPlain(s.title)}>
+            <span>{i + 1}</span> <MathText text={s.title} />
           </a>
         ))}
       </nav>
@@ -116,17 +117,17 @@ function StepView({ lecture, step, index, present }: { lecture: Lecture; step: S
   return (
     <>
       <div className="lecture-text">
-        <h3 id="lecture-step-title" tabIndex={-1}>{step.title}</h3>
-        <p className="lecture-idea">{step.idea}</p>
+        <h3 id="lecture-step-title" tabIndex={-1}><MathText text={step.title} /></h3>
+        <p className="lecture-idea"><MathText text={step.idea} /></p>
         {step.formula?.length ? (
-          <div className="lecture-formula" role="math" aria-label={step.formula.join('; ')}>
-            {step.formula.map((line, i) => <div key={i}>{line}</div>)}
+          <div className="lecture-formula" data-testid="lecture-formula">
+            {step.formula.map((line, i) => <Tex key={i} tex={line} display />)}
           </div>
         ) : null}
         {step.example && (
           <section className="lecture-example" aria-label="Worked example">
             <h4>Example</h4>
-            <p>{step.example}</p>
+            <p><MathText text={step.example} /></p>
           </section>
         )}
         {e && station && (
@@ -135,7 +136,7 @@ function StepView({ lecture, step, index, present }: { lecture: Lecture; step: S
             <span>{station.name}{e.seed != null ? ` · seed ${e.seed}` : ''}</span>
           </a>
         )}
-        {present && step.notes && <p className="lecture-notes"><b>Teacher notes.</b> {step.notes}</p>}
+        {present && step.notes && <p className="lecture-notes"><b>Teacher notes.</b> <MathText text={step.notes} /></p>}
       </div>
       {step.scientists?.length ? (
         <aside className="lecture-portraits" aria-label="Scientists">
@@ -186,7 +187,7 @@ export function Portrait({ slug }: { slug: string }) {
       )}
       <figcaption>
         <b>{name}</b> {person && <span className="portrait-years">{person.years}</span>}
-        {person && <span className="portrait-line">{person.contribution}</span>}
+        {person && <span className="portrait-line"><MathText text={person.contribution} /></span>}
       </figcaption>
     </figure>
   );

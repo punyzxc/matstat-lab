@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { MathText, Tex } from './math';
 import { AutoplayBar, useAutoplayKeys, usePlayback, useTicker, type Playback } from './stations/autoplay';
 import { FigureCaption } from './lab-shell';
 import type { LastResult } from './last-results';
@@ -72,7 +73,7 @@ export function MethodPreview({
   return (
     <div className="station-legacy method-station">
       <section className="method-figure" aria-label="Experiment chart">
-        <FigureCaption number="A">{chart.y}</FigureCaption>
+        <FigureCaption number="A"><MathText text={chart.y} /></FigureCaption>
         <Chart series={chart.series} xLabel={chart.x} yLabel={chart.y} height={250} domain={chart.domain} />
       </section>
       <div className="method-desk">
@@ -95,8 +96,8 @@ export function MethodPreview({
         <section className="method-value" aria-live="polite">
           <FigureCaption number="C">{data.label}</FigureCaption>
           <strong>{data.value}</strong>
-          <code>{data.formula}</code>
-          <p>{data.detail}</p>
+          <code><Tex tex={data.formula} /></code>
+          <p><MathText text={data.detail} /></p>
         </section>
       </div>
     </div>

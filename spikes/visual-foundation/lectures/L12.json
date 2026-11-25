@@ -12,10 +12,10 @@
   "steps": [
     {
       "title": "Errors of two kinds",
-      "idea": "A test rejects a true H₀ with probability α and keeps a false H₀ with probability β; the power is 1 − β.",
+      "idea": "A test rejects a true $H_0$ with probability $\\alpha$ and keeps a false $H_0$ with probability $\\beta$; the power is $1 - \\beta$.",
       "formula": [
-        "α = P(reject H₀ | H₀)",
-        "β = P(keep H₀ | H₁)"
+        "\\alpha = P(\\text{reject } H_0 \\mid H_0)",
+        "\\beta = P(\\text{keep } H_0 \\mid H_1)"
       ],
       "experiment": {
         "station": "testing",
@@ -29,9 +29,9 @@
     },
     {
       "title": "Comparing variances",
-      "idea": "The ratio of two sample variances follows the Fisher–Snedecor F law under H₀.",
+      "idea": "The ratio of two sample variances follows the Fisher–Snedecor $F$ law under $H_0$.",
       "formula": [
-        "F = s₁² / s₂²"
+        "F = \\dfrac{s_1^2}{s_2^2}"
       ],
       "scientists": [
         "fisher",

@@ -10,8 +10,8 @@
       "title": "Variation series and histogram",
       "idea": "Sort the sample, group it into intervals and draw the histogram and the empirical distribution function.",
       "formula": [
-        "k ≈ 5 lg n intervals",
-        "Fₙ(x) = (number of xᵢ ≤ x) / n"
+        "k \\approx 5 \\lg n \\quad \\text{intervals}",
+        "F_n(x) = \\dfrac{\\#\\{\\, i : x_i \\le x \\,\\}}{n}"
       ],
       "experiment": {
         "station": "sample",
@@ -22,7 +22,7 @@
       "title": "Kolmogorov test",
       "idea": "The largest gap between the empirical and the hypothesised distribution function tells whether the law fits.",
       "formula": [
-        "Dₙ = sup |Fₙ(x) − F(x)|,  λ = Dₙ √n"
+        "D_n = \\sup_x \\bigl|F_n(x) - F(x)\\bigr|, \\qquad \\lambda = D_n\\sqrt{n}"
       ],
       "scientists": [
         "kolmogorov"
@@ -33,10 +33,10 @@
       }
     },
     {
-      "title": "Pearson χ² test",
+      "title": "Pearson $\\chi^2$ test",
       "idea": "Compare observed and expected counts in each interval.",
       "formula": [
-        "χ² = Σ (nᵢ − npᵢ)² / (npᵢ)"
+        "\\chi^2 = \\sum_{i=1}^{s} \\dfrac{(n_i - np_i)^2}{np_i}"
       ],
       "scientists": [
         "pearson"
