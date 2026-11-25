@@ -1,0 +1,14 @@
+.live-formula { margin: 8px 0 18px; padding: 14px 16px; border-left: 2px solid #88c8ff; background: #88c8ff08; font-size: 17px; }
+.live-formula .katex { line-height: 1.5; }
+.live-formula [data-live-slot] { display: inline-flex; align-items: baseline; }
+.live-variable { position: relative; display: inline-flex; align-items: baseline; gap: .15em; color: var(--live-variable-color); }
+.live-formula .live-variable input { padding: 1px 3px; min-width: 2ch; max-width: 14ch; border: 0; border-bottom: 1px solid currentColor; border-radius: 2px; background: #ffffff08; color: var(--live-variable-color); font: inherit; font-variant-numeric: tabular-nums; }
+.live-variable input:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.live-variable input[aria-invalid="true"] { outline: 2px solid #ff8a7a; }
+.live-formula output { font-variant-numeric: tabular-nums; }
+.live-formula-hint, .live-formula-error { position: absolute; z-index: 5; bottom: calc(100% + 9px); left: 0; width: max-content; max-width: min(32ch, 65vw); padding: 8px 11px; white-space: normal; background: #161c23; border: 1px solid #64717f; border-radius: 4px; color: #e2e9ef; font: 12px/1.5 sans-serif; }
+.live-formula-error { bottom: auto; top: calc(100% + 6px); border-color: #ff8a7a; }
+[data-live-figure] .chart-series.chart-series--pdf, [data-live-figure] .chart-series--rule.tone-muted { stroke: var(--live-variable-color); }
+[data-live-figure][data-highlighted="true"] .chart-series--pdf { stroke-width: 3.5px; filter: drop-shadow(0 0 4px var(--live-variable-color)); }
+[data-live-figure][data-highlighted="true"] .chart-series--rule.tone-muted { opacity: 1; stroke-width: 2px; }
+@media (max-width: 600px) { .live-formula { font-size: 14px; padding: 12px 8px; } }
