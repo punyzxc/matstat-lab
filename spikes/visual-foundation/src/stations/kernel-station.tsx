@@ -10,6 +10,7 @@ import { Chart } from './chart';
 import { Surface3D } from './surface-3d';
 import { MathText, Tex, mathToPlain } from '../math';
 import { DecisionZones } from './decision-zones';
+import { Beam } from './beam';
 import { kernelText, locale, plural, t, texDec, useLang } from '../i18n';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
@@ -38,6 +39,7 @@ function localizeResult(kernel: string, r: KernelResult): KernelResult {
     surface: r.surface && { ...r.surface, title: k(r.surface.title), sampleLabel: k(r.surface.sampleLabel), labels: { x: k(r.surface.labels.x), y: k(r.surface.labels.y), z: k(r.surface.labels.z) } },
     formula: r.formula?.map((line) => texDec(k(line))),
     decisions: r.decisions,
+    beam: r.beam,
   };
 }
 /** A readout cell: numbers formatted, text with `$…$` formulas typeset. */
@@ -124,7 +126,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
     const out = outcome.result as Partial<KernelResult> | null;
     if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series)) return { error: t('The kernel returned no readouts or series.', 'Ядро не вернуло ни показаний, ни графиков.') };
     return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface,
-      formula: Array.isArray(out.formula) ? out.formula.filter((l) => typeof l === 'string') : undefined, decisions: out.decisions };
+      formula: Array.isArray(out.formula) ? out.formula.filter((l) => typeof l === 'string') : undefined, decisions: out.decisions, beam: out.beam };
   }, [outcome]);
   /** What is on screen: the same result with its texts in the current language. */
   const view = useMemo(() => (result && !('error' in result) ? localizeResult(station.kernel, result) : result), [result, station.kernel, lang]);
@@ -223,6 +225,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
                 {view.formula.map((line, i) => <Tex key={i} tex={line} display />)}
               </div>
             )}
+            {view.beam && <Beam beam={view.beam} onParam={(key, v) => setParams((p) => ({ ...p, [key]: v }))} />}
             {view.surface && <Surface3D surface={view.surface} />}
             {view.series.length > 0 && (
               <div className="chart-stage">

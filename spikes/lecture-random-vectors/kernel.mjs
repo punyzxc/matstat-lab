@@ -29,13 +29,96 @@ const normPdf = (z) => Math.exp(-0.5 * z * z) / SQRT2PI;
 
 const r6 = (v) => (v == null || !Number.isFinite(v) ? null : Number(v.toPrecision(6)));
 const grid = (lo, hi, count) => Array.from({ length: count }, (_, i) => lo + ((hi - lo) * i) / (count - 1));
-const LAW_NAMES = ['Bernoulli', 'Binomial', 'Poisson', 'Uniform', 'Exponential', 'Normal'];
+const LAW_NAMES = ['Bernoulli', 'Binomial', 'Poisson', 'Uniform', 'Exponential', 'Normal', 'Gamma', 'Beta'];
+
+// ---------------------------------------------------------------- Special functions for the gamma and beta laws (#132)
+
+const LANCZOS = [676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+/** ln Γ(x) for x > 0 (Lanczos, g = 7): about 15 significant digits. */
+export function lnGamma(x) {
+  if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - lnGamma(1 - x);
+  x -= 1;
+  let a = 0.99999999999980993;
+  const t = x + 7.5;
+  for (let i = 0; i < 8; i++) a += LANCZOS[i] / (x + i + 1);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+/** Regularized lower incomplete gamma P(k, x): the series below k + 1, Lentz's continued fraction above. */
+export function gammaP(k, x) {
+  if (x <= 0) return 0;
+  const lead = k * Math.log(x) - x - lnGamma(k);
+  if (x < k + 1) {
+    let term = 1 / k, sum = term;
+    for (let n = 1; n < 500 && Math.abs(term) > Math.abs(sum) * 1e-15; n++) { term *= x / (k + n); sum += term; }
+    return Math.min(1, sum * Math.exp(lead));
+  }
+  let b = x + 1 - k, c = 1e300, d = 1 / b, h = d;
+  for (let n = 1; n < 500; n++) {
+    const an = -n * (n - k);
+    b += 2;
+    d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+    c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+    d = 1 / d;
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return Math.max(0, 1 - Math.exp(lead) * h);
+}
+function betaCf(a, b, x) {
+  let c = 1, d = 1 - ((a + b) * x) / (a + 1);
+  if (Math.abs(d) < 1e-300) d = 1e-300;
+  d = 1 / d;
+  let h = d;
+  for (let m = 1; m < 500; m++) {
+    const m2 = 2 * m;
+    let aa = (m * (b - m) * x) / ((a + m2 - 1) * (a + m2));
+    d = 1 + aa * d; if (Math.abs(d) < 1e-300) d = 1e-300;
+    c = 1 + aa / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+    d = 1 / d; h *= d * c;
+    aa = (-(a + m) * (a + b + m) * x) / ((a + m2) * (a + m2 + 1));
+    d = 1 + aa * d; if (Math.abs(d) < 1e-300) d = 1e-300;
+    c = 1 + aa / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+    d = 1 / d;
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < 1e-15) break;
+  }
+  return h;
+}
+/** Regularized incomplete beta I_x(a, b). */
+export function betaI(a, b, x) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const front = Math.exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  return x < (a + 1) / (a + b + 2) ? (front * betaCf(a, b, x)) / a : 1 - (front * betaCf(b, a, 1 - x)) / b;
+}
+/** The point where a continuous cdf reaches q, by bisection on [lo, hi]. */
+function quantile(cdf, q, lo, hi) {
+  for (let i = 0; i < 200; i++) { const mid = (lo + hi) / 2; if (cdf(mid) < q) lo = mid; else hi = mid; }
+  return (lo + hi) / 2;
+}
+/**
+ * A Gamma(k, 1) draw from fixture streams (Marsaglia–Tsang). Attempt j of draw i reads index 64i + j, so the
+ * rejection loop stays deterministic; k < 1 uses Gamma(k + 1)·U^(1/k).
+ */
+function gammaDraw(seed, stream, i, k) {
+  if (k < 1) return gammaDraw(seed, stream, i, k + 1) * uni(seed, stream + 3, i) ** (1 / k);
+  const d = k - 1 / 3, c = 1 / Math.sqrt(9 * d);
+  for (let j = 0; j < 64; j++) {
+    const z = gauss(seed, stream, 64 * i + j), v = (1 + c * z) ** 3;
+    if (v <= 0) continue;
+    const u = uni(seed, stream + 2, 64 * i + j); // gauss reads stream and stream + 1
+    if (Math.log(u) < 0.5 * z * z + d - d * v + d * Math.log(v)) return d * v;
+  }
+  return d; // never reached in practice: acceptance is above 95 % for every k ≥ 1
+}
 
 /**
  * The six lecture laws (L5 §Main distributions; moments from L6).
  * Discrete laws carry their full support and PMF; continuous ones a pdf, cdf and display range.
  */
-export function makeLaw(index, { p, m, lambda, sigma }) {
+export function makeLaw(index, { p, m, lambda, sigma, a = 2, b = 1 }) {
   const q = 1 - p;
   if (index === 0 || index === 1) {
     const trials = index === 0 ? 1 : m;
@@ -90,6 +173,46 @@ export function makeLaw(index, { p, m, lambda, sigma }) {
       pdf: (x) => (x < 0 ? 0 : lambda * Math.exp(-lambda * x)), cdf: (x) => (x < 0 ? 0 : 1 - Math.exp(-lambda * x)),
       mean: 1 / lambda, variance: 1 / lambda ** 2, skew: 2, exkurt: 6, median: Math.LN2 / lambda, mode: [0],
       sample: (seed, i) => -Math.log(uni(seed, 50, i)) / lambda,
+    };
+  }
+  if (index === 6) {
+    // Gamma(k, θ): shape k = a, scale θ = b. Moments: kθ, kθ², 2/√k, 6/k.
+    const k = a, th = b, mean = k * th, sd = Math.sqrt(k) * th;
+    const top = Math.max(10, Math.ceil((mean + 6 * sd) / 5) * 5);
+    const cdf = (x) => (x <= 0 ? 0 : gammaP(k, x / th));
+    return {
+      name: `Gamma ($k = ${k}$, $\\theta = ${th}$)`, discrete: false, range: [0, top], bins: 100,
+      pdf: (x) => (x <= 0 ? 0 : Math.exp((k - 1) * Math.log(x / th) - x / th - lnGamma(k)) / th), cdf,
+      mean, variance: k * th * th, skew: 2 / Math.sqrt(k), exkurt: 6 / k,
+      median: quantile(cdf, 0.5, 0, mean + 20 * sd), mode: k >= 1 ? [r6((k - 1) * th)] : '$0$ (the density is unbounded there)',
+      formula: [
+        `M\\xi = k\\theta = ${k} \\cdot ${th} = ${r6(mean)} \\qquad D\\xi = k\\theta^2 = ${r6(k * th * th)}`,
+        `Sk = \\dfrac{2}{\\sqrt{k}} = ${r6(2 / Math.sqrt(k))} \\qquad Ek = \\dfrac{6}{k} = ${r6(6 / k)}`,
+      ],
+      sample: (seed, i) => th * gammaDraw(seed, 70, i, k),
+    };
+  }
+  if (index === 7) {
+    // Beta(α, β) on [0, 1] with α = a, β = b.
+    const al = a, be = b, s = al + be;
+    const mean = al / s, variance = (al * be) / (s * s * (s + 1));
+    const skew = (2 * (be - al) * Math.sqrt(s + 1)) / ((s + 2) * Math.sqrt(al * be));
+    const exkurt = (6 * ((al - be) ** 2 * (s + 1) - al * be * (s + 2))) / (al * be * (s + 2) * (s + 3));
+    const cdf = (x) => betaI(al, be, x);
+    const lnB = lnGamma(al) + lnGamma(be) - lnGamma(s);
+    const mode = al > 1 && be > 1 ? [r6((al - 1) / (s - 2))]
+      : al === 1 && be === 1 ? 'every point of $[0, 1]$'
+        : al < 1 && be < 1 ? '$0$ and $1$ (the density is unbounded there)'
+          : al <= 1 && be >= 1 ? [0] : [1];
+    return {
+      name: `Beta ($\\alpha = ${al}$, $\\beta = ${be}$)`, discrete: false, range: [0, 1], bins: 50,
+      pdf: (x) => (x <= 0 || x >= 1 ? 0 : Math.exp((al - 1) * Math.log(x) + (be - 1) * Math.log(1 - x) - lnB)), cdf,
+      mean, variance, skew, exkurt, median: quantile(cdf, 0.5, 0, 1), mode,
+      formula: [
+        `M\\xi = \\dfrac{\\alpha}{\\alpha + \\beta} = ${r6(mean)} \\qquad D\\xi = \\dfrac{\\alpha\\beta}{(\\alpha + \\beta)^2(\\alpha + \\beta + 1)} = ${r6(variance)}`,
+        `Sk = \\dfrac{2(\\beta - \\alpha)\\sqrt{\\alpha + \\beta + 1}}{(\\alpha + \\beta + 2)\\sqrt{\\alpha\\beta}} = ${r6(skew)} \\qquad Ek = ${r6(exkurt)}`,
+      ],
+      sample: (seed, i) => { const x = gammaDraw(seed, 70, i, al), y = gammaDraw(seed, 74, i, be); return x / (x + y); },
     };
   }
   return {
@@ -150,21 +273,23 @@ function histogram(xs, lo, hi, bins) {
 
 // ---------------------------------------------------------------- Moments (L6)
 
-const lawParam = { key: 'law', label: 'Law (0 Bernoulli · 1 Binomial · 2 Poisson · 3 Uniform · 4 Exponential · 5 Normal)', min: 0, max: 5, step: 1, default: 5 };
+const lawParam = { key: 'law', label: 'Law (0 Bernoulli · 1 Binomial · 2 Poisson · 3 Uniform · 4 Exponential · 5 Normal · 6 Gamma · 7 Beta)', min: 0, max: 7, step: 1, default: 5 };
 const momentsParams = [
   lawParam,
   { key: 'p', label: 'Success probability $p$ (laws 0–1)', min: 0.05, max: 0.95, step: 0.05, default: 0.3 },
   { key: 'm', label: 'Trials $m$ (law 1)', min: 1, max: 30, step: 1, default: 10 },
   { key: 'lambda', label: 'Rate $\\lambda$ (laws 2, 4)', min: 0.2, max: 8, step: 0.1, default: 2 },
   { key: 'sigma', label: 'Standard deviation $\\sigma$ (laws 3, 5)', min: 0.5, max: 3, step: 0.1, default: 1 },
+  { key: 'a', label: 'Shape: $k$ (law 6), $\\alpha$ (law 7)', min: 0.5, max: 10, step: 0.1, default: 2 },
+  { key: 'b', label: 'Scale $\\theta$ (law 6), shape $\\beta$ (law 7)', min: 0.5, max: 10, step: 0.1, default: 2 },
   { key: 'n', label: 'Sample size $n$', min: 100, max: 20000, step: 100, default: 5000 },
 ];
 
 /** Lecture Table 3 (L6, 3σ rule) as printed, for the normal law. */
 export const LECTURE_TABLE_3 = { 1: 0.6826, 2: 0.9544, 3: 0.9973, 4: 0.9997 };
 
-function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
-  const law = makeLaw(li, { p, m, lambda, sigma });
+function runMoments({ law: li, p, m, lambda, sigma, a = 2, b = 2, n }, seed) {
+  const law = makeLaw(li, { p, m, lambda, sigma, a, b });
   const xs = Array.from({ length: n }, (_, i) => law.sample(seed, i));
   const sm = sampleMoments(xs);
   const sorted = [...xs].sort((a, b) => a - b);
@@ -187,7 +312,8 @@ function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
     const [lo, hi] = law.range, bins = law.bins;
     const h = histogram(xs, lo, hi, bins);
     series.push({ id: 'hist', kind: 'hist', label: 'Sample histogram (density scale)', x: h.x, y: h.y });
-    const curve = law.pdfPolyline ? law.pdfPolyline() : (() => { const x = grid(lo, hi, 241); return { x, y: x.map(law.pdf) }; })();
+    // Cell midpoints, so an unbounded density at an end of the range (gamma k < 1, beta α < 1) stays finite.
+    const curve = law.pdfPolyline ? law.pdfPolyline() : (() => { const x = grid(lo, hi, 241).map((v, i, g) => (i === 0 ? v + (g[1] - v) / 4 : i === 240 ? v - (v - g[239]) / 4 : v)); return { x, y: x.map(law.pdf) }; })();
     series.push({ id: 'pdf', kind: 'pdf', tone: 'signal', label: 'Density $f(x)$', x: curve.x, y: curve.y });
     const top = h.counts.indexOf(Math.max(...h.counts));
     modeObserved = r6(lo + (top + 0.5) * h.w);
@@ -195,7 +321,9 @@ function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
     if (h.outside) extraNote = `${h.outside} of ${n} draws fall outside the fixed display range $[${lo}, ${hi}]$; the readouts use all of them.`;
     medConvention = '$F(x) = \\tfrac12$';
   }
-  series.push({ id: 'sigma-rules', kind: 'rule', tone: 'muted', label: '$M\\xi \\pm \\sigma,\\ 2\\sigma,\\ 3\\sigma$', x: [-3, -2, -1, 1, 2, 3].map((k) => law.mean + k * sd), y: [] });
+  // Bounded laws (beta on [0, 1], gamma from 0) keep only the rules inside their support, so the chart stays on it.
+  const inRange = (x) => law.discrete || (x >= law.range[0] && x <= law.range[1]);
+  series.push({ id: 'sigma-rules', kind: 'rule', tone: 'muted', label: '$M\\xi \\pm \\sigma,\\ 2\\sigma,\\ 3\\sigma$', x: [-3, -2, -1, 1, 2, 3].map((k) => law.mean + k * sd).filter(inRange), y: [] });
   series.push({ id: 'mean', kind: 'rule', tone: 'accent', label: '$M\\xi$', x: [law.mean], y: [] });
 
   const within = (k) => xs.reduce((c, x) => (Math.abs(x - law.mean) < k * sd ? c + 1 : c), 0) / n;
@@ -219,7 +347,82 @@ function runMoments({ law: li, p, m, lambda, sigma, n }, seed) {
   if (li !== 5) notes.push('The $3\\sigma$ rule is a property of the normal law. For this law the exact share inside $3\\sigma$ is shown in the table and may differ from 0.9973.');
   if (extraNote) notes.push(extraNote);
   if (law.discrete) notes.push('For a discrete law the bars are sample frequencies at each value $k$, the stems are $P(\\xi = k)$.');
-  return { axes: { x: 'value $x$', y: law.discrete ? 'probability' : 'density $f(x)$' }, readouts, series, notes };
+  if (li >= 6) notes.push('Shape lab: type the two parameters and watch the density bend; $Sk$ measures the lean of the tail, $Ek$ how heavy the tails are against the normal law ($Ek = 0$).');
+  // The live formula: the closed forms of this law with the current numbers in them.
+  const formula = law.formula ?? [
+    `M\\xi = ${r6(law.mean)} \\qquad D\\xi = ${r6(law.variance)} \\qquad Sk = ${r6(law.skew)} \\qquad Ek = ${r6(law.exkurt)}`,
+  ];
+  return { axes: { x: 'value $x$', y: law.discrete ? 'probability' : 'density $f(x)$' }, readouts, series, notes, formula };
+}
+
+// ---------------------------------------------------------------- Balance (L6: the expectation as a centre of mass, #132)
+
+export const BEAM = { lo: -5, hi: 5, weights: 4 };
+const balanceParams = [
+  ...[[-3, 0.2], [-1, 0.3], [1.5, 0.4], [4, 0.1]].flatMap(([x, w], i) => [
+    { key: `x${i + 1}`, label: `Value $x_${i + 1}$`, min: BEAM.lo, max: BEAM.hi, step: 0.1, default: x },
+    { key: `p${i + 1}`, label: `Probability $p_${i + 1}$`, min: 0, max: 1, step: 0.01, default: w },
+  ]),
+  { key: 'n', label: 'Throws $n$', min: 20, max: 20000, step: 10, default: 2000 },
+];
+
+/** The discrete law of the beam: values and probabilities as typed; weights that do not sum to 1 are rescaled. */
+export function beamLaw(params) {
+  const x = [], w = [];
+  for (let i = 1; i <= BEAM.weights; i++) { x.push(params[`x${i}`]); w.push(params[`p${i}`]); }
+  const total = w.reduce((a, b) => a + b, 0);
+  const p = total > 0 ? w.map((v) => v / total) : w.map(() => 1 / BEAM.weights);
+  const mean = x.reduce((a, v, i) => a + v * p[i], 0);
+  const variance = x.reduce((a, v, i) => a + (v - mean) ** 2 * p[i], 0);
+  return { x, p, total, mean, variance };
+}
+
+const texNum = (v) => { const t = String(r6(v)); return v < 0 ? `(${t})` : t; };
+
+function runBalance(params, seed) {
+  const { n } = params;
+  const law = beamLaw(params);
+  const cum = [];
+  law.p.reduce((a, v, i) => (cum[i] = a + v), 0);
+  const counts = law.x.map(() => 0);
+  let sum = 0, sum2 = 0;
+  for (let i = 0; i < n; i++) {
+    const u = uni(seed, 100, i);
+    let k = cum.findIndex((c) => u < c);
+    if (k < 0) k = law.p.findLastIndex((v) => v > 0);
+    counts[k]++;
+    sum += law.x[k]; sum2 += law.x[k] ** 2;
+  }
+  const xbar = sum / n, s2 = n > 1 ? (sum2 - n * xbar * xbar) / (n - 1) : 0;
+  const torque = law.x.reduce((a, v, i) => a + (v - law.mean) * law.p[i], 0);
+  const order = law.x.map((_, i) => i);
+  const series = [
+    // One bar per weight (ids stable, so the bars glide as values are typed or dragged).
+    { id: 'freq', kind: 'pmf', label: 'Sample frequency $n_i/n$', x: order.map((i) => law.x[i]), y: order.map((i) => r6(counts[i] / n)) },
+    { id: 'pmf', kind: 'points', tone: 'signal', label: 'Probability $p_i$', x: law.x, y: law.p.map(r6) },
+    { id: 'mean', kind: 'rule', tone: 'accent', label: 'Fulcrum $M\\xi = \\sum x_i p_i$', x: [r6(law.mean)], y: [] },
+    { id: 'xbar', kind: 'rule', tone: 'muted', label: 'Sample mean $\\bar{x}$', x: [r6(xbar)], y: [] },
+  ];
+  const terms = law.x.map((v, i) => `${texNum(v)} \\cdot ${r6(law.p[i])}`).join(' + ');
+  const formula = [
+    `M\\xi = \\sum_{i=1}^{4} x_i\\,p_i = ${terms} = ${r6(law.mean)}`,
+    `\\sum_{i=1}^{4} (x_i - M\\xi)\\,p_i = ${r6(Math.abs(torque) < 1e-12 ? 0 : torque)} \\qquad D\\xi = \\sum_{i=1}^{4} (x_i - M\\xi)^2\\,p_i = ${r6(law.variance)}`,
+  ];
+  const rescaled = Math.abs(law.total - 1) > 1e-9;
+  const readouts = [
+    { key: 'mean', label: 'Fulcrum: expectation $M\\xi$', observed: r6(xbar), theory: r6(law.mean), convention: 'observed: the sample mean $\\bar{x}$ of the throws' },
+    { key: 'variance', label: 'Variance $D\\xi$', observed: r6(s2), theory: r6(law.variance), convention: '$s^2$, divisor $n - 1$' },
+    { key: 'torque', label: 'Torque about the fulcrum $\\sum (x_i - M\\xi)\\,p_i$', observed: r6(law.x.reduce((a, v, i) => a + (v - xbar) * (counts[i] / n), 0)), theory: 0, convention: 'zero: the beam balances' },
+    { key: 'total', label: 'Sum of the typed $p_i$', observed: r6(law.total), theory: 1, convention: rescaled ? 'not 1: each $p_i$ is divided by the sum' : 'the probabilities add up to 1' },
+  ];
+  const notes = [
+    'L6: the expectation $M\\xi = \\sum x_i p_i$ is the centre of mass of the masses $p_i$ placed at the points $x_i$; the beam balances on it.',
+    'Type a value or drag a weight: the fulcrum slides to the new $M\\xi$. A heavy weight far from the centre pulls it the most, since it enters as $x_i p_i$.',
+    `The throws are a sample of $n = ${n}$; their mean $\\bar{x}$ is the centre of mass of the sample and settles at $M\\xi$ as $n$ grows.`,
+  ];
+  if (rescaled) notes.push(`The typed $p_i$ add up to ${r6(law.total)}, not 1; the beam uses $p_i / \\sum p_j$ so that they form a law.`);
+  const beam = { x: law.x.map(r6), p: law.p.map(r6), mean: r6(law.mean), sampleMean: r6(xbar), range: [BEAM.lo, BEAM.hi], keys: law.x.map((_, i) => `x${i + 1}`), step: 0.1 };
+  return { axes: { x: 'value $x$', y: 'probability' }, readouts, series, notes, formula, beam };
 }
 
 // ---------------------------------------------------------------- Transform (L6 §Functions of a random variable)
@@ -631,11 +834,13 @@ export const stations = {
   moments: { params: momentsParams, live: true },
   transform: { params: transformParams, live: true },
   scatter: { params: scatterParams, live: true },
+  balance: { params: balanceParams, live: true },
 };
 
 export function run(params, { seed, station = 'moments' } = {}) {
   const s = seed >>> 0;
   if (station === 'transform') return runTransform(params, s);
+  if (station === 'balance') return runBalance(params, s);
   if (station === 'scatter') return params.mode === 2 ? runMatching(params, s) : params.mode >= 3 ? runNonlinear(params, s) : runVector(params, s);
   return runMoments(params, s);
 }

@@ -32,6 +32,12 @@ export type Decisions = {
   reject: boolean[];
   theory: { alpha: number; beta: number | null; power: number | null };
 };
+/**
+ * A discrete law drawn as masses on a beam (#132): `p[i]` at `x[i]`, the fulcrum at `mean` = Σ x_i p_i and the
+ * sample's centre of mass at `sampleMean`. `keys[i]` names the parameter that holds `x[i]`, so a dragged weight
+ * changes it; `step` is that parameter's grid.
+ */
+export type Beam = { x: number[]; p: number[]; mean: number; sampleMean: number; range: [number, number]; keys: string[]; step: number };
 export type KernelResult = {
   readouts: Readout[];
   series: Series[];
@@ -41,6 +47,7 @@ export type KernelResult = {
   /** A live formula above the chart: display-style TeX lines that carry the current numbers (#136). */
   formula?: string[];
   decisions?: Decisions;
+  beam?: Beam;
 };
 export type Kernel = {
   meta: KernelMeta;

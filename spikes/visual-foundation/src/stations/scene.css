@@ -1047,3 +1047,71 @@ html:has(.orbital-lab) body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+
+/* #132: the expectation as a centre of mass. */
+.beam {
+  margin: 4px 0 14px;
+}
+.beam-head {
+  margin: 0 0 6px;
+  color: #a8a8a8;
+  font: 11px var(--mono);
+}
+.beam-head b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.beam svg {
+  display: block;
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  touch-action: none;
+}
+.beam-axis line {
+  stroke: #3a3a3a;
+}
+.beam-axis text {
+  fill: #8a8a8a;
+  font: 10px var(--mono);
+  text-anchor: middle;
+}
+.beam-bar {
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.beam-fulcrum {
+  fill: var(--signal);
+}
+.beam-xbar {
+  stroke: #7d7d7d;
+  stroke-dasharray: 3 4;
+}
+.beam-weight line {
+  stroke: #6a6a6a;
+}
+.beam-weight circle {
+  fill: rgb(244 244 242 / 0.16);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  cursor: grab;
+}
+.beam-weight circle:focus {
+  outline: none;
+}
+.beam-weight circle:hover,
+.beam-weight circle:focus-visible {
+  fill: rgb(244 244 242 / 0.3);
+  outline: none;
+  stroke: var(--signal);
+}
+.beam-mass {
+  fill: #bdbdbd;
+  font: 10.5px var(--mono);
+  text-anchor: middle;
+}
+.beam-mean-label .svg-math-box {
+  color: var(--signal);
+  font-size: 12px;
+}

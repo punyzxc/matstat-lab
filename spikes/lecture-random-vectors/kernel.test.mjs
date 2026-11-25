@@ -224,7 +224,9 @@ test('every station is deterministic and emits only finite numbers', () => {
     else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) finite(x, `${path}.${k}`);
   };
   const runs = [
-    ...[0, 1, 2, 3, 4, 5].map((law) => ['moments', { law }]),
+    ...[0, 1, 2, 3, 4, 5, 6, 7].map((law) => ['moments', { law }]),
+    ['moments', { law: 6, a: 0.5, b: 3 }], ['moments', { law: 7, a: 0.5, b: 0.7 }],
+    ['balance', {}], ['balance', { p1: 0, p2: 0, p3: 0, p4: 0 }],
     ...[0, 1, 2, 3].map((phi) => ['transform', { phi }]),
     ['transform', { phi: 2, lambda: 0.2, beta: 4 }],
     ...[0, 1, 2, 3, 4].map((mode) => ['scatter', { mode }]),
@@ -335,4 +337,65 @@ test('#133 scatter: nonlinear presets have r near 0 while the dependence is stro
     const mass = s.z.flat().reduce((a, b) => a + b, 0) * dx * dy;
     assert.ok(Math.abs(mass - 1) < 0.08, `mode ${mode}: mass ${mass}`);
   }
+});
+
+// #132: the shape lab (gamma and beta families) and the beam.
+test('#132 special functions: incomplete gamma and beta match closed forms', () => {
+  close(K.lnGamma(5), Math.log(24), 1e-12, 'ln Γ(5)');
+  close(K.lnGamma(0.5), Math.log(Math.sqrt(Math.PI)), 1e-12, 'ln Γ(1/2)');
+  for (const x of [0.3, 1, 2.5, 7]) close(K.gammaP(1, x), 1 - Math.exp(-x), 1e-12, `P(1, ${x})`);
+  for (const x of [0.4, 2, 9]) close(K.gammaP(2, x), 1 - (1 + x) * Math.exp(-x), 1e-12, `P(2, ${x})`);
+  for (const x of [0.1, 0.5, 0.9]) {
+    close(K.betaI(2, 3, x), 6 * x ** 2 - 8 * x ** 3 + 3 * x ** 4, 1e-12, `I_x(2, 3) at ${x}`); // ∫ 12t(1−t)² dt
+    close(K.betaI(0.5, 0.5, x), (2 / Math.PI) * Math.asin(Math.sqrt(x)), 1e-10, `arcsine law at ${x}`);
+  }
+});
+
+test('#132 shape lab: shown moments equal the closed forms of each family, the sample agrees', () => {
+  const families = [
+    [5, { sigma: 1.7 }, (q) => [0, q.sigma ** 2, 0, 0]],
+    [4, { lambda: 0.8 }, (q) => [1 / q.lambda, 1 / q.lambda ** 2, 2, 6]],
+    [6, { a: 3, b: 1.5 }, (q) => [q.a * q.b, q.a * q.b ** 2, 2 / Math.sqrt(q.a), 6 / q.a]],
+    [6, { a: 0.5, b: 2 }, (q) => [q.a * q.b, q.a * q.b ** 2, 2 / Math.sqrt(q.a), 6 / q.a]],
+    [7, { a: 2, b: 5 }, () => [2 / 7, 10 / (49 * 8), (2 * 3 * Math.sqrt(8)) / (9 * Math.sqrt(10)), (6 * (9 * 8 - 10 * 9)) / (10 * 9 * 10)]],
+    [7, { a: 0.5, b: 0.5 }, () => [0.5, 1 / 8, 0, -1.5]],
+  ];
+  const n = 20000;
+  for (const [law, over, exact] of families) {
+    const q = { ...defaults('moments'), law, ...over, n };
+    const res = K.run(q, { seed: 41, station: 'moments' });
+    const [m, d, sk, ek] = exact(q);
+    for (const [key, v] of [['mean', m], ['variance', d], ['skew', sk], ['exkurt', ek]]) close(readout(res, key).theory, v, 1e-5 * Math.max(1, Math.abs(v)), `law ${law} ${key}`);
+    // Predeclared band for the sample mean: 5 standard errors.
+    close(readout(res, 'mean').observed, m, 5 * Math.sqrt(d / n), `law ${law} sample mean`);
+    close(readout(res, 'variance').observed, d, 0.06 * d + 1e-9, `law ${law} sample variance`);
+    assert.ok(res.formula.length >= 1 && res.formula.join(' ').includes('D\\xi'), 'the live formula shows the moments');
+    const dens = res.series.find((s) => s.id === 'pdf');
+    assert.ok(dens.y.every(Number.isFinite), `law ${law}: finite density curve`);
+    // The median sits where the exact cdf is 1/2.
+    const med = readout(res, 'median').theory;
+    if (law === 6) close(K.gammaP(q.a, med / q.b), 0.5, 1e-5, 'gamma median');
+    if (law === 7) close(K.betaI(q.a, q.b, med), 0.5, 1e-5, 'beta median');
+  }
+});
+
+test('#132 beam: the fulcrum is Σ x_i p_i, the torque about it is zero, and typed weights are rescaled', () => {
+  const q = { ...defaults('balance'), x1: -4, p1: 0.5, x2: 0, p2: 0.1, x3: 2, p3: 0.2, x4: 5, p4: 0.2, n: 20000 };
+  const res = K.run(q, { seed: 2, station: 'balance' });
+  const mean = -4 * 0.5 + 0 + 2 * 0.2 + 5 * 0.2, variance = 0.5 * (4 + mean) ** 2 + 0.1 * mean ** 2 + 0.2 * (2 - mean) ** 2 + 0.2 * (5 - mean) ** 2;
+  close(readout(res, 'mean').theory, mean, 1e-9, 'Mξ');
+  close(readout(res, 'variance').theory, variance, 1e-6, 'Dξ');
+  close(res.beam.mean, mean, 1e-9, 'beam fulcrum');
+  close(readout(res, 'mean').observed, mean, 5 * Math.sqrt(variance / q.n), 'sample mean');
+  assert.equal(readout(res, 'torque').theory, 0);
+  assert.ok(res.formula[0].includes('(-4) \\cdot 0.5'), res.formula[0]);
+  assert.deepEqual(res.beam.keys, ['x1', 'x2', 'x3', 'x4']);
+  // Moving one weight moves the fulcrum by Δx · p.
+  const moved = K.run({ ...q, x4: 3 }, { seed: 2, station: 'balance' });
+  close(moved.beam.mean - res.beam.mean, -2 * 0.2, 1e-9, 'fulcrum shift');
+  // Weights that do not add up to 1 are divided by their sum, and the note says so.
+  const half = K.run({ ...q, p1: 0.25, p2: 0.05, p3: 0.1, p4: 0.1 }, { seed: 2, station: 'balance' });
+  close(half.beam.mean, mean, 1e-9, 'rescaled law has the same centre');
+  assert.equal(readout(half, 'total').observed, 0.5);
+  assert.ok(half.notes.some((t) => t.includes('not 1')));
 });
