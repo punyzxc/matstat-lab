@@ -5,6 +5,7 @@ import { ArrowUpRight } from 'lucide-react';
 import type { modules } from './modules';
 import { moduleReadout } from './method-readouts';
 import { collect, histogram, moments, sources, type RunSettings } from './statistics';
+import { dec, t, useLang } from './i18n';
 
 type Snapshot = { settings: RunSettings; size: number; saved: boolean };
 type Module = (typeof modules)[number];
@@ -21,7 +22,7 @@ const width = 180;
 const base = 37;
 const left = 4;
 const right = width - left;
-const decimals = (value: number) => value.toFixed(3).replace(/^-0\.000$/, '0.000');
+const decimals = (value: number) => dec(value.toFixed(3).replace(/^-0\.000$/, '0.000'));
 const linear = (value: number, lo: number, hi: number, start: number, end: number) =>
   start + ((value - lo) / (hi - lo || 1)) * (end - start);
 
@@ -45,11 +46,11 @@ function previewData(id: Module['id'], { settings, size }: Snapshot) {
       const { counts, outside } = histogram(sample, source.domain(settings.scale), 18);
       return show(
         { kind: 'histogram', bins: counts },
-        'Frequency · 18 bins',
+        t('Frequency · 18 bins', 'Частоты · 18 интервалов'),
         [stats.mean],
         scalar,
-        'Bin counts: ' + counts.join(', ') + (outside ? `. Outside range: ${outside}.` : '.'),
-        'Sample mean',
+        t('Bin counts: ', 'Частоты интервалов: ') + counts.join(', ') + (outside ? t(`. Outside range: ${outside}.`, `. Вне диапазона: ${outside}.`) : '.'),
+        t('Sample mean', 'Выборочное среднее'),
       );
     }
     case 'convergence': {
@@ -60,22 +61,22 @@ function previewData(id: Module['id'], { settings, size }: Snapshot) {
       });
       return show(
         { kind: 'line', series: { points, reference: mean } },
-        'Prefix means',
+        t('Prefix means', 'Средние начальных отрезков'),
         [stats.mean],
         scalar,
-        `Running sample mean from the first draw to ${size}, with model mean ${decimals(mean)} as reference.`,
-        'Final sample mean',
+        t(`Running sample mean from the first draw to ${size}, with model mean ${decimals(mean)} as reference.`, `Скользящее выборочное среднее от первого значения до ${size}-го; для сравнения — среднее модели ${decimals(mean)}.`),
+        t('Final sample mean', 'Итоговое выборочное среднее'),
       );
     }
     case 'estimation': {
       const standardError = stats.deviation! / Math.sqrt(size);
       return show(
         { kind: 'estimate', mean: stats.mean, standardError, reference: mean },
-        'Mean ± 1 SE',
+        t('Mean ± 1 SE', 'Среднее ± 1 ст. ошибка'),
         [standardError],
         scalar,
-        `Estimated mean ${decimals(stats.mean)} plus or minus one estimated standard error.`,
-        'Estimated standard error',
+        t(`Estimated mean ${decimals(stats.mean)} plus or minus one estimated standard error.`, `Оценка среднего ${decimals(stats.mean)} плюс-минус одна оценённая стандартная ошибка.`),
+        t('Estimated standard error', 'Оценка стандартной ошибки'),
       );
     }
     case 'confidence': {
@@ -87,11 +88,11 @@ function previewData(id: Module['id'], { settings, size }: Snapshot) {
       const { center, radius } = bands[bands.length - 1];
       return show(
         { kind: 'interval', bands, reference: mean },
-        '95% Chebyshev intervals',
+        t('95% Chebyshev intervals', '95% интервалы Чебышёва'),
         [center - radius, center + radius],
         ([a, b]) => `${decimals(a)} … ${decimals(b)}`,
-        '95% conservative intervals at one quarter, one half and all observations, using known model variance.',
-        'Interval endpoints',
+        t('95% conservative intervals at one quarter, one half and all observations, using known model variance.', 'Осторожные 95% интервалы по четверти, половине и всем наблюдениям при известной дисперсии модели.'),
+        t('Interval endpoints', 'Границы интервала'),
       );
     }
     case 'testing': {
@@ -101,11 +102,11 @@ function previewData(id: Module['id'], { settings, size }: Snapshot) {
       const probability = Number(moduleReadout(id, sample, settings).value);
       return show(
         { kind: 'signs', above, total: signs.length },
-        'Signs vs. 50% null',
+        t('Signs vs. 50% null', 'Знаки против нулевых 50%'),
         [probability],
-        ([value]) => (value < 0.0001 ? '< 0.0001' : value.toFixed(4)),
-        `${above} of ${signs.length} non-tied draws exceed the model median.`,
-        'Two-sided exact sign test p-value',
+        ([value]) => dec(value < 0.0001 ? '< 0.0001' : value.toFixed(4)),
+        t(`${above} of ${signs.length} non-tied draws exceed the model median.`, `${above} из ${signs.length} значений, не совпадающих с медианой модели, больше её.`),
+        t('Two-sided exact sign test p-value', 'p-значение критерия знаков'),
       );
     }
     case 'randomness': {
@@ -116,11 +117,11 @@ function previewData(id: Module['id'], { settings, size }: Snapshot) {
         .slice(-36);
       return show(
         { kind: 'runs', signs },
-        `Last ${signs.length} non-tied draws`,
+        t(`Last ${signs.length} non-tied draws`, `Последние ${signs.length} значений вне медианы`),
         [Number(moduleReadout(id, sample, settings).value)],
         ([value]) => String(Math.round(value)),
-        'Points above and below the median in draw order. The count covers all non-tied observations.',
-        'Observed runs',
+        t('Points above and below the median in draw order. The count covers all non-tied observations.', 'Точки выше и ниже медианы в порядке розыгрыша. Подсчёт охватывает все наблюдения, не совпадающие с медианой.'),
+        t('Observed runs', 'Число серий'),
       );
     }
   }
@@ -351,24 +352,25 @@ export function OrbitPreview({
   const { count, distribution, scale, seed } = snapshot.settings;
   const { size, saved } = snapshot;
   const clip = useId();
+  const lang = useLang();
   const revision = [distribution, scale, seed, size].join(':');
   const data = useMemo(
     () => previewData(module.id, { settings: { count, distribution, scale, seed }, size, saved }),
-    [module.id, count, distribution, scale, seed, size, saved],
+    [module.id, count, distribution, scale, seed, size, saved, lang],
   );
   const source = sources[distribution].label.split(' (')[0];
-  const status = saved ? 'Latest result' : 'Seeded preview';
+  const status = saved ? t('Latest result', 'Последний результат') : t('Seeded preview', 'Пример с зерном');
   const valueLabel = `${data.measure}: ${data.format(data.values)}`;
   return (
     <a
-      href={`#module/${module.id}`}
+      href={`#station/${module.id}`}
       className="orbit-preview"
       data-active={active}
       data-motion={animate}
       data-saved={saved}
       data-module={module.id}
       onClick={onActivate}
-      aria-label={`${module.name}. ${visited ? 'Last opened. ' : ''}${status}. ${valueLabel}. ${source}, seed ${seed}, ${size} observations.`}
+      aria-label={t(`${module.name}. ${visited ? 'Last opened. ' : ''}${status}. ${valueLabel}. ${source}, seed ${seed}, ${size} observations.`, `${module.name}. ${visited ? 'Открыта последней. ' : ''}${status}. ${valueLabel}. ${source}, зерно ${seed}, наблюдений: ${size}.`)}
     >
       <span className="orbit-preview-head">
         <span className="orbit-preview-label">{module.name}</span>
@@ -419,9 +421,9 @@ export function OrbitPreview({
       <span className="orbit-preview-provenance">
         <span>
           {status}
-          {visited && <span className="orbit-preview-visited"> · Last opened</span>}
+          {visited && <span className="orbit-preview-visited"> · {t('Last opened', 'открыта последней')}</span>}
         </span>
-        <span title={`${source}, seed ${seed}`}>
+        <span title={`${source}, ${t('seed', 'зерно')} ${seed}`}>
           {source} · n {size}
         </span>
       </span>

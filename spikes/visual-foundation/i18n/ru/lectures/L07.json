@@ -1,0 +1,12 @@
+{
+  "The law of large numbers": "Закон больших чисел",
+  "Chebyshev inequality": "Неравенство Чебышёва",
+  "A finite variance bounds the chance of a large deviation from the mean, whatever the law.": "Конечная дисперсия ограничивает вероятность большого отклонения от среднего при любом законе распределения.",
+  "Compare 1/k² with the real tail": "Сравните $1/k^2$ с настоящим «хвостом»",
+  "Running means settle": "Скользящие средние стабилизируются",
+  "The mean of $n$ independent draws with finite variance converges in probability to the expectation.": "Среднее $n$ независимых наблюдений с конечной дисперсией сходится по вероятности к математическому ожиданию.",
+  "Watch the running mean": "Понаблюдайте за скользящим средним",
+  "When it fails": "Когда закон не выполняется",
+  "The Cauchy law has no mean, and its running means never settle.": "У закона Коши нет математического ожидания, и его скользящие средние никогда не стабилизируются.",
+  "Watch Cauchy running means": "Понаблюдайте за скользящими средними для закона Коши"
+}

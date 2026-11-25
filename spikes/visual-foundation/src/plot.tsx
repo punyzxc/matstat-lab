@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { histogram, sources, type RunSettings } from './statistics.ts';
+import { dec, t, useLang } from './i18n';
 
 type Mode = 'histogram' | 'ecdf';
 
 export function Plot({ sample, settings, mode, showTheory, densityPeak }: { sample: number[]; settings: RunSettings; mode: Mode; showTheory: boolean; densityPeak: number }) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const lang = useLang();
 
   useEffect(() => {
     const element = canvas.current;
@@ -56,7 +58,7 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
         const y = py(top * fraction);
         ctx.strokeStyle = i === 0 ? '#555' : '#292929';
         line(margin.left, y, width - margin.right, y);
-        ctx.fillText((top * fraction).toFixed(2), margin.left - 9, y);
+        ctx.fillText(dec((top * fraction).toFixed(2)), margin.left - 9, y);
       }
       const ticks = width < 440 ? 4 : 8;
       ctx.textAlign = 'center';
@@ -65,7 +67,7 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
         const x = px(value);
         ctx.strokeStyle = '#292929';
         line(x, margin.top, x, baseline);
-        ctx.fillText(Number(value.toFixed(2)).toString(), x, baseline + 15);
+        ctx.fillText(dec(Number(value.toFixed(2)).toString()), x, baseline + 15);
       }
       ctx.save();
       ctx.beginPath();
@@ -118,8 +120,8 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
     observer.observe(element);
     draw();
     return () => observer.disconnect();
-  }, [sample, settings, mode, showTheory, densityPeak]);
+  }, [sample, settings, mode, showTheory, densityPeak, lang]);
 
   return <canvas className="plot-canvas" ref={canvas} role="img"
-    aria-label={mode === 'ecdf' ? 'Empirical cumulative distribution, P(X ≤ x)' : 'Histogram of observations, normalized as density'} />;
+    aria-label={mode === 'ecdf' ? t('Empirical cumulative distribution, P(X ≤ x)', 'Эмпирическая функция распределения, P(X ≤ x)') : t('Histogram of observations, normalized as density', 'Гистограмма наблюдений, нормированная как плотность')} />;
 }

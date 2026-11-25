@@ -1,0 +1,16 @@
+{
+ "// ": "Russian for the station template (spikes/station-template): copy this file next to a new kernel's dictionary.",
+ "Template: the sum and the maximum of two dice": "Шаблон: сумма и максимум двух костей",
+ "Show (0 the sum $X_1 + X_2$, 1 the maximum $\\max(X_1, X_2)$)": "Показать (0 сумму $X_1 + X_2$, 1 максимум $\\max(X_1, X_2)$)",
+ "Rolls $n$": "Бросков $n$",
+ "Mean $\\bar{x}$ against $M(X)$": "Среднее $\\bar{x}$ против $M(X)$",
+ "$n = [[1]]$ rolls": "бросков: $n = [[1]]$",
+ "relative frequencies": "относительные частоты",
+ "Every number on this card comes from the seeded rolls or from the exact law: nothing is decorative.": "Каждое число на этой карточке получено из бросков с зерном или из точного закона: ничего декоративного.",
+ "The 3D view shows the joint law of $(X_1, X_2)$: a flat table at $\\tfrac{1}{36}$ with the observed shares as stems.": "Трёхмерный вид показывает совместный закон $(X_1, X_2)$: ровную плоскость на высоте $\\tfrac{1}{36}$ и наблюдаемые доли в виде столбиков.",
+ "sum $x_1 + x_2$": "сумма $x_1 + x_2$",
+ "probability": "вероятность",
+ "Joint law of two fair dice: $P(X_1 = i, X_2 = j) = \\tfrac{1}{36}$": "Совместный закон двух правильных костей: $P(X_1 = i, X_2 = j) = \\tfrac{1}{36}$",
+ "Observed share of each pair": "Наблюдаемая доля каждой пары",
+ "maximum $\\max(x_1, x_2)$": "максимум $\\max(x_1, x_2)$"
+}

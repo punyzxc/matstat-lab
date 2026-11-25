@@ -1,0 +1,317 @@
+{
+  "provenance": {
+    "python": "3.12.14",
+    "decimalPrecision": 80,
+    "baseline": "1f4187f2db7e66c8397cc8f5d9a192a59dc84cda",
+    "scipy": null,
+    "numpy": null
+  },
+  "inventory": {
+    "oracleMetrics": 18,
+    "nominalCoverage": 5,
+    "meanDiagnostics": 4,
+    "nominalComparisons": 27,
+    "illustrativeUndercoverage": 1,
+    "deterministicQAChecks": 5,
+    "deterministicQAAlpha": 0
+  },
+  "currentNormalReference": {
+    "alpha4SE": 6.334248366623993e-05,
+    "alpha6SE": 1.9731752900754032e-09,
+    "unionBound": 0.006140172598693479,
+    "independenceIllustration": 0.006123882504289754,
+    "actualCoverageSize": 0.000832374126191437,
+    "discretenessAdjustedUnionReference": 0.005302043229650663,
+    "caveat": "Normal-reference approximation, not an established finite-sample FWER"
+  },
+  "allocation": {
+    "targetCombinedFamilyAlpha": "0.001",
+    "runsPerFamily": 2,
+    "comparisonsPerRun": 9,
+    "perComparisonAlpha": "0.000055555555555555555555555555555555555555555555555555555555555555555555555555555556",
+    "perComparisonAlphaRational": "1/18000",
+    "normalZFor27Comparisons": 4.125226318998095,
+    "caveat": "Model-conditional, one PR evaluation plus one nightly; not lifetime FWER"
+  },
+  "coverageBands": [
+    {
+      "policy": "current",
+      "R": 2000,
+      "nominal": "0.95",
+      "alpha": "0.001",
+      "lo": 1867,
+      "hi": 1931,
+      "lowerFraction": 0.9335,
+      "upperFraction": 0.9655,
+      "lowerTail": "0.00049814140687062275976891849327696067429507841933248591634348915514159282611013909",
+      "upperTail": "0.00033423271932081417657903587836912480815723071786493011637225142651018060575994182",
+      "actualSize": "0.00083237412619143693634795437164608548245230913719741603271574058165177343187008091",
+      "lowerBoundaryMass": "0.00019405140908298016122597839088794144152763833661524601715630328735561089754586476",
+      "upperBoundaryMass": "0.00017204012096652298792646831965941780847402439061145385613130702058164749385577458"
+    },
+    {
+      "policy": "all-27-normal-reference-only",
+      "R": 2000,
+      "nominal": "0.95",
+      "alpha": "0.000037037037037037037037037037037037037037037037037037037037037037037037037037037037",
+      "lo": 1857,
+      "hi": 1938,
+      "lowerFraction": 0.9285,
+      "upperFraction": 0.969,
+      "lowerTail": "0.000012407372983558932092834755207476583389561004450141792180449026241958902569525275",
+      "upperTail": "0.000012022215987183620395582328081088676196501391134157929702977631504775624516724206",
+      "actualSize": "0.000024429588970742552488417083288565259586062395584299721883426657746734527086249481",
+      "lowerBoundaryMass": "0.0000061344408292516048020816544440906906482678971427172119891396021531064907619495056",
+      "upperBoundaryMass": "0.0000082328538538542845072586263149280293683638677880681621444007174149381862794870552"
+    },
+    {
+      "policy": "recommended-9-per-run-2-runs",
+      "R": 2000,
+      "nominal": "0.95",
+      "alpha": "0.000055555555555555555555555555555555555555555555555555555555555555555555555555555556",
+      "lo": 1859,
+      "hi": 1937,
+      "lowerFraction": 0.9295,
+      "upperFraction": 0.9685,
+      "lowerTail": "0.000027512360493691382022610626618517977208627543431805540754353051995706047475832589",
+      "upperTail": "0.000020255069841037904902840954396016705564865258922226091847378348919713810796211261",
+      "actualSize": "0.000047767430334729286925451581014534682773492802354031632601731400915419858272043850",
+      "lowerBoundaryMass": "0.000013019115086076664956707368142459923160201579172392552827162138178874924626937798",
+      "upperBoundaryMass": "0.000013329382430049793964133014033692999929731976418777024424267828195614206357264756"
+    },
+    {
+      "policy": "current",
+      "R": 20000,
+      "nominal": "0.95",
+      "alpha": "0.001",
+      "lo": 18897,
+      "hi": 19100,
+      "lowerFraction": 0.94485,
+      "upperFraction": 0.955,
+      "lowerTail": "0.00046622144672371683876981721603418611433764254122993861059837581213136150210148504",
+      "upperTail": "0.00046688414132616922202672788403865598893620527288277630727735780125250420186806855",
+      "actualSize": "0.00093310558804988606079654510007284210327384781411271491787573361338386570396955359",
+      "lowerBoundaryMass": "0.000055205394503415420696015865602367399090493208834287129921885965714482499986352341",
+      "upperBoundaryMass": "0.000059149639168257610998723916082452446855542851196045409296635885812433046589673277"
+    },
+    {
+      "policy": "all-27-normal-reference-only",
+      "R": 20000,
+      "nominal": "0.95",
+      "alpha": "0.000037037037037037037037037037037037037037037037037037037037037037037037037037037037",
+      "lo": 18870,
+      "hi": 19125,
+      "lowerFraction": 0.9435,
+      "upperFraction": 0.95625,
+      "lowerTail": "0.000016194713196207620078950822101341514559245187397673487981100569812276356485908359",
+      "upperTail": "0.000016474976024092792511001494150350945713777226857364432393188888130019304826427947",
+      "actualSize": "0.000032669689220300412589952316251692460273022414255037920374289457942295661312336306",
+      "lowerBoundaryMass": "0.0000023605895879517133709665323471268192633867138520149597535051983447751675703689303",
+      "upperBoundaryMass": "0.0000026153964730133787562694701124075937199910675079998624736807802654925887596317761"
+    },
+    {
+      "policy": "recommended-9-per-run-2-runs",
+      "R": 20000,
+      "nominal": "0.95",
+      "alpha": "0.000055555555555555555555555555555555555555555555555555555555555555555555555555555556",
+      "lo": 18874,
+      "hi": 19122,
+      "lowerFraction": 0.9437,
+      "upperFraction": 0.9561,
+      "lowerTail": "0.000027760367327315606675209222249940624331163445138325008100867277850883431880201305",
+      "upperTail": "0.000025544735237054353337605897040276629795213246165649432483085644505362874479291428",
+      "actualSize": "0.000053305102564369960012815119290217254126376691303974440583952922356246306359492733",
+      "lowerBoundaryMass": "0.0000039329874355540893632807708484632727771857042266530420613895661062838952614803004",
+      "upperBoundaryMass": "0.0000039538002025317196661256727566253862850940007472554050327446615282225409257721567"
+    }
+  ],
+  "meanBands": [
+    {
+      "R": 2000,
+      "model": "uniform",
+      "alpha": "0.000055555555555555555555555555555555555555555555555555555555555555555555555555555556",
+      "N": 64000,
+      "lower": 0.49094665366708323,
+      "upper": 0.5090533463329168,
+      "method": "Hoeffding"
+    },
+    {
+      "R": 2000,
+      "model": "exponential",
+      "alpha": "0.000055555555555555555555555555555555555555555555555555555555555555555555555555555556",
+      "N": 64000,
+      "lower": 0.9820024261442384,
+      "upper": 1.018216141272428,
+      "method": "Exponential MGF Chernoff"
+    },
+    {
+      "R": 20000,
+      "model": "uniform",
+      "alpha": "0.000055555555555555555555555555555555555555555555555555555555555555555555555555555556",
+      "N": 640000,
+      "lower": 0.49713708051416494,
+      "upper": 0.5028629194858351,
+      "method": "Hoeffding"
+    },
+    {
+      "R": 20000,
+      "model": "exponential",
+      "alpha": "0.000055555555555555555555555555555555555555555555555555555555555555555555555555555556",
+      "N": 640000,
+      "lower": 0.994285084220464,
+      "upper": 1.0057367725928603,
+      "method": "Exponential MGF Chernoff"
+    }
+  ],
+  "mandatoryCases": [
+    {
+      "id": "coverage-z-n1",
+      "family": "coverage",
+      "method": "z",
+      "model": "normal",
+      "mu": 10,
+      "sigma": 3,
+      "n": 1,
+      "seed": 1001,
+      "referenceRng": "inference-methods mulberry32 + cached Box-Muller at 1f4187f",
+      "prR": 2000,
+      "nightlyR": 20000
+    },
+    {
+      "id": "coverage-z-n5",
+      "family": "coverage",
+      "method": "z",
+      "model": "normal",
+      "mu": 10,
+      "sigma": 3,
+      "n": 5,
+      "seed": 1005,
+      "referenceRng": "inference-methods mulberry32 + cached Box-Muller at 1f4187f",
+      "prR": 2000,
+      "nightlyR": 20000
+    },
+    {
+      "id": "coverage-t-n2",
+      "family": "coverage",
+      "method": "t",
+      "model": "normal",
+      "mu": 10,
+      "sigma": 3,
+      "n": 2,
+      "seed": 2002,
+      "referenceRng": "inference-methods mulberry32 + cached Box-Muller at 1f4187f",
+      "prR": 2000,
+      "nightlyR": 20000
+    },
+    {
+      "id": "coverage-t-n5",
+      "family": "coverage",
+      "method": "t",
+      "model": "normal",
+      "mu": 10,
+      "sigma": 3,
+      "n": 5,
+      "seed": 2005,
+      "referenceRng": "inference-methods mulberry32 + cached Box-Muller at 1f4187f",
+      "prR": 2000,
+      "nightlyR": 20000
+    },
+    {
+      "id": "coverage-t-n30",
+      "family": "coverage",
+      "method": "t",
+      "model": "normal",
+      "mu": 10,
+      "sigma": 3,
+      "n": 30,
+      "seed": 2030,
+      "referenceRng": "inference-methods mulberry32 + cached Box-Muller at 1f4187f",
+      "prR": 2000,
+      "nightlyR": 20000
+    },
+    {
+      "id": "mean-uniform-lln",
+      "family": "mean",
+      "model": "uniform",
+      "experiment": "lln",
+      "seed": 2048,
+      "referenceRng": "fixture-mix32-v1",
+      "engine": "simulation-fixture-v1",
+      "pr": {
+        "n": 64000,
+        "repetitions": 1
+      },
+      "nightly": {
+        "n": 640000,
+        "repetitions": 1
+      }
+    },
+    {
+      "id": "mean-uniform-clt",
+      "family": "mean",
+      "model": "uniform",
+      "experiment": "clt",
+      "seed": 2048,
+      "referenceRng": "fixture-mix32-v1",
+      "engine": "simulation-fixture-v1",
+      "pr": {
+        "n": 32,
+        "repetitions": 2000
+      },
+      "nightly": {
+        "n": 32,
+        "repetitions": 20000
+      }
+    },
+    {
+      "id": "mean-exponential-lln",
+      "family": "mean",
+      "model": "exponential",
+      "experiment": "lln",
+      "seed": 2048,
+      "referenceRng": "fixture-mix32-v1",
+      "engine": "simulation-fixture-v1",
+      "pr": {
+        "n": 64000,
+        "repetitions": 1
+      },
+      "nightly": {
+        "n": 640000,
+        "repetitions": 1
+      }
+    },
+    {
+      "id": "mean-exponential-clt",
+      "family": "mean",
+      "model": "exponential",
+      "experiment": "clt",
+      "seed": 2048,
+      "referenceRng": "fixture-mix32-v1",
+      "engine": "simulation-fixture-v1",
+      "pr": {
+        "n": 32,
+        "repetitions": 2000
+      },
+      "nightly": {
+        "n": 32,
+        "repetitions": 20000
+      }
+    }
+  ],
+  "nightlyNonblockingDiagnostics": {
+    "oracleSeeds": {
+      "normal": 20261123,
+      "exponential": 20261124
+    },
+    "R": 20000,
+    "n": 5,
+    "comparisons": 18,
+    "expectedUndercoverage": {
+      "model": "exponential",
+      "method": "t",
+      "n": 5,
+      "seed": 77,
+      "R": 2000
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "Numerical characteristics, functions and sums of random variables": "Числовые характеристики, функции и суммы случайных величин",
+  "Expectation and variance": "Математическое ожидание и дисперсия",
+  "The mean is the centre of mass of the distribution; the variance is the mean squared spread around it.": "Математическое ожидание — центр масс распределения; дисперсия — средний квадрат отклонения от него.",
+  "M\\xi = \\sum_i x_i\\, p_i \\quad \\text{or} \\quad M\\xi = \\int_{-\\infty}^{\\infty} x f(x)\\,dx": "M\\xi = \\sum_i x_i\\, p_i \\quad \\text{или} \\quad M\\xi = \\int_{-\\infty}^{\\infty} x f(x)\\,dx",
+  "The $3\\sigma$ rule": "Правило $3\\sigma$",
+  "For a normal variable almost all values lie within three standard deviations of the mean.": "Для нормальной случайной величины почти все значения лежат в пределах трёх средних квадратических отклонений от среднего.",
+  "Sums and convolution": "Суммы и композиция законов",
+  "The density of a sum of independent variables is the convolution of their densities.": "Плотность суммы независимых случайных величин равна свёртке их плотностей."
+}

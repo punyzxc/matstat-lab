@@ -1,0 +1,938 @@
+/* One scene: the program never scrolls the document. Only docked panels scroll inside themselves. */
+html:has(.orbital-lab),
+html:has(.orbital-lab) body {
+  height: 100%;
+  overflow: hidden;
+  color-scheme: dark;
+}
+@media (pointer: fine) {
+  html:has(.orbital-lab) {
+    overscroll-behavior: none;
+  }
+}
+.orbital-lab {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.orbital-lab > .lab-spread {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: 100%;
+  min-height: 0;
+}
+.orbital-lab .orbital-instruments {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+}
+.orbital-lab .orbital-field {
+  height: auto;
+  min-height: 0;
+}
+.orbital-lab .orbit-heading {
+  padding: 14px 0 10px;
+}
+.orbital-lab .orbit-heading h1 {
+  font-size: clamp(34px, 3.6vw, 60px);
+}
+@media (max-height: 820px) {
+  .orbital-lab .orbit-heading h1 {
+    font-size: clamp(30px, 3vw, 46px);
+  }
+  .orbital-lab .orbit-heading p br {
+    display: none;
+  }
+}
+
+/* Lecture orbit switcher in the top bar. */
+.orbit-switch {
+  gap: clamp(10px, 1.7vw, 30px) !important;
+}
+.orbit-switch a b {
+  font: 500 10px var(--mono);
+  color: var(--quiet);
+  margin-right: 6px;
+  letter-spacing: 0.06em;
+}
+.orbit-switch a[aria-current] b {
+  color: var(--signal);
+}
+.lab-session .lab-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 12px var(--sans);
+  color: var(--grey);
+  transition: color 160ms var(--ease);
+}
+.lab-session .lab-tool:hover,
+.lab-session .lab-tool:focus-visible {
+  color: var(--ink);
+}
+.lab-session > i {
+  display: none;
+}
+/* The language switch: a quiet mono tag at the end of the tools; it names the language it switches to. */
+.lab-session .lab-lang {
+  min-width: 30px;
+  height: 22px;
+  justify-content: center;
+  margin-left: 4px;
+  padding: 0 6px;
+  border: 1px solid #ffffff1f;
+  border-radius: 999px;
+  font: 500 10px var(--mono);
+  letter-spacing: 0.08em;
+  color: var(--quiet);
+}
+.lab-session .lab-lang:hover,
+.lab-session .lab-lang:focus-visible {
+  border-color: #e8e48566;
+  color: var(--signal);
+}
+
+/* Lecture station cards share the instrument preview frame. */
+.station-card {
+  justify-content: flex-start;
+  gap: 8px;
+}
+.station-card-summary {
+  flex: 1;
+  color: #bdbdbd;
+  font: 12px/1.38 var(--sans);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.station-card[data-ready='false'] .orbit-preview-provenance span:first-child {
+  color: var(--quiet);
+}
+.station-card[data-ready='true'] .orbit-preview-provenance span:first-child {
+  color: var(--signal);
+}
+
+/* The dock: a station opened inside the scene. The globe stays visible around it, dimmed. */
+.orbital-lab[data-dock='open'] .orbital-engine,
+.orbital-lab[data-dock='open'] .orbital-nodes {
+  opacity: 0.22;
+  transition: opacity 200ms var(--ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbital-lab[data-dock='open'] .orbital-engine,
+  .orbital-lab[data-dock='open'] .orbital-nodes {
+    transition: none;
+  }
+}
+.scene-dock {
+  position: absolute;
+  z-index: 5;
+  inset: 10px clamp(8px, 4vw, 72px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: rgb(8 8 8 / 0.94);
+  border: 1px solid #454545;
+  border-top-color: #6a6a6a;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.55);
+  animation: dock-in 180ms var(--ease) both;
+}
+.scene-dock--end {
+  left: auto;
+  width: min(560px, 92%);
+  right: 0;
+}
+@keyframes dock-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-dock {
+    animation: none;
+  }
+}
+.scene-dock-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.scene-dock-head .edition {
+  margin: 0 0 4px;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.scene-dock-head h2 {
+  margin: 0;
+  font: 450 clamp(24px, 2.2vw, 34px) / 1 var(--sans);
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+  outline: none;
+}
+.scene-dock-lead {
+  margin: 6px 0 0;
+  max-width: 76ch;
+  color: #b8b8b8;
+  font-size: 13px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+.dock-lecture {
+  margin-left: 6px;
+  color: var(--signal);
+  font: 10px var(--mono);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.scene-dock-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  color: var(--grey);
+  border: 1px solid #3c3c3c;
+  background: transparent;
+  transition: color 160ms var(--ease), border-color 160ms var(--ease);
+}
+.scene-dock-close:hover,
+.scene-dock-close:focus-visible {
+  color: var(--ink);
+  border-color: #777;
+}
+.scene-dock-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 14px 18px 18px;
+}
+
+/* Embedded prototype instruments inside the dock. */
+.station-legacy .instrument-grid {
+  margin-top: 0;
+}
+.station-legacy .workspace-title {
+  margin-top: 0;
+}
+.workspace-actions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+/* Kernel stations. */
+.station-grid {
+  display: grid;
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
+  gap: 14px;
+}
+.station-grid .parameter-body {
+  display: grid;
+  gap: 12px;
+}
+.station-status,
+.station-pending {
+  color: #c4c4c4;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.station-pending {
+  max-width: 64ch;
+}
+.station-pending .edition {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.station-pending a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--signal);
+}
+.readouts {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font: 12px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.readouts :is(th, td) {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--faint);
+  text-align: right;
+}
+.readouts :is(thead th, tbody th) {
+  text-align: left;
+  font-weight: 400;
+  color: #cfcfcf;
+}
+.readouts thead th {
+  color: var(--quiet);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.readouts tbody th small {
+  display: block;
+  color: var(--quiet);
+  font-size: 10px;
+}
+.station-notes p {
+  color: #bdbdbd;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 80ch;
+}
+.series-plot {
+  margin: 0;
+}
+.series-plot svg {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  font: 10px var(--mono);
+  fill: var(--quiet);
+}
+.series-plot .axis {
+  fill: none;
+  stroke: #4a4a4a;
+}
+.series-plot .series {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+.series-plot .series--hist rect {
+  fill: #5d5d5d;
+  stroke: none;
+}
+.series-plot .series--pmf rect {
+  fill: var(--ink);
+  stroke: none;
+}
+.series-plot :is(.series--pdf, .series--cdf, .series--line) {
+  stroke: var(--signal);
+}
+.series-plot .series--points circle {
+  fill: var(--ink);
+  stroke: none;
+  opacity: 0.7;
+}
+.series-plot .series--band {
+  fill: rgb(232 228 133 / 0.14);
+  stroke: none;
+}
+.series-plot figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: var(--quiet);
+  font: 10px var(--mono);
+}
+.series-plot .key i {
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+  background: var(--ink);
+}
+.series-plot :is(.key--pdf, .key--cdf, .key--line) i {
+  background: var(--signal);
+}
+.series-plot .key--hist i {
+  height: 8px;
+  background: #5d5d5d;
+}
+
+/* Lab notes and the sample record as drawers. */
+.lab-notes-body h3 {
+  margin: 18px 0 6px;
+  font: 500 14px var(--sans);
+}
+.lab-notes-body p {
+  color: #bdbdbd;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.lab-notes-body a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--signal);
+}
+.scene-dock .orbital-record {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Narrow screens: the scene keeps one screen; the station rail scrolls inside the field. */
+@media (max-width: 760px) {
+  .orbital-lab .orbital-field {
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .station-grid {
+    grid-template-columns: 1fr;
+  }
+  .orbit-switch a {
+    font-size: 0 !important;
+  }
+  .orbit-switch a b {
+    font-size: 11px;
+  }
+  .scene-dock {
+    inset: 4px 0;
+  }
+}
+.station-legacy .workspace-title {
+  justify-content: flex-end;
+}
+.station-legacy .workspace-title h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.scene-dock .specimen {
+  min-height: 330px;
+}
+
+/* Charts: one grammar for every station. Observed = ink, theory/reference = signal yellow,
+   context = grey, highlighted region = translucent signal. Labels are mono and tabular. */
+.chart {
+  margin: 0;
+}
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font: 10.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.chart-grid line {
+  stroke: #232323;
+  stroke-width: 1;
+}
+.chart-axis path {
+  fill: none;
+  stroke: #5a5a5a;
+}
+.chart-axis text {
+  fill: #9a9a9a;
+}
+.chart-axis .chart-title {
+  fill: #c9c9c9;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+.chart-series {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.chart-series.tone-signal {
+  stroke: var(--signal);
+}
+.chart-series.tone-muted {
+  stroke: #7d7d7d;
+}
+.chart-series.tone-accent {
+  stroke: var(--signal);
+}
+.chart-series--line.tone-signal {
+  stroke-dasharray: 5 4;
+}
+.chart-series--hist rect {
+  fill: #cfcfcf;
+  stroke: none;
+}
+.chart-series--hist.tone-muted rect {
+  fill: #4b4b4b;
+}
+.chart-series--pmf circle {
+  fill: var(--ink);
+  stroke: none;
+}
+.chart-series--pmf.tone-muted circle {
+  fill: #7d7d7d;
+}
+.chart-series--pmf.tone-accent circle {
+  fill: var(--signal);
+}
+.chart-series--points circle {
+  fill: var(--ink);
+  stroke: none;
+  opacity: 0.75;
+}
+.chart-series--points.tone-muted circle {
+  fill: #6a6a6a;
+}
+.chart-series--points:is(.tone-accent, .tone-signal) circle {
+  fill: var(--signal);
+  opacity: 0.9;
+}
+.chart-series--band {
+  fill: rgb(244 244 242 / 0.08);
+  stroke: none;
+}
+.chart-series--band:is(.tone-signal, .tone-accent) {
+  fill: rgb(232 228 133 / 0.13);
+}
+.chart-series--rule line {
+  stroke-width: 1.25;
+}
+.chart-series--rule.tone-default line {
+  stroke-dasharray: 2 3;
+}
+.chart figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 6px;
+  color: #a8a8a8;
+  font: 10.5px var(--mono);
+}
+.chart-key i {
+  display: inline-block;
+  width: 14px;
+  height: 0;
+  margin-right: 7px;
+  vertical-align: middle;
+  border-top: 1.5px solid var(--ink);
+}
+.chart-key:is(.tone-signal, .tone-accent) i {
+  border-color: var(--signal);
+}
+.chart-key.tone-muted i {
+  border-color: #7d7d7d;
+}
+.chart-key--line.tone-signal i {
+  border-top-style: dashed;
+}
+.chart-key--band i,
+.chart-key--hist i {
+  height: 8px;
+  border: 0;
+  background: rgb(244 244 242 / 0.18);
+}
+.chart-key--band:is(.tone-signal, .tone-accent) i {
+  background: rgb(232 228 133 / 0.3);
+}
+.chart-key--hist.tone-muted i {
+  background: #4b4b4b;
+}
+.chart-empty {
+  color: var(--quiet);
+  font: 12px var(--mono);
+}
+.method-station {
+  display: grid;
+  gap: 16px;
+}
+.method-station .method-desk {
+  margin-top: 0;
+}
+.chart-series.chart-series--band {
+  stroke: rgb(232 228 133 / 0.45);
+  stroke-width: 0.75;
+}
+.chart-series.chart-series--band.tone-default,
+.chart-series.chart-series--band.tone-muted {
+  stroke: none;
+}
+
+/* Card telemetry: readable at a glance on a projector. The value leads; labels are secondary. */
+@media (min-width: 761px) {
+  .orbital-lab .orbit-preview {
+    gap: 6px;
+    padding: 11px 13px 9px;
+  }
+  .orbital-lab .orbit-preview-label {
+    font-size: clamp(13px, 1.1vw, 16px);
+  }
+  .orbital-lab .orbit-preview-meta > span {
+    font-size: 10.5px;
+    color: #b4b4b4;
+  }
+  .orbital-lab .orbit-preview-value {
+    font-size: clamp(14px, 1.25vw, 19px);
+    letter-spacing: -0.01em;
+  }
+  .orbital-lab .orbit-preview-chart {
+    height: 46px;
+    color: #e2e2e2;
+  }
+  .orbital-lab .orbit-preview-provenance {
+    font-size: 10px;
+    color: #b9b9b9;
+  }
+  .orbital-lab .orbit-console {
+    font-size: 11px;
+    color: #c4c4c4;
+  }
+  .orbital-lab .orbit-console :is(strong, b) {
+    color: var(--ink);
+  }
+}
+@media (min-width: 761px) {
+  .orbital-lab .orbit-preview-meta {
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .orbital-lab .orbit-preview-meta > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .orbital-lab .orbit-preview-value {
+    flex: none;
+    white-space: nowrap;
+  }
+  .orbital-lab .orbit-preview[data-module='confidence'] .orbit-preview-value {
+    font-size: clamp(12px, 1vw, 15px);
+  }
+}
+
+/* Live preview line and the rotatable surface view (kernel stations with a joint density). */
+.live-note {
+  margin: 6px 0 0;
+  color: var(--quiet);
+  font: 11px var(--mono);
+}
+.surface {
+  margin: 0 0 12px;
+}
+.surface-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.surface-heading {
+  color: #c9c9c9;
+  font: 11px var(--mono);
+  letter-spacing: 0.02em;
+}
+.surface-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font: 10.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.surface-svg:active {
+  cursor: grabbing;
+}
+.surface-svg:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+.surface-box path,
+.surface-box line {
+  fill: none;
+  stroke: #2c2c2c;
+}
+.surface-quad {
+  fill: color-mix(in srgb, var(--signal) calc(var(--h, 0) * 85%), #151515);
+  stroke: rgb(232 228 133 / 0.28);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+}
+.surface-stem line {
+  stroke: var(--ink);
+  stroke-width: 0.8;
+  opacity: 0.75;
+}
+.surface-stem circle {
+  fill: var(--ink);
+}
+.surface-axis path {
+  fill: none;
+  stroke: #5a5a5a;
+}
+.surface-axis text {
+  fill: #9a9a9a;
+}
+.surface-axis .surface-title {
+  fill: #c9c9c9;
+  font-size: 11px;
+}
+.surface figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 4px;
+  color: #b4b4b4;
+  font: 10.5px var(--mono);
+}
+.surface-key-sample i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.surface-hint {
+  color: var(--quiet);
+}
+
+/* Autoplay: experiments play by themselves; the bar only stops, steps or paces them. */
+.autoplay {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 10px;
+}
+.autoplay-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.autoplay button {
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: 500 12px var(--sans);
+  transition: border-color var(--quick) var(--ease), background var(--quick) var(--ease), color var(--quick) var(--ease);
+}
+.autoplay button:hover {
+  border-color: #777;
+}
+.autoplay button:focus-visible,
+.choice-chips button:focus-visible,
+.range-typed:focus-visible,
+.readout-track button:focus-visible,
+.ridge-toggle:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+}
+.autoplay-main {
+  min-width: 92px;
+  padding: 0 14px;
+}
+.autoplay[data-playing='false'] .autoplay-main {
+  color: #141414;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.autoplay-icon {
+  width: 34px;
+}
+.autoplay-speed {
+  display: inline-flex;
+  margin-left: auto;
+}
+.autoplay-speed button {
+  min-width: 38px;
+  font: 12px var(--mono);
+  color: var(--quiet);
+}
+.autoplay-speed button + button {
+  margin-left: -1px;
+}
+.autoplay-speed button[aria-checked='true'] {
+  color: var(--ink);
+  border-color: var(--ink);
+  position: relative;
+}
+.autoplay-status {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--quiet);
+  font: 11px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.autoplay-status kbd {
+  margin-left: auto;
+  font: 10px var(--mono);
+  color: #707070;
+  border: 1px solid var(--faint);
+  padding: 1px 5px;
+}
+.autoplay-progress {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1px;
+  width: calc(var(--p, 0) * 100%);
+  background: var(--signal);
+  transition: width 300ms var(--ease);
+}
+
+/* Typed values beside every slider. */
+.range-typed {
+  min-width: 0;
+  max-width: 11ch;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-bottom-color: #3a3a3a;
+  background: transparent;
+  color: var(--ink);
+  font: 12px var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  cursor: text;
+}
+.range-typed:hover {
+  border-bottom-color: #777;
+}
+.range-typed:focus {
+  border-color: #555;
+  background: #121212;
+}
+.range-typed[aria-invalid='true'] {
+  border-color: var(--signal);
+}
+.range-note {
+  display: block;
+  margin-top: 4px;
+  color: var(--signal);
+  font: 11px var(--mono);
+}
+.parameter-hint {
+  margin: 4px 0 0;
+  color: #777;
+  font: 11px/1.5 var(--mono);
+}
+
+/* Named choices as chips. */
+.choice-field {
+  display: grid;
+  gap: 6px;
+}
+.choice-title {
+  font-size: 13px;
+}
+.choice-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.choice-chips button {
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: #bdbdbd;
+  padding: 4px 9px;
+  min-height: 28px;
+  font: 12px var(--sans);
+  transition: border-color var(--quick) var(--ease), color var(--quick) var(--ease), background var(--quick) var(--ease);
+}
+.choice-chips button:hover {
+  border-color: #777;
+  color: var(--ink);
+}
+.choice-chips button[aria-checked='true'] {
+  color: #141414;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Following one readout across draws, and the stacked-draws 3D view. */
+.chart-stage {
+  position: relative;
+}
+.ridge-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--rule);
+  background: rgba(8, 8, 8, 0.7);
+  color: var(--quiet);
+  padding: 3px 8px;
+  font: 11px var(--mono);
+}
+.ridge-toggle:hover,
+.ridge-toggle[aria-pressed='true'] {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.readout-track {
+  width: 30px;
+}
+.readout-track button {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #5a5a5a;
+}
+.readout-track button:hover {
+  color: var(--ink);
+}
+.readout-track button[aria-pressed='true'] {
+  color: var(--signal);
+  border-color: #3a3a3a;
+}
+.readouts tr[data-tracked] th {
+  color: var(--ink);
+}
+.trace {
+  margin-top: 14px;
+  border-top: 1px solid var(--rule);
+  padding-top: 8px;
+}
+.trace-head {
+  margin: 0 0 4px;
+  color: var(--quiet);
+  font: 11px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.trace-head b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.trace-empty {
+  margin: 6px 0;
+  color: #777;
+  font: 11px var(--mono);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .autoplay-progress {
+    transition: none;
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "lecture": 10,
+  "title": "Samples and goodness of fit",
+  "scientists": [
+    "kolmogorov",
+    "pearson"
+  ],
+  "steps": [
+    {
+      "title": "Variation series and histogram",
+      "idea": "Sort the sample, group it into intervals and draw the histogram and the empirical distribution function.",
+      "formula": [
+        "k \\approx 5 \\lg n \\quad \\text{intervals}",
+        "F_n(x) = \\dfrac{\\#\\{\\, i : x_i \\le x \\,\\}}{n}"
+      ],
+      "experiment": {
+        "station": "sample",
+        "seed": 1010
+      }
+    },
+    {
+      "title": "Kolmogorov test",
+      "idea": "The largest gap between the empirical and the hypothesised distribution function tells whether the law fits.",
+      "formula": [
+        "D_n = \\sup_x \\bigl|F_n(x) - F(x)\\bigr|, \\qquad \\lambda = D_n\\sqrt{n}"
+      ],
+      "scientists": [
+        "kolmogorov"
+      ],
+      "experiment": {
+        "station": "fit",
+        "seed": 1933
+      }
+    },
+    {
+      "title": "Pearson $\\chi^2$ test",
+      "idea": "Compare observed and expected counts in each interval.",
+      "formula": [
+        "\\chi^2 = \\sum_{i=1}^{s} \\dfrac{(n_i - np_i)^2}{np_i}"
+      ],
+      "scientists": [
+        "pearson"
+      ],
+      "experiment": {
+        "station": "fit",
+        "seed": 1900
+      }
+    }
+  ],
+  "status": "draft"
+}

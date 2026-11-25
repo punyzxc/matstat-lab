@@ -1,0 +1,75 @@
+{
+  "lecture": 3,
+  "title": "The Bernoulli scheme and its approximations",
+  "scientists": [
+    "bernoulli-jacob",
+    "de-moivre",
+    "laplace",
+    "gauss",
+    "poisson",
+    "newton"
+  ],
+  "steps": [
+    {
+      "title": "Bernoulli formula",
+      "idea": "$n$ independent trials, each a success with probability $p$: the number of successes follows the binomial law.",
+      "formula": [
+        "P_n(k) = C_n^k\\, p^k q^{\\,n-k}, \\qquad q = 1 - p"
+      ],
+      "example": "$n = 7,\\ k = 5,\\ p = 0.5$: $\\;P_7(5) = \\frac{21}{128} \\approx 0.164$.",
+      "scientists": [
+        "bernoulli-jacob"
+      ],
+      "experiment": {
+        "station": "bernoulli",
+        "seed": 7
+      }
+    },
+    {
+      "title": "Local de Moivre–Laplace theorem",
+      "idea": "For large $n$ the binomial probabilities follow the normal bell.",
+      "formula": [
+        "P_n(k) \\approx \\dfrac{\\varphi(x)}{\\sqrt{npq}}, \\qquad x = \\dfrac{k - np}{\\sqrt{npq}}"
+      ],
+      "scientists": [
+        "de-moivre",
+        "laplace",
+        "gauss"
+      ],
+      "experiment": {
+        "station": "bernoulli",
+        "seed": 1733
+      }
+    },
+    {
+      "title": "Integral theorem",
+      "idea": "The probability that the count falls in a range is an area under the normal curve.",
+      "formula": [
+        "P(k_1 \\le k \\le k_2) \\approx \\Phi(x_2) - \\Phi(x_1), \\qquad x_i = \\dfrac{k_i - np}{\\sqrt{npq}}"
+      ],
+      "example": "$n = 5000,\\ p = 0.01$, $\\;P(0 \\le k \\le 50)$: exact 0.5375, normal 0.5. The continuity correction closes most of the gap.",
+      "scientists": [
+        "laplace"
+      ],
+      "experiment": {
+        "station": "bernoulli",
+        "seed": 5000
+      }
+    },
+    {
+      "title": "Poisson approximation",
+      "idea": "When $p$ is small and $np = \\lambda$ is moderate, rare events follow the Poisson law.",
+      "formula": [
+        "P_n(k) \\approx \\dfrac{\\lambda^k}{k!}\\, e^{-\\lambda}, \\qquad \\lambda = np"
+      ],
+      "scientists": [
+        "poisson"
+      ],
+      "experiment": {
+        "station": "bernoulli",
+        "seed": 1837
+      }
+    }
+  ],
+  "status": "draft"
+}

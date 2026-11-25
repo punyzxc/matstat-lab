@@ -1,0 +1,63 @@
+{
+  "lecture": 11,
+  "title": "Point estimates and confidence intervals",
+  "scientists": [
+    "gosset"
+  ],
+  "steps": [
+    {
+      "title": "Unbiased variance",
+      "idea": "Dividing by $n$ underestimates the variance; dividing by $n - 1$ removes the bias.",
+      "formula": [
+        "s^2 = \\dfrac{1}{n-1} \\sum_{i=1}^{n} (x_i - \\bar{x})^2"
+      ],
+      "experiment": {
+        "station": "estimation",
+        "seed": 1111,
+        "params": {
+          "n": 5,
+          "sigma": 1,
+          "law": 0,
+          "R": 2000,
+          "view": 0
+        }
+      }
+    },
+    {
+      "title": "Confidence interval for the mean",
+      "idea": "An interval built from the sample covers the true mean in a stated share of repeated samples.",
+      "formula": [
+        "\\bar{x} \\pm t_{\\gamma,\\,n-1}\\, \\dfrac{s}{\\sqrt{n}}"
+      ],
+      "scientists": [
+        "gosset"
+      ],
+      "experiment": {
+        "station": "confidence",
+        "seed": 1908,
+        "params": {
+          "n": 10,
+          "gamma": 0.95,
+          "target": 0,
+          "law": 0,
+          "R": 1000,
+          "view": 1
+        }
+      }
+    },
+    {
+      "title": "Homogeneity of two series",
+      "idea": "Two series of trials give frequencies $m_1/n_1$ and $m_2/n_2$. Are they samples of one probability $p$? Pool them and compare the difference with its standard error.",
+      "formula": [
+        "z = \\dfrac{\\dfrac{m_1}{n_1} - \\dfrac{m_2}{n_2}}{\\sqrt{\\hat{p}\\,(1 - \\hat{p})\\left(\\dfrac{1}{n_1} + \\dfrac{1}{n_2}\\right)}}, \\qquad \\hat{p} = \\dfrac{m_1 + m_2}{n_1 + n_2}",
+        "\\text{reject homogeneity when}\\quad |z| > z_{1-\\alpha/2}"
+      ],
+      "experiment": {
+        "station": "homogeneity",
+        "seed": 139,
+        "label": "Run the two-series test"
+      }
+    }
+  ],
+  "status": "draft"
+}

@@ -1,0 +1,11 @@
+{
+  "Conditional probability, total probability and Bayes": "Условная вероятность, формула полной вероятности и формула Байеса",
+  "Conditional probability": "Условная вероятность",
+  "Knowing that $B$ happened shrinks the space of outcomes to $B$.": "Если известно, что событие $B$ произошло, пространство исходов сужается до $B$.",
+  "Total probability": "Формула полной вероятности",
+  "Split the space into hypotheses $H_1, \\ldots, H_n$ and add up the paths that lead to $A$.": "Разобьём пространство на гипотезы $H_1, \\ldots, H_n$ и сложим вероятности всех путей, ведущих к $A$.",
+  "Bayes formula": "Формула Байеса",
+  "After $A$ is observed, the weights of the hypotheses are updated.": "После наблюдения события $A$ вероятности гипотез пересчитываются.",
+  "A student knows the answer with probability $p$ and otherwise guesses among 5 options. Given a correct answer, the chance that it was a guess is $\\dfrac{1 - p}{4p + 1}$.": "Студент знает ответ с вероятностью $p$, а иначе наугад выбирает один из 5 вариантов. Если ответ верен, вероятность того, что он был угадан, равна $\\dfrac{1 - p}{4p + 1}$.",
+  "Count the posterior": "Найдите апостериорную вероятность"
+}

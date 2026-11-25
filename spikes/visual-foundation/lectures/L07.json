@@ -1,0 +1,73 @@
+{
+  "lecture": 7,
+  "title": "The law of large numbers",
+  "scientists": [
+    "chebyshev",
+    "markov",
+    "khinchin",
+    "bernoulli-jacob",
+    "poisson",
+    "cauchy"
+  ],
+  "steps": [
+    {
+      "title": "Chebyshev inequality",
+      "idea": "A finite variance bounds the chance of a large deviation from the mean, whatever the law.",
+      "formula": [
+        "P\\bigl(|\\xi - M\\xi| \\ge \\varepsilon\\bigr) \\le \\dfrac{D\\xi}{\\varepsilon^2}"
+      ],
+      "scientists": [
+        "chebyshev"
+      ],
+      "experiment": {
+        "station": "lln",
+        "seed": 1853,
+        "params": {
+          "law": 0,
+          "k": 3,
+          "view": 1
+        },
+        "label": "Compare 1/k² with the real tail"
+      }
+    },
+    {
+      "title": "Running means settle",
+      "idea": "The mean of $n$ independent draws with finite variance converges in probability to the expectation.",
+      "formula": [
+        "\\dfrac{\\xi_1 + \\ldots + \\xi_n}{n} \\;\\xrightarrow[\\;n\\to\\infty\\;]{P}\\; a"
+      ],
+      "scientists": [
+        "chebyshev",
+        "khinchin"
+      ],
+      "experiment": {
+        "station": "convergence",
+        "seed": 707,
+        "params": {
+          "dist": 1,
+          "n": 2048,
+          "scale": 1
+        },
+        "label": "Watch the running mean"
+      }
+    },
+    {
+      "title": "When it fails",
+      "idea": "The Cauchy law has no mean, and its running means never settle.",
+      "scientists": [
+        "cauchy"
+      ],
+      "experiment": {
+        "station": "lln",
+        "seed": 707,
+        "params": {
+          "law": 4,
+          "N": 10000,
+          "view": 0
+        },
+        "label": "Watch Cauchy running means"
+      }
+    }
+  ],
+  "status": "draft"
+}

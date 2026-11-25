@@ -1,0 +1,37 @@
+{
+  "lecture": 4,
+  "title": "Axioms of probability and geometric probability",
+  "scientists": [
+    "kolmogorov",
+    "bertrand"
+  ],
+  "steps": [
+    {
+      "title": "Kolmogorov axioms",
+      "idea": "Probability is a measure on events: non-negative, equal to one on the whole space and additive over disjoint events.",
+      "formula": [
+        "P(A) \\ge 0, \\qquad P(\\Omega) = 1",
+        "P\\Bigl(\\bigcup_{i} A_i\\Bigr) = \\sum_{i} P(A_i) \\quad \\text{for disjoint } A_i"
+      ],
+      "scientists": [
+        "kolmogorov"
+      ]
+    },
+    {
+      "title": "Geometric probability",
+      "idea": "A point thrown uniformly into a region hits a subregion with probability equal to the ratio of their measures.",
+      "formula": [
+        "P(A) = \\dfrac{\\operatorname{mes} g}{\\operatorname{mes} G}"
+      ],
+      "experiment": {
+        "station": "darts",
+        "seed": 404,
+        "params": {
+          "view": 1,
+          "N": 10000
+        }
+      }
+    }
+  ],
+  "status": "draft"
+}

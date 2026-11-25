@@ -1,0 +1,9 @@
+{
+  "Testing statistical hypotheses": "Проверка статистических гипотез",
+  "Errors of two kinds": "Ошибки двух родов",
+  "A test rejects a true $H_0$ with probability $\\alpha$ and keeps a false $H_0$ with probability $\\beta$; the power is $1 - \\beta$.": "Критерий отвергает верную гипотезу $H_0$ с вероятностью $\\alpha$ и принимает неверную $H_0$ с вероятностью $\\beta$; мощность равна $1 - \\beta$.",
+  "\\alpha = P(\\text{reject } H_0 \\mid H_0)": "\\alpha = P(\\text{отвергнуть } H_0 \\mid H_0)",
+  "\\beta = P(\\text{keep } H_0 \\mid H_1)": "\\beta = P(\\text{принять } H_0 \\mid H_1)",
+  "Comparing variances": "Сравнение дисперсий",
+  "The ratio of two sample variances follows the Fisher–Snedecor $F$ law under $H_0$.": "При $H_0$ отношение двух выборочных дисперсий подчиняется закону Фишера — Снедекора $F$."
+}

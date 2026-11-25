@@ -83,6 +83,50 @@ area: research
 budget_hours: 2
 ```
 
+## Follow-ups from the merged research (2026-11-24)
+
+The merged research (#4, #6, #14, #15, #22) left these open points. Each one has its own deliverable and can run in parallel.
+
+```crew-research
+id: snapshot-comparison-fields
+question: Which fields must the next ExperimentSnapshot version add (axis units, series kind, histogram normalization, ECDF scale, variance divisor, quantile method) so comparisons and exports never guess, and how do version 1 records migrate?
+area: contracts
+owner: punyzxc
+budget_hours: 2
+```
+
+```crew-research
+id: scientific-decision-register
+question: Which scientific choices from the merged research (tolerances, divisors, replay bounds, interval eligibility, coverage bands) are decided, which are deferred, and who confirms each?
+area: research
+owner: punyzxc
+budget_hours: 2
+```
+
+```crew-research
+id: frontend-scaffold
+question: Can a static Vite, React and TypeScript scaffold without a server run Workers, IndexedDB, Vitest and Playwright locally and in CI, with the disjoint area paths proposed in #16?
+area: web
+owner: pluxha
+budget_hours: 3
+```
+
+```crew-research
+id: qa-multiplicity
+question: How should a suite of many Monte Carlo oracle and coverage checks keep its false failure rate fixed, and which cases are mandatory for the first release?
+area: e2e
+owner: adekin06
+budget_hours: 2
+```
+
+```crew-research
+id: convergence-teaching
+question: Which fixed-seed LLN prefix and CLT replicate fixtures, with predeclared bands, show convergence correctly for the Convergence module?
+area: research
+owner: Jumalinova
+budget_hours: 2
+```
+
 ## Exit criteria
 
 - [ ] Record resolved or explicitly deferred scientific decisions, including replay bounds and interval eligibility.
@@ -90,3 +134,166 @@ budget_hours: 2
 - [ ] Verify a frontend-only scaffold and review the required path and check changes through the maintainer workflow.
 - [ ] Confirm all functional owners as repository members and complete independent reviews of the research.
 - [ ] Land the final PRD on main through a reviewed PR.
+
+## Lecture modules (epic proposal, 2026-11-24)
+
+The owner asked for lab modules that follow the 12 course lectures and open inside the single scene of the Orbital laboratory. [The lecture module map](research/lecture-module-map.md) gives the lecture-to-station table, the shared kernel contract and the lecture errata. Each kernel spike is pure, seeded and tested against independent references. The scene host turns kernels into stations. These blocks become the production epic "Lecture modules" after the PRD is approved.
+
+```crew-research
+id: lecture-module-map
+question: How do the 12 course lectures map to in-scene lab stations, one shared kernel contract and a list of lecture errata?
+area: research
+owner: punyzxc
+budget_hours: 2
+```
+
+```crew-research
+id: scene-module-host
+question: Can the Orbital laboratory host every module inside its one scene (no page scroll, no extra views) with keyboard and URL-hash state?
+area: web
+owner: punyzxc
+budget_hours: 4
+```
+
+```crew-research
+id: lecture-combinatorics
+question: Which seeded kernel shows urn sampling counts, hypergeometric and balls-in-boxes laws exactly next to simulation (lecture 1)?
+area: research
+owner: GredesCerber
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-bernoulli-approximations
+question: Which kernel compares the exact binomial law with local, integral and Poisson approximations and their errors (lectures 3 and 9)?
+area: research
+owner: GredesCerber
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-geometric-probability
+question: Which seeded kernel shows frequency stabilisation, geometric probability and the three Bertrand chord schemes (lectures 1 and 4)?
+area: research
+owner: Jumalinova
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-limit-theorems
+question: Which kernel shows uniform-sum convolution, Chebyshev bounds against real tails, Cauchy non-convergence and the CLT (lectures 6 to 9)?
+area: research
+owner: Jumalinova
+budget_hours: 4
+```
+
+```crew-research
+id: lecture-worked-examples-audit
+question: Do the worked examples of all 12 lectures hold under independent recomputation, and which reference fixtures should the kernels reuse?
+area: e2e
+owner: adekin06
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-conditional-bayes
+question: Which seeded kernel shows event algebra, conditional and total probability and Bayes as counts of simulated outcomes (lectures 1 and 2)?
+area: research
+owner: punyzxc
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-random-vectors
+question: Which kernel shows moments, the 3-sigma rule, functions of a random variable, correlation and regression lines (lectures 5 and 6)?
+area: research
+owner: punyzxc
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-sampling-goodness-of-fit
+question: Which kernel builds the variation series, histogram, ECDF, Kolmogorov and Pearson tests with correct degrees of freedom (lectures 10 and 12)?
+area: research
+owner: punyzxc
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-estimation-intervals
+question: Which kernel shows estimator bias and MSE and the coverage of normal, t and chi-square intervals and the two-proportion test (lecture 11)?
+area: research
+owner: punyzxc
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-hypothesis-tests
+question: Which kernel shows critical regions, type I and II errors and power for the z, t and F tests of lecture 12?
+area: research
+budget_hours: 3
+```
+
+## Interactive lectures (owner request, 2026-11-24)
+
+A quiet "Lectures" drawer inside the scene walks through each lecture step by step: the idea, the formula, a worked example and a button that opens the matching station with preset parameters. A teacher can run a lesson from it (presenter mode). Each lecture shows the scientists it mentions next to a slot for an ASCII portrait; the owner draws the portraits.
+
+```crew-research
+id: lecture-walkthrough-host
+question: Which in-scene step player, step format and presenter mode let a teacher run each lecture and open its experiment with preset parameters?
+area: web
+owner: punyzxc
+budget_hours: 4
+```
+
+```crew-research
+id: lecture-walkthroughs-probability
+question: Which step-by-step scripts for lectures 1 to 3 explain each idea and formula and link to the right station presets?
+area: research
+owner: GredesCerber
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-walkthroughs-random-variables
+question: Which step-by-step scripts for lectures 4 to 9 explain each idea and formula and link to the right station presets?
+area: research
+owner: Jumalinova
+budget_hours: 3
+```
+
+```crew-research
+id: lecture-walkthroughs-statistics
+question: Which step-by-step scripts for lectures 10 to 12 explain each idea and formula and link to the right station presets?
+area: research
+owner: adekin06
+budget_hours: 3
+```
+
+## Shared infrastructure for lecture kernels (2026-11-24)
+
+Several kernels need the same special functions, heavy runs and independent acceptance tests. Each item below has one owner, so the kernel tasks do not each rebuild them.
+
+```crew-research
+id: lecture-special-functions
+question: Which shared special functions (Φ, normal, t, χ² and F quantiles, log-gamma, Kolmogorov K) with fixtures should every lecture kernel import?
+area: research
+owner: GredesCerber
+budget_hours: 3
+```
+
+```crew-research
+id: kernel-worker-runner
+question: Can the scene run any contract kernel in the simulation Web Worker with progress and cancellation, so heavy stations never block the scene?
+area: web
+owner: Jumalinova
+budget_hours: 3
+```
+
+```crew-research
+id: scene-acceptance-audit
+question: Do independent browser tests confirm the one-scene rules (no scroll, in-scene stations, URL replay, keyboard and focus) for every station?
+area: e2e
+owner: adekin06
+budget_hours: 2
+```

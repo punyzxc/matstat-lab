@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('globe, module links and preview motion share the pause control', async ({ page }) => {
-  await page.goto('/');
+test('the globe always turns on a full-screen stage with no pause or mode buttons', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await page.goto('/#orbit/statistics');
   await expect(page.getByRole('heading', { name: 'Orbital laboratory' })).toBeVisible();
   const globe = page.getByRole('img', { name: /Earth point cloud/ });
   await expect(globe).toBeVisible();
@@ -20,14 +21,27 @@ test('globe, module links and preview motion share the pause control', async ({ 
   expect(tintedPixels).toBe(0);
   await expect(page.locator('.orbit-link-trace')).toHaveCount(6);
   await expect(page.locator('.orbit-link-focal')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Pause motion' }).click();
-  const paused = await frame();
-  await expect(page.locator('.orbit-link-focal')).toHaveCount(0);
-  await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(6);
-  await page.waitForTimeout(170);
-  expect(await frame()).toBe(paused);
-  await page.getByRole('button', { name: 'Wireframe' }).click();
-  await expect.poll(frame).not.toBe(paused);
+  await expect(page.getByRole('group', { name: 'Globe controls' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /motion|Wireframe/ })).toHaveCount(0);
+  // The scene fills the viewport; the station cards and the HUD float over it.
+  const stage = await page.locator('.orbital-field').boundingBox();
+  expect(stage).toEqual({ x: 0, y: 0, width: 1600, height: 900 });
+  // The canvas host (the intro animation only scales the pixels inside it).
+  const canvas = await page.locator('.orbital-disc .plate-canvas').boundingBox();
+  expect(canvas).toEqual({ x: 0, y: 0, width: 1600, height: 900 });
+  // A drag nudges the Earth and it keeps turning on its own afterwards.
+  await page.mouse.move(800, 450);
+  await page.mouse.down();
+  await page.mouse.move(860, 450, { steps: 4 });
+  await page.mouse.up();
+  const after = await frame();
+  await expect.poll(frame).not.toBe(after);
+  // An open station sits over the live scene, and the Earth keeps turning behind it.
+  await page.locator('.orbital-nodes a').first().click();
+  const dock = await page.getByTestId('station-dock').boundingBox();
+  expect(dock.width).toBeGreaterThan(1400);
+  const behind = await frame();
+  await expect.poll(frame).not.toBe(behind);
 });
 
 test('all six orbital windows are direct entry links and preserve the last opened channel', async ({
@@ -35,26 +49,22 @@ test('all six orbital windows are direct entry links and preserve the last opene
 }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  for (const name of [
-    'Distribution Explorer',
-    'Convergence',
-    'Estimation',
-    'Confidence Intervals',
-    'Hypothesis Testing',
-    'Randomness',
+  for (const [orbit, name] of [
+    ['II Random variables', 'Distribution Explorer'],
+    ['III Limit theorems', 'Convergence'],
   ]) {
-    const node = page
-      .getByRole('navigation', { name: 'Laboratory modules' })
-      .getByRole('link', { name: new RegExp('^' + name) });
+    await page.getByRole('navigation', { name: 'Lecture orbits' }).getByRole('link', { name: orbit }).click();
+    const node = page.locator('.orbital-nodes').getByRole('link', { name: new RegExp('^' + name) });
     await node.focus();
     await expect(node).toHaveAttribute('data-active', 'true');
     await node.press('Enter');
     await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
-    await page.getByRole('link', { name: 'Orbital laboratory', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await expect(node).toBeFocused();
     await expect(node).toHaveAccessibleName(/Last opened/);
   }
   await page.reload();
-  await expect(page.locator('[data-module="randomness"]')).toHaveAccessibleName(/Last opened/);
+  await expect(page.locator('[data-module="convergence"]')).toHaveAccessibleName(/Last opened/);
 });
 
 test('narrow screens keep all connected windows and immediate static previews', async ({ page }) => {
@@ -68,10 +78,10 @@ test('narrow screens keep all connected windows and immediate static previews', 
   await page.waitForTimeout(210);
   expect(await globe.evaluate((node) => node.toDataURL())).toBe(before);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
-  await expect(page.locator('.orbit-link-trace')).toHaveCount(6);
-  await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(6);
+  await expect(page.locator('.orbit-link-trace')).toHaveCount(4);
+  await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(1);
   await page.getByRole('link', { name: /^Distribution Explorer/ }).click();
-  await expect(page.getByRole('button', { name: 'Run simulation' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /(Play|Stop) the experiment/ })).toBeVisible();
 });
 
 test('the active sample updates the distribution window and unvisited examples', async ({ page }) => {
@@ -82,23 +92,25 @@ test('the active sample updates the distribution window and unvisited examples',
   await page.getByLabel('Model', { exact: true }).selectOption('uniform');
   await page.getByRole('button', { name: 'Resample' }).click();
   await expect(distribution).toHaveAccessibleName(/Latest result.*Uniform, seed 2049/);
-  await expect(page.locator('[data-module="confidence"]')).toHaveAccessibleName(
+  await page.getByRole('link', { name: 'III Limit theorems' }).click();
+  await expect(page.locator('[data-module="convergence"]')).toHaveAccessibleName(
     /Seeded preview.*Uniform, seed 2049/,
   );
+  await page.getByRole('link', { name: 'II Random variables' }).click();
   await distribution.click();
   await expect(page.getByLabel('Random seed')).toHaveValue('2049');
 });
 
-test('static preference changes live and the reference dialog restores focus', async ({ page }) => {
+test('static preference changes live and the notes drawer restores focus', async ({ page }) => {
   await page.goto('/');
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect(page.getByRole('button', { name: 'Reduced motion enabled' })).toBeDisabled();
-  await page.getByRole('button', { name: 'Lab notes' }).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.locator('.orbital-field')).toHaveAttribute('data-playing', 'false');
+  await page.getByRole('link', { name: 'Lab notes' }).click();
+  await expect(page.getByRole('heading', { name: 'Lab notes', exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: 'Lab notes' })).toBeFocused();
+  await expect(page.getByRole('link', { name: 'Lab notes' })).toBeFocused();
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await expect(page.getByRole('button', { name: 'Pause motion' })).toBeEnabled();
+  await expect(page.locator('.orbital-field')).toHaveAttribute('data-playing', 'true');
 });
 
 test('the secondary trefoil study retains a working fallback and CDF readout', async ({ page }) => {
@@ -109,8 +121,8 @@ test('the secondary trefoil study retains a working fallback and CDF readout', a
     };
   });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-  await page.getByText('Geometric study · Trefoil', { exact: true }).click();
+  await page.goto('/#record');
+  await expect(page.getByText('Geometric study · Trefoil')).toBeVisible();
   const probe = page.getByRole('button', { name: 'Inspect next draw' });
   await expect(probe).toContainText('F(x) = 0.735');
   await probe.click();

@@ -1,0 +1,8 @@
+{
+  "Axioms of probability and geometric probability": "Аксиомы вероятности и геометрическая вероятность",
+  "Kolmogorov axioms": "Аксиомы Колмогорова",
+  "Probability is a measure on events: non-negative, equal to one on the whole space and additive over disjoint events.": "Вероятность — мера на событиях: неотрицательная, равная единице на всём пространстве и аддитивная на несовместных событиях.",
+  "P\\Bigl(\\bigcup_{i} A_i\\Bigr) = \\sum_{i} P(A_i) \\quad \\text{for disjoint } A_i": "P\\Bigl(\\bigcup_{i} A_i\\Bigr) = \\sum_{i} P(A_i) \\quad \\text{для несовместных } A_i",
+  "Geometric probability": "Геометрическая вероятность",
+  "A point thrown uniformly into a region hits a subregion with probability equal to the ratio of their measures.": "Точка, брошенная наудачу в область, попадает в её подобласть с вероятностью, равной отношению их мер."
+}

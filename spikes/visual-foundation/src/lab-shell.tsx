@@ -1,5 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ArrowUpRight, BookOpen, X } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { ArrowUpRight, BookOpen, GraduationCap } from 'lucide-react';
+import { Tex } from './math';
+import { orbits, type OrbitId } from './stations/catalog';
+import { orbitHash } from './stations/route';
+import { setLang, t, useLang } from './i18n';
 
 export function LabMark() {
   return (
@@ -18,105 +22,89 @@ export function LabMark() {
     </svg>
   );
 }
-function Notes({ close }: { close: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const node = ref.current;
-    node?.showModal();
-    return () => node?.close();
-  }, []);
+export function LabNotesContent() {
   return (
-    <dialog
-      className="lab-notes"
-      ref={ref}
-      aria-labelledby="notes-title"
-      onCancel={close}
-      onClick={(e) => {
-        if (e.target === ref.current) close();
-      }}
-    >
-      <div>
-        <div className="notes-chrome">
-          <BookOpen size={17} />
-          <button onClick={close} aria-label="Close notes">
-            <X size={17} />
-          </button>
-        </div>
-        <h2 id="notes-title">Lab notes</h2>
-        <h3>Geometric studies</h3>
+    <div className="lab-notes-body">
+      <h3>{t('Geometric studies', 'Геометрические этюды')}</h3>
         <p>
-          The trefoil winds twice around a torus and three times through its hole. The yellow cross-section
-          sits at the probability coordinate F(x) of the inspected draw. Choose the draw readout to advance
-          through the sample. Drag it horizontally or use the left and right arrow keys to turn it. The Earth
-          study projects Natural Earth land data onto a rotating sphere. The ASCII satellites, starfield and
-          links are simulated.
+          {t(
+            'The trefoil winds twice around a torus and three times through its hole. The yellow cross-section sits at the probability coordinate ',
+            'Трилистник дважды обвивает тор и трижды проходит через его отверстие. Жёлтое сечение стоит на вероятностной координате ',
+          )}
+          <Tex tex="F(x)" />
+          {t(
+            ' of the inspected draw. Choose the draw readout to advance through the sample. Drag it horizontally or use the left and right arrow keys to turn it. The Earth study projects Natural Earth land data onto a rotating sphere. The ASCII satellites, starfield and links are simulated.',
+            ' выбранного значения. Нажмите на показание значения, чтобы перейти к следующему. Поворачивайте фигуру перетаскиванием по горизонтали или стрелками влево и вправо. Этюд «Земля» проецирует данные о суше Natural Earth на вращающуюся сферу. ASCII-спутники, звёздное небо и связи смоделированы.',
+          )}
         </p>
-        <h3>Reading the sample</h3>
+        <h3>{t('Reading the sample', 'Как читать выборку')}</h3>
         <p>
-          Each experiment uses a seeded sequence. The trace shows the first 48 draws in order. The ASCII
-          histogram counts observations in 34 equal-width bins. Sample variance uses n − 1.
+          {t(
+            'Each experiment uses a seeded sequence. The trace shows the first 48 draws in order. The ASCII histogram counts observations in 34 equal-width bins. Sample variance uses ',
+            'Каждый эксперимент использует последовательность с заданным зерном. Трасса показывает первые 48 значений по порядку. ASCII-гистограмма считает наблюдения в 34 интервалах равной ширины. Выборочная дисперсия вычисляется с делителем ',
+          )}
+          <Tex tex="n - 1" />.
         </p>
-        <h3>Experiment index</h3>
-        <p>
-          Open an instrument directly from its orbital preview. Each preview shows its most recent saved
-          result or a labeled example. Distribution Explorer generates and exports samples. The other five
-          studies explore prefixes of the same completed run.
-        </p>
+        <h3>{t('Moving around', 'Навигация')}</h3>
+      <p>
+        {t(
+          'Choose a lecture orbit in the top bar, then open a station from its card. A station opens inside the scene and Escape closes it. The address bar keeps the station, its parameters and its seed, so a copied link reopens the same run.',
+          'Выберите орбиту лекций на верхней панели и откройте станцию с её карточки. Станция открывается прямо на сцене, Esc закрывает её. Адресная строка хранит станцию, её параметры и зерно, поэтому скопированная ссылка воспроизводит тот же прогон.',
+        )}
+      </p>
         <a
           href="https://www.naturalearthdata.com/downloads/110m-physical-vectors/110m-land/"
           target="_blank"
           rel="noreferrer"
         >
-          Earth geometry source <ArrowUpRight size={14} />
+          {t('Earth geometry source', 'Источник геометрии Земли')} <ArrowUpRight size={14} aria-hidden="true" />
         </a>
-      </div>
-    </dialog>
+    </div>
   );
 }
-export function LabHeader({ home = false, action }: { home?: boolean; action?: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const trigger = useRef<HTMLButtonElement>(null);
-  function close() {
-    setOpen(false);
-    requestAnimationFrame(() => trigger.current?.focus());
-  }
+export function LabHeader({ orbit, action }: { orbit?: OrbitId | null; action?: ReactNode }) {
+  const lang = useLang();
   return (
-    <>
-      <header className="lab-bar">
-        <div className="lab-brand">
-          <a href="#observatory" aria-label="STATUM LAB home">
-            <LabMark />
-            <strong>
-              STATUM<span>LAB</span>
-            </strong>
+    <header className="lab-bar">
+      <div className="lab-brand">
+        <a href={orbit ? orbitHash(orbit) : '#'} aria-label={t('STATUM LAB, back to the scene', 'STATUM LAB, назад к сцене')}>
+          <LabMark />
+          <strong translate="no">
+            STATUM<span>LAB</span>
+          </strong>
+        </a>
+      </div>
+      <nav aria-label={t('Lecture orbits', 'Орбиты лекций')} className="orbit-switch">
+        {orbits.map((o) => (
+          <a key={o.id} href={orbitHash(o.id)} aria-current={orbit === o.id ? 'true' : undefined} title={t(`Lectures ${o.lectures}`, o.lectures)}>
+            <b>{o.numeral}</b> {o.name}
           </a>
-        </div>
-        <nav aria-label="Laboratory navigation">
-          <a href="#observatory" aria-current={home ? 'page' : undefined}>
-            Observatory
-          </a>
-          <a href="#experiments">Experiments</a>
-          <button ref={trigger} onClick={() => setOpen(true)} aria-haspopup="dialog">
-            Lab notes
-          </button>
-        </nav>
-        <div className="lab-session">
-          {action ?? (
-            <>
-              <i /> Local session
-            </>
-          )}
-        </div>
-      </header>
-      {open && <Notes close={close} />}
-    </>
+        ))}
+      </nav>
+      <div className="lab-session">
+        {action}
+        <a href="#lectures" className="lab-tool"><GraduationCap size={14} aria-hidden="true" /> {t('Lectures', 'Лекции')}</a>
+        <a href="#record" className="lab-tool">{t('Sample record', 'Журнал выборки')}</a>
+        <a href="#notes" className="lab-tool"><BookOpen size={14} aria-hidden="true" /> {t('Lab notes', 'Заметки')}</a>
+        <button
+          type="button"
+          className="lab-tool lab-lang"
+          lang={lang === 'en' ? 'ru' : 'en'}
+          aria-label={lang === 'en' ? 'Переключить на русский' : 'Switch to English'}
+          title={lang === 'en' ? 'Русский' : 'English'}
+          onClick={() => setLang(lang === 'en' ? 'ru' : 'en')}
+        >
+          {lang === 'en' ? 'RU' : 'EN'}
+        </button>
+      </div>
+    </header>
   );
 }
 export function FigureCaption({ number, children }: { number: string; children: ReactNode }) {
   return (
     <span className="fig-caption">
       <span className="fig-cross" aria-hidden="true" />
-      <span className="fig-id">FIG. {number}</span>
+      <span className="fig-id">{t('FIG.', 'РИС.')} {number}</span>
       <i />
       {children}
     </span>
@@ -126,7 +114,7 @@ export function LabFooter() {
   return (
     <footer className="lab-footer">
       <span>STATUM LAB</span>
-      <span>Monte Carlo laboratory</span>
+      <span>{t('Monte Carlo laboratory', 'Лаборатория Монте-Карло')}</span>
     </footer>
   );
 }

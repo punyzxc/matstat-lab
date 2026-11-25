@@ -1,0 +1,49 @@
+{
+  "lecture": 5,
+  "title": "Random variables and their distributions",
+  "scientists": [],
+  "steps": [
+    {
+      "title": "Distribution function",
+      "idea": "The distribution function gives the probability that the variable falls to the left of $x$.",
+      "formula": [
+        "F(x) = P(\\xi < x) \\qquad \\text{(lecture convention)}",
+        "\\text{the lab plots } P(\\xi \\le x)\\text{; they differ only at the jumps}"
+      ]
+    },
+    {
+      "title": "Density",
+      "idea": "For a continuous variable the density is the derivative of F, and probabilities are areas under it.",
+      "formula": [
+        "f(x) = F'(x), \\qquad P(a < \\xi < b) = \\int_a^b f(x)\\,dx"
+      ],
+      "experiment": {
+        "station": "distribution",
+        "seed": 505,
+        "params": {
+          "dist": 0,
+          "n": 1024,
+          "scale": 1
+        },
+        "label": "Sample a normal law"
+      }
+    },
+    {
+      "title": "Exponential law",
+      "idea": "Waiting times without memory follow the exponential law.",
+      "formula": [
+        "f(x) = \\lambda e^{-\\lambda x}, \\qquad x \\ge 0"
+      ],
+      "experiment": {
+        "station": "distribution",
+        "seed": 506,
+        "params": {
+          "dist": 2,
+          "n": 1024,
+          "scale": 1
+        }
+      }
+    }
+  ],
+  "status": "draft"
+}

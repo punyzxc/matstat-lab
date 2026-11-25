@@ -24,8 +24,8 @@ function normalCdf(x: number) {
 export const sources: Record<Distribution, Model> = {
   normal: {
     label: 'Normal (Gaussian)',
-    notation: 'N(0, σ²)',
-    parameter: 'Standard deviation σ',
+    notation: String.raw`N(0,\,\sigma^2)`,
+    parameter: 'Standard deviation $\\sigma$',
     description: 'A symmetric bell centered at zero. The standard deviation controls how far observations spread around the mean.',
     sample: (random, scale) => scale * Math.sqrt(-2 * Math.log(random())) * Math.cos(2 * Math.PI * random()),
     density: (x, scale) => Math.exp(-0.5 * (x / scale) ** 2) / (scale * Math.sqrt(2 * Math.PI)),
@@ -35,8 +35,8 @@ export const sources: Record<Distribution, Model> = {
   },
   uniform: {
     label: 'Uniform',
-    notation: 'U(−a, a)',
-    parameter: 'Half-width a',
+    notation: String.raw`U(-a,\,a)`,
+    parameter: 'Half-width $a$',
     description: 'Equal-length intervals within the support carry the same probability. Observations cluster differently by chance.',
     sample: (random, scale) => (2 * random() - 1) * scale,
     density: (x, scale) => Math.abs(x) <= scale ? 1 / (2 * scale) : 0,
@@ -46,8 +46,8 @@ export const sources: Record<Distribution, Model> = {
   },
   exponential: {
     label: 'Exponential',
-    notation: 'Exp(scale β)',
-    parameter: 'Scale β',
+    notation: String.raw`\mathrm{Exp}(\lambda),\ \lambda = 1/\beta`,
+    parameter: 'Scale $\\beta$',
     description: 'A right-skewed waiting-time model. Larger values are rarer, but the theoretical support extends beyond the visible chart.',
     sample: (random, scale) => -scale * Math.log(random()),
     density: (x, scale) => x >= 0 ? Math.exp(-x / scale) / scale : 0,

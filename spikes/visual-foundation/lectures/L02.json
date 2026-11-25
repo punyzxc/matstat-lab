@@ -1,0 +1,44 @@
+{
+  "lecture": 2,
+  "title": "Conditional probability, total probability and Bayes",
+  "scientists": [
+    "bayes"
+  ],
+  "steps": [
+    {
+      "title": "Conditional probability",
+      "idea": "Knowing that $B$ happened shrinks the space of outcomes to $B$.",
+      "formula": [
+        "P(A \\mid B) = \\dfrac{P(AB)}{P(B)}"
+      ],
+      "experiment": {
+        "station": "bayes",
+        "seed": 202
+      }
+    },
+    {
+      "title": "Total probability",
+      "idea": "Split the space into hypotheses $H_1, \\ldots, H_n$ and add up the paths that lead to $A$.",
+      "formula": [
+        "P(A) = \\sum_{i=1}^{n} P(H_i)\\, P(A \\mid H_i)"
+      ]
+    },
+    {
+      "title": "Bayes formula",
+      "idea": "After $A$ is observed, the weights of the hypotheses are updated.",
+      "formula": [
+        "P(H_k \\mid A) = \\dfrac{P(H_k)\\, P(A \\mid H_k)}{\\sum\\limits_{i=1}^{n} P(H_i)\\, P(A \\mid H_i)}"
+      ],
+      "example": "A student knows the answer with probability $p$ and otherwise guesses among 5 options. Given a correct answer, the chance that it was a guess is $\\dfrac{1 - p}{4p + 1}$.",
+      "scientists": [
+        "bayes"
+      ],
+      "experiment": {
+        "station": "bayes",
+        "seed": 1763,
+        "label": "Count the posterior"
+      }
+    }
+  ],
+  "status": "draft"
+}

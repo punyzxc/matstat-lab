@@ -1,18 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Grid2X2, Pause, Play, RotateCw } from 'lucide-react';
-import { FigureCaption, LabFooter, LabHeader } from './lab-shell';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Tex } from './math';
+import { ChevronDown, RotateCw } from 'lucide-react';
+import { FigureCaption, LabHeader } from './lab-shell';
+import { orbits, stationsOf, type OrbitId } from './stations/catalog';
+import { StationCard } from './stations/station-card';
 import { SpecimenView } from './specimen-view';
 import { Matrix, Trace } from './sample-readouts';
 import { useStationReducedMotion } from './motion-preference';
 import { collect, sources, type RunSettings, type Distribution } from './statistics';
-import { modules, type ModuleId } from './modules';
+import { modules } from './modules';
 import { resultFor, type LastResults } from './last-results';
 import { PlateCanvas } from './plate-canvas';
 import { earthPlate } from './globe';
 import { OrbitLinks } from './orbit-links';
 import { OrbitPreview } from './orbit-preview';
+import { int, t } from './i18n';
 import './observatory.css';
 import './orbital.css';
+import './stations/scene.css';
+import './stage.css';
 
 function useVisibleField(field: React.RefObject<HTMLDivElement | null>) {
   const [visible, setVisible] = useState(true);
@@ -38,56 +44,76 @@ function useVisibleField(field: React.RefObject<HTMLDivElement | null>) {
 
 export function Observatory({
   settings,
-  initialModule,
-  onSelect,
+  orbit,
+  openStation,
+  openKey = null,
   onSample,
   results,
   lastVisited,
+  overlay,
 }: {
   settings: RunSettings;
-  initialModule: ModuleId;
-  onSelect: (m: ModuleId) => void;
+  orbit: OrbitId;
+  openStation: string | null;
+  /** What is open in the scene (a station id, 'notes' or 'record'); focus returns to its opener on close. */
+  openKey?: string | null;
   onSample: (s: RunSettings) => void;
   results: LastResults;
-  lastVisited?: ModuleId;
+  lastVisited?: string;
+  overlay?: ReactNode;
 }) {
   const reduced = useStationReducedMotion();
-  const [paused, setPaused] = useState(false);
-  const [mesh, setMesh] = useState(false);
-  const [hover, setHover] = useState<ModuleId | null>(null);
-  const [focus, setFocus] = useState<ModuleId | null>(null);
-  const [study, setStudy] = useState(false);
+  const [hover, setHover] = useState<string | null>(null);
+  const [focus, setFocus] = useState<string | null>(null);
   const field = useRef<HTMLDivElement>(null);
   const visible = useVisibleField(field);
-  const playing = !paused && !reduced;
-  const animating = playing && visible;
-  const active = focus ?? hover ?? lastVisited ?? initialModule;
-  const sample = useMemo(() => collect(settings), [settings]);
+  // The Earth always turns. Only the system reduced-motion preference holds the scene still.
+  const animating = !reduced && visible;
+  // The first-light intro plays once per visit, not on every orbit switch.
+  const [intro, setIntro] = useState(true);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIntro(false), 1600);
+    return () => clearTimeout(timer);
+  }, []);
+  const opened = useRef<string | null>(null);
+  useEffect(() => {
+    const previous = opened.current;
+    opened.current = openKey;
+    if (!previous || openKey) return;
+    const target =
+      previous === 'notes' || previous === 'record'
+        ? document.querySelector<HTMLElement>(`.lab-session a[href="#${previous}"]`)
+        : document.querySelector<HTMLElement>(`.orbit-node[data-orbit-id="${previous}"] a`);
+    target?.focus({ preventScroll: true });
+  }, [openKey]);
+  const orbitStations = stationsOf(orbit);
+  const current = orbits.find((o) => o.id === orbit)!;
+  const active = openStation ?? focus ?? hover ?? (orbitStations.some((s) => s.id === lastVisited) ? lastVisited! : orbitStations[0].id);
   return (
-    <div className="atlas orbital-lab">
-      <a className="skip" href="#experiments">
-        Skip to experiments
+    <div className="atlas orbital-lab" data-dock={overlay ? 'open' : 'closed'} data-intro={intro}>
+      <a className="skip" href="#stations" onClick={(e) => { e.preventDefault(); document.querySelector<HTMLElement>('.orbital-nodes a')?.focus(); }}>
+        {t('Skip to stations', 'К станциям')}
       </a>
-      <LabHeader home />
+      <LabHeader orbit={orbit} />
       <main className="lab-spread">
         <header className="orbit-heading">
           <div>
             <div className="edition">
-              <i /> MONTE CARLO · RESEARCH STATION
+              <i /> {t('ORBIT', 'ОРБИТА')} {current.numeral} · {current.lectures.toUpperCase()}
             </div>
             <h1>
-              Orbital <em>laboratory</em>
+              {t('Orbital', 'Орбитальная')} <em>{t('laboratory', 'лаборатория')}</em>
               <span aria-hidden="true">.</span>
             </h1>
           </div>
           <p>
-            Explore the latest results.
-            <br /> Select an instrument to continue.
+            {current.name}. {t('Open a station to run it.', 'Откройте станцию, чтобы запустить её.')}
+            <br /> {t('Every run is seeded and reproducible.', 'Каждый прогон задан зерном и воспроизводим.')}
           </p>
         </header>
-        <section id="experiments" aria-labelledby="index-title" className="orbital-instruments">
+        <section id="stations" aria-labelledby="index-title" className="orbital-instruments">
           <h2 id="index-title" tabIndex={-1} className="orbit-sr">
-            Experiments
+            {t(`${current.name} stations`, `Станции орбиты «${current.name}»`)}
           </h2>
           <div ref={field} className="orbital-field" data-playing={animating}>
             <div className="orbital-engine">
@@ -110,69 +136,57 @@ export function Observatory({
               <div className="orbital-disc">
                 <PlateCanvas
                   create={earthPlate}
-                  label="Earth point cloud with simulated orbital links and ASCII satellites"
+                  label={t('Earth point cloud with simulated orbital links and ASCII satellites', 'Облако точек Земли со смоделированными орбитальными связями и ASCII-спутниками')}
                   playing={animating}
-                  mesh={mesh}
+                  mesh={false}
                   cue={0}
                 />
               </div>
               <div className="orbital-legend">
-                <i /> EARTH <span>·</span> DATA CORE
-              </div>
-              <div className="orbital-controls" role="group" aria-label="Globe controls">
-                <button
-                  aria-pressed={mesh}
-                  aria-label="Wireframe"
-                  title="Toggle wireframe"
-                  onClick={() => setMesh((v) => !v)}
-                >
-                  <Grid2X2 size={14} aria-hidden="true" />
-                </button>
-                <button
-                  disabled={reduced}
-                  aria-label={reduced ? 'Reduced motion enabled' : playing ? 'Pause motion' : 'Resume motion'}
-                  title={reduced ? 'Reduced motion enabled' : playing ? 'Pause motion' : 'Resume motion'}
-                  onClick={() => setPaused((v) => !v)}
-                >
-                  {playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
-                </button>
+                <i /> {t('EARTH', 'ЗЕМЛЯ')} <span>·</span> {t('DATA CORE', 'ЯДРО ДАННЫХ')}
               </div>
             </div>
-            <OrbitLinks field={field} active={active} playing={animating} />
-            <nav className="orbital-nodes" aria-label="Laboratory modules">
-              {modules.map((module, index) => (
-                <div
-                  key={module.id}
-                  className="orbit-node"
-                  data-orbit-id={module.id}
-                  data-row={Math.floor(index / 2)}
-                  data-side={index % 2 ? 'right' : 'left'}
-                  data-active={active === module.id}
-                  onPointerEnter={() => setHover(module.id)}
-                  onPointerLeave={() => setHover(null)}
-                  onFocus={() => setFocus(module.id)}
-                  onBlur={() => setFocus(null)}
-                >
-                  <OrbitPreview
-                    module={module}
-                    snapshot={resultFor(results, module.id, settings)}
-                    active={active === module.id}
-                    animate={animating}
-                    visited={lastVisited === module.id}
-                    onActivate={() => onSelect(module.id)}
-                  />
-                </div>
-              ))}
+            <OrbitLinks key={orbit} field={field} active={active} playing={animating && !overlay} />
+            <nav className="orbital-nodes" aria-label={t(`${current.name} stations`, `Станции орбиты «${current.name}»`)} inert={overlay ? true : undefined}>
+              {orbitStations.map((station, index) => {
+                const legacy = station.kind === 'legacy' ? modules.find((m) => m.id === station.module)! : null;
+                return (
+                  <div
+                    key={station.id}
+                    className="orbit-node"
+                    data-orbit-id={station.id}
+                    data-row={Math.floor(index / 2)}
+                    data-side={index % 2 ? 'right' : 'left'}
+                    data-active={active === station.id}
+                    onPointerEnter={() => setHover(station.id)}
+                    onPointerLeave={() => setHover(null)}
+                    onFocus={() => setFocus(station.id)}
+                    onBlur={() => setFocus(null)}
+                  >
+                    {legacy ? (
+                      <OrbitPreview
+                        module={legacy}
+                        snapshot={resultFor(results, legacy.id, settings)}
+                        active={active === station.id}
+                        animate={animating && !overlay}
+                        visited={lastVisited === station.id}
+                      />
+                    ) : (
+                      station.kind === 'kernel' && <StationCard station={station} active={active === station.id} />
+                    )}
+                  </div>
+                );
+              })}
             </nav>
           </div>
           <div className="orbit-console">
             <div className="orbit-source">
               <i aria-hidden="true" />
-              <span>ACTIVE SAMPLE</span>
-              <strong>n = {settings.count.toLocaleString('en-US')}</strong>
+              <span>{t('ACTIVE SAMPLE', 'АКТИВНАЯ ВЫБОРКА')}</span>
+              <strong>n = {int(settings.count)}</strong>
             </div>
             <div className="orbit-model">
-              <label htmlFor="atlas-model">Model</label>
+              <label htmlFor="atlas-model">{t('Model', 'Модель')}</label>
               <span>
                 <select
                   id="atlas-model"
@@ -192,49 +206,49 @@ export function Observatory({
               </span>
             </div>
             <div className="session-source">
-              SEED <b>{settings.seed}</b>
+              {t('SEED', 'ЗЕРНО')} <b>{settings.seed}</b>
             </div>
             <button
               className="resample"
               onClick={() => onSample({ ...settings, seed: (settings.seed + 1) >>> 0 })}
             >
-              <RotateCw size={13} aria-hidden="true" /> Resample
+              <RotateCw size={13} aria-hidden="true" /> {t('Resample', 'Новая выборка')}
             </button>
             <div className="orbit-formula" aria-hidden="true">
-              x̄ₙ = Σ xᵢ / n <span>·· / ···</span>
+              <Tex tex={String.raw`\bar{x}_n = \frac{1}{n}\sum_{i=1}^{n} x_i`} /> <span className="orbit-formula-dots">·· / ···</span>
             </div>
           </div>
         </section>
-        <section className="record orbital-record" aria-labelledby="record-title">
-          <div className="record-title">
-            <h2 id="record-title">Sample record</h2>
-            <p className="session-source">
-              {sources[settings.distribution].label} · seed {settings.seed}
-            </p>
-          </div>
-          <div className="record-figure">
-            <FigureCaption number="A">Draw sequence</FigureCaption>
-            <Trace sample={sample.slice(0, 48)} animate={playing} />
-          </div>
-          <div className="record-figure">
-            <FigureCaption number="B">Frequency / ASCII</FigureCaption>
-            <Matrix sample={sample} settings={settings} />
-          </div>
-        </section>
-        <details className="orbital-study" onToggle={(e) => setStudy(e.currentTarget.open)}>
-          <summary>Geometric study · Trefoil</summary>
-          {study && (
-            <SpecimenView
-              settings={settings}
-              sample={sample}
-              playing={playing}
-              reduced={reduced}
-              toggle={() => setPaused((v) => !v)}
-            />
-          )}
-        </details>
+        
       </main>
-      <LabFooter />
+      {overlay}
+    </div>
+  );
+}
+
+/** The prototype's sample record and trefoil study, now a scene drawer instead of page sections below the fold. */
+export function SampleRecord({ settings }: { settings: RunSettings }) {
+  const reduced = useStationReducedMotion();
+  const [paused, setPaused] = useState(false);
+  const sample = useMemo(() => collect(settings), [settings]);
+  const playing = !paused && !reduced;
+  return (
+    <div className="record orbital-record">
+      <p className="session-source">
+        {sources[settings.distribution].label} · {t('seed', 'зерно')} {settings.seed}
+      </p>
+      <div className="record-figure">
+        <FigureCaption number="A">{t('Draw sequence', 'Последовательность значений')}</FigureCaption>
+        <Trace sample={sample.slice(0, 48)} animate={playing} />
+      </div>
+      <div className="record-figure">
+        <FigureCaption number="B">{t('Frequency / ASCII', 'Частоты / ASCII')}</FigureCaption>
+        <Matrix sample={sample} settings={settings} />
+      </div>
+      <div className="record-figure">
+        <FigureCaption number="C">{t('Geometric study · Trefoil', 'Геометрический этюд · трилистник')}</FigureCaption>
+        <SpecimenView settings={settings} sample={sample} playing={playing} reduced={reduced} toggle={() => setPaused((v) => !v)} />
+      </div>
     </div>
   );
 }

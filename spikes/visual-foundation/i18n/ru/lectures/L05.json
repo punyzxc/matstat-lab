@@ -1,0 +1,12 @@
+{
+  "Random variables and their distributions": "Случайные величины и их распределения",
+  "Distribution function": "Функция распределения",
+  "The distribution function gives the probability that the variable falls to the left of $x$.": "Функция распределения равна вероятности того, что случайная величина примет значение левее $x$.",
+  "F(x) = P(\\xi < x) \\qquad \\text{(lecture convention)}": "F(x) = P(\\xi < x) \\qquad \\text{(принятое в лекциях определение)}",
+  "\\text{the lab plots } P(\\xi \\le x)\\text{; they differ only at the jumps}": "\\text{в лаборатории строится } P(\\xi \\le x)\\text{; они различаются лишь в точках скачков}",
+  "Density": "Плотность",
+  "For a continuous variable the density is the derivative of F, and probabilities are areas under it.": "Для непрерывной случайной величины плотность — это производная функции $F$, а вероятности — площади под ней.",
+  "Sample a normal law": "Выборка из нормального закона",
+  "Exponential law": "Показательный закон",
+  "Waiting times without memory follow the exponential law.": "Время ожидания без последействия подчиняется показательному закону."
+}

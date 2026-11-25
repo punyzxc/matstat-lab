@@ -1,0 +1,43 @@
+{
+  "lecture": 12,
+  "title": "Testing statistical hypotheses",
+  "scientists": [
+    "pearson",
+    "kolmogorov",
+    "gosset",
+    "fisher",
+    "snedecor",
+    "laplace"
+  ],
+  "steps": [
+    {
+      "title": "Errors of two kinds",
+      "idea": "A test rejects a true $H_0$ with probability $\\alpha$ and keeps a false $H_0$ with probability $\\beta$; the power is $1 - \\beta$.",
+      "formula": [
+        "\\alpha = P(\\text{reject } H_0 \\mid H_0)",
+        "\\beta = P(\\text{keep } H_0 \\mid H_1)"
+      ],
+      "experiment": {
+        "station": "testing",
+        "seed": 1212,
+        "params": {
+          "dist": 0,
+          "n": 128,
+          "scale": 1
+        }
+      }
+    },
+    {
+      "title": "Comparing variances",
+      "idea": "The ratio of two sample variances follows the Fisher–Snedecor $F$ law under $H_0$.",
+      "formula": [
+        "F = \\dfrac{s_1^2}{s_2^2}"
+      ],
+      "scientists": [
+        "fisher",
+        "snedecor"
+      ]
+    }
+  ],
+  "status": "draft"
+}

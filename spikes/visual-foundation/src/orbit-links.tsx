@@ -1,10 +1,22 @@
 import { useEffect, useState, type RefObject } from 'react';
-import type { ModuleId } from './modules';
+type ModuleId = string;
 
 type Point = { x: number; y: number };
 type Link = { id: ModuleId; from: Point; end: Point; path: string };
 type Layout = { width: number; height: number; links: Link[] };
-export const globeRadius = (width: number, height: number) => Math.min(width * 0.426, height * 0.443);
+/**
+ * One radius for the canvas and the measured links. On a wide screen the globe canvas fills the whole
+ * viewport, so the radius leaves room for the two station rails (the CSS --orbit-rail clamp and gutter).
+ * A narrow screen stacks the cards under a small globe box and keeps the old fit.
+ */
+export const stageMinWidth = 761;
+export function globeRadius(width: number, height: number) {
+  if (width < stageMinWidth) return Math.min(width * 0.426, height * 0.443);
+  const rail = Math.min(280, Math.max(205, width * 0.194));
+  const gutter = Math.min(56, Math.max(18, width * 0.024));
+  const free = width - 2 * (rail + gutter) - width * 0.1;
+  return Math.max(120, Math.min(height * 0.405, free / 2));
+}
 
 export function OrbitLinks({
   field,
@@ -27,6 +39,7 @@ export function OrbitLinks({
       const cx = globe.left - frame.left + globe.width / 2,
         cy = globe.top - frame.top + globe.height / 2;
       const radius = globeRadius(globe.width, globe.height);
+      host.style.setProperty('--globe-r', `${radius.toFixed(1)}px`);
       const narrow = window.matchMedia('(max-width: 760px)').matches;
       const links = nodes.map((node): Link => {
         const box = node.getBoundingClientRect();
