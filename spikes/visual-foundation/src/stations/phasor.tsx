@@ -27,6 +27,8 @@ export function Phasor({ phasor, onParam }: { phasor: Data; onParam: (key: strin
   useLang();
   const reduced = useStationReducedMotion();
   const { xs, shown, T, ts, exact } = phasor;
+  const parts = phasor.parts ?? [];
+  const product = parts.length > 0;
   const sweeping = phasor.motion && !reduced;
   const [tNow, setTNow] = useState(phasor.t);
   const start = useRef<number | null>(null);
@@ -59,10 +61,11 @@ export function Phasor({ phasor, onParam }: { phasor: Data; onParam: (key: strin
     return { tips, mean: [re / xs.length, im / xs.length] as [number, number] };
   }, [xs, shown, tNow]);
   const ex = lerpExact(ts, exact, tNow);
+  const factors = parts.map((part) => ({ key: part.key, z: lerpExact(ts, part.exact, tNow) }));
   const px = (re: number) => C + R * re, py = (im: number) => C - R * im;
   const curve = useMemo(() => exact.map(([a, b], i) => `${i ? 'L' : 'M'}${(C + R * a).toFixed(1)},${(C - R * b).toFixed(1)}`).join(''), [exact]);
   const sx = (v: number) => SX + ((v + T) / (2 * T)) * SW;
-  const strip = (k: 0 | 1, top: number) => exact.map((z, i) => `${i ? 'L' : 'M'}${sx(ts[i]).toFixed(1)},${(top + SH / 2 - (SH / 2 - 6) * z[k]).toFixed(1)}`).join('');
+  const strip = (k: 0 | 1, top: number, src: [number, number][] = exact) => src.map((z, i) => `${i ? 'L' : 'M'}${sx(ts[i]).toFixed(1)},${(top + SH / 2 - (SH / 2 - 6) * z[k]).toFixed(1)}`).join('');
 
   const setFromPointer = (e: React.PointerEvent<SVGRectElement>) => {
     const box = e.currentTarget.getBoundingClientRect();
@@ -84,8 +87,9 @@ export function Phasor({ phasor, onParam }: { phasor: Data; onParam: (key: strin
     <section className="phasor" aria-label={tr('Characteristic function on the complex plane', 'Характеристическая функция на комплексной плоскости')} data-sweep={sweeping || undefined}>
       <div className="ph-head">
         <span className="ph-t" data-t={tNow.toFixed(3)}>t = {fmt(tNow)}</span>
-        <span className="ph-emp">{tr('sample', 'выборочная')} φ(t) = {fmt(mean[0])} {mean[1] < 0 ? '−' : '+'} {fmt(Math.abs(mean[1]))}i</span>
-        <span className="ph-exact">φ(t) = {fmt(ex[0])} {ex[1] < 0 ? '−' : '+'} {fmt(Math.abs(ex[1]))}i</span>
+        <span className="ph-emp">{tr('sample', 'выборочная')} φ{product && <sub>X+Y</sub>}(t) = {fmt(mean[0])} {mean[1] < 0 ? '−' : '+'} {fmt(Math.abs(mean[1]))}i</span>
+        {factors.map((f) => <span key={f.key} className="ph-factor" data-part={f.key}>φ<sub>{f.key}</sub>(t) = {fmt(f.z[0])} {f.z[1] < 0 ? '−' : '+'} {fmt(Math.abs(f.z[1]))}i</span>)}
+        <span className="ph-exact">{product ? <>φ<sub>X</sub>φ<sub>Y</sub></> : 'φ'}(t) = {fmt(ex[0])} {ex[1] < 0 ? '−' : '+'} {fmt(Math.abs(ex[1]))}i</span>
         <span className="ph-n">{tr(`${tips.length} of ${xs.length} vectors drawn; the mean uses all`, `показано ${tips.length} из ${xs.length} векторов; среднее — по всем`)}</span>
       </div>
       <svg viewBox={`0 0 ${SX + SW + 8} ${PLANE}`} role="img"
@@ -104,6 +108,13 @@ export function Phasor({ phasor, onParam }: { phasor: Data; onParam: (key: strin
           {tips.map(([c, s], j) => <circle key={j} cx={px(c)} cy={py(s)} r={1.6} />)}
         </g>
         <path className="ph-curve" d={curve} />
+        {factors.map((f) => (
+          <g key={f.key} className="ph-factor-arrow" data-part={f.key}>
+            <line x1={C} y1={C} x2={px(f.z[0])} y2={py(f.z[1])} />
+            <circle cx={px(f.z[0])} cy={py(f.z[1])} r={3} />
+            <text x={px(f.z[0]) + 6} y={py(f.z[1]) - 6}>φ{f.key === 'X' ? 'ₓ' : 'ᵧ'}</text>
+          </g>
+        ))}
         <circle className="ph-exact-dot" cx={px(ex[0])} cy={py(ex[1])} r={6} />
         <line className="ph-mean" x1={C} y1={C} x2={px(mean[0])} y2={py(mean[1])} />
         <circle className="ph-mean-dot" data-re={mean[0].toFixed(4)} data-im={mean[1].toFixed(4)} cx={px(mean[0])} cy={py(mean[1])} r={3.6} />
@@ -114,10 +125,11 @@ export function Phasor({ phasor, onParam }: { phasor: Data; onParam: (key: strin
           const yv = (v: number) => zero - (SH / 2 - 6) * v;
           return (
             <g key={k} className="ph-strip" data-part={k ? 'im' : 're'}>
-              <text className="ph-tick" x={SX} y={top - 6}>{k ? 'Im φ(t)' : 'Re φ(t)'}</text>
+              <text className="ph-tick" x={SX} y={top - 6}>{k ? 'Im' : 'Re'} {product ? 'φₓ, φᵧ, φₓφᵧ' : 'φ(t)'}</text>
               <line className="ph-axis" x1={SX} y1={zero} x2={SX + SW} y2={zero} />
               <line className="ph-grid" x1={SX} y1={yv(1)} x2={SX + SW} y2={yv(1)} />
               <line className="ph-grid" x1={SX} y1={yv(-1)} x2={SX + SW} y2={yv(-1)} />
+              {parts.map((part) => <path key={part.key} className="ph-strip-part" data-part={part.key} d={strip(k, top, part.exact)} />)}
               <path className={k ? 'ph-strip-im' : 'ph-strip-re'} d={strip(k, top)} />
               <line className="ph-cursor" x1={sx(tNow)} y1={top} x2={sx(tNow)} y2={top + SH} />
               <circle className="ph-exact-dot" cx={sx(tNow)} cy={yv(ex[k])} r={4} />

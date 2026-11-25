@@ -242,3 +242,20 @@ test('#121 the phasor field carries the whole sample, the shown cap and the moti
   assert.equal(charfn({ n: 50 }).phasor.shown, 50);
   assert.notDeepEqual(charfn({}, 1).phasor.xs, charfn({}, 2).phasor.xs);
 });
+
+// #122: sums of independent X and Y have φ_X φ_Y.
+test('#122 the empirical φ of simulated sums lands within 4/√n of φ_X φ_Y; means and variances add', () => {
+  for (let lx = 0; lx < CF_LAWS.length; lx++) for (let ly = 0; ly < CF_LAWS.length; ly++) for (const t of [-1.3, 0.6, 2]) {
+    const r = charfn({ view: 1, law: lx, law2: ly, t, n: 3000 }, 7);
+    const band = 4 / Math.sqrt(3000);
+    for (const key of ['re', 'im']) { const x = r.readouts.find((v) => v.key === key); close(x.observed, x.theory, band, `${key} ${lx}+${ly} t ${t}`); }
+    const q = { p: 0.3, m: 10, lambda: 2, a: 0, s: 1 }, q2 = { p: 0.5, m: 6, lambda: 1, a: 0, s: 1 };
+    const [fx, fy] = [CF_LAWS[lx].phi(t, q), CF_LAWS[ly].phi(t, q2)];
+    close(r.readouts[0].theory, fx[0] * fy[0] - fx[1] * fy[1], 1e-5);
+    const v = r.readouts.find((x) => x.key === 'var');
+    close(v.theory, CF_LAWS[lx].variance(q) + CF_LAWS[ly].variance(q2), 1e-4);
+    close(v.observed, v.theory, 0.15 * v.theory + 0.01, `var ${lx}+${ly}`);
+    assert.equal(r.phasor.parts.length, 2);
+    assert.equal(r.phasor.xs.length, 3000);
+  }
+});

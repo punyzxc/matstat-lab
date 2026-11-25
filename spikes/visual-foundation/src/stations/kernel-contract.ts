@@ -102,6 +102,8 @@ export type BayesTree = {
  */
 export type Phasor = {
   xs: number[]; shown: number; T: number; t: number; motion: boolean; ts: number[]; exact: [number, number][]; symmetric: boolean;
+  /** #122: the factors of a product φ_X φ_Y (then `exact` is the product and `xs` are the sums x_j + y_j). */
+  parts?: { key: string; exact: [number, number][] }[];
 };
 export type KernelResult = {
   readouts: Readout[];
