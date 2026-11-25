@@ -19,6 +19,7 @@ import { beamThrows, irwinHallPdf, lawDraws, overlap, sumsOf, throwStats, within
 import { run as runMoments } from '../../lecture-random-vectors/kernel.mjs';
 import { additive, chords, crossings, darts, longShare, needles, piPath, quarter, unionText } from '../src/lectures/figures/geo-model.mjs';
 import { run as runDarts } from '../../lecture-geometric-probability/kernel.mjs';
+import { areaLeft, continuous, dice, diceF, empirical } from '../src/lectures/figures/rv-model.mjs';
 import { courtCases, errorsOf, powerCurve, regionOf, rejects } from '../src/lectures/figures/test-model.mjs';
 import { validateLecture } from '../src/lectures/script.ts';
 import { ksBand, LAWS, standardizedSums } from '../../lecture-limit-theorems/kernel.mjs';
@@ -76,7 +77,7 @@ test('typed values snap to the parameter range and step; text that is not a numb
 // ---------------------------------------------------------------- story scripts
 test('the flagship lectures are stories; every story script checks against the figure specs', () => {
   const ids = stories.map((s) => s.lecture);
-  for (const n of [4, 6, 7, 8, 10, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
+  for (const n of [4, 5, 6, 7, 8, 10, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
   const lectureSteps = Object.fromEntries(scripts.map((s) => [s.lecture, s.steps.length]));
   for (const s of scripts) assert.deepEqual(validateLecture(s, { stations, scientists: slugs, figures: FIGURES, liveKeys: liveTexKeys, lectureSteps }), [], `L${s.lecture}`);
 });
@@ -334,6 +335,31 @@ test('corridor: Chebyshev bounds hold and fall; Cauchy has no bound and its shar
   assert.deepEqual(corridor({ law: 2, N: 2000, M: 20, eps: 0.2, seed: 707 }), corridor({ law: 2, N: 2000, M: 20, eps: 0.2, seed: 707 }));
   assert.deepEqual(FIGURES['lln-corridor'].station({ law: 0, k: 2, N: 2000, M: 200, eps: 0.2 }, 'tail'), { station: 'lln', params: { law: 0, N: 2000, k: 2, view: 1 } });
   assert.deepEqual(FIGURES['lln-corridor'].station({ law: 2, k: 2, N: 2000, M: 200, eps: 0.2 }, 'paths'), { station: 'lln', params: { law: 2, N: 2000, view: 2, M: 200, eps: 0.2 } });
+});
+
+// ---------------------------------------------------------------- L5 a random variable is a function
+test('random variable: the dice staircase and the continuous areas are the Distribution function station\'s own', () => {
+  const ob = (r, key) => r.readouts.find((x) => x.key === key);
+  const r6 = (v) => Number(v.toPrecision(6));
+  for (const [map, x] of [[0, 7], [1, 4], [2, 0], [3, 1], [4, 3]]) {
+    const d = dice(map, 2, -1, 505, 600), e = empirical(d.xs, x);
+    const st = runMoments({ source: 0, map, a: 2, b: -1, x, n: 600 }, { seed: 505, station: 'cdf' });
+    assert.equal(r6(e.F), ob(st, 'F').observed, `map ${map}`);
+    assert.equal(r6(diceF(d, x)), ob(st, 'F').theory);
+    assert.equal(r6(e.mean), ob(st, 'mean').observed);
+    assert.ok(Math.abs(d.pmf.reduce((p, q) => p + q, 0) - 1) < 1e-12);
+  }
+  for (const source of [1, 2, 3])
+    for (const x of [-0.5, 0.5, 1, 2]) {
+      const c = continuous(source, 505, 600), e = empirical(c.xs, x);
+      const st = runMoments({ source, map: 0, a: 2, b: -1, x, n: 600 }, { seed: 505, station: 'cdf' });
+      assert.equal(r6(e.F), ob(st, 'F').observed, `source ${source}, x ${x}`);
+      assert.equal(r6(areaLeft(c.law, x)), ob(st, 'area').observed);
+      assert.equal(e.jump, 0, 'a continuous law never hits a point');
+    }
+  const spec = FIGURES['rv-function'], d = figureParams('rv-function');
+  assert.deepEqual(spec.station(d, 'staircase'), { station: 'cdf', params: { source: 0, map: 0, a: 2, b: -1, x: 7, n: 600 } });
+  assert.deepEqual(spec.station({ ...d, x: 1 }, 'area'), { station: 'cdf', params: { source: 2, map: 0, a: 2, b: -1, x: 1, n: 600 } });
 });
 
 // ---------------------------------------------------------------- L4 darts on a board
