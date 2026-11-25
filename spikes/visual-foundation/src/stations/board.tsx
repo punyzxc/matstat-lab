@@ -10,10 +10,60 @@ import type { Board as Data } from './kernel-contract';
 const S = 100; // view units per board unit
 const fmt = (v: number) => String(Number(v.toPrecision(3))).replace('.', t('.', ','));
 
-export function Board({ board, drawKey }: { board: Data; drawKey: number }) {
+export function Board({ board, drawKey, onFocusLine }: { board: Data; drawKey: number; onFocusLine?: (line: number | null) => void }) {
   useLang();
   const reduced = useStationReducedMotion();
+  if (board.kind === 'chords') return <Chords board={board} drawKey={drawKey} reduced={reduced} onFocusLine={onFocusLine} />;
   return board.kind === 'needles' ? <Needles board={board} drawKey={drawKey} reduced={reduced} /> : <Darts board={board} drawKey={drawKey} reduced={reduced} />;
+}
+
+/**
+ * #124: Bertrand's paradox as three circles, one per way of taking "a chord at random". Each draws its own chords;
+ * those longer than the side √3 of the inscribed triangle are lit. Hovering or focusing a circle lights its line
+ * of the live formula.
+ */
+const METHOD: Record<string, [string, string]> = {
+  radius: ['a point on a radius', 'точка на радиусе'],
+  endpoints: ['random endpoints', 'случайные концы'],
+  midpoint: ['a midpoint in the disc', 'середина в круге'],
+};
+const EXACT: Record<string, string> = { radius: '1/2', endpoints: '1/3', midpoint: '1/4' };
+function Chords({ board, drawKey, reduced, onFocusLine }: { board: Extract<Data, { kind: 'chords' }>; drawKey: number; reduced: boolean; onFocusLine?: (line: number | null) => void }) {
+  const R = 90;
+  const tri = [0, 1, 2].map((k) => { const a = Math.PI / 2 + (2 * Math.PI * k) / 3; return `${R * Math.cos(a)},${-R * Math.sin(a)}`; }).join(' ');
+  return (
+    <figure className="board board--chords" data-reduced={reduced || undefined}>
+      <figcaption className="board-head">
+        <b>{t('Three ways to take a chord at random', 'Три способа взять хорду наудачу')}</b>
+        <span>{t('lit: longer than the side √3 of the inscribed triangle', 'светятся хорды длиннее стороны √3 вписанного треугольника')}</span>
+      </figcaption>
+      <div className="chord-row">
+        {board.circles.map((c, j) => {
+          const [en, ru] = METHOD[c.id] ?? [c.label, c.label];
+          const lit = c.long.filter(Boolean).length;
+          return (
+            <div key={c.id} className="chord-circle" data-method={c.id} tabIndex={0} role="group"
+              aria-label={t(`${en}: ${lit} of the first ${c.chords.length} chords are long; share ${fmt(c.share)}, exact ${EXACT[c.id]}`, `${ru}: длинных ${lit} из первых ${c.chords.length} хорд; доля ${fmt(c.share)}, точно ${EXACT[c.id]}`)}
+              onMouseEnter={() => onFocusLine?.(j)} onMouseLeave={() => onFocusLine?.(null)} onFocus={() => onFocusLine?.(j)} onBlur={() => onFocusLine?.(null)}>
+              <svg viewBox={`${-R - 6} ${-R - 6} ${2 * R + 12} ${2 * R + 12}`} aria-hidden>
+                <circle className="chord-disc" r={R} />
+                <polygon className="chord-tri" points={tri} />
+                <g key={drawKey}>
+                  {c.chords.map(([x1, y1, x2, y2], i) => (
+                    <line key={i} className="chord" data-long={c.long[i] || undefined} x1={x1 * R} y1={-y1 * R} x2={x2 * R} y2={-y2 * R} style={{ animationDelay: `${i * 18}ms` }} />
+                  ))}
+                </g>
+              </svg>
+              <div className="chord-caption">
+                <span>{t(en, ru)}</span>
+                <span className="chord-share" data-share={c.share}>{fmt(c.share)} <i>→ {EXACT[c.id]}</i></span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </figure>
+  );
 }
 
 function Needles({ board, drawKey, reduced }: { board: Extract<Data, { kind: 'needles' }>; drawKey: number; reduced: boolean }) {

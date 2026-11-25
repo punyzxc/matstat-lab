@@ -170,3 +170,34 @@ test('#90 the darts station declares the new views, Buffon parameters and the re
   assert.equal(k.checkText('darts', 'region', text.default), null);
   for (const p of text.presets) assert.equal(k.checkText('darts', 'region', p), null, p);
 });
+
+// #124: Bertrand's three circles.
+test('#124 every drawn chord lies on the unit circle and is lit exactly when it is longer than √3', () => {
+  for (const seed of [1, 2, 3]) {
+    const res = darts({ view: 2, N: 2000 }, seed);
+    assert.equal(res.board.kind, 'chords');
+    assert.deepEqual(res.board.circles.map((c) => c.id), ['radius', 'endpoints', 'midpoint']);
+    for (const c of res.board.circles) {
+      assert.equal(c.chords.length, k.CHORDS_SHOWN);
+      c.chords.forEach(([x1, y1, x2, y2], i) => {
+        assert.ok(Math.abs(Math.hypot(x1, y1) - 1) < 1e-5 && Math.abs(Math.hypot(x2, y2) - 1) < 1e-5, `${c.id} ${i} on the circle`);
+        const len = Math.hypot(x2 - x1, y2 - y1);
+        if (Math.abs(len - Math.sqrt(3)) > 1e-4) assert.equal(c.long[i], len > Math.sqrt(3), `${c.id} chord ${i}: length ${len}`);
+      });
+      assert.equal(c.share, ro(res, c.id).observed);
+    }
+    assert.equal(res.formula.length, 3);
+    assert.ok(res.formula[1].includes('\\tfrac13'));
+  }
+});
+
+test('#124 with 10 000 chords per method each share lies in the predeclared 3-SE band of 1/2, 1/3, 1/4', () => {
+  for (const seed of [11, 12, 13, 14]) {
+    const res = darts({ view: 2, N: 10000 }, seed);
+    for (const [id, exact] of [['radius', 1 / 2], ['endpoints', 1 / 3], ['midpoint', 1 / 4]]) {
+      const share = res.board.circles.find((c) => c.id === id).share;
+      assert.ok(Math.abs(share - exact) <= k.band3(exact, 10000), `seed ${seed} ${id}: ${share}`);
+    }
+    assert.equal(JSON.stringify(res), JSON.stringify(darts({ view: 2, N: 10000 }, seed)));
+  }
+});

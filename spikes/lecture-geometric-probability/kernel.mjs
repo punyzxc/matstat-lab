@@ -81,6 +81,22 @@ export const BERTRAND = Object.freeze([
     long: (u, _v) => Math.sqrt(u) < 0.5 }, // midpoint radius r = √u is uniform over the disc's area
 ]);
 
+// #124: the chords themselves. Each method turns its draw u (stream 40 + j, the one the counts use) and an angle
+// φ = 2π·v (stream 60 + j, which only turns the picture) into a chord of the unit circle, [x1, y1, x2, y2].
+export const CHORDS_SHOWN = 36;
+export function bertrandChord(id, u, phi) {
+  const at = (a) => [Math.cos(a), Math.sin(a)];
+  if (id === 'endpoints') return [...at(phi), ...at(phi + 2 * Math.PI * u)]; // two points on the circle, central angle 2πu
+  const dist = id === 'radius' ? u : Math.sqrt(u); // distance of the chord from the centre
+  const half = Math.acos(Math.min(1, dist)); // the chord ⟂ the radius at φ, at that distance
+  return [...at(phi - half), ...at(phi + half)];
+}
+const FORMULA_124 = {
+  radius: (c) => `\\text{a point on a radius: } P = \\tfrac12, \\quad \\tfrac{m}{n} = ${c}`,
+  endpoints: (c) => `\\text{random endpoints: } P = \\tfrac13, \\quad \\tfrac{m}{n} = ${c}`,
+  midpoint: (c) => `\\text{a midpoint in the disc: } P = \\tfrac14, \\quad \\tfrac{m}{n} = ${c}`,
+};
+
 function runDarts({ view, N, l, d, region }, seed) {
   if (view === 3) return runBuffon({ N, l, d }, seed);
   if (view === 4) return runRegion({ N, region: region ?? DEFAULT_REGION }, seed);
@@ -95,7 +111,18 @@ function runDarts({ view, N, l, d, region }, seed) {
       }
       return { s, y, count: c };
     });
+    const circles = BERTRAND.map((s, j) => {
+      const chords = [], long = [];
+      for (let i = 1; i <= Math.min(N, CHORDS_SHOWN); i++) {
+        const u = uni(seed, 40 + j, i);
+        chords.push(bertrandChord(s.id, u, 2 * Math.PI * uni(seed, 60 + j, i)).map(r6));
+        long.push(s.long(u, 0));
+      }
+      return { id: s.id, label: s.label, exact: s.exact, share: r6(rows[j].count / N), chords, long };
+    });
     return {
+      board: { kind: 'chords', circles },
+      formula: rows.map(({ s, count }) => FORMULA_124[s.id](String(Number((count / N).toPrecision(4))))),
       readouts: rows.map(({ s, count }) => ({ key: s.id, label: `Long chords, ${s.label}`, observed: r6(count / N), theory: r6(s.exact),
         convention: `± ${fmt(band3(s.exact, N))} (3 SE); ${Math.abs(count / N - s.exact) <= band3(s.exact, N) ? 'inside' : 'outside'}` })),
       series: [
