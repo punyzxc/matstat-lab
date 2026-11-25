@@ -95,3 +95,78 @@ test('AC4 and contract: identical params and seed give byte-identical output; ex
   assert.notEqual(JSON.stringify(k.run({ view: 2, N: 500 }, { seed: 1, station: 'darts' })), JSON.stringify(k.run({ view: 2, N: 500 }, { seed: 2, station: 'darts' })));
   assert.equal(k.meta.id, 'lecture-geometric-probability');
 });
+
+// #90: Buffon's needle and a typed region.
+import * as R from './region.mjs';
+const darts = (q, seed = 1) => k.run({ ...defaults('darts'), ...q }, { seed, station: 'darts' });
+const ro = (res, key) => res.readouts.find((r) => r.key === key);
+
+test("#90 Buffon: the estimate of π converges within 4 SE, and every drawn needle crosses a line exactly when it is counted", () => {
+  for (const [l, d, seed] of [[0.8, 1, 1], [0.5, 1, 2], [1, 1, 3], [0.3, 0.6, 4]]) {
+    const N = 20000, res = darts({ view: 3, N, l, d }, seed);
+    const p = k.buffonP(l, d);
+    assert.equal(ro(res, 'cross').theory, Number(p.toPrecision(6)));
+    const se = Math.PI * Math.sqrt((1 - p) / (N * p));
+    assert.ok(Math.abs(ro(res, 'pi').observed - Math.PI) <= 4 * se, `l ${l} d ${d}: ${ro(res, 'pi').observed}`);
+    // Independent geometry: the ends of the needle lie in different strips (or on a line) iff it crosses.
+    const { needles, hits } = res.board;
+    assert.equal(needles.length, k.NEEDLES);
+    needles.forEach(([, cy, th], i) => {
+      const y1 = cy - (l / 2) * Math.sin(th), y2 = cy + (l / 2) * Math.sin(th);
+      const crosses = Math.floor(y1 / d + 1e-6) !== Math.floor(y2 / d - 1e-6) || Math.abs(y1 / d - Math.round(y1 / d)) < 1e-5;
+      assert.equal(hits[i], crosses, `needle ${i}`);
+    });
+    const est = res.series.find((s) => s.id === 'estimate');
+    assert.ok(Math.abs(est.y.at(-1) - ro(res, 'pi').observed) < 1e-4);
+    assert.equal(JSON.stringify(res), JSON.stringify(darts({ view: 3, N, l, d }, seed)), 'same seed, same bytes');
+  }
+  const long = darts({ view: 3, l: 1.5, d: 1 });
+  assert.ok(long.notes[0].includes('cut to $l = d = 1$'));
+  assert.equal(ro(long, 'cross').theory, Number(k.buffonP(1, 1).toPrecision(6)));
+});
+
+test('#90 typed regions: exact areas within the grid error, hit shares within the band, darts recomputed', () => {
+  const cases = [['y < x^2', 1 / 3], ['x^2 + y^2 < 1', Math.PI / 4], ['|x - 0.5| + |y - 0.5| < 0.4', 0.32], ['0.2 < x < 0.8', 0.6],
+    ['y < sin(pi x)', 2 / Math.PI], ['y > x and y < 2x', 0.25], ['y < 0,5 или x > 0,5', 0.75], ['not (x < 0.3)', 0.7], ['y ≤ 2x(1 − x)', 1 / 3]];
+  for (const [text, exact] of cases) {
+    const N = 20000, res = darts({ view: 4, N, region: text }, 7);
+    const area = ro(res, 'area').theory, err = k.prepareRegion(text).error;
+    assert.ok(Math.abs(area - exact) <= err + 1e-6, `${text}: area ${area} vs ${exact} ± ${err}`);
+    assert.ok(Math.abs(ro(res, 'share').observed - exact) <= 4 * Math.sqrt((exact * (1 - exact)) / N), `${text}: share`);
+    assert.ok(res.formula[0].startsWith('A = \\{(x, y) \\in [0, 1]^2 : '), res.formula[0]);
+    const f = k.prepareRegion(text).inside;
+    res.board.darts.forEach(([x, y], i) => assert.equal(res.board.hits[i], f(x, y), `${text} dart ${i}`));
+  }
+  assert.equal(darts({ view: 4, region: 'y < x^2' }).formula[0], 'A = \\{(x, y) \\in [0, 1]^2 : y < x^{2}\\}');
+  assert.equal(darts({ view: 4, region: '0.2 < x < 0.8' }).formula[0], 'A = \\{(x, y) \\in [0, 1]^2 : 0.2 < x < 0.8\\}');
+  assert.ok(darts({ view: 4, region: 'y > 2' }).notes[0].includes('empty'));
+});
+
+test('#90 invalid regions are explained and never run; nothing typed is executed as code', () => {
+  for (const bad of ['', 'x +', 'y = x', 'y < z', 'x + y', '(y < x) + 1', '2 > 1', 'y < (x', 'alert(1) < x', 'constructor < 1', 'x.y < 1', 'y < x;', 'sin < x', '__proto__ > x']) {
+    const c = k.checkText('darts', 'region', bad);
+    assert.ok(c && c.message && c.template, `${JSON.stringify(bad)} should be rejected`);
+    assert.equal(c.values.reduce((s, v, i) => s.replace(`[[${i + 1}]]`, v), c.template), c.message);
+    assert.throws(() => R.parseRegion(bad), R.RegionError);
+  }
+  for (const good of ['y < x^2', 'xy > 0.1', 'y<sinx', 'y < e^(-3x)', '√x > y', 'x² + y² ≤ 1', 'y > x and y < 2x or x > 0.9']) assert.equal(k.checkText('darts', 'region', good), null, good);
+  assert.equal(k.checkText('darts', 'other', 'anything'), null);
+  // Precedence: and binds tighter than or; powers are right-associative; unary minus below the power.
+  const f = R.compileRegion(R.parseRegion('x < 0.1 or x > 0.5 and y > 0.5'));
+  assert.equal(f(0.05, 0.1), true);
+  assert.equal(f(0.7, 0.1), false);
+  assert.equal(R.compileRegion(R.parseRegion('y < -x^2 + 1'))(0.5, 0.74), true);
+  assert.equal(R.compileRegion(R.parseRegion('y < 2^3^0'))(0.5, 1.9), true); // 2^(3^0) = 2
+  // Undefined functions leave the point outside: sqrt of a negative number.
+  assert.equal(R.compileRegion(R.parseRegion('y < sqrt(x - 0.5)'))(0.25, 0.01), false);
+});
+
+test('#90 the darts station declares the new views, Buffon parameters and the region text', () => {
+  const ps = k.stations.darts.params;
+  assert.equal(ps.find((p) => p.key === 'view').max, 4);
+  assert.deepEqual(ps.find((p) => p.key === 'l').when, { view: [3] });
+  const text = k.stations.darts.texts[0];
+  assert.equal(text.key, 'region');
+  assert.equal(k.checkText('darts', 'region', text.default), null);
+  for (const p of text.presets) assert.equal(k.checkText('darts', 'region', p), null, p);
+});

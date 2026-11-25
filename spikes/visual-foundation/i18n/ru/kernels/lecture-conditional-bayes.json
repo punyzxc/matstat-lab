@@ -54,5 +54,20 @@
  "$P(\\text{correct answer})$": "$P(\\text{верный ответ})$",
  "P(A)": "$P(A)$",
  "P(B)": "$P(B)$",
- "P(C)": "$P(C)$"
+ "P(C)": "$P(C)$",
+ "Width of $A$": "Ширина $A$",
+ "Left edge of $B$": "Левый край $B$",
+ "Width of $B$": "Ширина $B$",
+ "Height of $B$": "Высота $B$",
+ "Points thrown $n$": "Брошено точек $n$",
+ "not zero: $A$ and $B$ are dependent": "не ноль: $A$ и $B$ зависимы",
+ "equal within [[1]]: $A$ and $B$ are independent": "равны с точностью [[1]]: $A$ и $B$ независимы",
+ "frequency of $A$": "частота $A$",
+ "share of $A$ among the points of $B$": "доля $A$ среди точек $B$",
+ "Conditioning on $B$ (L2): we learn that $B$ happened, so only the outcomes of $B$ remain possible. $B$ becomes the whole world, and $A$ keeps only its part inside $B$: $P(A \\mid B) = \\dfrac{P(AB)}{P(B)}$.": "Условие $B$ (лекция 2): мы узнали, что $B$ произошло, поэтому возможны только исходы из $B$. $B$ становится всем миром, а от $A$ остаётся лишь часть внутри $B$: $P(A \\mid B) = \\dfrac{P(AB)}{P(B)}$.",
+ "$A$ and $B$ are independent when $P(AB) = P(A)\\,P(B)$, that is, when $P(A \\mid B) = P(A)$: knowing $B$ does not change the chances of $A$. Here it holds when the share of $B$ covered by $A$ equals the width of $A$; the marker shows it within [[1]].": "$A$ и $B$ независимы, когда $P(AB) = P(A)\\,P(B)$, то есть $P(A \\mid B) = P(A)$: знание о $B$ не меняет шансов $A$. Здесь это так, когда доля $B$, покрытая $A$, равна ширине $A$; метка показывает это с точностью [[1]].",
+ "$\\lg n$, points thrown": "$\\lg n$, брошено точек",
+ "frequency": "частота",
+ "$B$ has zero area: $P(B) = 0$, and conditioning on it is not defined.": "У $B$ нулевая площадь: $P(B) = 0$, и условие $B$ не определено.",
+ "P(B) = 0 \\Rightarrow P(A \\mid B) \\text{ is not defined}": "P(B) = 0 \\Rightarrow P(A \\mid B) \\text{ не определена}"
 }

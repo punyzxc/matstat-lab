@@ -141,3 +141,55 @@ test('band: clipped to [0, 1] and omitted when too few outcomes are expected', (
   for (const view of [1, 2, 3, 4]) for (const x of run({ view, n: 100 }, { seed: 2 }).readouts)
     if (x.band) assert.ok(x.band[0] >= 0 && x.band[1] <= 1, x.key);
 });
+
+// #117: conditional probability as shrinking the world to B.
+import { INDEP_TOL, SQUARE_POINTS } from './kernel.mjs';
+const cond = (q, seed = 1) => run({ a: 0.5, s: 0.3, b: 0.5, h: 0.6, n: 4000, ...q }, { seed, station: 'conditional' });
+
+test('#117 exact P(A), P(B), P(AB), P(A|B) from the rectangles, in the live formula', () => {
+  for (const [a, s, b, h] of [[0.5, 0.3, 0.5, 0.6], [0.2, 0, 1, 1], [0.7, 0.6, 0.6, 0.25], [1, 0.1, 0.3, 0.5]]) {
+    const out = cond({ a, s, b, h });
+    const bw = Math.min(1, s + b) - s, ox = Math.max(0, Math.min(a, s + bw) - s);
+    const r = byKey(out);
+    close(r.pA.theory, a, 1e-6);
+    close(r.pB.theory, Number((bw * h).toPrecision(6)), 1e-9);
+    close(r.pAB.theory, Number((ox * h).toPrecision(6)), 1e-9);
+    close(r.pAgB.theory, Number((ox / bw).toPrecision(6)), 1e-9);
+    assert.ok(out.formula[1].includes('\\dfrac{P(AB)}{P(B)}'), out.formula[1]);
+    assert.deepEqual(out.square.B, [s, Math.min(1, s + b), 0, h]);
+  }
+  const zero = cond({ h: 0 });
+  assert.equal(zero.square.P.AgB, null);
+  assert.ok(zero.notes[0].includes('zero area'));
+});
+
+test('#117 the independence marker: on exactly when |P(AB) − P(A)P(B)| ≤ the tolerance', () => {
+  assert.equal(INDEP_TOL, 0.002);
+  let on = 0, off = 0;
+  for (let a = 0.05; a <= 0.95; a += 0.05) for (let s = 0; s <= 0.8; s += 0.1) for (const b of [0.2, 0.5]) {
+    const out = cond({ a: +a.toFixed(2), s: +s.toFixed(2), b, h: 0.5 });
+    const P = out.square.P, gap = P.AB - P.A * P.B;
+    assert.equal(out.square.independent, Math.abs(gap) <= INDEP_TOL + 1e-12, `a ${a} s ${s} b ${b}`);
+    out.square.independent ? on++ : off++;
+  }
+  assert.ok(on > 0 && off > 0, `${on} independent, ${off} dependent layouts`);
+  // A = [0, 0.5] and B = [0.25, 0.75]: half of B lies in A, as half of Ω does.
+  assert.equal(cond({ a: 0.5, s: 0.25, b: 0.5 }).square.independent, true);
+  assert.equal(cond({ a: 0.5, s: 0.3, b: 0.5 }).square.independent, false);
+  assert.match(byKey(cond({ a: 0.5, s: 0.25, b: 0.5 })).indep.convention, /independent/);
+});
+
+test('#117 simulated frequencies converge to the exact values within 4 SE; same seed, same bytes', () => {
+  for (const seed of SEEDS) {
+    const out = cond({ n: 20000 }, seed), r = byKey(out);
+    for (const k of ['pA', 'pB', 'pAB', 'pAgB']) inBand(r[k]);
+    assert.equal(out.square.points.length, SQUARE_POINTS);
+    out.square.points.forEach(([x, y], i) => {
+      const inA = x < 0.5, inB = x >= 0.3 && x < 0.8 && y < 0.6;
+      assert.equal(out.square.cls[i], (inA ? 1 : 0) + (inB ? 2 : 0));
+    });
+    const trace = out.series.find((s) => s.id === 'freqAgB');
+    close(trace.y.at(-1), r.pAgB.observed, 1e-5);
+    assert.equal(JSON.stringify(out), JSON.stringify(cond({ n: 20000 }, seed)));
+  }
+});

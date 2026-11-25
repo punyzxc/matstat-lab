@@ -90,7 +90,9 @@ test('kernel dictionaries hold no entries that no kernel text uses', async () =>
     for (const text of texts) matchedKeys(text, dict, 0, used);
     // A text of a rare branch (a draw outside a 99.9% band) may not come up in the sweep; its entry stays
     // as long as every word of it is still written in the kernel's source.
-    const source = readFileSync(`${spikes}${dir}/kernel.mjs`, 'utf8').replace(/\\\\/g, '\\').replace(/\\'/g, "'");
+    // The kernel and its helper modules (a parser's error messages, #90), not its tests.
+    const files = readdirSync(`${spikes}${dir}`).filter((f) => f.endsWith('.mjs') && !f.includes('.test.'));
+    const source = files.map((f) => readFileSync(`${spikes}${dir}/${f}`, 'utf8')).join('\n').replace(/\\\\/g, '\\').replace(/\\'/g, "'");
     const inSource = (key) => (key.replace(/\[\[\d+\]\]/g, ' ').match(/[A-Za-z]{3,}/g) ?? []).every((word) => source.includes(word));
     for (const key of Object.keys(own)) if (!key.startsWith('//') && !used.has(key) && !inSource(key)) stale.push(`${dir}: ${key}`);
   }

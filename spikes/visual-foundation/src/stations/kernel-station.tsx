@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Activity, Box, CircleHelp, ExternalLink, SlidersHorizontal } from 'lucide-react';
 import { Panel, PanelHeading, Slider } from '../ui';
-import { isKernel, resolveParams, type Kernel, type KernelParam, type KernelResult, type Series } from './kernel-contract';
+import { applies, isKernel, resolveParams, resolveTexts, type Kernel, type KernelParam, type KernelResult, type Series } from './kernel-contract';
 import { AutoplayBar, useAutoplayKeys, usePlayback, useTicker } from './autoplay';
 import { choicesOf, grownSize, GROWTH, ridgeOf, sizeParamOf, tickDelay, traceSummary } from './autoplay-math.mjs';
 import { useKernelRunner, type Job } from './kernel-runner';
@@ -14,6 +14,9 @@ import { Beam } from './beam';
 import { OutcomeFlight } from './outcome-flight';
 import { OutcomeSpace } from './outcome-space';
 import { Constructions } from './constructions';
+import { Board } from './board';
+import { EventSquare } from './event-square';
+import { TextField } from './text-field';
 import { kernelText, locale, plural, t, texDec, useLang } from '../i18n';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
@@ -47,6 +50,8 @@ function localizeResult(kernel: string, r: KernelResult): KernelResult {
     outcomes: r.outcomes,
     space: r.space,
     constructions: r.constructions,
+    board: r.board,
+    square: r.square,
     linked: r.linked && { ...r.linked, series: r.linked.series.map((s) => (s.label ? { ...s, label: k(s.label) } : s)), axes: r.linked.axes && { x: k(r.linked.axes.x), y: k(r.linked.axes.y) } },
   };
 }
@@ -79,30 +84,34 @@ export function KernelStation({
   station,
   seed,
   params,
+  texts = NO_TEXTS,
   onState,
 }: {
   station: KernelStationInfo;
   seed: number;
   params: Record<string, number>;
-  onState: (seed: number, params: Record<string, number>) => void;
+  texts?: Record<string, string>;
+  onState: (seed: number, params: Record<string, number>, texts: Record<string, string>) => void;
 }) {
   const load = useKernel(station.kernel);
   if (load.state === 'missing') return <PendingStation station={station} />;
   if (load.state === 'loading') return <p className="station-status" role="status">{t(`Loading the ${station.name} kernel…`, `Загрузка ядра станции «${station.name}»…`)}</p>;
   if (load.state === 'error') return <p className="station-status" role="alert">{t('The kernel failed to load: ', 'Ядро не загрузилось: ')}{load.message}</p>;
-  return <ReadyStation station={station} kernel={load.kernel} seed={seed} params={params} onState={onState} />;
+  return <ReadyStation station={station} kernel={load.kernel} seed={seed} params={params} texts={texts} onState={onState} />;
 }
 
 /** Parameters as a stable string, to tell a new experiment from a new draw of the same one. */
-const keyOf = (declared: KernelParam[], p: Record<string, number>) => declared.map((d) => `${d.key}=${p[d.key]}`).join('&');
+const NO_TEXTS: Record<string, string> = {};
+const keyOf = (declared: KernelParam[], p: Record<string, number>, texts: Record<string, string> = NO_TEXTS) =>
+  [...declared.map((d) => `${d.key}=${p[d.key]}`), ...Object.entries(texts).map(([k, v]) => `${k}=${v}`)].join('&');
 const numeric = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const TRACE = 60, RIDGE = 18;
 
 type Draw = { draw: number; seed: number; result: KernelResult };
 
-function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onState }: {
-  station: KernelStationInfo; kernel: Kernel; seed: number; params: Record<string, number>;
-  onState: (seed: number, params: Record<string, number>) => void;
+function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, texts: textsProp, onState }: {
+  station: KernelStationInfo; kernel: Kernel; seed: number; params: Record<string, number>; texts: Record<string, string>;
+  onState: (seed: number, params: Record<string, number>, texts: Record<string, string>) => void;
 }) {
   const lang = useLang();
   const declared = kernel.stations?.[station.id]?.params ?? kernel.meta.params;
@@ -115,6 +124,11 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
   // A link opened from outside (a lecture step, the address bar) replaces the experiment.
   useEffect(() => setParams(resolved), [resolved]);
   useEffect(() => setSeed(seedProp), [seedProp]);
+  // Typed text parameters (#90): only a text the kernel accepts reaches `texts`; the field keeps the draft.
+  const declaredTexts = useMemo(() => kernel.stations?.[station.id]?.texts ?? [], [kernel, station.id]);
+  const resolvedTexts = useMemo(() => resolveTexts(kernel, station.id, declaredTexts, textsProp), [kernel, station.id, declaredTexts, textsProp]);
+  const [texts, setTexts] = useState(resolvedTexts);
+  useEffect(() => setTexts(resolvedTexts), [resolvedTexts]);
   const playback = usePlayback();
   const { playing, setPlaying, speed } = playback;
   // Growth: a fresh experiment starts small and grows to the chosen size, frame by frame.
@@ -124,8 +138,8 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
 
   const job = useMemo<Job>(() => {
     const p = growing && size ? { ...params, [size.key]: grownSize(size, params[size.key], grow) } : params;
-    return { params: p, seed, tag: growing ? 'grow' : 'draw' };
-  }, [params, seed, grow, growing, size]);
+    return { params: p, seed, tag: growing ? 'grow' : 'draw', texts };
+  }, [params, seed, grow, growing, size, texts]);
   const { outcome, done } = useKernelRunner(station.kernel, station.id, kernel, job);
 
   const result = useMemo<KernelResult | { error: string } | null>(() => {
@@ -135,7 +149,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
     if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series)) return { error: t('The kernel returned no readouts or series.', 'Ядро не вернуло ни показаний, ни графиков.') };
     return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface,
       formula: Array.isArray(out.formula) ? out.formula.filter((l) => typeof l === 'string') : undefined, decisions: out.decisions, beam: out.beam,
-      domain: out.domain, linked: out.linked && Array.isArray(out.linked.series) ? out.linked : undefined, outcomes: out.outcomes, space: out.space, constructions: out.constructions };
+      domain: out.domain, linked: out.linked && Array.isArray(out.linked.series) ? out.linked : undefined, outcomes: out.outcomes, space: out.space, constructions: out.constructions, board: out.board, square: out.square };
   }, [outcome]);
   /** What is on screen: the same result with its texts in the current language. */
   const view = useMemo(() => (result && !('error' in result) ? localizeResult(station.kernel, result) : result), [result, station.kernel, lang]);
@@ -145,9 +159,9 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
   const sync = useRef(onState);
   sync.current = onState;
   useEffect(() => {
-    const t = window.setTimeout(() => sync.current(seed, params), playing ? 900 : 250);
+    const t = window.setTimeout(() => sync.current(seed, params, texts), playing ? 900 : 250);
     return () => clearTimeout(t);
-  }, [seed, params, playing]);
+  }, [seed, params, texts, playing]);
 
   const advance = useCallback(() => {
     if (growing) setGrow((k) => k + 1);
@@ -171,7 +185,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
   useTicker(playing && done && !failed, tickDelay(speed, outcome?.ms ?? 0, growing), job, advance);
 
   // History of draws of this exact experiment: the trace of one readout and the 3D ridge.
-  const expKey = keyOf(declared, params);
+  const expKey = keyOf(declared, params, texts);
   const lastExp = useRef(expKey);
   useEffect(() => {
     if (lastExp.current !== expKey) setDraws(0);
@@ -180,7 +194,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
   const [history, setHistory] = useState<{ key: string; draws: Draw[] }>({ key: expKey, draws: [] });
   useEffect(() => {
     if (!outcome?.ok || !result || 'error' in result || outcome.job.tag === 'grow') return;
-    const k = keyOf(declared, outcome.job.params);
+    const k = keyOf(declared, outcome.job.params, outcome.job.texts);
     setHistory((h) => {
       const base = h.key === k ? h.draws : [];
       if (base.at(-1)?.seed === outcome.job.seed) return h.key === k ? h : { key: k, draws: base };
@@ -206,7 +220,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
       <Panel label={t('Station parameters', 'Параметры станции')} className="parameters">
         <PanelHeading icon={<SlidersHorizontal size={16} aria-hidden />} title={t('Parameters', 'Параметры')} />
         <div className="parameter-body">
-          {labelled.map((p) => {
+          {labelled.filter((p) => applies(p.when, params)).map((p) => {
             const choice = choicesOf(p);
             return choice ? (
               <Choice key={p.key} id={`p-${p.key}`} title={choice.title} options={choice.options} value={params[p.key]}
@@ -216,6 +230,11 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
                 min={p.min} max={p.max} step={p.step} onChange={(v) => setParams({ ...params, [p.key]: v })} />
             );
           })}
+          {declaredTexts.filter((p) => applies(p.when, params)).map((p) => (
+            <TextField key={p.key} id={`p-${p.key}`} label={kernelText(station.kernel, p.label)} value={texts[p.key]} presets={p.presets}
+              check={(v) => kernel.checkText?.(station.id, p.key, v) ?? null} translate={(s) => kernelText(station.kernel, s)}
+              onChange={(v) => setTexts((x) => ({ ...x, [p.key]: v }))} />
+          ))}
           <SeedField seed={seed} onSeed={(v) => { setSeed(v); setDraws(0); }} />
           <p className="parameter-hint">{t('Every change runs at once. Type exact values in the boxes: 0,5 · 20 000 · 1/3 · π/4.', 'Любое изменение применяется сразу. Точные значения вводятся в полях: 0,5 · 20 000 · 1/3 · π/4.')}</p>
         </div>
@@ -238,6 +257,8 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
             {view.outcomes && outcome?.ok && <OutcomeFlight outcomes={view.outcomes} drawKey={outcome.job.seed} />}
             {view.space && outcome?.ok && <OutcomeSpace space={view.space} drawKey={outcome.job.seed} />}
             {view.constructions && outcome?.ok && <Constructions data={view.constructions} drawKey={outcome.job.seed} />}
+            {view.board && outcome?.ok && <Board board={view.board} drawKey={outcome.job.seed} />}
+            {view.square && outcome?.ok && <EventSquare square={view.square} drawKey={outcome.job.seed} onParam={(key, v) => setParams((p) => ({ ...p, [key]: v }))} />}
             {view.surface && <Surface3D surface={view.surface} />}
             {view.series.length > 0 && (
               <div className="chart-stage">

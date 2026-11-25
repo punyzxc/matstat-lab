@@ -1309,7 +1309,7 @@ html:has(.orbital-lab) body {
   font: 11px var(--mono);
   color: #a8a8a8;
 }
-.cx-var {
+.constructions button.cx-var {
   padding: 3px 8px;
   border: 1px solid #333;
   border-radius: 4px;
@@ -1318,8 +1318,8 @@ html:has(.orbital-lab) body {
   font: inherit;
   cursor: default;
 }
-.cx-var[data-on],
-.cx-var:focus-visible {
+.constructions button.cx-var[data-on],
+.constructions button.cx-var:focus-visible {
   border-color: var(--signal);
   outline: none;
 }
@@ -1406,4 +1406,271 @@ html:has(.orbital-lab) body {
 }
 .constructions[data-reduced] .cx-item {
   animation: none;
+}
+
+/* #90: Buffon's needles and darts over a typed region. */
+.board {
+  margin: 4px 0 12px;
+}
+.board-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-bottom: 6px;
+  font: 11px var(--mono);
+  color: #a8a8a8;
+}
+.board-head b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.board-count {
+  color: var(--signal);
+}
+.board svg {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+}
+.board--region svg {
+  max-width: 320px;
+}
+.board-rule {
+  stroke: #5a5a5a;
+  stroke-width: 1.2;
+}
+.board-needle line {
+  stroke: #9a9a9a;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.board-needle circle {
+  fill: #9a9a9a;
+}
+.board-needle[data-hit] line {
+  stroke: var(--signal);
+}
+.board-needle[data-hit] circle {
+  fill: var(--signal);
+}
+.board-needle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: board-fall 0.4s var(--ease) both;
+}
+@keyframes board-fall {
+  from {
+    opacity: 0;
+    transform: translateY(-36px) rotate(-70deg);
+  }
+}
+.board-square {
+  fill: none;
+  stroke: #5a5a5a;
+}
+.board-region {
+  fill: rgba(232, 228, 133, 0.16);
+}
+.board-dart {
+  fill: #8a8a8a;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: board-land 0.25s ease-out both;
+}
+.board-dart[data-hit] {
+  fill: var(--signal);
+}
+@keyframes board-land {
+  from {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+.board-tick {
+  fill: #8a8a8a;
+  font: 10px var(--mono);
+}
+.board[data-reduced] .board-needle,
+.board[data-reduced] .board-dart {
+  animation: none;
+}
+.text-param {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 10px;
+}
+.text-param label {
+  font-size: 13px;
+  color: var(--ink);
+}
+.text-param-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 9px;
+  border: 1px solid #3a3a3a;
+  border-radius: 5px;
+  background: #0c0c0c;
+  color: var(--ink);
+  font: 13px var(--mono);
+}
+.text-param-input:focus-visible {
+  outline: none;
+  border-color: var(--signal);
+}
+.text-param-input[aria-invalid='true'] {
+  border-color: #e08a6f;
+}
+.text-param-error {
+  color: #f0a58f;
+  font-size: 12px;
+}
+.text-param-hint {
+  color: #8a8a8a;
+  font: 11px var(--mono);
+}
+.text-param-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.text-param button.text-param-preset {
+  padding: 3px 7px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: transparent;
+  color: #c8c8c8;
+  font: 11px var(--mono);
+  cursor: pointer;
+}
+.text-param button.text-param-preset[aria-pressed='true'],
+.text-param button.text-param-preset:hover,
+.text-param button.text-param-preset:focus-visible {
+  border-color: var(--signal);
+  color: var(--ink);
+  outline: none;
+}
+
+/* #117: conditional probability as shrinking the world to B. */
+.event-square {
+  margin: 4px 0 12px;
+}
+.es-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-bottom: 6px;
+  font: 11px var(--mono);
+  color: #a8a8a8;
+}
+.event-square button.es-given {
+  padding: 4px 10px;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  font: 12px var(--sans);
+  cursor: pointer;
+}
+.event-square button.es-given[aria-pressed='true'] {
+  border-color: var(--signal);
+  background: rgba(232, 228, 133, 0.12);
+}
+.event-square button.es-given:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+.event-square button.es-given:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.es-indep {
+  color: var(--signal);
+}
+.es-dep {
+  color: #8a8a8a;
+}
+.event-square svg {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  touch-action: none;
+}
+.es-omega {
+  fill: #0d0d0d;
+  stroke: #5a5a5a;
+}
+.es-a,
+.es-b,
+.es-ab,
+.es-pt {
+  transition: x 0.6s var(--ease), y 0.6s var(--ease), width 0.6s var(--ease), height 0.6s var(--ease), cx 0.6s var(--ease), cy 0.6s var(--ease), opacity 0.4s;
+}
+.event-square[data-reduced] .es-a,
+.event-square[data-reduced] .es-b,
+.event-square[data-reduced] .es-ab,
+.event-square[data-reduced] .es-pt {
+  transition: none;
+}
+.es-a {
+  fill: rgba(159, 211, 199, 0.13);
+  stroke: #9fd3c7;
+  stroke-width: 1.2;
+}
+.es-b {
+  fill: rgba(183, 178, 240, 0.13);
+  stroke: #b7b2f0;
+  stroke-width: 1.2;
+  stroke-dasharray: 5 3;
+}
+.es-ab {
+  fill: rgba(232, 228, 133, 0.22);
+}
+.es-pt {
+  fill: #5c5c5c;
+}
+.es-pt[data-c='1'] {
+  fill: #9fd3c7;
+}
+.es-pt[data-c='2'] {
+  fill: #b7b2f0;
+}
+.es-pt[data-c='3'] {
+  fill: var(--signal);
+}
+.event-square[data-given] .es-pt[data-c='0'],
+.event-square[data-given] .es-pt[data-c='1'] {
+  opacity: 0;
+}
+.es-label {
+  fill: var(--ink);
+  font: italic 15px var(--serif);
+}
+.es-handle {
+  stroke: transparent;
+  stroke-width: 12;
+  cursor: ew-resize;
+  outline: none;
+}
+.es-handle:hover,
+.es-handle:focus-visible {
+  stroke: rgba(232, 228, 133, 0.55);
+}
+.es-handles line:last-child {
+  cursor: ns-resize;
+}
+.es-body {
+  fill: transparent;
+  stroke-width: 0;
+  cursor: grab;
+}
+.es-body:focus-visible,
+.es-body:hover {
+  fill: rgba(232, 228, 133, 0.06);
+}
+.es-tick,
+.es-omega-label {
+  fill: #8a8a8a;
+  font: 10px var(--mono);
 }
