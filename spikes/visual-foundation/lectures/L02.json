@@ -28,7 +28,20 @@
       "idea": "Split the space into hypotheses $H_1, \\ldots, H_n$ and add up the paths that lead to $A$.",
       "formula": [
         "P(A) = \\sum_{i=1}^{n} P(H_i)\\, P(A \\mid H_i)"
-      ]
+      ],
+      "experiment": {
+        "station": "bayes-tree",
+        "seed": 118,
+        "params": {
+          "q1": 0.5,
+          "q2": 0.3,
+          "q3": 0.2,
+          "l1": 0.2,
+          "l2": 0.5,
+          "l3": 0.9
+        },
+        "label": "Watch the particles in the Bayes tree"
+      }
     },
     {
       "title": "Bayes formula",

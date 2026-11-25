@@ -87,6 +87,15 @@ export type EventSquare = {
   A: number[]; B: number[]; P: { A: number; B: number; AB: number; AgB: number | null }; independent: boolean; gap: number;
   points: number[][]; cls: number[]; keys: { a: number; s: number; b: number; h: number }; step: number;
 };
+/**
+ * The Bayes tree (#118): normalised `priors` P(H_i), likelihoods `lik` P(A | H_i), `joint` P(H_i)P(A | H_i), the
+ * total P(A) and the posteriors (null when P(A) = 0); particle counts per hypothesis `H` and per hypothesis with A
+ * `HA` out of `n`, `A` in all; `particles[i]` = [i of H, 1 if A] for the first particles of the draw.
+ */
+export type BayesTree = {
+  priors: number[]; lik: number[]; joint: number[]; pA: number; post: number[] | null;
+  H: number[]; HA: number[]; A: number; n: number; particles: number[][]; keys: string[];
+};
 export type KernelResult = {
   readouts: Readout[];
   series: Series[];
@@ -105,6 +114,7 @@ export type KernelResult = {
   constructions?: Constructions;
   board?: Board;
   square?: EventSquare;
+  tree?: BayesTree;
 };
 export type Kernel = {
   meta: KernelMeta;

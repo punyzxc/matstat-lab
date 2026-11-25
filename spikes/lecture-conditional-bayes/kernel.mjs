@@ -224,6 +224,60 @@ function runHypotheses(p, seed) {
   };
 }
 
+// ---------- The living Bayes tree (#118) ----------
+/** Particles drawn flowing down the tree; the counts use all n. */
+export const TREE_PARTICLES = 90;
+const d4 = (v) => String(Number(v.toPrecision(4)));
+
+export function runTree(p, seed) {
+  const w = [p.q1, p.q2, p.q3], sw = w.reduce((m, v) => m + v, 0);
+  if (!(sw > 0)) throw new Error('At least one prior must be positive.');
+  const priors = w.map((v) => v / sw), lik = [p.l1, p.l2, p.l3];
+  const joint = priors.map((q, k) => q * lik[k]);
+  const pA = joint.reduce((m, v) => m + v, 0);
+  const post = pA > 0 ? joint.map((v) => v / pA) : null;
+  const H = [0, 0, 0], HA = [0, 0, 0], particles = [];
+  for (let i = 0; i < p.n; i++) {
+    const u = u01(seed, 5, i);
+    const k = u < priors[0] ? 0 : u < priors[0] + priors[1] ? 1 : 2;
+    const a = u01(seed, 6, i) < lik[k];
+    H[k]++;
+    if (a) HA[k]++;
+    if (i < TREE_PARTICLES) particles.push([k, a ? 1 : 0]);
+  }
+  const A = HA.reduce((m, v) => m + v, 0), n = p.n;
+  const readouts = [
+    { key: 'pA', label: '$P(A) = \\sum_i P(H_i)\\,P(A \\mid H_i)$', observed: r6(A / n), theory: r6(pA), band: band(pA, n), count: A },
+    ...priors.map((q, k) => ({ key: `prior${k + 1}`, label: `$P(H_${k + 1})$, share of particles`, observed: r6(H[k] / n), theory: r6(q), band: band(q, n), count: H[k] })),
+    ...priors.map((_, k) => ({ key: `post${k + 1}`, label: `$P(H_${k + 1} \\mid A)$, Bayes`, observed: A > 0 ? r6(HA[k] / A) : null, theory: post ? r6(post[k]) : null,
+      band: post ? band(post[k], n * pA) : null, count: HA[k] })),
+  ];
+  const sum = priors.map((q, k) => `${d4(q)} \\cdot ${d4(lik[k])}`).join(' + ');
+  const formula = [`P(A) = \\sum_{i=1}^{3} P(H_i)\\,P(A \\mid H_i) = ${sum} = ${d4(pA)}`];
+  if (post) formula.push(post.map((q, k) => `P(H_${k + 1} \\mid A) = \\dfrac{${d4(joint[k])}}{${d4(pA)}} = ${d4(q)}`).join(', \\quad '));
+  else formula.push('P(A) = 0 \\Rightarrow P(H_k \\mid A) \\text{ is not defined}');
+  const notes = [
+    'Forward: each particle first picks a hypothesis $H_i$ with probability $P(H_i)$, then $A$ happens with probability $P(A \\mid H_i)$. The width of a branch is the probability of passing along it, so the $A$-ends add up to the total probability $P(A)$.',
+    'Inverse: regroup the same particles by the outcome. Among the particles that reached $A$, the share that came through $H_k$ is the posterior $P(H_k \\mid A) = \\dfrac{P(H_k)\\,P(A \\mid H_k)}{P(A)}$: the Bayes formula.',
+  ];
+  if (Math.abs(sw - 1) > 1e-9) notes.unshift(`The typed priors add up to ${d4(sw)}, not 1, so they are scaled to a complete group: $P(H_i) = q_i / ${d4(sw)}$.`);
+  if (!post) notes.unshift('$P(A) = 0$: no particle can reach $A$, and the posteriors are not defined.');
+  const x = [1, 2, 3];
+  return {
+    axes: { x: 'hypothesis $H_i$', y: 'probability' },
+    readouts,
+    series: [
+      { id: 'prior', kind: 'pmf', tone: 'muted', label: 'prior $P(H_i)$', x: x.map((v) => v - 0.12), y: priors },
+      ...(post ? [{ id: 'posterior', kind: 'pmf', tone: 'signal', label: 'posterior $P(H_i \\mid A)$', x: x.map((v) => v + 0.12), y: post },
+        { id: 'observed', kind: 'points', tone: 'accent', label: 'share of the $A$-particles from $H_i$', x: x.map((v) => v + 0.12), y: HA.map((h) => (A ? h / A : 0)) }] : []),
+    ],
+    domain: { x: [0.5, 3.5], y: [0, 1] },
+    formula,
+    tree: { priors, lik, joint, pA, post, H, HA, A, n, particles, keys: ['q1', 'q2', 'q3'] },
+    notes,
+  };
+}
+
 // ---------- View 4: the guessing student ----------
 /** P(guessed | correct) when the student knows with probability p and otherwise picks one of m options. */
 export const guessingPosterior = (p, m) => posteriors([p, 1 - p], [1, 1 / m])[1];
@@ -267,6 +321,11 @@ const groups = {
   guessing: [P('skill', 'Student: probability $p$ of solving', 0, 1, 0.01, 0.6), P('m', 'Student: number of options $m$', 2, 10, 1, 5)],
 };
 const all = [...common, ...Object.values(groups).flat()];
+const treeParams = [
+  P('q1', 'Prior $P(H_1)$', 0, 1, 0.01, 0.5), P('q2', 'Prior $P(H_2)$', 0, 1, 0.01, 0.3), P('q3', 'Prior $P(H_3)$', 0, 1, 0.01, 0.2),
+  P('l1', 'Likelihood $P(A \\mid H_1)$', 0, 1, 0.01, 0.2), P('l2', 'Likelihood $P(A \\mid H_2)$', 0, 1, 0.01, 0.5), P('l3', 'Likelihood $P(A \\mid H_3)$', 0, 1, 0.01, 0.9),
+  P('n', 'Particles $n$', 100, 20000, 100, 4000),
+];
 const conditionalParams = [
   P('a', 'Width of $A$', 0, 1, 0.01, 0.5), P('s', 'Left edge of $B$', 0, 1, 0.01, 0.3), P('b', 'Width of $B$', 0, 1, 0.01, 0.5),
   P('h', 'Height of $B$', 0, 1, 0.01, 0.6), P('n', 'Points thrown $n$', 100, 20000, 100, 4000),
@@ -281,10 +340,16 @@ export const stations = {
   'bayes-hypotheses': { params: [common[1], ...groups.bayes] },
   'bayes-guessing': { params: [common[1], ...groups.guessing] },
   conditional: { params: conditionalParams, live: true },
+  'bayes-tree': { params: treeParams, live: true },
 };
 const viewOf = { 'bayes-events': 1, 'bayes-independence': 2, 'bayes-hypotheses': 3, 'bayes-guessing': 4 };
 
 export function run(params, { seed = 1, station = 'bayes' } = {}) {
+  if (station === 'bayes-tree') {
+    const q = Object.fromEntries(treeParams.map((d) => [d.key, Number.isFinite(params?.[d.key]) ? params[d.key] : d.default]));
+    if (!Number.isInteger(q.n) || q.n < 1) throw new Error('n must be a positive integer.');
+    return runTree(q, seed);
+  }
   if (station === 'conditional') {
     const q = Object.fromEntries(conditionalParams.map((d) => [d.key, Number.isFinite(params?.[d.key]) ? params[d.key] : d.default]));
     if (!Number.isInteger(q.n) || q.n < 1) throw new Error('n must be a positive integer.');

@@ -1751,3 +1751,83 @@ html:has(.orbital-lab) body {
   stroke-width: 0.6;
   opacity: 0.32;
 }
+
+/* #118: the living Bayes tree. */
+.bayes-tree {
+  margin: 4px 0 12px;
+}
+.bt-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-bottom: 6px;
+  font: 11px var(--mono);
+  color: #a8a8a8;
+}
+.bt-modes {
+  display: inline-flex;
+  gap: 4px;
+}
+.bayes-tree .bt-modes button {
+  padding: 4px 10px;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background: transparent;
+  color: #c8c8c8;
+  font: 12px var(--sans);
+  cursor: pointer;
+}
+.bayes-tree .bt-modes button[aria-checked='true'] {
+  border-color: var(--signal);
+  color: var(--ink);
+  background: rgba(232, 228, 133, 0.12);
+}
+.bayes-tree .bt-modes button:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+.bt-count {
+  color: var(--signal);
+}
+.bayes-tree svg {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+}
+.bt-edge {
+  fill: none;
+  stroke: #3c3c3c;
+  stroke-linecap: round;
+  opacity: 0.85;
+  transition: stroke-width 0.6s var(--ease), d 0.6s var(--ease);
+}
+.bt-edge[data-tone='a'] {
+  stroke: rgba(232, 228, 133, 0.55);
+}
+.bt-edge[data-tone='h'] {
+  stroke: rgba(159, 211, 199, 0.45);
+}
+.bt-node circle {
+  fill: #0d0d0d;
+  stroke: #6a6a6a;
+}
+.bt-node,
+.bt-label {
+  transition: transform 0.6s var(--ease);
+}
+.bt-particle {
+  fill: #8a8a8a;
+}
+.bt-particle[data-a] {
+  fill: var(--signal);
+}
+.bt-leaf-count {
+  fill: #a8a8a8;
+  font: 11px var(--mono);
+}
+.bayes-tree[data-reduced] .bt-edge,
+.bayes-tree[data-reduced] .bt-node,
+.bayes-tree[data-reduced] .bt-label {
+  transition: none;
+}

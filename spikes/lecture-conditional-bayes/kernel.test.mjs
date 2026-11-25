@@ -193,3 +193,40 @@ test('#117 simulated frequencies converge to the exact values within 4 SE; same 
     assert.equal(JSON.stringify(out), JSON.stringify(cond({ n: 20000 }, seed)));
   }
 });
+
+// #118: the living Bayes tree.
+import { TREE_PARTICLES } from './kernel.mjs';
+const tree = (q, seed = 1) => run({ q1: 0.5, q2: 0.3, q3: 0.2, l1: 0.2, l2: 0.5, l3: 0.9, n: 4000, ...q }, { seed, station: 'bayes-tree' });
+
+test('#118 branch widths are the exact probabilities; the inverse tree holds the Bayes posteriors', () => {
+  const t = tree({}).tree;
+  close(t.pA, 0.5 * 0.2 + 0.3 * 0.5 + 0.2 * 0.9, 1e-12);
+  t.joint.forEach((j, k) => close(j, t.priors[k] * t.lik[k], 1e-15));
+  close(t.post.reduce((m, v) => m + v, 0), 1, 1e-12);
+  posteriors(t.priors, t.lik).forEach((q, k) => close(t.post[k], q, 1e-12));
+  // Typed priors that do not add up to 1 are scaled, and the note says so.
+  const s = tree({ q1: 0.2, q2: 0.2, q3: 0.1 });
+  s.tree.priors.forEach((q, k) => close(q, [0.4, 0.4, 0.2][k], 1e-12));
+  assert.ok(s.notes[0].includes('scaled'));
+  const none = tree({ l1: 0, l2: 0, l3: 0 });
+  assert.equal(none.tree.post, null);
+  assert.ok(none.formula[1].includes('not defined'));
+  assert.throws(() => tree({ q1: 0, q2: 0, q3: 0 }), /positive/);
+});
+
+test('#118 particle shares match the exact branches within the fixture band; particles agree with the counts', () => {
+  for (const seed of SEEDS) {
+    const out = tree({ n: 20000 }, seed), r = byKey(out);
+    for (const key of ['pA', 'prior1', 'prior2', 'prior3', 'post1', 'post2', 'post3']) inBand(r[key]);
+    const t = out.tree;
+    assert.equal(t.H.reduce((m, v) => m + v, 0), t.n);
+    assert.equal(t.HA.reduce((m, v) => m + v, 0), t.A);
+    assert.equal(t.particles.length, TREE_PARTICLES);
+    // The drawn particles are the first ones counted: recount them independently.
+    const small = tree({ n: TREE_PARTICLES }, seed).tree;
+    assert.deepEqual(small.particles, t.particles);
+    small.H.forEach((h, k) => assert.equal(h, t.particles.filter(([i]) => i === k).length));
+    small.HA.forEach((h, k) => assert.equal(h, t.particles.filter(([i, a]) => i === k && a).length));
+    assert.equal(JSON.stringify(out), JSON.stringify(tree({ n: 20000 }, seed)));
+  }
+});
