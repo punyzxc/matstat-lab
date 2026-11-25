@@ -8,8 +8,9 @@ import { useKernelRunner, type Job } from './kernel-runner';
 import type { KernelStation as KernelStationInfo } from './catalog';
 import { Chart } from './chart';
 import { Surface3D } from './surface-3d';
-import { MathText, mathToPlain } from '../math';
-import { kernelText, locale, plural, t, useLang } from '../i18n';
+import { MathText, Tex, mathToPlain } from '../math';
+import { DecisionZones } from './decision-zones';
+import { kernelText, locale, plural, t, texDec, useLang } from '../i18n';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
 const sources = import.meta.glob('../../../*/kernel.mjs');
@@ -35,6 +36,8 @@ function localizeResult(kernel: string, r: KernelResult): KernelResult {
     notes: r.notes.map((n) => k(n)),
     axes: r.axes && { x: k(r.axes.x), y: k(r.axes.y) },
     surface: r.surface && { ...r.surface, title: k(r.surface.title), sampleLabel: k(r.surface.sampleLabel), labels: { x: k(r.surface.labels.x), y: k(r.surface.labels.y), z: k(r.surface.labels.z) } },
+    formula: r.formula?.map((line) => texDec(k(line))),
+    decisions: r.decisions,
   };
 }
 /** A readout cell: numbers formatted, text with `$…$` formulas typeset. */
@@ -120,7 +123,8 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
     if (!outcome.ok) return { error: outcome.error };
     const out = outcome.result as Partial<KernelResult> | null;
     if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series)) return { error: t('The kernel returned no readouts or series.', 'Ядро не вернуло ни показаний, ни графиков.') };
-    return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface };
+    return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface,
+      formula: Array.isArray(out.formula) ? out.formula.filter((l) => typeof l === 'string') : undefined, decisions: out.decisions };
   }, [outcome]);
   /** What is on screen: the same result with its texts in the current language. */
   const view = useMemo(() => (result && !('error' in result) ? localizeResult(station.kernel, result) : result), [result, station.kernel, lang]);
@@ -214,6 +218,11 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
           <p className="station-status" role="alert">{t('The kernel rejected these parameters: ', 'Ядро отклонило эти параметры: ')}{view.error}</p>
         ) : (
           <>
+            {view.formula && view.formula.length > 0 && (
+              <div className="live-formula" aria-label={t('Live formula', 'Живая формула')} role="group">
+                {view.formula.map((line, i) => <Tex key={i} tex={line} display />)}
+              </div>
+            )}
             {view.surface && <Surface3D surface={view.surface} />}
             {view.series.length > 0 && (
               <div className="chart-stage">
@@ -222,6 +231,10 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
               </div>
             )}
             {ridgeOn && <Ridge draws={past} axes={view.axes} />}
+            {view.decisions && outcome?.ok && (
+              <DecisionZones decisions={view.decisions} drawKey={outcome.job.seed}
+                experimentKey={declared.filter((d) => !['truth', 'view', 'R'].includes(d.key)).map((d) => `${d.key}=${outcome.job.params[d.key]}`).join('&')} />
+            )}
             <table className="readouts" aria-label={t('Readouts', 'Показания')}>
               <thead><tr><th scope="col">{t('Quantity', 'Величина')}</th><th scope="col">{t('Observed', 'Опыт')}</th><th scope="col">{t('Theory', 'Теория')}</th><th scope="col"><span className="sr-only">{t('Track', 'Следить')}</span></th></tr></thead>
               <tbody>

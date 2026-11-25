@@ -22,7 +22,26 @@ export type Surface = {
   /** Legend text for the `zSample` stems; defaults to the 2D-histogram wording. */
   sampleLabel?: string;
 };
-export type KernelResult = { readouts: Readout[]; series: Series[]; notes: string[]; axes?: { x?: string; y?: string }; surface?: Surface };
+/**
+ * Single experiments with a test decision (#137): `statistic[i]` and whether it was rejected, under the
+ * `truth` that generated them (0: $H_0$, 1: $H_1$), with the exact rates to compare the shares against.
+ */
+export type Decisions = {
+  truth: 0 | 1;
+  statistic: number[];
+  reject: boolean[];
+  theory: { alpha: number; beta: number | null; power: number | null };
+};
+export type KernelResult = {
+  readouts: Readout[];
+  series: Series[];
+  notes: string[];
+  axes?: { x?: string; y?: string };
+  surface?: Surface;
+  /** A live formula above the chart: display-style TeX lines that carry the current numbers (#136). */
+  formula?: string[];
+  decisions?: Decisions;
+};
 export type Kernel = {
   meta: KernelMeta;
   run: (params: Record<string, number>, options: { seed: number; station?: string }) => KernelResult;

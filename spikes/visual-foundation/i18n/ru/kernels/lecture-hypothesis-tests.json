@@ -133,5 +133,8 @@
  "power $1 - \\beta$": "мощность $1 - \\beta$",
  "Power surface $1 - \\beta(a, n)$: height $\\alpha = [[1]]$ at $a = a_0$, rising towards 1 as the truth moves into $H_1$": "Поверхность мощности $1 - \\beta(a, n)$: высота $\\alpha = [[1]]$ при $a = a_0$, рост к 1 по мере ухода истины в $H_1$",
  "Simulated rejection share ([[1]] tests per point)": "Смоделированная доля отвержений ([[1]] проверок на точку)",
- "true mean $a$ ($a_0 = [[1]]$, $\\sigma = [[2]]$)": "истинное среднее $a$ ($a_0 = [[1]]$, $\\sigma = [[2]]$)"
+ "true mean $a$ ($a_0 = [[1]]$, $\\sigma = [[2]]$)": "истинное среднее $a$ ($a_0 = [[1]]$, $\\sigma = [[2]]$)",
+ "Experiments in the decision zones (0 $H_0$ true, 1 $H_1$ true)": "Опыты в зонах решений (0 верна $H_0$, 1 верна $H_1$)",
+ "$1 - \\beta$: $H_1$ true, statistic in the critical region": "$1 - \\beta$: верна $H_1$, статистика в критической области",
+ "a = a_0 = [[1]]\\colon \\text{ no alternative, so no } \\beta \\text{ and no power}": "a = a_0 = [[1]]\\colon \\text{ альтернативы нет, поэтому нет ни } \\beta\\text{, ни мощности}"
 }

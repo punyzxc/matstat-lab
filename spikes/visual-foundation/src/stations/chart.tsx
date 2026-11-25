@@ -153,7 +153,7 @@ export function Chart({
         </g>
       </svg>
       <figcaption>
-        {series.filter((s) => s.label).map((s, si) => (
+        {series.filter((s, i) => s.label && series.findIndex((t) => t.label === s.label && t.kind === s.kind && t.tone === s.tone) === i).map((s, si) => (
           <span key={s.id + si} className={`chart-key chart-key--${s.kind} tone-${s.tone ?? 'default'}`}><i /><MathText text={s.label} /></span>
         ))}
       </figcaption>
