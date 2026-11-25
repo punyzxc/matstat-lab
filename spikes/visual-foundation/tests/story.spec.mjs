@@ -353,11 +353,14 @@ test('L4 darts: disjoint strips add up, overlapping ones count the overlap twice
   expect(await fits(page)).toBe(true);
 
   await page.goto('/#lecture/4/3');
+  await expect(page.getByTestId('story-beat')).toHaveText('Probability is area');
   await expect(page.locator('[data-step="3"]').getByTestId('live-formula').nth(1).locator('[data-v="pihat"][data-role="res"]')).toHaveText('3.125');
   await page.goto('/#lecture/4/4');
+  await expect(page.getByTestId('story-beat')).toHaveText("Buffon's needle");
   await expect(page.locator('[data-step="4"]').getByTestId('live-formula').nth(1).locator('[data-v="pihat"][data-role="res"]')).toHaveText('3.2112');
   await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/darts\?seed=404&view=3&N=4000&l=0\.8&d=1&lecture=4&step=4$/);
   await page.goto('/#lecture/4/5');
+  await expect(page.getByTestId('story-beat')).toHaveText("Bertrand's three chords");
   await expect(page.locator('[data-step="5"]').getByTestId('live-formula').nth(0).locator('[data-v="radius"][data-role="res"]')).toHaveText('0.501');
   expect(await fits(page)).toBe(true);
 });
