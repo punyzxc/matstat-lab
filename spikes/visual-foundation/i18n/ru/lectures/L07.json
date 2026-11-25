@@ -14,6 +14,7 @@
   "normal law": "нормальный закон",
   "Poisson law": "закон Пуассона",
   "$N = 10000$": "$N = 10\\,000$",
+  "Watch the running mean": "Посмотреть на бегущее среднее",
   "The axis of $n$ is logarithmic: the first ten draws take as much room as the next ninety. That is where the paths are wild; later they barely move.": "Ось $n$ логарифмическая: первые десять значений занимают столько же места, сколько следующие девяносто. Именно там пути мечутся; дальше они почти не двигаются.",
   "A corridor of many paths": "Коридор из многих путей",
   "Draw a corridor $a \\pm \\varepsilon$ and run two hundred paths. At each $n$ count the paths outside it. Chebyshev's inequality for the mean, whose variance is $\\sigma^2/n$, bounds that share by $\\sigma^2/(n\\varepsilon^2)$, and the bound falls to zero.": "Проведём коридор $a \\pm \\varepsilon$ и запустим двести путей. При каждом $n$ сосчитаем пути вне коридора. Неравенство Чебышёва для среднего, дисперсия которого $\\sigma^2/n$, ограничивает эту долю величиной $\\sigma^2/(n\\varepsilon^2)$, и граница стремится к нулю.",

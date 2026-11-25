@@ -100,6 +100,16 @@
           }
         }
       ],
+      "experiment": {
+        "station": "convergence",
+        "seed": 707,
+        "params": {
+          "dist": 1,
+          "n": 2048,
+          "scale": 1
+        },
+        "label": "Watch the running mean"
+      },
       "layers": {
         "intuition": "The axis of $n$ is logarithmic: the first ten draws take as much room as the next ninety. That is where the paths are wild; later they barely move."
       }
