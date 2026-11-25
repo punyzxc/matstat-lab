@@ -14,6 +14,7 @@ import { PlateCanvas } from './plate-canvas';
 import { earthPlate } from './globe';
 import { OrbitLinks } from './orbit-links';
 import { OrbitPreview } from './orbit-preview';
+import { int, t } from './i18n';
 import './observatory.css';
 import './orbital.css';
 import './stations/scene.css';
@@ -86,28 +87,28 @@ export function Observatory({
   return (
     <div className="atlas orbital-lab" data-dock={overlay ? 'open' : 'closed'}>
       <a className="skip" href="#stations" onClick={(e) => { e.preventDefault(); document.querySelector<HTMLElement>('.orbital-nodes a')?.focus(); }}>
-        Skip to stations
+        {t('Skip to stations', 'К станциям')}
       </a>
       <LabHeader orbit={orbit} />
       <main className="lab-spread">
         <header className="orbit-heading">
           <div>
             <div className="edition">
-              <i /> ORBIT {current.numeral} · {current.lectures.toUpperCase()}
+              <i /> {t('ORBIT', 'ОРБИТА')} {current.numeral} · {current.lectures.toUpperCase()}
             </div>
             <h1>
-              Orbital <em>laboratory</em>
+              {t('Orbital', 'Орбитальная')} <em>{t('laboratory', 'лаборатория')}</em>
               <span aria-hidden="true">.</span>
             </h1>
           </div>
           <p>
-            {current.name}. Open a station to run it.
-            <br /> Every run is seeded and reproducible.
+            {current.name}. {t('Open a station to run it.', 'Откройте станцию, чтобы запустить её.')}
+            <br /> {t('Every run is seeded and reproducible.', 'Каждый прогон задан зерном и воспроизводим.')}
           </p>
         </header>
         <section id="stations" aria-labelledby="index-title" className="orbital-instruments">
           <h2 id="index-title" tabIndex={-1} className="orbit-sr">
-            {current.name} stations
+            {t(`${current.name} stations`, `Станции орбиты «${current.name}»`)}
           </h2>
           <div ref={field} className="orbital-field" data-playing={animating}>
             <div className="orbital-engine">
@@ -130,28 +131,28 @@ export function Observatory({
               <div className="orbital-disc">
                 <PlateCanvas
                   create={earthPlate}
-                  label="Earth point cloud with simulated orbital links and ASCII satellites"
+                  label={t('Earth point cloud with simulated orbital links and ASCII satellites', 'Облако точек Земли со смоделированными орбитальными связями и ASCII-спутниками')}
                   playing={animating}
                   mesh={mesh}
                   cue={0}
                 />
               </div>
               <div className="orbital-legend">
-                <i /> EARTH <span>·</span> DATA CORE
+                <i /> {t('EARTH', 'ЗЕМЛЯ')} <span>·</span> {t('DATA CORE', 'ЯДРО ДАННЫХ')}
               </div>
-              <div className="orbital-controls" role="group" aria-label="Globe controls">
+              <div className="orbital-controls" role="group" aria-label={t('Globe controls', 'Управление глобусом')}>
                 <button
                   aria-pressed={mesh}
-                  aria-label="Wireframe"
-                  title="Toggle wireframe"
+                  aria-label={t('Wireframe', 'Каркас')}
+                  title={t('Toggle wireframe', 'Показать каркас')}
                   onClick={() => setMesh((v) => !v)}
                 >
                   <Grid2X2 size={14} aria-hidden="true" />
                 </button>
                 <button
                   disabled={reduced}
-                  aria-label={reduced ? 'Reduced motion enabled' : playing ? 'Pause motion' : 'Resume motion'}
-                  title={reduced ? 'Reduced motion enabled' : playing ? 'Pause motion' : 'Resume motion'}
+                  aria-label={reduced ? t('Reduced motion enabled', 'Включено уменьшение движения') : playing ? t('Pause motion', 'Остановить движение') : t('Resume motion', 'Продолжить движение')}
+                  title={reduced ? t('Reduced motion enabled', 'Включено уменьшение движения') : playing ? t('Pause motion', 'Остановить движение') : t('Resume motion', 'Продолжить движение')}
                   onClick={() => setPaused((v) => !v)}
                 >
                   {playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
@@ -159,7 +160,7 @@ export function Observatory({
               </div>
             </div>
             <OrbitLinks key={orbit} field={field} active={active} playing={animating && !overlay} />
-            <nav className="orbital-nodes" aria-label={`${current.name} stations`} inert={overlay ? true : undefined}>
+            <nav className="orbital-nodes" aria-label={t(`${current.name} stations`, `Станции орбиты «${current.name}»`)} inert={overlay ? true : undefined}>
               {orbitStations.map((station, index) => {
                 const legacy = station.kind === 'legacy' ? modules.find((m) => m.id === station.module)! : null;
                 return (
@@ -195,11 +196,11 @@ export function Observatory({
           <div className="orbit-console">
             <div className="orbit-source">
               <i aria-hidden="true" />
-              <span>ACTIVE SAMPLE</span>
-              <strong>n = {settings.count.toLocaleString('en-US')}</strong>
+              <span>{t('ACTIVE SAMPLE', 'АКТИВНАЯ ВЫБОРКА')}</span>
+              <strong>n = {int(settings.count)}</strong>
             </div>
             <div className="orbit-model">
-              <label htmlFor="atlas-model">Model</label>
+              <label htmlFor="atlas-model">{t('Model', 'Модель')}</label>
               <span>
                 <select
                   id="atlas-model"
@@ -219,13 +220,13 @@ export function Observatory({
               </span>
             </div>
             <div className="session-source">
-              SEED <b>{settings.seed}</b>
+              {t('SEED', 'ЗЕРНО')} <b>{settings.seed}</b>
             </div>
             <button
               className="resample"
               onClick={() => onSample({ ...settings, seed: (settings.seed + 1) >>> 0 })}
             >
-              <RotateCw size={13} aria-hidden="true" /> Resample
+              <RotateCw size={13} aria-hidden="true" /> {t('Resample', 'Новая выборка')}
             </button>
             <div className="orbit-formula" aria-hidden="true">
               <Tex tex={String.raw`\bar{x}_n = \frac{1}{n}\sum_{i=1}^{n} x_i`} /> <span className="orbit-formula-dots">·· / ···</span>
@@ -247,18 +248,18 @@ export function SampleRecord({ settings }: { settings: RunSettings }) {
   return (
     <div className="record orbital-record">
       <p className="session-source">
-        {sources[settings.distribution].label} · seed {settings.seed}
+        {sources[settings.distribution].label} · {t('seed', 'зерно')} {settings.seed}
       </p>
       <div className="record-figure">
-        <FigureCaption number="A">Draw sequence</FigureCaption>
+        <FigureCaption number="A">{t('Draw sequence', 'Последовательность значений')}</FigureCaption>
         <Trace sample={sample.slice(0, 48)} animate={playing} />
       </div>
       <div className="record-figure">
-        <FigureCaption number="B">Frequency / ASCII</FigureCaption>
+        <FigureCaption number="B">{t('Frequency / ASCII', 'Частоты / ASCII')}</FigureCaption>
         <Matrix sample={sample} settings={settings} />
       </div>
       <div className="record-figure">
-        <FigureCaption number="C">Geometric study · Trefoil</FigureCaption>
+        <FigureCaption number="C">{t('Geometric study · Trefoil', 'Геометрический этюд · трилистник')}</FigureCaption>
         <SpecimenView settings={settings} sample={sample} playing={playing} reduced={reduced} toggle={() => setPaused((v) => !v)} />
       </div>
     </div>

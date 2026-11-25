@@ -5,6 +5,7 @@ import { Button } from '../ui';
 import type { Surface } from './kernel-contract';
 import { clamp, lerpArray, lerpGrid, niceTicks, project, quadsByDepth, unit } from './surface-math.mjs';
 import { useTween } from './use-tween';
+import { locale, t } from '../i18n';
 
 const W = 680, H = 340;
 const VIEWPORT = { cx: 340, cy: 180, scale: 112 };
@@ -29,7 +30,7 @@ function mixSurface(a: Surface, b: Surface, t: number): Surface | null {
 
 const fmt = (v: number, step: number) => {
   const digits = Math.max(0, Math.min(4, -Math.floor(Math.log10(step) + 1e-9)));
-  return v.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }).replace('-', '−');
+  return v.toLocaleString(locale(), { minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: false }).replace('-', '−');
 };
 const stepOf = (t: number[]) => (t.length > 1 ? t[1] - t[0] : 1);
 const finiteMin = (a: number[]) => a.reduce((m, v) => (Number.isFinite(v) && v < m ? v : m), Infinity);
@@ -121,16 +122,19 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
     rotate(m[0], m[1]);
   };
 
-  const title = surface.title ?? `Joint density of ${labels.x} and ${labels.y}`;
-  const aria =
+  const title = surface.title ?? t(`Joint density of ${labels.x} and ${labels.y}`, `Совместная плотность ${labels.x} и ${labels.y}`);
+  const aria = t(
     `${mathToPlain(title)}: 3D surface of the theoretical density ${mathToPlain(labels.z)} over ${mathToPlain(labels.x)} and ${mathToPlain(labels.y)}` +
-    `${zSample ? ', with the sample density drawn as stems' : ''}.`;
+    `${zSample ? ', with the sample density drawn as stems' : ''}.`,
+    `${mathToPlain(title)}: трёхмерная поверхность теоретической плотности ${mathToPlain(labels.z)} над ${mathToPlain(labels.x)} и ${mathToPlain(labels.y)}` +
+    `${zSample ? ', выборочная плотность показана столбиками' : ''}.`,
+  );
 
   return (
     <figure className="surface">
       <div className="surface-bar">
         <span className="surface-heading"><MathText text={title} /></span>
-        <Button variant="ghost" onClick={() => setView(DEFAULT_VIEW)}><RotateCcw size={14} aria-hidden /> Reset view</Button>
+        <Button variant="ghost" onClick={() => setView(DEFAULT_VIEW)}><RotateCcw size={14} aria-hidden /> {t('Reset view', 'Сбросить вид')}</Button>
       </div>
       <svg
         className="surface-svg" viewBox={`0 0 ${W} ${H}`} role="img" tabIndex={0} aria-label={aria} aria-describedby={hintId}
@@ -177,9 +181,9 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
         </g>
       </svg>
       <figcaption>
-        <span className="chart-key chart-key--line tone-signal"><i /><MathText text={keyLabel ?? `Theory ${labels.z}`} /></span>
-        {zSample && <span className="surface-key-sample"><i />Sample density (2D histogram)</span>}
-        <span id={hintId} className="surface-hint">Drag or use arrow keys to rotate.</span>
+        <span className="chart-key chart-key--line tone-signal"><i /><MathText text={keyLabel ?? t(`Theory ${labels.z}`, `Теория ${labels.z}`)} /></span>
+        {zSample && <span className="surface-key-sample"><i />{t('Sample density (2D histogram)', 'Выборочная плотность (двумерная гистограмма)')}</span>}
+        <span id={hintId} className="surface-hint">{t('Drag or use arrow keys to rotate.', 'Поворачивайте перетаскиванием или стрелками.')}</span>
       </figcaption>
     </figure>
   );

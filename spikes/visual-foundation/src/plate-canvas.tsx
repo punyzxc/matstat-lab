@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { t } from './i18n';
 
 export type Frame = {
   width: number;
@@ -160,14 +161,19 @@ export function PlateCanvas({
       engine.dispose?.();
       canvas.remove();
     };
-  }, [create, fallback, label]);
+    // The label only names the canvas; a language switch relabels it below instead of rebuilding the scene.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [create, fallback]);
+  useEffect(() => {
+    host.current?.querySelector('canvas')?.setAttribute('aria-label', label);
+  }, [label]);
   return (
     <div
       className="plate-canvas"
       ref={host}
       tabIndex={0}
       role="group"
-      aria-label="Rotate specimen with left and right arrow keys or by dragging horizontally"
+      aria-label={t('Rotate specimen with left and right arrow keys or by dragging horizontally', 'Поворачивайте фигуру стрелками влево и вправо или перетаскиванием по горизонтали')}
     />
   );
 }

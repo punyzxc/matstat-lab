@@ -3,6 +3,7 @@ import { MathText, SvgMathText, mathToPlain } from '../math';
 import type { Series } from './kernel-contract';
 import { lerp, lerpArray } from './surface-math.mjs';
 import { useTween } from './use-tween';
+import { locale, t } from '../i18n-core';
 
 /** "Nice" tick values (1, 2, 2.5, 5 × 10ᵏ) covering [lo, hi]. */
 export function ticks(lo: number, hi: number, target = 5) {
@@ -17,7 +18,7 @@ export function ticks(lo: number, hi: number, target = 5) {
 }
 const tickText = (v: number, step: number) => {
   const digits = Math.max(0, Math.min(6, -Math.floor(Math.log10(step) + 1e-9)));
-  return v.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }).replace('-', '−');
+  return v.toLocaleString(locale(), { minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: locale() === 'en-US' }).replace('-', '−');
 };
 
 /**
@@ -83,7 +84,7 @@ export function Chart({
   const shown = useTween(target, mixFrame);
   const W = 680, H = height, L = 52, R = 14, T = yLabel ? 24 : 12, B = xLabel ? 42 : 28;
   const finite = (v: number) => Number.isFinite(v);
-  if (!shown.ext) return <p className="chart-empty">No data to plot yet.</p>;
+  if (!shown.ext) return <p className="chart-empty">{t('No data to plot yet.', 'Данных для графика пока нет.')}</p>;
   const [x0, x1, y0, y1] = shown.ext;
   series = shown.series;
   const xt = ticks(x0, x1, 6), yt = ticks(y0, y1, 4);
@@ -104,7 +105,7 @@ export function Chart({
   const label = series.map((s) => mathToPlain(s.label ?? s.id)).join(', ');
   return (
     <figure className="chart">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${label}${xLabel ? ` against ${mathToPlain(xLabel)}` : ''}`}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${label}${xLabel ? t(` against ${mathToPlain(xLabel)}`, ` по оси ${mathToPlain(xLabel)}`) : ''}`}>
         <defs>
           <clipPath id={clip}>
             <rect x={L} y={T} width={W - L - R} height={H - T - B} />

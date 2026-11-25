@@ -151,7 +151,11 @@
 .lecture-experiment:focus-visible {
   filter: brightness(1.08);
 }
-.lecture-experiment span {
+/* The label may hold a formula ($1/k^2$): it keeps the button's colour and size. */
+.lecture-experiment-label {
+  font-weight: inherit;
+}
+.lecture-experiment-meta {
   font: 10px var(--mono);
   opacity: 0.72;
 }

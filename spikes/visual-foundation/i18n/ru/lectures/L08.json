@@ -1,0 +1,7 @@
+{
+  "The central limit theorem": "Центральная предельная теорема",
+  "Standardised sums": "Стандартизованные суммы",
+  "A sum of many independent draws, centred and scaled, is close to the standard normal law.": "Сумма большого числа независимых слагаемых после центрирования и нормирования близка к стандартному нормальному закону.",
+  "Lyapunov condition": "Условие Ляпунова",
+  "Different laws can be added as long as no single term dominates the sum.": "Можно складывать величины с разными законами, пока ни одно слагаемое не доминирует в сумме."
+}

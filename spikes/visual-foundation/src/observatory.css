@@ -1,4 +1,8 @@
 @import '@fontsource/instrument-serif/latin-400-italic.css';
+/* Cyrillic (the lab speaks Russian): Onest beside Space Grotesk, Cormorant Garamond italic beside Instrument Serif.
+   They only supply the letters the first font lacks, so the Latin look is unchanged. */
+@import '@fontsource-variable/onest/index.css';
+@import '@fontsource/cormorant-garamond/cyrillic-500-italic.css';
 
 :root {
   --black: #080808;
@@ -10,8 +14,8 @@
   --surface: #101010;
   --signal: #e8e485;
   --mono: 'IBM Plex Mono', monospace;
-  --sans: 'Space Grotesk Variable', sans-serif;
-  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Space Grotesk Variable', 'Onest Variable', sans-serif;
+  --serif: 'Instrument Serif', 'Cormorant Garamond', Georgia, serif;
   --gutter: clamp(20px, 4.2vw, 84px);
   --measure: 1700px;
   --quick: 160ms;
