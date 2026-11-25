@@ -47,9 +47,9 @@ export function lectureFormula(n: number, tex: string) {
   return texDec(lectureText(n, tex));
 }
 
-const scientists = ruScientists as Record<string, { name?: string; contribution?: string; years?: string }>;
+const scientists = ruScientists as Record<string, { name?: string; contribution?: string; years?: string; more?: string }>;
 /** A scientist's name or contribution in the current language. */
-export function scientistText(slug: string, field: 'name' | 'contribution' | 'years', en: string) {
+export function scientistText(slug: string, field: 'name' | 'contribution' | 'years' | 'more', en: string) {
   if (getLang() === 'en') return en;
   return decimalComma(scientists[slug]?.[field] || en);
 }

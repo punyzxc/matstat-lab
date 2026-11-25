@@ -36,6 +36,8 @@ export const STORY_TEXT = {
   get workedExample() { return t('Worked example', 'Разобранный пример'); },
   get notes() { return t('Teacher notes.', 'Заметки преподавателя.'); },
   get openExperiment() { return t('Open experiment', 'Открыть эксперимент'); },
+  get more() { return t('More', 'Подробнее'); },
+  get less() { return t('Less', 'Свернуть'); },
   get portals() { return t('Related', 'Связано'); },
   get portal() { return t('Portal', 'Портал'); },
   get lecture() { return t('Lecture', 'Лекция'); },

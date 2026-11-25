@@ -229,3 +229,22 @@ test('portals: every portal target exists, opens a story step with a figure, and
   assert.match(withPortals([{ lecture: 11 }]).join(), /needs a lecture and a step/);
   assert.match(validateLecture({ ...base, story: false, steps: [{ title: 'S', idea: 'I', portals: [{ lecture: 11, step: 1 }] }] }, known).join(), /need "story": true/);
 });
+
+// ---------------------------------------------------------------- #134 scientist cards
+test('scientist cards: every card a story step shows is in the roster, lists that lecture, and its longer text is valid', () => {
+  const roster = read('lectures/scientists.json').scientists;
+  let cards = 0;
+  for (const s of stories)
+    s.steps.forEach((step, i) => {
+      for (const slug of step.scientists ?? []) {
+        cards++;
+        const p = roster.find((x) => x.slug === slug);
+        assert.ok(p, `L${s.lecture} step ${i + 1}: ${slug} is in scientists.json`);
+        assert.ok(p.lectures.includes(s.lecture), `L${s.lecture} step ${i + 1}: ${slug} lists lecture ${s.lecture}`);
+        assert.ok(p.more, `L${s.lecture} step ${i + 1}: ${slug} has the longer card text`);
+      }
+    });
+  assert.ok(cards >= 3);
+  for (const p of roster.filter((x) => x.more))
+    for (const part of splitMath(p.more)) if (part.math) assert.doesNotThrow(() => katex.renderToString(part.value, { throwOnError: true }), `${p.slug}: ${part.value}`);
+});

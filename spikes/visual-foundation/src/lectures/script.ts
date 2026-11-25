@@ -53,7 +53,7 @@ export type Lecture = {
   story?: boolean;
   steps: Step[];
 };
-export type Scientist = { slug: string; name: string; years: string; lectures: number[]; contribution: string };
+export type Scientist = { slug: string; name: string; years: string; lectures: number[]; contribution: string; more?: string };
 
 const isText = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
 const SLUG = /^[a-z][a-z0-9-]*$/;
@@ -206,6 +206,7 @@ export function validateRoster(value: unknown): string[] {
     if (!isText(s.name)) errors.push(`${s.slug}: name is required`);
     if (!isText(s.years)) errors.push(`${s.slug}: years are required`);
     if (!isText(s.contribution)) errors.push(`${s.slug}: contribution is required`);
+    if (s.more != null && !isText(s.more)) errors.push(`${s.slug}: more must be text`);
     if (!Array.isArray(s.lectures) || !s.lectures.length || !s.lectures.every((n) => Number.isInteger(n) && n >= 1 && n <= 12))
       errors.push(`${s.slug}: lectures must list numbers from 1 to 12`);
   });

@@ -40,7 +40,8 @@
         8,
         11
       ],
-      "contribution": "Bernoulli scheme and the first law of large numbers."
+      "contribution": "Bernoulli scheme and the first law of large numbers.",
+      "more": "His book Ars Conjectandi, published in 1713 after his death, proved that the relative frequency of an event converges to its probability. He called it his golden theorem; it took him about twenty years."
     },
     {
       "slug": "de-moivre",
@@ -139,7 +140,8 @@
         9,
         11
       ],
-      "contribution": "Chebyshev inequality and law of large numbers."
+      "contribution": "Chebyshev inequality and law of large numbers.",
+      "more": "In 1867 he proved the inequality $P(|X - MX| \\ge \\varepsilon) \\le DX/\\varepsilon^2$ and with it the law of large numbers for independent variables with bounded variances. He founded the St Petersburg school of probability; Markov and Lyapunov were his students."
     },
     {
       "slug": "markov",
@@ -149,7 +151,8 @@
         1,
         7
       ],
-      "contribution": "Markov inequality and his form of the law of large numbers."
+      "contribution": "Markov inequality and his form of the law of large numbers.",
+      "more": "A student of Chebyshev. He extended the law of large numbers to dependent variables and, doing so, invented the chains that bear his name. His inequality $P(X \\ge a) \\le MX/a$ holds for any nonnegative $X$."
     },
     {
       "slug": "lyapunov",
@@ -160,7 +163,8 @@
         8,
         9
       ],
-      "contribution": "Central limit theorem under the Lyapunov condition."
+      "contribution": "Central limit theorem under the Lyapunov condition.",
+      "more": "In 1901 he proved the central limit theorem for independent terms with different laws, using characteristic functions. His condition asks the third absolute moments to grow slower than the variance, so that no single term dominates the sum."
     },
     {
       "slug": "khinchin",
@@ -170,7 +174,8 @@
         1,
         7
       ],
-      "contribution": "Law of large numbers without finite variance."
+      "contribution": "Law of large numbers without finite variance.",
+      "more": "In 1929 he showed that for independent identically distributed terms the law of large numbers needs only a finite mean, not a finite variance. With Kolmogorov he built the Moscow school of probability."
     },
     {
       "slug": "kolmogorov",
@@ -183,7 +188,8 @@
         11,
         12
       ],
-      "contribution": "Axioms of probability and the goodness-of-fit test."
+      "contribution": "Axioms of probability and the goodness-of-fit test.",
+      "more": "His 1933 book gave probability its axioms through measure theory. The same year he found the limit law of $\\sqrt{n}\\,\\sup_x |F_n(x) - F(x)|$, the basis of the Kolmogorov goodness-of-fit test."
     },
     {
       "slug": "lindeberg",
@@ -192,7 +198,8 @@
       "lectures": [
         8
       ],
-      "contribution": "Central limit theorem for i.i.d. sums (with Lévy)."
+      "contribution": "Central limit theorem for i.i.d. sums (with Lévy).",
+      "more": "In 1922 he proved the central limit theorem under a condition on the tails of the terms that now bears his name. For identically distributed terms the condition always holds, so the theorem needs nothing beyond $\\sigma^2 < \\infty$."
     },
     {
       "slug": "levy",
@@ -201,7 +208,8 @@
       "lectures": [
         8
       ],
-      "contribution": "Central limit theorem for i.i.d. sums (with Lindeberg)."
+      "contribution": "Central limit theorem for i.i.d. sums (with Lindeberg).",
+      "more": "He studied sums of independent variables through characteristic functions and found every law that can appear as their limit: the stable laws. His continuity theorem is the standard tool for proving limit theorems."
     },
     {
       "slug": "cauchy",
@@ -222,7 +230,8 @@
         10,
         12
       ],
-      "contribution": "The $\\chi^2$ goodness-of-fit test; long coin-toss runs."
+      "contribution": "The $\\chi^2$ goodness-of-fit test; long coin-toss runs.",
+      "more": "In 1900 he introduced the statistic $\\chi^2 = \\sum \\dfrac{(n_i - np_i)^2}{np_i}$ and its limit law: the first general goodness-of-fit test. He also founded the journal Biometrika and, in London, the first university department of statistics."
     },
     {
       "slug": "glivenko",
@@ -231,7 +240,8 @@
       "lectures": [
         10
       ],
-      "contribution": "The empirical distribution function converges to the true one."
+      "contribution": "The empirical distribution function converges to the true one.",
+      "more": "In 1933 he proved that the empirical distribution function converges to the true one uniformly, with probability one. Generalised by Cantelli, the result is often called the fundamental theorem of mathematical statistics."
     },
     {
       "slug": "gosset",
@@ -242,7 +252,8 @@
         11,
         12
       ],
-      "contribution": "The t distribution for small samples."
+      "contribution": "The t distribution for small samples.",
+      "more": "A chemist at the Guinness brewery in Dublin, he worked with very small samples of barley and malt. In 1908 he published the law of $\\dfrac{\\bar{x} - a}{s/\\sqrt{n}}$ under the pen name Student, because the brewery did not let its staff publish."
     },
     {
       "slug": "fisher",
@@ -251,7 +262,8 @@
       "lectures": [
         12
       ],
-      "contribution": "The F distribution for comparing variances (with Snedecor)."
+      "contribution": "The F distribution for comparing variances (with Snedecor).",
+      "more": "He built much of modern statistics: maximum likelihood, the analysis of variance and the design of experiments. The F law for the ratio of two sample variances is named after him; Snedecor tabulated it."
     },
     {
       "slug": "snedecor",

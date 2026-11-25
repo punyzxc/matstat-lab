@@ -803,3 +803,102 @@ html[data-present] .story {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------- scientist cards (#134) */
+.scientist-cards {
+  position: absolute;
+  top: 64px;
+  right: 14px;
+  z-index: 3;
+  display: grid;
+  gap: 6px;
+  width: min(330px, 42%);
+  pointer-events: none;
+  animation: card-in 420ms var(--ease) both;
+}
+.scientist-cards.is-leaving {
+  animation: card-out 260ms var(--ease) both;
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes card-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.scientist-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 10px 8px 8px;
+  background: rgb(10 10 10 / 0.94);
+  backdrop-filter: blur(6px);
+  border: 1px solid #333;
+  border-left: 2px solid var(--signal);
+  pointer-events: auto;
+}
+.scientist-card .portrait {
+  --cell: 3px;
+}
+.scientist-card .portrait figcaption {
+  display: none;
+}
+.scientist-card .portrait-placeholder small {
+  display: none;
+}
+.scientist-card .portrait-placeholder span {
+  font-size: 13px;
+}
+.scientist-card-text p {
+  margin: 0;
+}
+.scientist-card-name {
+  font: 13px/1.25 var(--sans);
+}
+.scientist-card-name span {
+  white-space: nowrap;
+  color: var(--grey);
+  font: 10px var(--mono);
+  margin-left: 4px;
+}
+.scientist-card-line {
+  margin-top: 3px !important;
+  color: #c9c9c5;
+  font: 12px/1.35 var(--sans);
+}
+.scientist-card-more {
+  margin-top: 6px !important;
+  color: #b4b4b0;
+  font: 12px/1.45 var(--sans);
+  animation: card-in 300ms var(--ease) both;
+}
+.scientist-card .scientist-card-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--signal);
+  font: 10px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.scientist-card-toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .scientist-cards,
+  .scientist-cards.is-leaving,
+  .scientist-card-more {
+    animation: none;
+  }
+}
