@@ -44,6 +44,19 @@
           "view": 1
         }
       }
+    },
+    {
+      "title": "Homogeneity of two series",
+      "idea": "Two series of trials give frequencies $m_1/n_1$ and $m_2/n_2$. Are they samples of one probability $p$? Pool them and compare the difference with its standard error.",
+      "formula": [
+        "z = \\dfrac{\\dfrac{m_1}{n_1} - \\dfrac{m_2}{n_2}}{\\sqrt{\\hat{p}\\,(1 - \\hat{p})\\left(\\dfrac{1}{n_1} + \\dfrac{1}{n_2}\\right)}}, \\qquad \\hat{p} = \\dfrac{m_1 + m_2}{n_1 + n_2}",
+        "\\text{reject homogeneity when}\\quad |z| > z_{1-\\alpha/2}"
+      ],
+      "experiment": {
+        "station": "homogeneity",
+        "seed": 139,
+        "label": "Run the two-series test"
+      }
     }
   ],
   "status": "draft"

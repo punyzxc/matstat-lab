@@ -39,7 +39,7 @@ const pathOf = (pts: { x: number; y: number }[]) => pts.map((p, i) => `${i ? 'L'
 type Item = { points: number[][]; bias?: number; kind: 'quad' | 'stem'; h: number };
 
 /** A rotatable SVG joint-density surface: theory as shaded quads, sample density as stems. */
-export function Surface3D({ surface }: { surface: Surface }) {
+export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: string }) {
   const shown = useTween(surface, mixSurface);
   const [view, setView] = useState(DEFAULT_VIEW);
   const drag = useRef<{ id: number; x: number; y: number } | null>(null);
@@ -177,7 +177,7 @@ export function Surface3D({ surface }: { surface: Surface }) {
         </g>
       </svg>
       <figcaption>
-        <span className="chart-key chart-key--line tone-signal"><i />Theory <MathText text={labels.z} /></span>
+        <span className="chart-key chart-key--line tone-signal"><i /><MathText text={keyLabel ?? `Theory ${labels.z}`} /></span>
         {zSample && <span className="surface-key-sample"><i />Sample density (2D histogram)</span>}
         <span id={hintId} className="surface-hint">Drag or use arrow keys to rotate.</span>
       </figcaption>

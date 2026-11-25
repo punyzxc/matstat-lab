@@ -48,3 +48,16 @@
   font-size: 1.45em;
   color: #c9c9c9;
 }
+/* Radicals and stretchy delimiters are inline SVG: keep chart/scene SVG styles (fill: none, strokes) off them. */
+.tex .katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: inherit;
+  max-width: none;
+}
+.tex .katex svg,
+.tex .katex svg path {
+  fill: currentColor;
+  stroke: none;
+}
