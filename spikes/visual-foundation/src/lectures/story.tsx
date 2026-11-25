@@ -138,7 +138,7 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
     setMode(mode === 'demo' ? 'explore' : 'demo');
   };
   const target = spec?.station(params, ref.beat) ?? null;
-  const stationHref = target && findStation(target.station) ? stationHash(target.station, spec!.seed, target.params, { n: lecture.lecture, step: active, present }) : null;
+  const stationHref = target && findStation(target.station) ? stationHash(target.station, spec!.seed, target.params, { n: lecture.lecture, step: active, present }, target.texts) : null;
   const openStation = (e: MouseEvent<HTMLAnchorElement>) => {
     // Grow the figure into the station: a view transition where the browser has one.
     const doc = document as Document & { startViewTransition?: (cb: () => Promise<void>) => unknown };

@@ -121,9 +121,11 @@
       "name": "Georges-Louis Leclerc de Buffon",
       "years": "1707–1788",
       "lectures": [
-        1
+        1,
+        4
       ],
-      "contribution": "Coin-toss runs and the needle problem."
+      "contribution": "Coin-toss runs and the needle problem.",
+      "more": "Naturalist and director of the King's Garden in Paris. In 1777 he posed the needle problem, the first question of geometric probability, and solved it: a needle of length $l$ crosses one of the lines $d$ apart with probability $2l/(\\pi d)$."
     },
     {
       "slug": "bertrand",
@@ -133,7 +135,8 @@
         1,
         4
       ],
-      "contribution": "The chord paradox: 'random' needs a stated scheme."
+      "contribution": "The chord paradox: 'random' needs a stated scheme.",
+      "more": "In his Calculus of probabilities (1889) he asked for the chance that a random chord is longer than the side of the inscribed triangle and showed three answers. The paradox taught that a geometric probability must name the law by which the point is thrown."
     },
     {
       "slug": "bernstein",

@@ -17,6 +17,8 @@ import { corridor, exactTail, kBound, tailDraws, tailShare } from '../src/lectur
 import { run as runLimits } from '../../lecture-limit-theorems/kernel.mjs';
 import { beamThrows, irwinHallPdf, lawDraws, overlap, sumsOf, throwStats, within } from '../src/lectures/figures/moment-model.mjs';
 import { run as runMoments } from '../../lecture-random-vectors/kernel.mjs';
+import { additive, chords, crossings, darts, longShare, needles, piPath, quarter, unionText } from '../src/lectures/figures/geo-model.mjs';
+import { run as runDarts } from '../../lecture-geometric-probability/kernel.mjs';
 import { courtCases, errorsOf, powerCurve, regionOf, rejects } from '../src/lectures/figures/test-model.mjs';
 import { validateLecture } from '../src/lectures/script.ts';
 import { ksBand, LAWS, standardizedSums } from '../../lecture-limit-theorems/kernel.mjs';
@@ -74,7 +76,7 @@ test('typed values snap to the parameter range and step; text that is not a numb
 // ---------------------------------------------------------------- story scripts
 test('the flagship lectures are stories; every story script checks against the figure specs', () => {
   const ids = stories.map((s) => s.lecture);
-  for (const n of [6, 7, 8, 10, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
+  for (const n of [4, 6, 7, 8, 10, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
   const lectureSteps = Object.fromEntries(scripts.map((s) => [s.lecture, s.steps.length]));
   for (const s of scripts) assert.deepEqual(validateLecture(s, { stations, scientists: slugs, figures: FIGURES, liveKeys: liveTexKeys, lectureSteps }), [], `L${s.lecture}`);
 });
@@ -332,6 +334,36 @@ test('corridor: Chebyshev bounds hold and fall; Cauchy has no bound and its shar
   assert.deepEqual(corridor({ law: 2, N: 2000, M: 20, eps: 0.2, seed: 707 }), corridor({ law: 2, N: 2000, M: 20, eps: 0.2, seed: 707 }));
   assert.deepEqual(FIGURES['lln-corridor'].station({ law: 0, k: 2, N: 2000, M: 200, eps: 0.2 }, 'tail'), { station: 'lln', params: { law: 0, N: 2000, k: 2, view: 1 } });
   assert.deepEqual(FIGURES['lln-corridor'].station({ law: 2, k: 2, N: 2000, M: 200, eps: 0.2 }, 'paths'), { station: 'lln', params: { law: 2, N: 2000, view: 2, M: 200, eps: 0.2 } });
+});
+
+// ---------------------------------------------------------------- L4 darts on a board
+test('darts on a board: the strips, the quarter disc, the needles and the chords are the Darts station\'s own', () => {
+  const ob = (r, key) => r.readouts.find((x) => x.key === key).observed;
+  const r6 = (v) => Number(v.toPrecision(6));
+  for (const N of [500, 4000]) {
+    for (const [a, b] of [[0.3, 0.4], [0.3, 0.85], [0.5, 0.5]]) {
+      const ad = additive(darts(404, N, 1), a, b);
+      assert.equal(r6(ad.mU / N), ob(runDarts({ view: 4, N, region: unionText(a, b) }, { seed: 404 }), 'share'), `a ${a}, b ${b}`);
+      assert.equal(ad.mU, ad.mA + ad.mB - ad.mAB, 'the addition rule holds dart by dart');
+      if (a + b <= 1) assert.equal(ad.mAB, 0, 'disjoint strips share no dart');
+    }
+    const q = quarter(darts(404, N, 0));
+    assert.equal(r6(q.share), ob(runDarts({ view: 1, N }, { seed: 404 }), 'freq'));
+    assert.equal(r6(q.pi), ob(runDarts({ view: 1, N }, { seed: 404 }), 'pi'));
+    assert.equal(piPath(darts(404, N, 0), N).at(-1)[1], q.pi);
+    for (const [l, d] of [[0.8, 1], [1, 1], [0.5, 2]]) {
+      const c = crossings(needles(404, N, l, d)), st = runDarts({ view: 3, N, l, d }, { seed: 404 });
+      assert.equal(r6(c.share), ob(st, 'cross'), `l ${l}, d ${d}`);
+      assert.equal(r6(c.pi), ob(st, 'pi'));
+    }
+    const ch = chords(404, N), st = runDarts({ view: 2, N }, { seed: 404 });
+    for (const c of ch) assert.equal(r6(longShare(c)), ob(st, c.id), c.id);
+  }
+  const spec = FIGURES['geo-darts'], d = figureParams('geo-darts');
+  assert.deepEqual(spec.station(d, 'additive'), { station: 'darts', params: { view: 4, N: 4000 }, texts: { region: unionText(0.3, 0.4) } });
+  assert.deepEqual(spec.station({ ...d, b: 0.85 }, 'additive').texts, { region: unionText(0.3, 0.85) });
+  assert.deepEqual(spec.station(d, 'needle'), { station: 'darts', params: { view: 3, N: 4000, l: 0.8, d: 1 } });
+  assert.deepEqual(spec.station(d, 'chords'), { station: 'darts', params: { view: 2, N: 4000 } });
 });
 
 // ---------------------------------------------------------------- L6 the centre of mass

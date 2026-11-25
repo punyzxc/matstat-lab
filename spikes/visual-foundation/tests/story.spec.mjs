@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11),
-// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court, #125 the living population (L10), the corridor of running means (L7), the centre of mass (L6).
+// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court, #125 the living population (L10), the corridor of running means (L7), the centre of mass (L6), darts on a board (L4).
 const fits = (page) => page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
 
 test.beforeEach(async ({ page }) => {
@@ -334,6 +334,31 @@ test('L6 centre of mass: the beam balances at the mean, the sigma bands hold the
   const slide = page.locator('[data-step="4"]').getByTestId('live-formula');
   await expect(slide.nth(1).locator('[data-v="fz"][data-role="res"]')).toHaveText('1');
   await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/convolution\?seed=606&m=2&R=5000&lecture=6&step=4$/);
+  expect(await fits(page)).toBe(true);
+});
+
+test('L4 darts: disjoint strips add up, overlapping ones count the overlap twice; area, needle and chords match the Darts station', async ({ page }) => {
+  await page.goto('/#lecture/4/1');
+  await expect(page.getByTestId('story-beat')).toHaveText('Events are regions of the square');
+  const ax = page.locator('[data-step="1"]').getByTestId('live-formula');
+  // reduced motion throws all 4000 darts at once (seed 404): the bars agree while A and B are disjoint
+  await expect(ax.nth(2).locator('[data-v="pU"][data-role="res"]')).toHaveText('0.7');
+  await expect(ax.nth(2).locator('[data-v="sumAB"][data-role="res"]')).toHaveText('0.7');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/darts\?seed=404&view=4&N=4000&region=x%20%3C%200\.3%20or%20x%20%3E%200\.6&lecture=4&step=1$/);
+  await ax.nth(1).locator('[data-v="b"][data-role="edit"]').click();
+  await page.locator('[data-step="1"]').getByRole('textbox').fill('0.85');
+  await page.locator('[data-step="1"]').getByRole('textbox').press('Enter');
+  await expect(ax.nth(2).locator('[data-v="sumAB"][data-role="res"]')).not.toHaveText('0.7');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /region=x%20%3C%200\.3%20or%20x%20%3E%200\.15&/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/4/3');
+  await expect(page.locator('[data-step="3"]').getByTestId('live-formula').nth(1).locator('[data-v="pihat"][data-role="res"]')).toHaveText('3.125');
+  await page.goto('/#lecture/4/4');
+  await expect(page.locator('[data-step="4"]').getByTestId('live-formula').nth(1).locator('[data-v="pihat"][data-role="res"]')).toHaveText('3.2112');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/darts\?seed=404&view=3&N=4000&l=0\.8&d=1&lecture=4&step=4$/);
+  await page.goto('/#lecture/4/5');
+  await expect(page.locator('[data-step="5"]').getByTestId('live-formula').nth(0).locator('[data-v="radius"][data-role="res"]')).toHaveText('0.501');
   expect(await fits(page)).toBe(true);
 });
 
