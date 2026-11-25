@@ -11,12 +11,126 @@
   ],
   "steps": [
     {
+      "title": "A claim on trial",
+      "idea": "A hypothesis $H_0\\colon a = a_0$ is put on trial against an alternative $H_1$. The evidence is one number computed from the sample, the statistic $U$. If $H_0$ is true, $U$ follows the standard normal law; if the true mean is $a$, the same law slides to $\\delta$.",
+      "figure": {
+        "id": "test-court",
+        "beat": "laws",
+        "params": {
+          "n": 16,
+          "a": 0.5,
+          "alpha": 0.05,
+          "tail": 1,
+          "truth": 1
+        }
+      },
+      "live": [
+        "\\lv{U}{U} = \\dfrac{(\\bar{x} - \\lv{a0}{a_0})\\sqrt{\\lval{n}}}{\\sigma} = \\lres{U}, \\qquad \\lv{delta}{\\delta} = \\dfrac{(\\lval{a} - a_0)\\sqrt{n}}{\\sigma} = \\lres{delta}"
+      ],
+      "whatIf": [
+        {
+          "label": "$a = 0$",
+          "params": {
+            "a": 0
+          }
+        },
+        {
+          "label": "$a = 1$",
+          "params": {
+            "a": 1
+          }
+        },
+        {
+          "label": "$n = 64$",
+          "params": {
+            "n": 64
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "The white curve is the law of $U$ in a world where $H_0$ is true, the cyan curve in the world where the mean is really $a$. A test cannot know which world it lives in; it only sees one value of $U$.",
+        "definition": "A statistical hypothesis is a statement about the law of the data. The null hypothesis $H_0$ is tested; the alternative $H_1$ is what we accept when $H_0$ is rejected. A test is a rule that maps every sample to a verdict."
+      },
+      "portals": [
+        {
+          "lecture": 8,
+          "step": 6
+        }
+      ]
+    },
+    {
+      "title": "The critical region",
+      "idea": "Fix in advance the values of $U$ that are too unlikely under $H_0$: the critical region $\\mathcal{K}$. If $U$ falls into it, $H_0$ is rejected. Its size under $H_0$ is the significance level $\\alpha$.",
+      "figure": {
+        "id": "test-court",
+        "beat": "laws"
+      },
+      "live": [
+        "\\mathcal{K} = \\{\\, \\lv{U}{U} > \\lv{ucr}{u_{\\mathrm{cr}}} \\,\\}, \\qquad \\lv{ucr}{u_{\\mathrm{cr}}} = \\lres{ucr}",
+        "P(U \\in \\mathcal{K} \\mid H_0) = \\lv{alpha}{\\alpha} = \\lval{alpha}"
+      ],
+      "whatIf": [
+        {
+          "label": "$\\alpha = 0.01$",
+          "params": {
+            "alpha": 0.01
+          }
+        },
+        {
+          "label": "$\\alpha = 0.1$",
+          "params": {
+            "alpha": 0.1
+          }
+        },
+        {
+          "label": "two-sided $H_1\\colon a \\ne a_0$",
+          "params": {
+            "tail": 0
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "The coral sliver is the price of the rule: in a world where $H_0$ is true, that share of samples still lands in $\\mathcal{K}$ and convicts an innocent hypothesis.",
+        "details": "For a right-sided $H_1\\colon a > a_0$ the region is $U > u_{\\mathrm{cr}}$ with $\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - 2\\alpha}{2}$; for a two-sided $H_1$ it is $|U| > u_{\\mathrm{cr}}$ with $\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - \\alpha}{2}$, where $\\Phi_0$ is the Laplace function."
+      }
+    },
+    {
       "title": "Errors of two kinds",
       "idea": "A test rejects a true $H_0$ with probability $\\alpha$ and keeps a false $H_0$ with probability $\\beta$; the power is $1 - \\beta$.",
       "formula": [
         "\\alpha = P(\\text{reject } H_0 \\mid H_0)",
         "\\beta = P(\\text{keep } H_0 \\mid H_1)"
       ],
+      "figure": {
+        "id": "test-court",
+        "beat": "laws"
+      },
+      "live": [
+        "\\lv{beta}{\\beta} = P(U \\notin \\mathcal{K} \\mid H_1) = \\lres{beta}, \\qquad \\lv{power}{1 - \\beta} = \\lres{power}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 4$",
+          "params": {
+            "n": 4
+          }
+        },
+        {
+          "label": "$n = 64$",
+          "params": {
+            "n": 64
+          }
+        },
+        {
+          "label": "$\\alpha = 0.01$",
+          "params": {
+            "alpha": 0.01
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Shrinking $\\alpha$ moves the border right: fewer innocent convictions, but more of the cyan law stays outside $\\mathcal{K}$ and $\\beta$ grows. Only a larger $n$ lowers both, because it pulls the two laws apart."
+      },
       "experiment": {
         "station": "testing",
         "seed": 1212,
@@ -32,6 +146,103 @@
       }
     },
     {
+      "title": "A thousand verdicts",
+      "idea": "Now draw samples from the world where the mean really is $a$. Each sample gets its verdict; green convicts the false $H_0$, violet lets it go. The share of convictions settles at the power.",
+      "figure": {
+        "id": "test-court",
+        "beat": "stream",
+        "params": {
+          "truth": 1
+        }
+      },
+      "live": [
+        "\\lv{rej}{\\hat{p}} = \\lres{rej} \\approx \\lv{power}{1 - \\beta} = \\lres{power}, \\qquad \\lv{count}{N} = \\lres{count}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 64$",
+          "params": {
+            "n": 64
+          }
+        },
+        {
+          "label": "$a = 0.2$",
+          "params": {
+            "a": 0.2
+          }
+        }
+      ],
+      "portals": [
+        {
+          "lecture": 11,
+          "step": 5
+        }
+      ]
+    },
+    {
+      "title": "When $H_0$ is true",
+      "idea": "Switch the world: the samples now come from $H_0$ itself. The coral verdicts are type I errors, and their share settles at $\\alpha$, whatever $n$ is.",
+      "figure": {
+        "id": "test-court",
+        "beat": "stream",
+        "params": {
+          "truth": 0
+        }
+      },
+      "live": [
+        "\\lv{rej}{\\hat{p}} = \\lres{rej} \\approx \\lv{alpha}{\\alpha} = \\lval{alpha}"
+      ],
+      "whatIf": [
+        {
+          "label": "$\\alpha = 0.01$",
+          "params": {
+            "alpha": 0.01
+          }
+        },
+        {
+          "label": "$n = 200$",
+          "params": {
+            "n": 200
+          }
+        }
+      ]
+    },
+    {
+      "title": "The power curve",
+      "idea": "The power depends on how far the truth is from $H_0$. At $a = a_0$ it equals $\\alpha$; it climbs towards 1 as $a$ moves into $H_1$, and climbs faster for larger $n$.",
+      "figure": {
+        "id": "test-court",
+        "beat": "power"
+      },
+      "live": [
+        "1 - \\beta(\\lval{a}) = \\lres{power}, \\qquad 1 - \\beta(a_0) = \\lv{alpha}{\\alpha} = \\lval{alpha}",
+        "n = \\lval{n}"
+      ],
+      "whatIf": [
+        {
+          "label": "$n = 4$",
+          "params": {
+            "n": 4
+          }
+        },
+        {
+          "label": "$n = 100$",
+          "params": {
+            "n": 100
+          }
+        },
+        {
+          "label": "two-sided $H_1\\colon a \\ne a_0$",
+          "params": {
+            "tail": 0
+          }
+        }
+      ],
+      "layers": {
+        "details": "For the right-sided z-test $1 - \\beta(a) = 1 - \\Phi\\!\\left(u_{\\mathrm{cr}} - \\dfrac{(a - a_0)\\sqrt{n}}{\\sigma}\\right)$. The dots are the share of rejections among 400 seeded samples at each $a$, drawn with common random numbers, so they rise with $a$ like the curve."
+      }
+    },
+    {
       "title": "Comparing variances",
       "idea": "The ratio of two sample variances follows the Fisher–Snedecor $F$ law under $H_0$.",
       "formula": [
@@ -43,5 +254,6 @@
       ]
     }
   ],
-  "status": "draft"
+  "status": "draft",
+  "story": true
 }

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11),
-// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards.
+// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court.
 const fits = (page) => page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
 
 test.beforeEach(async ({ page }) => {
@@ -201,6 +201,38 @@ test('scientist cards sit in the figure while their step is read, open in place 
   await page.keyboard.press('ArrowDown');
   await expect(page.getByTestId('step-counter')).toHaveText('Step 7 / 8');
   await expect(cards).toHaveCount(0);
+  expect(await fits(page)).toBe(true);
+});
+
+test('L12 hypothesis court: a thousand verdicts reject as often as the Testing station; with H0 true the rate falls to alpha', async ({ page }) => {
+  await page.goto('/#lecture/12/2');
+  await expect(page.getByTestId('story-beat')).toHaveText('Two laws of one statistic');
+  const region = page.locator('[data-step="2"]').getByTestId('live-formula').first();
+  await expect(region.locator('[data-v="ucr"][data-role="res"]')).toHaveText('1.645');
+
+  await page.goto('/#lecture/12/4');
+  await expect(page.getByTestId('story-beat')).toHaveText('A thousand verdicts');
+  // reduced motion judges all 1000 samples at once: 660 of them reject H0 (seed 1212, n = 16, a = 0.5, alpha = 0.05)
+  await expect(page.getByTestId('court-rate')).toHaveText('66.0%');
+  const verdicts = page.locator('[data-step="4"]').getByTestId('live-formula').first();
+  await expect(verdicts.locator('[data-v="power"][data-role="res"]')).toHaveText('0.639');
+  await expect(verdicts.locator('[data-v="count"][data-role="res"]')).toHaveText('1000');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/testing\?seed=1212&sigmaKnown=1&a0=0&mu=0.5&sigma=1&n=16&alpha=0.05&tail=1&R=1000&view=0&truth=1&lecture=12&step=4$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/12/5');
+  await expect(page.getByTestId('court-rate')).toHaveText('5.6%');
+  const alpha = page.locator('[data-step="5"]').getByTestId('live-formula').first().locator('[data-v="alpha"][data-role="edit"]');
+  await alpha.click();
+  await page.locator('[data-step="5"]').getByRole('textbox').fill('0.01');
+  await page.locator('[data-step="5"]').getByRole('textbox').press('Enter');
+  await expect(alpha).toHaveText('0.010');
+  await expect(page.getByTestId('court-rate')).not.toHaveText('5.6%');
+  await expect.poll(async () => parseFloat(await page.getByTestId('court-rate').textContent())).toBeLessThan(3);
+
+  await page.goto('/#lecture/12/6');
+  await expect(page.getByTestId('story-beat')).toHaveText('The power curve');
+  await expect(page.locator('[data-step="6"]').getByTestId('live-formula').first().locator('[data-v="power"][data-role="res"]')).toHaveText('0.639');
   expect(await fits(page)).toBe(true);
 });
 

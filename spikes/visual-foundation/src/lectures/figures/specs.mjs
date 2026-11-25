@@ -97,6 +97,36 @@ export const FIGURES = Object.freeze({
     },
     station: ({ n, sigma, law }) => ({ station: 'estimation', params: { n: Math.round(n), sigma, law: Math.round(law), R: 2000, view: 0 } }),
   },
+  'test-court': {
+    title: 'The hypothesis court',
+    seed: 1212,
+    beats: ['laws', 'stream', 'power'],
+    beatTitles: { laws: 'Two laws of one statistic', stream: 'A thousand verdicts', power: 'The power curve' },
+    params: {
+      n: { label: 'Sample size $n$', min: 2, max: 200, step: 1, default: 16 },
+      a: { label: 'True mean $a$ ($H_0\\colon a_0 = 0$, $\\sigma = 1$)', min: -1.5, max: 1.5, step: 0.05, default: 0.5 },
+      alpha: { label: 'Significance level $\\alpha$', min: 0.001, max: 0.2, step: 0.001, default: 0.05 },
+      tail: { label: '$H_1$ (0 two-sided $\\ne$, 1 right $>$, 2 left $<$)', min: 0, max: 2, step: 1, default: 1 },
+      truth: { label: 'Samples come from (0 $H_0$, 1 the true $a$)', min: 0, max: 1, step: 1, default: 1 },
+    },
+    vars: {
+      n: { color: PALETTE.signal, hint: 'Observations in each sample. A larger $n$ pulls the two laws apart.', digits: 0 },
+      a: { color: PALETTE.cyan, hint: 'The true mean. $H_1$ is true when $a \\ne a_0$; the cyan law is the statistic under it.', digits: 2 },
+      a0: { color: PALETTE.ink, hint: 'The mean claimed by $H_0$.' },
+      alpha: { color: PALETTE.coral, hint: 'Type I error: the coral area of the $H_0$ law inside the critical region.', digits: 3 },
+      beta: { color: PALETTE.violet, hint: 'Type II error: the violet area of the $H_1$ law outside the critical region.', digits: 3 },
+      power: { color: PALETTE.mint, hint: 'Power $1 - \\beta$: the green area of the $H_1$ law inside the critical region.', digits: 3 },
+      ucr: { color: PALETTE.signal, hint: 'Critical value: the border of the critical region $\\mathcal{K}$.', digits: 3 },
+      U: { color: PALETTE.ink, hint: 'The statistic of the latest sample, $U = \\dfrac{(\\bar{x} - a_0)\\sqrt{n}}{\\sigma}$.', digits: 3 },
+      delta: { color: PALETTE.cyan, hint: 'Centre of the $H_1$ law: $\\delta = \\dfrac{(a - a_0)\\sqrt{n}}{\\sigma}$.', digits: 3 },
+      rej: { color: PALETTE.signal, hint: 'Share of samples so far whose verdict is "reject $H_0$".', digits: 3 },
+      count: { color: PALETTE.ink, hint: 'Samples judged so far.', digits: 0 },
+    },
+    station: ({ n, a, alpha, tail, truth }) => ({
+      station: 'testing',
+      params: { sigmaKnown: 1, a0: 0, mu: a, sigma: 1, n: Math.round(n), alpha, tail: Math.round(tail), R: 1000, view: 0, truth: Math.round(truth) },
+    }),
+  },
 });
 
 /** Russian texts of the specs (i18n/README.md): the same keys, Russian values. */
@@ -158,6 +188,30 @@ export const RU = Object.freeze({
       mnth: 'Теория: $M s_n^2 = \\dfrac{n-1}{n}\\sigma^2$.',
       bias: 'Наблюдаемое смещение оценки с делителем $n$ против теоретического $-\\sigma^2/n$.',
       count: 'Сколько выборок уже сделано.',
+    },
+  },
+  'test-court': {
+    title: 'Суд над гипотезой',
+    beatTitles: { laws: 'Два закона одной статистики', stream: 'Тысяча вердиктов', power: 'Кривая мощности' },
+    params: {
+      n: 'Объём выборки $n$',
+      a: 'Истинное среднее $a$ ($H_0\\colon a_0 = 0$, $\\sigma = 1$)',
+      alpha: 'Уровень значимости $\\alpha$',
+      tail: '$H_1$ (0 двусторонняя $\\ne$, 1 правая $>$, 2 левая $<$)',
+      truth: 'Выборки берутся из (0 $H_0$, 1 истинного $a$)',
+    },
+    vars: {
+      n: 'Число наблюдений в каждой выборке. Чем больше $n$, тем дальше расходятся два закона.',
+      a: 'Истинное среднее. $H_1$ верна, когда $a \\ne a_0$; голубой закон — статистика при ней.',
+      a0: 'Среднее, которое утверждает $H_0$.',
+      alpha: 'Ошибка первого рода: коралловая площадь закона $H_0$ внутри критической области.',
+      beta: 'Ошибка второго рода: фиолетовая площадь закона $H_1$ вне критической области.',
+      power: 'Мощность $1 - \\beta$: зелёная площадь закона $H_1$ внутри критической области.',
+      ucr: 'Критическое значение: граница критической области $\\mathcal{K}$.',
+      U: 'Статистика последней выборки, $U = \\dfrac{(\\bar{x} - a_0)\\sqrt{n}}{\\sigma}$.',
+      delta: 'Центр закона $H_1$: $\\delta = \\dfrac{(a - a_0)\\sqrt{n}}{\\sigma}$.',
+      rej: 'Доля уже рассмотренных выборок с вердиктом «отвергнуть $H_0$».',
+      count: 'Сколько выборок уже рассмотрено.',
     },
   },
 });
