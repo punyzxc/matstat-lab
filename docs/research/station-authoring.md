@@ -118,7 +118,7 @@ typed value, and that the same URL in a fresh page shows the same numbers.
   **An orbit shows at most six stations**; check `stationsOf(orbit)` before adding a visible one, or replace one
   with the owner's agreement.
 - `hidden: true` keeps a station off the orbit but reachable at `#station/<id>`: use it while you build.
-- `lectures` uses the course index #79 (L11 is hypothesis testing, L12 estimation).
+- `lectures` follows the lecture content (L11 estimation, L12 hypothesis testing; the PDF headings of these two are swapped).
 
 Then run the lab (`cd spikes/visual-foundation && npm ci && npm run dev -- --host 127.0.0.1 --port 4175`) and open
 `http://127.0.0.1:4175/#station/dice-template`. A lecture step links to it with

@@ -918,3 +918,114 @@ html:has(.orbital-lab) body {
     transition: none;
   }
 }
+
+/* #136: the live formula above the chart carries the current α, β and power. */
+.live-formula {
+  display: grid;
+  gap: 2px;
+  margin: 4px 0 10px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--signal);
+  background: rgb(232 228 133 / 0.04);
+  overflow-x: auto;
+}
+.live-formula .tex-display {
+  margin: 0;
+  text-align: left;
+}
+.chart-series.chart-series--band.tone-default {
+  fill: rgb(244 244 242 / 0.2);
+}
+.chart-key--band.tone-default i {
+  background: rgb(244 244 242 / 0.36);
+}
+
+/* #137: the stream of decisions, four zones. */
+.decision-zones {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #262626;
+}
+.decision-zones-head {
+  margin: 0 0 8px;
+  color: #a8a8a8;
+  font: 11px var(--mono);
+}
+.decision-zones-head b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.decision-zones svg {
+  display: block;
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+}
+.dz-cell rect {
+  fill: rgb(244 244 242 / 0.025);
+  stroke: #333;
+}
+.dz-cell--error rect {
+  fill: rgb(232 228 133 / 0.05);
+  stroke: rgb(232 228 133 / 0.35);
+}
+.dz-cell:not([data-active]) {
+  opacity: 0.55;
+}
+.dz-count {
+  fill: var(--ink);
+  font: 500 15px var(--mono);
+  text-anchor: end;
+}
+.dz-note {
+  fill: #9a9a9a;
+  font: 10.5px var(--mono);
+}
+.dz-col .svg-math-box,
+.dz-row .svg-math-box {
+  color: #cfcfcf;
+  font-size: 12px;
+}
+.dz-dot {
+  fill: var(--ink);
+  opacity: 0.85;
+  animation: dz-fly 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.dz-dot--error {
+  fill: var(--signal);
+}
+@keyframes dz-fly {
+  from {
+    transform: translate(var(--dx), var(--dy));
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+}
+.decision-zones svg[data-reduced] .dz-dot {
+  animation: none;
+}
+.decision-shares {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font: 11.5px var(--mono);
+}
+.decision-shares th,
+.decision-shares td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #222;
+  text-align: right;
+  font-weight: 400;
+}
+.decision-shares th[scope='row'],
+.decision-shares thead th:first-child {
+  text-align: left;
+}
+.decision-shares thead th {
+  color: #7d7d7d;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

@@ -8,7 +8,8 @@ import { useKernelRunner, type Job } from './kernel-runner';
 import type { KernelStation as KernelStationInfo } from './catalog';
 import { Chart } from './chart';
 import { Surface3D } from './surface-3d';
-import { MathText, mathToPlain } from '../math';
+import { MathText, Tex, mathToPlain } from '../math';
+import { DecisionZones } from './decision-zones';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
 const sources = import.meta.glob('../../../*/kernel.mjs');
@@ -98,7 +99,8 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
     if (!outcome.ok) return { error: outcome.error };
     const out = outcome.result as Partial<KernelResult> | null;
     if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series)) return { error: 'The kernel returned no readouts or series.' };
-    return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface };
+    return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface,
+      formula: Array.isArray(out.formula) ? out.formula.filter((l) => typeof l === 'string') : undefined, decisions: out.decisions };
   }, [outcome]);
   const failed = Boolean(result && 'error' in result);
 
@@ -189,6 +191,11 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
           <p className="station-status" role="alert">The kernel rejected these parameters: {result.error}</p>
         ) : (
           <>
+            {result.formula && result.formula.length > 0 && (
+              <div className="live-formula" aria-label="Live formula" role="group">
+                {result.formula.map((line, i) => <Tex key={i} tex={line} display />)}
+              </div>
+            )}
             {result.surface && <Surface3D surface={result.surface} />}
             {result.series.length > 0 && (
               <div className="chart-stage">
@@ -197,6 +204,10 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
               </div>
             )}
             {ridgeOn && <Ridge draws={past} axes={result.axes} />}
+            {result.decisions && outcome?.ok && (
+              <DecisionZones decisions={result.decisions} drawKey={outcome.job.seed}
+                experimentKey={declared.filter((d) => !['truth', 'view', 'R'].includes(d.key)).map((d) => `${d.key}=${outcome.job.params[d.key]}`).join('&')} />
+            )}
             <table className="readouts" aria-label="Readouts">
               <thead><tr><th scope="col">Quantity</th><th scope="col">Observed</th><th scope="col">Theory</th><th scope="col"><span className="sr-only">Track</span></th></tr></thead>
               <tbody>

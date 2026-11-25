@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   meta, stations, run, TAILS, criticalRegion, proportionTest, meanTest, fTest, lectureExample,
-  proportionPower, proportionSize, zPower, tPower, fPower, acceptanceBand, simulateMean, simulateVariances, simulateProportion, surfaceSizes,
+  proportionPower, proportionSize, zPower, tPower, fPower, acceptanceBand, simulateMean, simulateVariances, simulateProportion, surfaceSizes, DECISIONS,
 } from './kernel.mjs';
 import { normalQuantile, studentTQuantile, fisherQuantile, fisherCdf, normalCdf, studentTCdf, logGamma } from './special.mjs';
 
@@ -193,7 +193,7 @@ test('the lecture one-sided rule (larger over smaller with alpha) doubles the ty
 // ---------------------------------------------------------------- contract
 test('kernel follows the contract: deterministic, finite, aligned arrays, every station and view', () => {
   assert.equal(meta.id, 'lecture-hypothesis-tests');
-  assert.deepEqual(meta.lectures, ['L11']); // course index #79: lecture 11 is hypothesis testing
+  assert.deepEqual(meta.lectures, ['L12']); // by content lecture 12 is hypothesis testing (the PDF headings of L11/L12 are swapped)
   for (const [id, st] of Object.entries(stations)) {
     for (const p of st.params) assert.ok(p.min <= p.default && p.default <= p.max, `${id}.${p.key}`);
     const view = st.params.find((p) => p.key === 'view');
@@ -293,4 +293,64 @@ test('testing station: n changes redraw the power curve', () => {
   const a = curve(5), b = curve(50);
   assert.equal(a.length, b.length);
   assert.ok(b[b.length - 5] > a[a.length - 5], 'more data, more power');
+});
+
+// ---------------------------------------------------------------- #136: critical-region and error lab
+const bandArea = (s) => s.x.reduce((a, x, i) => (i ? a + (x - s.x[i - 1]) * ((s.y2[i] - s.y[i]) + (s.y2[i - 1] - s.y[i - 1])) / 2 : 0), 0);
+test('#136: the shaded areas equal the exact alpha, beta and power', () => {
+  for (const [sigmaKnown, tail, alpha] of [[1, 0, 0.05], [1, 1, 0.1], [0, 2, 0.05], [0, 0, 0.01], [0, 1, 0.2]]) {
+    const out = run({ sigmaKnown, tail, alpha, a0: 1, mu: tail === 2 ? 0.4 : 1.6, sigma: 1.5, n: 25, R: 200, view: 0 }, { seed: SEED, station: 'testing' });
+    const area = (prefix) => out.series.filter((s) => s.id.startsWith(prefix)).reduce((a, s) => a + bandArea(s), 0);
+    const get = (key) => out.readouts.find((r) => r.key === key).theory;
+    const tag = `z=${sigmaKnown} tail=${tail} alpha=${alpha}`;
+    close(area('crit-'), alpha, 2e-3, `alpha area ${tag}`);
+    close(area('power-'), get('power'), 2e-3, `power area ${tag}`);
+    close(bandArea(out.series.find((s) => s.id === 'beta')), get('beta'), 2e-3, `beta area ${tag}`);
+  }
+});
+
+test('#136: series keep their ids and lengths as alpha moves, so the boundary slides', () => {
+  const shape = (alpha) => JSON.stringify(run({ alpha, tail: 0, R: 200, view: 0 }, { seed: 3, station: 'testing' }).series.map((s) => [s.id, s.kind, s.x.length]));
+  const first = shape(0.01);
+  for (const a of [0.02, 0.05, 0.1, 0.2]) assert.equal(shape(a), first);
+});
+
+test('#136: the live formula gives the critical region, alpha, beta and the power', () => {
+  const out = run({ sigmaKnown: 1, tail: 1, alpha: 0.05, a0: 0, mu: 0.5, sigma: 1, n: 16, view: 0 }, { seed: SEED, station: 'testing' });
+  const power = out.readouts.find((r) => r.key === 'power').theory;
+  assert.equal(out.formula.length, 2);
+  assert.match(out.formula[0], /\\mathcal\{K\} = \\\{\\, U > 1\.645 \\,\\\}/);
+  assert.match(out.formula[0], /= 0\.050$/);
+  assert.match(out.formula[1], new RegExp(`1 - \\\\beta = ${power.toFixed(3)}$`));
+  const flat = run({ a0: 1, mu: 1, view: 0 }, { seed: SEED, station: 'testing' });
+  assert.match(flat.formula[1], /no alternative/);
+});
+
+// ---------------------------------------------------------------- #137: stream of decisions
+test('#137: each draw sends its first experiments to the decision zones, decided by the same rule', () => {
+  const out = run({ sigmaKnown: 0, tail: 0, alpha: 0.05, a0: 0, mu: 0.6, n: 10, truth: 1, R: 400 }, { seed: SEED, station: 'testing' });
+  const d = out.decisions;
+  assert.equal(d.truth, 1);
+  assert.equal(d.statistic.length, DECISIONS);
+  const c = studentTQuantile(0.975, 9);
+  d.statistic.forEach((t, i) => assert.equal(d.reject[i], Math.abs(t) > c, `experiment ${i}`));
+  assert.equal(d.theory.alpha, 0.05);
+  close(d.theory.power, out.readouts.find((r) => r.key === 'power').theory, 1e-12);
+  // A true H0 always streams H0 experiments.
+  assert.equal(run({ a0: 2, mu: 2, truth: 1 }, { seed: SEED, station: 'testing' }).decisions.truth, 0);
+});
+
+test('#137: zone shares converge on fixture seeds to alpha under H0 and to the power under H1', () => {
+  const params = { sigmaKnown: 1, tail: 1, alpha: 0.1, a0: 0, mu: 0.5, sigma: 1, n: 12, R: 400, view: 0 };
+  for (const truth of [0, 1]) {
+    let rejected = 0, total = 0, theory;
+    for (let draw = 0; draw < 60; draw++) {
+      const d = run({ ...params, truth }, { seed: 900 + draw, station: 'testing' }).decisions;
+      rejected += d.reject.filter(Boolean).length;
+      total += d.reject.length;
+      theory = truth === 0 ? d.theory.alpha : d.theory.power;
+    }
+    const band = acceptanceBand(total, theory, 0.001);
+    assert.ok(rejected >= band.lo && rejected <= band.hi, `truth ${truth}: ${rejected}/${total} vs ${theory}`);
+  }
 });

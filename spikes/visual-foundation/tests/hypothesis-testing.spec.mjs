@@ -45,3 +45,40 @@ test('typing n redraws the power curve, and the same seed gives the same surface
   await expect(again.getByTestId('station-dock').getByRole('table', { name: 'Readouts' }).getByRole('row', { name: /at the true value/ })).toHaveText(await power.textContent());
   expect(await again.getByTestId('station-dock').locator('.surface-svg').first().getAttribute('aria-label')).toBe(surface);
 });
+
+// #136: typed alpha slides the critical region; alpha, beta and the power are shaded and in a live formula.
+test('the error lab: alpha, beta and the power are shaded and given in a live formula that follows typed values', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#station/testing?seed=4&sigmaKnown=1&a0=0&mu=0.5&sigma=1&n=16&tail=1');
+  const dock = page.getByTestId('station-dock');
+  const formula = dock.getByRole('group', { name: 'Live formula' });
+  await expect(formula.locator('.katex').first()).toBeVisible();
+  await expect(formula).toContainText('1.645');
+  const keys = dock.locator('.chart-stage figcaption');
+  await expect(keys).toContainText(/critical region/);
+  await expect(keys).toContainText(/statistic in the critical region/);
+  await expect(keys).toContainText(/acceptance region/);
+  const alpha = dock.getByLabel(/Significance level α, typed value/);
+  await alpha.fill('0,1');
+  await alpha.press('Enter');
+  await expect(page).toHaveURL(/alpha=0\.1/);
+  await expect(formula).toContainText('1.282');
+});
+
+// #137: each experiment flies into one of four zones; the shares sit beside alpha, beta and the power.
+test('the stream of decisions fills four zones and counts each row against alpha, beta and the power', async ({ page }) => {
+  await page.goto('/#station/testing?seed=9&sigmaKnown=1&a0=0&mu=0.6&n=16&tail=1&R=400&truth=1');
+  const dock = page.getByTestId('station-dock');
+  const zones = dock.getByRole('region', { name: 'Decision zones' });
+  await expect(zones).toBeVisible({ timeout: 15000 });
+  const shares = zones.getByRole('table', { name: 'Zone shares' });
+  const power = shares.locator('tr[data-cell="h1-reject"]');
+  await expect.poll(async () => Number(await power.locator('td').first().textContent()), { timeout: 20000 }).toBeGreaterThan(40);
+  await expect(power).toContainText(/1−β=0\.\d{3}/);
+  await expect(zones.locator('circle.dz-dot').first()).toBeAttached();
+  // Switching the truth sends H0 experiments: the H0 row starts to fill.
+  await dock.getByRole('radiogroup', { name: /decision zones/ }).getByRole('radio').first().click();
+  const typeI = shares.locator('tr[data-cell="h0-keep"]');
+  await expect.poll(async () => Number(await typeI.locator('td').first().textContent()), { timeout: 20000 }).toBeGreaterThan(0);
+  await expect(shares.locator('tr[data-cell="h0-reject"]')).toContainText(/α=0\.050/);
+});
