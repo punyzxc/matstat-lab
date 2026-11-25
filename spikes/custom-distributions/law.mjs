@@ -243,6 +243,12 @@ function discreteLaw(text) {
     while (lo < hi) { const m = (lo + hi) >> 1; if (xs[m] <= x) lo = m + 1; else hi = m; }
     return lo ? cum[lo - 1] : 0;
   };
+  /** F(x−) = P(X < x): the left limit, where a discrete CDF differs from F(x). */
+  const cdfLeft = (x) => {
+    let lo = 0, hi = xs.length;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (xs[m] < x) lo = m + 1; else hi = m; }
+    return lo ? cum[lo - 1] : 0;
+  };
   const quantile = (u) => {
     let lo = 0, hi = xs.length - 1;
     while (lo < hi) { const m = (lo + hi) >> 1; if (cum[m] >= u) hi = m; else lo = m + 1; }
@@ -250,7 +256,7 @@ function discreteLaw(text) {
   };
   const shown = order.map((i) => [vs[i], ps[i]]);
   const tex = `\\begin{array}{c|${'c'.repeat(xs.length)}} x_i & ${shown.map(([v]) => constant(v, 'value').tex).join(' & ')} \\\\ \\hline p_i & ${shown.map(([, p]) => constant(p, 'probability').tex).join(' & ')} \\end{array}`;
-  return { kind: 'discrete', text, values: xs, probs: pr, mean, variance, sd: Math.sqrt(variance), lo: xs[0], hi: xs.at(-1), cdf, quantile, tex,
+  return { kind: 'discrete', text, values: xs, probs: pr, mean, variance, sd: Math.sqrt(variance), lo: xs[0], hi: xs.at(-1), cdf, cdfLeft, quantile, tex,
     integer: xs.every((v) => Number.isInteger(v)) };
 }
 

@@ -1,6 +1,5 @@
 {
  "Sample description and goodness of fit: Kolmogorov and Pearson $\\chi^2$": "Описание выборки и согласие с распределением: критерии Колмогорова и $\\chi^2$ Пирсона",
- "True law (0 normal, 1 uniform, 2 exponential)": "Истинный закон (0 нормальный, 1 равномерный, 2 показательный)",
  "Sample size $n$": "Объём выборки $n$",
  "Intervals $k$ ($0 = 5 \\lg n$)": "Число интервалов $k$ ($0 = 5 \\lg n$)",
  "Round values to $d$ decimals (0 = no rounding)": "Округлять значения до $d$ знаков после запятой (0 = без округления)",
@@ -28,7 +27,6 @@
  "All values are distinct, so every step of $F_n$ is $1/n$. Round the values to create ties.": "Все значения различны, поэтому каждая ступенька $F_n$ равна $1/n$. Округлите значения, чтобы получить повторы.",
  "density ($W_r/h$)": "плотность ($W_r/h$)",
  "distribution function": "функция распределения",
- "Hypothesis $H_0$ (0 normal, 1 uniform, 2 exponential)": "Гипотеза $H_0$ (0 нормальный, 1 равномерный, 2 показательный)",
  "Significance level $\\alpha$": "Уровень значимости $\\alpha$",
  "Pearson intervals $s$": "Число интервалов Пирсона $s$",
  "Estimate $H_0$ parameters from the sample (0 no, 1 yes)": "Оценивать параметры $H_0$ по выборке (0 нет, 1 да)",
@@ -129,5 +127,11 @@
  "\\bar{x}_{\\text{random}} = [[1]] \\approx a = [[2]], \\qquad \\bar{x}_{\\text{biased}} = [[3]] \\approx M(\\xi \\mid [[4]]) = [[5]]": "\\bar{x}_{\\text{случ}} = [[1]] \\approx a = [[2]], \\qquad \\bar{x}_{\\text{смещ}} = [[3]] \\approx M(\\xi \\mid [[4]]) = [[5]]",
  "s^2_{\\text{random}} = [[1]] \\approx \\sigma^2 = [[2]], \\qquad s^2_{\\text{biased}} = [[3]] \\approx D(\\xi \\mid [[4]]) = [[5]]": "s^2_{\\text{случ}} = [[1]] \\approx \\sigma^2 = [[2]], \\qquad s^2_{\\text{смещ}} = [[3]] \\approx D(\\xi \\mid [[4]]) = [[5]]",
  "$a = M\\xi = [[1]]$": "$a = M\\xi = [[1]]$",
- "$\\bar{x}$ of the biased sample": "$\\bar{x}$ смещённой выборки"
+ "$\\bar{x}$ of the biased sample": "$\\bar{x}$ смещённой выборки",
+ "True law (0 normal, 1 uniform, 2 exponential, 3 typed)": "Истинный закон (0 нормальный, 1 равномерный, 2 показательный, 3 свой)",
+ "Hypothesis $H_0$ (0 normal, 1 uniform, 2 exponential, 3 typed)": "Гипотеза $H_0$ (0 нормальный, 1 равномерный, 2 показательный, 3 свой)",
+ "$p_i/h$, typed law": "$p_i/h$, введённый закон",
+ "Pearson (L12): [[1]] cells after [[2]], $r = 0$ estimated parameters, $k = s - 1 - r = [[3]]$. Each cell is one value of the typed law, merged while an expected count is below 5.": "Критерий Пирсона (лекция 12): ячеек — [[1]] ([[2]]); оценённых параметров: $r = 0$; $k = s - 1 - r = [[3]]$. Каждая ячейка — одно значение введённого закона; ячейки объединяются, пока ожидаемая частота меньше 5.",
+ "$H_0$ is discrete: Kolmogorov's critical values assume a continuous $F$, so for a discrete law the test is conservative (it rejects less often than $\\alpha$). Pearson's test has no such restriction.": "$H_0$ дискретна: критические значения Колмогорова рассчитаны на непрерывную $F$, поэтому для дискретного закона критерий консервативен (отвергает реже, чем в доле $\\alpha$). У критерия Пирсона такого ограничения нет.",
+ "A typed law has no parameters to estimate: $H_0$ is used exactly as typed.": "У введённого закона нет параметров для оценки: $H_0$ берётся точно таким, как введена."
 }
