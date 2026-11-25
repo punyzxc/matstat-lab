@@ -3,7 +3,7 @@
 // Pure ES module: no DOM. Randomness only from fixtureUint32 (fixture-mix32-v1).
 // Contract: docs/research/lecture-module-map.md; research: docs/research/lecture-geometric-probability.md.
 import { fixtureUint32 } from '../simulation-engine/engine.mjs';
-import { RegionError, compileRegion, parseRegion, regionArea, regionRuns, regionTex } from './region.mjs';
+import { RegionError, compileRegion, parseRegion, regionArea, regionDim, regionIntervals, regionLength, regionRuns, regionTex, regionVolume } from './region.mjs';
 
 /** Uniform on (0, 1), never 0 or 1, from one counter-based draw. */
 const uni = (seed, stream, i) => (fixtureUint32(seed, stream, i) + 0.5) / 2 ** 32;
@@ -97,9 +97,12 @@ const FORMULA_124 = {
   midpoint: (c) => `\\text{a midpoint in the disc: } P = \\tfrac14, \\quad \\tfrac{m}{n} = ${c}`,
 };
 
-function runDarts({ view, N, l, d, region }, seed) {
+function runDarts({ view, N, l, d, dim = 2, region, region1, region3 }, seed) {
   if (view === 3) return runBuffon({ N, l, d }, seed);
-  if (view === 4) return runRegion({ N, region: region ?? DEFAULT_REGION }, seed);
+  if (view === 4) {
+    const D = dim === 1 || dim === 3 ? dim : 2;
+    return runRegion({ N, dim: D, region: (D === 1 ? region1 : D === 3 ? region3 : region) ?? DEFAULT_REGIONS[D] }, seed);
+  }
   if (view === 2) {
     const ns = checkpoints(N), lx = ns.map((n) => Math.log10(n)), lN = Math.log10(N);
     const rows = BERTRAND.map((s, j) => {
@@ -248,19 +251,34 @@ function runBuffon({ N, l: lTyped, d }, seed) {
   };
 }
 
-// ---------------------------------------------------------------- a typed region (#90)
+// ---------------------------------------------------------------- a typed region (#90), on a segment, square or cube (#119)
 export const DEFAULT_REGION = 'y < x^2';
+export const DEFAULT_REGIONS = Object.freeze({ 1: 'x^2 < 0.5', 2: DEFAULT_REGION, 3: 'x^2 + y^2 + z^2 < 1' });
 export const DARTS = 400; // darts drawn on the board; the counts use all N
+export const DARTS_3D = 1200; // in the cube the hits themselves draw the shape, so more of them are shown
 export const AREA_GRID = 1000;
+/** A small error written plainly: 0.0021, 3e-6 as 3·10⁻⁶ in TeX. */
+const errText = (e) => (e >= 1e-4 ? String(Number(e.toPrecision(2))) : `$${Number(e.toPrecision(1)).toExponential().replace(/e([-+]\d+)/, (_, p) => ` \\cdot 10^{${Number(p)}}`)}$`);
+const TEXT_DIM = Object.freeze({ region1: 1, region: 2, region3: 3 });
+const SPACE = Object.freeze({
+  1: { set: '[0, 1]', mes: 'length', grid: (G) => `a grid of ${G} cells` },
+  2: { set: '[0, 1]^2', mes: 'area', grid: (G) => `a ${G} × ${G} grid` },
+  3: { set: '[0, 1]^3', mes: 'volume', grid: (G) => `a ${G} × ${G} × ${G} grid` },
+});
 const regions = new Map();
-/** The region typed as text, parsed, compiled, integrated and outlined once per text. Throws a RegionError. */
-export function prepareRegion(text) {
-  const key = String(text ?? '').trim();
+/** The region typed as text for a space of `dim` dimensions, parsed, compiled and measured once. Throws a RegionError. */
+export function prepareRegion(text, dim = 2) {
+  const key = `${dim}|${String(text ?? '').trim()}`;
   let r = regions.get(key);
   if (!r) {
-    const tree = parseRegion(key);
+    const tree = parseRegion(String(text ?? '').trim());
+    if (regionDim(tree) > dim)
+      throw dim === 1 ? new RegionError('On the segment use x only: y and z need the square or the cube.')
+        : new RegionError('In the square use x and y only: z needs the cube.');
     const inside = compileRegion(tree);
-    r = { inside, tex: regionTex(tree), ...regionArea(inside, AREA_GRID), runs: regionRuns(inside).map((q) => q.map(r6)) };
+    const measure = dim === 1 ? regionLength(inside) : dim === 3 ? regionVolume(inside) : regionArea(inside, AREA_GRID);
+    const shape = dim === 1 ? { intervals: regionIntervals(inside).map((q) => q.map(r6)) } : dim === 2 ? { runs: regionRuns(inside).map((q) => q.map(r6)) } : {};
+    r = { inside, tex: regionTex(tree), ...measure, ...shape };
     if (regions.size > 64) regions.clear();
     regions.set(key, r);
   }
@@ -268,9 +286,9 @@ export function prepareRegion(text) {
 }
 /** Checks a typed text parameter before the host sends it: null when valid, else the error with its template. */
 export function checkText(station, key, value) {
-  if (station !== 'darts' || key !== 'region') return null;
+  if (station !== 'darts' || !(key in TEXT_DIM)) return null;
   try {
-    prepareRegion(value);
+    prepareRegion(value, TEXT_DIM[key]);
     return null;
   } catch (e) {
     if (e instanceof RegionError) return { message: e.message, template: e.template, values: e.values };
@@ -278,46 +296,64 @@ export function checkText(station, key, value) {
   }
 }
 
-function runRegion({ N, region }, seed) {
-  const R = prepareRegion(region);
+/**
+ * Points thrown uniformly into the segment, square or cube; the share of hits settles at mes A. Coordinates come from
+ * streams 30, 31, 32 (x, y, z), so the square's darts are those of #90 and the same seed gives the same hits.
+ */
+function runRegion({ N, dim, region }, seed) {
+  const R = prepareRegion(region, dim), sp = SPACE[dim];
   const ns = checkpoints(N), lN = Math.log10(N);
+  const shown = dim === 3 ? DARTS_3D : DARTS;
   const freq = [], darts = [], hits = [];
   let m = 0, k = 0;
   for (let i = 1; i <= N; i++) {
-    const x = uni(seed, 30, i), y = uni(seed, 31, i);
-    const hit = R.inside(x, y);
+    const x = uni(seed, 30, i), y = dim > 1 ? uni(seed, 31, i) : 0, z = dim > 2 ? uni(seed, 32, i) : 0;
+    const hit = R.inside(x, y, z);
     if (hit) m++;
-    if (i <= DARTS) { darts.push([r6(x), r6(y)]); hits.push(hit); }
+    if (i <= shown) {
+      // On the segment the second coordinate only spreads the marks over the strip (stream 33); it is not counted.
+      darts.push(dim === 1 ? [r6(x), r6(uni(seed, 33, i))] : dim === 2 ? [r6(x), r6(y)] : [r6(x), r6(y), r6(z)]);
+      hits.push(hit);
+    }
     if (i === ns[k]) { freq.push(m / i); k++; }
   }
   const a = R.area, half = band3(a, N), share = m / N;
   const fmtN = (v) => String(Number(v.toPrecision(4)));
+  const noun = { 1: 'point', 2: 'dart', 3: 'point' }[dim];
   const notes = [
-    'Geometric method (L4): a dart thrown at random into the unit square lands in $A$ with probability $\\operatorname{mes} A$, the area of $A$. The share of hits settles at it.',
-    `The area is integrated numerically: the midpoint rule on a ${AREA_GRID} × ${AREA_GRID} grid, accurate to about ±${fmt(R.error, 4)} (half the cells the boundary crosses).`,
+    dim === 1 ? 'Geometric method (L4): a point thrown at random into $[0, 1]$ lands in $A$ with probability $\\operatorname{mes} A$, the length of $A$. The share of hits settles at it.'
+      : dim === 3 ? 'Geometric method (L4): a point thrown at random into the unit cube lands in $A$ with probability $\\operatorname{mes} A$, the volume of $A$. The share of hits settles at it.'
+      : 'Geometric method (L4): a dart thrown at random into the unit square lands in $A$ with probability $\\operatorname{mes} A$, the area of $A$. The share of hits settles at it.',
+    `The ${sp.mes} is integrated numerically: the midpoint rule on ${sp.grid(R.grid)}, accurate to about ±${errText(R.error)} (${dim === 2 ? 'half the cells the boundary crosses' : 'the change from a grid twice as coarse'}).`,
   ];
-  if (a === 0) notes.unshift('No point of the square satisfies the region: it is empty, so no dart can land in it.');
-  else if (a === 1) notes.unshift('Every point of the square satisfies the region: every dart lands in it.');
+  if (a === 0) notes.unshift(`No point of $${sp.set}$ satisfies the region: it is empty, so nothing can land in it.`);
+  else if (a === 1) notes.unshift(`Every point of $${sp.set}$ satisfies the region: everything lands in it.`);
+  const board = dim === 1 ? { kind: 'segment', intervals: R.intervals, darts, hits }
+    : dim === 3 ? { kind: 'cube', darts, hits }
+    : { kind: 'region', runs: R.runs, darts, hits };
+  const label = { 1: 'Share of points in $A$, $m/n$', 2: 'Share of darts in $A$, $m/n$', 3: 'Share of points in $A$, $m/n$' }[dim];
+  const shareLabel = { 1: 'share of points in $A$', 2: 'share of darts in $A$', 3: 'share of points in $A$' }[dim];
   return {
     readouts: [
-      { key: 'share', label: 'Share of darts in $A$, $m/n$', observed: r6(share), theory: r6(a),
+      { key: 'share', label, observed: r6(share), theory: r6(a),
         convention: `± ${fmt(half)} (3 SE); ${Math.abs(share - a) <= half + R.error ? 'inside' : 'outside'} the band` },
-      { key: 'area', label: 'Area of $A$, numerically integrated', observed: null, theory: r6(a), convention: `± ${fmt(R.error, 4)} on a ${AREA_GRID} × ${AREA_GRID} grid` },
-      { key: 'hits', label: 'Darts in $A$', observed: m, theory: r6(a * N), convention: `of $n = ${N}$` },
+      { key: 'area', label: { 1: 'Length of $A$, numerically integrated', 2: 'Area of $A$, numerically integrated', 3: 'Volume of $A$, numerically integrated' }[dim],
+        observed: null, theory: r6(a), convention: `± ${errText(R.error)} on ${sp.grid(R.grid)}` },
+      { key: 'hits', label: { 1: 'Points in $A$', 2: 'Darts in $A$', 3: 'Points in $A$' }[dim], observed: m, theory: r6(a * N), convention: `of $n = ${N}$` },
     ],
     series: [
       { id: 'band', kind: 'band', tone: 'signal', label: '$\\operatorname{mes} A \\pm 3\\sqrt{p(1-p)/n}$', x: ns.map((n) => Math.log10(n)),
         y: ns.map((n) => Math.max(0, a - band3(a, n))), y2: ns.map((n) => Math.min(1, a + band3(a, n))) },
       { id: 'area', kind: 'line', tone: 'signal', label: '$\\operatorname{mes} A$', x: [0, lN], y: [a, a] },
-      { id: 'freq', kind: 'line', tone: 'accent', label: 'share of darts in $A$', x: ns.map((n) => Math.log10(n)), y: freq },
+      { id: 'freq', kind: 'line', tone: 'accent', label: shareLabel, x: ns.map((n) => Math.log10(n)), y: freq },
     ],
-    axes: { x: '$\\lg n$, darts thrown', y: 'share of darts in $A$' },
+    axes: { x: `$\\lg n$, ${noun}s thrown`, y: shareLabel },
     domain: { x: [0, lN], y: [0, 1] },
     formula: [
-      `A = \\{(x, y) \\in [0, 1]^2 : ${R.tex}\\}`,
-      `\\dfrac{m}{n} = \\dfrac{${m}}{${N}} = ${fmtN(share)} \\approx \\operatorname{mes} A = ${fmtN(a)}`,
+      `A = \\{${dim === 1 ? 'x \\in [0, 1]' : dim === 2 ? '(x, y) \\in [0, 1]^2' : '(x, y, z) \\in [0, 1]^3'} : ${R.tex}\\}`,
+      `P = \\dfrac{\\operatorname{mes} A}{\\operatorname{mes} ${sp.set === '[0, 1]' ? '[0, 1]' : `[0, 1]^${dim}`}} = ${fmtN(a)}, \\quad \\dfrac{m}{n} = \\dfrac{${m}}{${N}} = ${fmtN(share)}`,
     ],
-    board: { kind: 'region', runs: R.runs, darts, hits },
+    board,
     notes,
   };
 }
@@ -330,6 +366,7 @@ const stationParams = {
   ],
   darts: [
     { key: 'view', label: "View (0 $\\sin^2$ example, 1 quarter disc, 2 Bertrand chords, 3 Buffon's needle, 4 your region)", min: 0, max: 4, step: 1, default: 2 },
+    { key: 'dim', label: 'Space (1 segment, 2 square, 3 cube)', min: 1, max: 3, step: 1, default: 2, when: { view: [4] } },
     { key: 'N', label: 'Throws $N$', min: 100, max: 20000, step: 100, default: 4000 },
     { key: 'l', label: 'Needle length $l$', min: 0.1, max: 2, step: 0.05, default: 0.8, when: { view: [3] } },
     { key: 'd', label: 'Line spacing $d$', min: 0.2, max: 2, step: 0.1, default: 1, when: { view: [3] } },
@@ -338,8 +375,12 @@ const stationParams = {
 export const stations = Object.freeze({
   frequency: { params: stationParams.frequency, live: true },
   darts: { params: stationParams.darts, live: true, texts: [
-    { key: 'region', label: 'Region $A$ in the unit square', default: DEFAULT_REGION, when: { view: [4] },
+    { key: 'region', label: 'Region $A$ in the unit square', default: DEFAULT_REGION, when: { view: [4], dim: [2] },
       presets: ['y < x^2', 'x^2 + y^2 < 1', '|x - 0.5| + |y - 0.5| < 0.4', 'y < sin(pi x)', 'y > x and y < 2x', '0.2 < x < 0.8 or y > 0.9'] },
+    { key: 'region1', label: 'Region $A$ in the segment $[0, 1]$', default: DEFAULT_REGIONS[1], when: { view: [4], dim: [1] },
+      presets: ['x^2 < 0.5', '|x - 0.5| < 0.2', 'sin(2 pi x) > 0', 'x < 0.3 or x > 0.9', 'sin(10 x)^2 < 0.5'] },
+    { key: 'region3', label: 'Region $A$ in the unit cube', default: DEFAULT_REGIONS[3], when: { view: [4], dim: [3] },
+      presets: ['x^2 + y^2 + z^2 < 1', 'x + y + z < 1', 'z < x y', 'x^2 + y^2 < z^2', '(x - 0.5)^2 + (y - 0.5)^2 < 0.1 and z < 0.7'] },
   ] },
 });
 export const meta = {
