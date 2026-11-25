@@ -1,0 +1,13 @@
+{
+  "The Bernoulli scheme and its approximations": "Схема Бернулли и её приближения",
+  "Bernoulli formula": "Формула Бернулли",
+  "$n$ independent trials, each a success with probability $p$: the number of successes follows the binomial law.": "В $n$ независимых испытаниях успех наступает с вероятностью $p$ в каждом: число успехов подчиняется биномиальному закону.",
+  "$n = 7,\\ k = 5,\\ p = 0.5$: $\\;P_7(5) = \\frac{21}{128} \\approx 0.164$.": "При $n = 7,\\ k = 5,\\ p = 0.5$: $\\;P_7(5) = \\frac{21}{128} \\approx 0.164$.",
+  "Local de Moivre–Laplace theorem": "Локальная теорема Муавра — Лапласа",
+  "For large $n$ the binomial probabilities follow the normal bell.": "При больших $n$ биномиальные вероятности следуют нормальной колоколообразной кривой.",
+  "Integral theorem": "Интегральная теорема",
+  "The probability that the count falls in a range is an area under the normal curve.": "Вероятность того, что число успехов попадёт в промежуток, равна площади под нормальной кривой.",
+  "$n = 5000,\\ p = 0.01$, $\\;P(0 \\le k \\le 50)$: exact 0.5375, normal 0.5. The continuity correction closes most of the gap.": "При $n = 5000,\\ p = 0.01$ и $\\;P(0 \\le k \\le 50)$: точное значение 0.5375, нормальное приближение 0.5. Поправка на непрерывность устраняет большую часть расхождения.",
+  "Poisson approximation": "Приближение Пуассона",
+  "When $p$ is small and $np = \\lambda$ is moderate, rare events follow the Poisson law.": "Если $p$ мало, а $np = \\lambda$ умеренно, редкие события подчиняются закону Пуассона."
+}

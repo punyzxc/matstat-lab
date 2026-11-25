@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { PALETTE } from './specs.mjs';
+import { int, plural, t, texDec } from '../../i18n-core';
 import { ksToNormal, phi, replicate, sourceOf, SOURCES, zSample, type Source } from './clt-model.mjs';
 import { clamp01, ease, easeInOut, Label, lerp, rgba, useCanvasLoop, useThrottledReport, type FigureProps, type Frame } from './kit';
 
@@ -96,29 +97,29 @@ export function CltFactory({ beat, params, seed, hot, onHot, playing, reduced, r
       onMouseLeave={() => onHot(null)}
     >
       <canvas ref={canvas} className="figure-canvas" role="img"
-        aria-label={`Normal distribution factory: ${src.id} terms, n = ${n}, ${sim.current.main.landed} standardized sums in the histogram.`} />
+        aria-label={t(`Normal distribution factory: ${src.id} terms, n = ${n}, ${sim.current.main.landed} standardized sums in the histogram.`, `Фабрика нормального распределения: n = ${n}, в гистограмме ${sim.current.main.landed} нормированных сумм.`)} />
       {!race ? (
         <>
-          <Label x={0.03} y={0.03} hot={hot === 'X'}>{`one term $X \\sim ${src.tex(p)}$`}</Label>
+          <Label x={0.03} y={0.03} hot={hot === 'X'}>{t(`one term $X \\sim ${src.tex(p)}$`, `одно слагаемое $X \\sim ${texDec(src.tex(p))}$`)}</Label>
           <Label x={srcFrac(src, src.mean(p))} y={0.045} hot={hot === 'a' || hot === 'sigma'} className="figure-mark">{'$a$'}</Label>
-          <Label x={0.03} y={0.315} hot={hot === 'S' || hot === 'n'} dim={dimMachine}>{`$n = ${n}$ terms add up: $S_n = X_1 + \\dots + X_n$`}</Label>
-          {slow && shown.sum != null && <Label x={0.5} y={0.405} align="middle" hot={hot === 'S'} className="figure-chip">{`$S_n = ${fmt(shown.sum)}$`}</Label>}
+          <Label x={0.03} y={0.315} hot={hot === 'S' || hot === 'n'} dim={dimMachine}>{t(`$n = ${n}$ terms add up: $S_n = X_1 + \\dots + X_n$`, `$n = ${n}$ слагаемых складываются: $S_n = X_1 + \\dots + X_n$`)}</Label>
+          {slow && shown.sum != null && <Label x={0.5} y={0.405} align="middle" hot={hot === 'S'} className="figure-chip">{`$S_n = ${texDec(fmt(shown.sum))}$`}</Label>}
           <Label x={0.62} y={0.505} hot={hot === 'z' || hot === 'a' || hot === 'sigma'} dim={dimMachine}>{'$z = \\dfrac{S_n - na}{\\sigma\\sqrt{n}}$'}</Label>
-          {slow && shown.z != null && <Label x={0.38} y={0.505} align="end" className="figure-chip">{`$z = ${fmt(shown.z)}$`}</Label>}
-          <Label x={0.03} y={0.6} hot={hot === 'z' || hot === 'count'} dim={dimHist && beat === 'source'}>{`histogram of $z$ · ${sim.current.main.landed.toLocaleString('en-US')} sums`}</Label>
+          {slow && shown.z != null && <Label x={0.38} y={0.505} align="end" className="figure-chip">{`$z = ${texDec(fmt(shown.z))}$`}</Label>}
+          <Label x={0.03} y={0.6} hot={hot === 'z' || hot === 'count'} dim={dimHist && beat === 'source'}>{t(`histogram of $z$ · ${int(sim.current.main.landed)} sums`, `гистограмма $z$ · ${int(sim.current.main.landed)} ${plural(sim.current.main.landed, 'сумма', 'суммы', 'сумм')}`)}</Label>
           {beat === 'normal' && <Label x={0.97} y={0.6} align="end" hot={hot === 'Phi' || hot === 'ks'}>{'$\\varphi(z) = \\tfrac{1}{\\sqrt{2\\pi}}\\,e^{-z^2/2}$'}</Label>}
         </>
       ) : (
         <>
           {SOURCES.map((s, i) => (
-            <Label key={s.id} x={(i + 0.5) / 3} y={0.03} align="middle">{`$X \\sim ${s.tex(p)}$`}</Label>
+            <Label key={s.id} x={(i + 0.5) / 3} y={0.03} align="middle">{`$X \\sim ${texDec(s.tex(p))}$`}</Label>
           ))}
           {SOURCES.map((s, i) => (
             <Label key={s.id + 'ks'} x={(i + 0.5) / 3} y={0.9} align="middle" hot={hot === 'ks'} className="figure-chip">
-              {`$D = ${shown.ks[i] == null ? '\\text{—}' : (shown.ks[i] as number).toFixed(3)}$`}
+              {`$D = ${shown.ks[i] == null ? '\\text{—}' : texDec((shown.ks[i] as number).toFixed(3))}$`}
             </Label>
           ))}
-          <Label x={0.5} y={0.25} align="middle">{`$n = ${n}$ terms in every sum`}</Label>
+          <Label x={0.5} y={0.25} align="middle">{t(`$n = ${n}$ terms in every sum`, `$n = ${n}$ слагаемых в каждой сумме`)}</Label>
         </>
       )}
     </div>

@@ -3,3 +3,4 @@ export function formatLive(value: number | null | undefined, digits?: number, tr
 export function expandLiveTex(src: string, o?: { values?: Record<string, number>; results?: Record<string, number | null>; digits?: Record<string, number> }): string;
 export const LIVE_KATEX: { throwOnError: boolean; strict: 'ignore'; output: 'html'; trust: (ctx: { command: string }) => boolean };
 export function snapValue(text: string, range?: { min?: number; max?: number; step?: number }): number | null;
+export function stripLiveTex(src: string): string;

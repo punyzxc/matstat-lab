@@ -1,11 +1,12 @@
 import type { ModuleId } from '../modules';
+import { localized } from '../i18n-core';
 
 /** Lecture blocks. Each one is an orbit of stations around the globe (docs/research/lecture-module-map.md). */
 export const orbits = [
-  { id: 'probability', numeral: 'I', name: 'Probability', lectures: 'L1–L3' },
-  { id: 'variables', numeral: 'II', name: 'Random variables', lectures: 'L4–L6' },
-  { id: 'limits', numeral: 'III', name: 'Limit theorems', lectures: 'L6–L9' },
-  { id: 'statistics', numeral: 'IV', name: 'Statistics', lectures: 'L10–L12' },
+  localized({ id: 'probability', numeral: 'I', name: 'Probability', lectures: 'L1–L3' } as const, { name: 'Вероятность', lectures: 'Лекции 1–3' }),
+  localized({ id: 'variables', numeral: 'II', name: 'Random variables', lectures: 'L4–L6' } as const, { name: 'Случайные величины', lectures: 'Лекции 4–6' }),
+  localized({ id: 'limits', numeral: 'III', name: 'Limit theorems', lectures: 'L6–L9' } as const, { name: 'Предельные теоремы', lectures: 'Лекции 6–9' }),
+  localized({ id: 'statistics', numeral: 'IV', name: 'Statistics', lectures: 'L10–L12' } as const, { name: 'Статистика', lectures: 'Лекции 10–12' }),
 ] as const;
 export type OrbitId = (typeof orbits)[number]['id'];
 
@@ -54,7 +55,7 @@ export const stations: readonly Station[] = [
     summary: 'Repeat samples: $s^2$ with divisor $n$ is biased, with $n - 1$ it is not. Compare their MSE.' },
   { kind: 'kernel', id: 'confidence', name: 'Confidence Intervals', orbit: 'statistics', lectures: 'L11', kernel: 'lecture-estimation-intervals', issue: 46,
     summary: 'Build normal, $t$ and $\\chi^2$ intervals for the mean and variance; measure how often they cover the truth.' },
-  { kind: 'kernel', id: 'testing', name: 'Hypothesis Testing', orbit: 'statistics', lectures: 'L11', kernel: 'lecture-hypothesis-tests', issue: 97,
+  { kind: 'kernel', id: 'testing', name: 'Hypothesis Testing', orbit: 'statistics', lectures: 'L12', kernel: 'lecture-hypothesis-tests', issue: 97,
     summary: 'Type $H_0\\colon a = a_0$ and the truth; watch repeated tests reject at rate $\\alpha$ or $1 - \\beta$, on a 3D power surface.' },
   { kind: 'kernel', id: 'homogeneity', name: 'Homogeneity', orbit: 'statistics', lectures: 'L11', kernel: 'lecture-estimation-intervals', issue: 46,
     summary: 'Test whether two series of trials share one probability p (z-test, formula 139).' },
@@ -64,6 +65,35 @@ export const stations: readonly Station[] = [
   { kind: 'kernel', id: 'contract-fixture', name: 'Contract fixture', orbit: 'probability', lectures: 'L1', kernel: 'scene-module-host', issue: 37, hidden: true,
     summary: 'Test fixture for the kernel contract; reachable only by URL.' },
 ];
+
+/** Russian names and summaries (i18n/README.md); the English above stays the source. */
+const ru: Record<string, { name: string; summary: string }> = {
+  urn: { name: 'Урна', summary: 'Упорядоченные и неупорядоченные выборки с возвращением и без: подсчитайте и разыграйте.' },
+  frequency: { name: 'Частота', summary: 'Посмотрите, как относительная частота события устанавливается около его вероятности.' },
+  darts: { name: 'Дартс', summary: 'Бросайте точки в область: сравните долю попаданий с отношением площадей и три способа Бертрана провести хорду.' },
+  bayes: { name: 'Байес', summary: 'Условная, полная и апостериорная вероятности как подсчёт смоделированных исходов.' },
+  bernoulli: { name: 'Бернулли', summary: 'Сравните точный биномиальный закон с приближениями Муавра — Лапласа и Пуассона.' },
+  distribution: { name: 'Исследование распределения', summary: 'Разыграйте выборку и сравните её форму с теоретической моделью.' },
+  moments: { name: 'Моменты', summary: 'Сравните среднее, медиану, моду, асимметрию и эксцесс с теорией; проверьте правило $3\\sigma$.' },
+  transform: { name: 'Преобразование', summary: 'Пропустите выборку через $y = \\varphi(x)$ и сравните её с плотностью преобразованной величины.' },
+  scatter: { name: 'Рассеяние', summary: 'Разыграйте случайный вектор: ковариация, коэффициент корреляции и обе прямые регрессии.' },
+  convolution: { name: 'Композиция', summary: 'Сложите равномерные величины и сравните точную кусочную плотность с моделью суммы.' },
+  convergence: { name: 'Сходимость', summary: 'Следите за скользящим выборочным средним по мере роста числа наблюдений.' },
+  lln: { name: 'Чебышёв и ЗБЧ', summary: 'Граница Чебышёва $1/k^2$ против настоящих хвостов; средние стабилизируются — кроме закона Коши.' },
+  clt: { name: 'ЦПТ', summary: 'Стандартизуйте суммы независимых величин и сравните их с нормальным законом.' },
+  sample: { name: 'Выборка', summary: 'Постройте вариационный ряд, таблицу частот, гистограмму и эмпирическую функцию распределения.' },
+  fit: { name: 'Согласие', summary: 'Проверьте гипотезу о законе распределения по критериям Колмогорова и $\\chi^2$ Пирсона.' },
+  estimation: { name: 'Оценивание', summary: 'Повторяйте выборки: $s^2$ с делителем $n$ смещена, с $n - 1$ — нет. Сравните их средний квадрат ошибки.' },
+  confidence: { name: 'Доверительные интервалы', summary: 'Постройте нормальный, $t$- и $\\chi^2$-интервалы для среднего и дисперсии; измерьте, как часто они накрывают истинное значение.' },
+  testing: { name: 'Проверка гипотез', summary: 'Задайте $H_0\\colon a = a_0$ и истину: повторные проверки отвергают $H_0$ с частотой $\\alpha$ или $1 - \\beta$; 3D-поверхность мощности.' },
+  homogeneity: { name: 'Однородность', summary: 'Проверьте, одна ли вероятность $p$ у двух серий испытаний ($z$-критерий, формула 139).' },
+  randomness: { name: 'Случайность', summary: 'Подсчитайте серии по обе стороны от медианы модели в исходном порядке значений.' },
+  'contract-fixture': { name: 'Тестовое ядро', summary: 'Тестовое ядро для проверки контракта; открывается только по ссылке.' },
+};
+/** Lecture references in Russian, with their word: «Лекция 6», «Лекции 1 · 4» (English adds "Lecture" where it shows them). */
+const ruLectures = (l: string) =>
+  l === 'extra' ? 'Вне лекций' : `${l.includes('·') ? 'Лекции' : 'Лекция'} ${l.replace(/L(?=\d)/g, '')}`;
+for (const s of stations) localized(s, { ...ru[s.id], lectures: ruLectures(s.lectures) });
 
 /** Each orbit holds at most six stations: the six slots around the globe. */
 export const stationsOf = (orbit: OrbitId) => stations.filter((s) => s.orbit === orbit && !s.hidden);

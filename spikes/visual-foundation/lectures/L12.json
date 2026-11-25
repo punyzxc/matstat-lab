@@ -21,9 +21,13 @@
         "station": "testing",
         "seed": 1212,
         "params": {
-          "dist": 0,
-          "n": 128,
-          "scale": 1
+          "sigmaKnown": 1,
+          "a0": 0,
+          "mu": 0.5,
+          "sigma": 1,
+          "n": 16,
+          "tail": 1,
+          "truth": 1
         }
       }
     },

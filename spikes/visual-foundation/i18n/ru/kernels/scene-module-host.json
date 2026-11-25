@@ -1,0 +1,10 @@
+{
+  "Contract fixture: frequency of an event with probability $p$": "Контрольная станция: частота события с вероятностью $p$",
+  "Probability $p$": "Вероятность $p$",
+  "Trials $n$": "Число испытаний $n$",
+  "Relative frequency $m/n$": "Относительная частота $m/n$",
+  "Hits $m$": "Число успехов $m$",
+  "At n = [[1]] the band half-width is [[2]].": "При $n = [[1]]$ полуширина полосы равна [[2]].",
+  "trials k": "число испытаний $k$",
+  "relative frequency": "относительная частота"
+}

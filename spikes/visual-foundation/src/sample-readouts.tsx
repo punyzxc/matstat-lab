@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { histogram, sources, type RunSettings } from './statistics';
+import { dec, t } from './i18n';
 const pad = (n: number) => String(n).padStart(2, '0');
-const num = (n: number) => n.toFixed(3);
+const num = (n: number) => dec(n.toFixed(3));
 export function Trace({ sample, animate }: { sample: number[]; animate: boolean }) {
   const trace = useRef<SVGSVGElement>(null);
   const [index, setIndex] = useState(0);
@@ -36,7 +37,7 @@ export function Trace({ sample, animate }: { sample: number[]; animate: boolean 
         viewBox="0 0 240 64"
         preserveAspectRatio="none"
         role="img"
-        aria-label={`Trace of ${sample.length} observations. Vertical range plus or minus ${num(span)}.`}
+        aria-label={t(`Trace of ${sample.length} observations. Vertical range plus or minus ${num(span)}.`, `Трасса из ${sample.length} наблюдений. Вертикальный диапазон: плюс-минус ${num(span)}.`)}
       >
         <path
           d="M0 10H240M0 32H240M0 54H240M48 4V60M96 4V60M144 4V60M192 4V60"
@@ -70,7 +71,7 @@ export function Trace({ sample, animate }: { sample: number[]; animate: boolean 
       </svg>
       <div className="axis-pair">
         <span>
-          DRAW {pad(index + 1)} / {sample.length}
+          {t('DRAW', 'ЗНАЧЕНИЕ')} {pad(index + 1)} / {sample.length}
         </span>
         <span className="trace-value">{num(sample[index])}</span>
       </div>
@@ -86,7 +87,7 @@ export function Matrix({ sample, settings }: { sample: number[]; settings: RunSe
       <div
         className="matrix-wrap"
         role="img"
-        aria-label={`Histogram of the session sample. Bin counts in ascending order: ${h.counts.join(', ')}. ${h.outside} outside the domain.`}
+        aria-label={t(`Histogram of the session sample. Bin counts in ascending order: ${h.counts.join(', ')}. ${h.outside} outside the domain.`, `Гистограмма выборки сеанса. Частоты интервалов по возрастанию: ${h.counts.join(', ')}. Вне области: ${h.outside}.`)}
       >
         {Array.from({ length: 8 }, (_, i) => (
           <pre key={i} aria-hidden="true">
@@ -106,11 +107,11 @@ export function Matrix({ sample, settings }: { sample: number[]; settings: RunSe
         ))}
       </div>
       <div className="axis-pair">
-        <span>{domain[0].toFixed(1)}</span>
-        <span>34 BINS</span>
-        <span>{domain[1].toFixed(1)}</span>
+        <span>{dec(domain[0].toFixed(1))}</span>
+        <span>{t('34 BINS', '34 ИНТЕРВАЛА')}</span>
+        <span>{dec(domain[1].toFixed(1))}</span>
       </div>
-      {h.outside > 0 && <p className="outside-count">{h.outside} outside range</p>}
+      {h.outside > 0 && <p className="outside-count">{t(`${h.outside} outside range`, `Вне диапазона: ${h.outside}`)}</p>}
     </div>
   );
 }

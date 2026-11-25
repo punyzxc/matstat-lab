@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
-import { FIGURES, figureParams, type FigureSpec } from './specs.mjs';
+import { FIGURES, figureParams, russianSpec, type FigureSpec } from './specs.mjs';
+import { getLang } from '../../i18n-core';
 import type { FigureProps } from './kit';
 import { CltFactory } from './clt-factory';
 import { CiWall } from './ci-wall';
@@ -10,9 +11,16 @@ const components: Record<string, ComponentType<FigureProps>> = {
   'ci-wall': CiWall,
 };
 
+const russian = new Map<string, FigureSpec>();
+
+/** The figure and its spec in the current language. */
 export function findFigure(id: string): { spec: FigureSpec; Component: ComponentType<FigureProps> } | null {
   const spec = FIGURES[id], Component = components[id];
-  return spec && Component ? { spec, Component } : null;
+  if (!spec || !Component) return null;
+  if (getLang() === 'en') return { spec, Component };
+  let ru = russian.get(id);
+  if (!ru) russian.set(id, (ru = russianSpec(id, spec)));
+  return { spec: ru, Component };
 }
 export { figureParams };
 export type { FigureProps };

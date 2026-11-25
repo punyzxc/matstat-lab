@@ -1,24 +1,39 @@
-/**
- * Every interface string of the story lectures in one place, so the language toggle can swap them.
- * Text with `$…$` is typeset.
- */
+import { t } from '../i18n-core';
+
+/** Every interface string of the story lectures, in the current language (read at render time). */
 export const STORY_TEXT = {
-  editHint: 'Press Enter or type a number to change it; arrow keys step it.',
-  editShort: 'click or type to change',
-  demo: 'Demo',
-  explore: 'Explore',
-  demoHint: 'Each step sets the experiment up for you.',
-  exploreHint: 'Your values stay as you read on. Type any of them.',
-  whatIf: 'What if…',
-  layers: { intuition: 'Intuition', definition: 'Definition', formula: 'Formula', details: 'Details & proof' },
-  openStation: 'Open the full station',
-  noStation: 'This source has no full station yet',
-  pause: 'Pause',
-  play: 'Play',
-  restart: 'Restart',
-  step: 'Step',
-  keys: 'scroll or ← → · Space pause · E explore',
-  figureLabel: 'Live figure',
-  reset: 'Back to the step’s values',
-  scientists: 'In history',
-} as const;
+  get editHint() { return t('Press Enter or type a number to change it; arrow keys step it.', 'Нажмите Enter или введите число, чтобы изменить; стрелки меняют на шаг.'); },
+  get editShort() { return t('click or type to change', 'щёлкните или введите число'); },
+  get demo() { return t('Demo', 'Демо'); },
+  get explore() { return t('Explore', 'Исследовать'); },
+  get demoHint() { return t('Each step sets the experiment up for you.', 'Каждый шаг сам настраивает эксперимент.'); },
+  get exploreHint() { return t('Your values stay as you read on. Type any of them.', 'Ваши значения сохраняются при чтении дальше. Любое можно ввести с клавиатуры.'); },
+  get whatIf() { return t('What if…', 'А что, если…'); },
+  get layers() {
+    return {
+      intuition: t('Intuition', 'Интуиция'),
+      definition: t('Definition', 'Определение'),
+      formula: t('Formula', 'Формула'),
+      details: t('Details & proof', 'Подробности и доказательство'),
+    };
+  },
+  get openStation() { return t('Open the full station', 'Открыть всю станцию'); },
+  get noStation() { return t('This source has no full station yet', 'Для этого закона пока нет полной станции'); },
+  get pause() { return t('Pause', 'Пауза'); },
+  get play() { return t('Play', 'Пуск'); },
+  get restart() { return t('Restart', 'Заново'); },
+  get step() { return t('Step', 'Шаг'); },
+  get keys() { return t('scroll or ← → · Space pause · E explore', 'прокрутка или ← → · Пробел пауза · E исследовать'); },
+  get figureLabel() { return t('Live figure', 'Живая иллюстрация'); },
+  get scientists() { return t('In history', 'В истории'); },
+  get mode() { return t('Mode', 'Режим'); },
+  get steps() { return t('Steps', 'Шаги'); },
+  get prev() { return t('Previous step', 'Предыдущий шаг'); },
+  get next() { return t('Next step', 'Следующий шаг'); },
+  get presenter() { return t('Presenter', 'Показ'); },
+  get presenterTitle() { return t('Presenter mode (P)', 'Режим показа (P)'); },
+  get example() { return t('Example', 'Пример'); },
+  get workedExample() { return t('Worked example', 'Разобранный пример'); },
+  get notes() { return t('Teacher notes.', 'Заметки преподавателя.'); },
+  get openExperiment() { return t('Open experiment', 'Открыть эксперимент'); },
+};

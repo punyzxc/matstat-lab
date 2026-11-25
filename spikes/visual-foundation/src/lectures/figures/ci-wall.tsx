@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { MathText } from '../../math';
 import { PALETTE } from './specs.mjs';
+import { dec, int, t, texDec } from '../../i18n-core';
 import { intervalAt, type Interval } from './ci-model.mjs';
 import { clamp01, ease, easeInOut, Label, lerp, rgba, useCanvasLoop, useThrottledReport, type FigureProps, type Frame } from './kit';
 
@@ -64,20 +65,20 @@ export function CiWall({ beat, params, seed, hot, onHot, playing, reduced, runKe
       onMouseLeave={() => onHot(null)}
     >
       <canvas ref={canvas} className="figure-canvas" role="img"
-        aria-label={`Confidence interval wall: n = ${n}, gamma = ${gamma}; ${shown.hits} of ${shown.count} intervals cover the true mean.`} />
-      <Label x={0.03} y={0.025}>{`one sample of $n = ${n}$ from $${law ? '\\text{a skewed law}' : 'N(a,\\,\\sigma^2)'}$`}</Label>
+        aria-label={t(`Confidence interval wall: n = ${n}, gamma = ${gamma}; ${shown.hits} of ${shown.count} intervals cover the true mean.`, `Стена доверительных интервалов: n = ${n}, γ = ${dec(String(gamma))}; ${shown.hits} из ${shown.count} интервалов накрывают истинное среднее.`)} />
+      <Label x={0.03} y={0.025}>{law ? t(`one sample of $n = ${n}$ from a skewed law`, `одна выборка объёма $n = ${n}$ из асимметричного закона`) : t(`one sample of $n = ${n}$ from $N(a,\\,\\sigma^2)$`, `одна выборка объёма $n = ${n}$ из $N(a,\\,\\sigma^2)$`)}</Label>
       <Label x={frac(MU)} y={0.055} align="middle" hot={hot === 'a'} className="figure-mark">{'$a$'}</Label>
       {last && beat !== 'wall' && (
-        <Label x={frac(Math.min(D1, Math.max(D0, last.estimate)))} y={0.205} align="middle" hot={hot === 'xbar'} className="figure-chip">{`$\\bar{x} = ${last.estimate.toFixed(2).replace('-', '−')}$`}</Label>
+        <Label x={frac(Math.min(D1, Math.max(D0, last.estimate)))} y={0.205} align="middle" hot={hot === 'xbar'} className="figure-chip">{`$\\bar{x} = ${texDec(last.estimate.toFixed(2))}$`}</Label>
       )}
-      <Label x={0.03} y={0.33} dim={beat === 'sample'}>{`every new sample adds one interval $\\bar{x} \\pm ${method ? 'z' : 't'}_{\\gamma}\\dfrac{s}{\\sqrt{n}}$`}</Label>
+      <Label x={0.03} y={0.33} dim={beat === 'sample'}>{t(`every new sample adds one interval $\\bar{x} \\pm ${method ? 'z' : 't'}_{\\gamma}\\dfrac{s}{\\sqrt{n}}$`, `каждая новая выборка добавляет интервал $\\bar{x} \\pm ${method ? 'z' : 't'}_{\\gamma}\\dfrac{s}{\\sqrt{n}}$`)}</Label>
       <div className={`ci-gauge${hot === 'cover' || hot === 'gamma' ? ' is-hot' : ''}`} aria-live="off">
-        <span className="ci-gauge-label">covered</span>
-        <b data-testid="ci-coverage">{cover == null ? '—' : (cover * 100).toFixed(1) + '%'}</b>
-        <span className="ci-gauge-count">{shown.hits.toLocaleString('en-US')} of {shown.count.toLocaleString('en-US')}</span>
+        <span className="ci-gauge-label">{t('covered', 'накрыли')}</span>
+        <b data-testid="ci-coverage">{cover == null ? '—' : dec((cover * 100).toFixed(1)) + '%'}</b>
+        <span className="ci-gauge-count">{int(shown.hits)} {t('of', 'из')} {int(shown.count)}</span>
         <div className="ci-gauge-bar">
           <i style={{ height: `${(cover ?? 0) * 100}%` }} />
-          <em style={{ bottom: `${gamma * 100}%` }}><span className="ci-gauge-gamma"><MathText text={`$\\gamma = ${gamma}$`} /></span></em>
+          <em style={{ bottom: `${gamma * 100}%` }}><span className="ci-gauge-gamma"><MathText text={`$\\gamma = ${texDec(String(gamma))}$`} /></span></em>
         </div>
       </div>
     </div>

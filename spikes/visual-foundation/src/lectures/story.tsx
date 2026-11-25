@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { ArrowDown, ArrowUp, Compass, Expand, Pause, Play, Presentation, RotateCcw, Sparkles } from 'lucide-react';
 import { MathText, Tex, mathToPlain } from '../math';
+import { lectureFormula, lectureText, scientistText } from '../i18n';
 import { Slider } from '../ui';
 import { useStationReducedMotion } from '../motion-preference';
 import { findStation } from '../stations/catalog';
@@ -193,7 +194,7 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
             <b data-testid="story-beat"><MathText text={spec?.beatTitles[ref.beat] ?? ref.beat} /></b>
           </div>
           <div className="story-tools">
-            <div className="story-mode" role="group" aria-label="Mode">
+            <div className="story-mode" role="group" aria-label={T.mode}>
               <button type="button" aria-pressed={mode === 'demo'} onClick={() => mode !== 'demo' && toggleMode()} title={T.demoHint}>
                 <Sparkles size={13} aria-hidden="true" /> {T.demo}
               </button>
@@ -234,14 +235,14 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
       </div>
 
       <footer className="story-foot">
-        <nav className="story-dots" aria-label="Steps">
+        <nav className="story-dots" aria-label={T.steps}>
           {lecture.steps.map((s, i) => (
             <a key={i} href={lectureHash({ n: lecture.lecture, step: i + 1, present })} aria-current={i + 1 === active ? 'step' : undefined}
               onClick={(e) => {
                 e.preventDefault();
                 scrollToStep(i + 1);
               }}>
-              <span className="sr-only"><MathText text={s.title} /></span>
+              <span className="sr-only"><MathText text={lectureText(lecture.lecture, s.title)} /></span>
             </a>
           ))}
         </nav>
@@ -249,11 +250,11 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
           {T.step} <b>{active}</b> / {total}
         </p>
         <p className="lecture-keys" aria-hidden="true">{T.keys}</p>
-        <button type="button" className="story-icon" onClick={() => scrollToStep(active - 1)} disabled={active === 1} aria-label="Previous step"><ArrowUp size={15} aria-hidden="true" /></button>
-        <button type="button" className="story-icon" onClick={() => scrollToStep(active + 1)} disabled={active === total} aria-label="Next step"><ArrowDown size={15} aria-hidden="true" /></button>
+        <button type="button" className="story-icon" onClick={() => scrollToStep(active - 1)} disabled={active === 1} aria-label={T.prev}><ArrowUp size={15} aria-hidden="true" /></button>
+        <button type="button" className="story-icon" onClick={() => scrollToStep(active + 1)} disabled={active === total} aria-label={T.next}><ArrowDown size={15} aria-hidden="true" /></button>
         <button type="button" className="lecture-nav lecture-present" aria-pressed={present}
-          onClick={() => (window.location.hash = lectureHash({ n: lecture.lecture, step: active, present: !present }))} title="Presenter mode (P)">
-          <Presentation size={15} aria-hidden="true" /> <span>Presenter</span>
+          onClick={() => (window.location.hash = lectureHash({ n: lecture.lecture, step: active, present: !present }))} title={T.presenterTitle}>
+          <Presentation size={15} aria-hidden="true" /> <span>{T.presenter}</span>
         </button>
       </footer>
     </div>
@@ -269,6 +270,7 @@ type SectionProps = {
 
 function StorySection({ step: s, index, active, present, lecture, figureId, params, results, hot, onHot, onParam, onWhatIf, onFocusStep, ref }: SectionProps) {
   const fig = findFigure(figureId)?.spec;
+  const tx = (v: string) => lectureText(lecture.lecture, v);
   const e = s.experiment, station = e ? findStation(e.station) : null;
   const same = (p: Record<string, number>) => Object.entries(p).every(([k, v]) => Math.abs((params[k] ?? NaN) - v) < 1e-9);
   const layers: [keyof typeof T.layers, string][] = [];
@@ -280,25 +282,25 @@ function StorySection({ step: s, index, active, present, lecture, figureId, para
     <section ref={ref} className={`story-step${active ? ' is-active' : ''}`} data-step={index} aria-current={active ? 'step' : undefined}
       onFocus={onFocusStep} aria-labelledby={`story-step-${index}`}>
       <p className="story-step-n">{String(index).padStart(2, '0')}</p>
-      <h3 id={`story-step-${index}`}><MathText text={s.title} /></h3>
-      <p className="lecture-idea"><MathText text={s.idea} /></p>
+      <h3 id={`story-step-${index}`}><MathText text={tx(s.title)} /></h3>
+      <p className="lecture-idea"><MathText text={tx(s.idea)} /></p>
       {s.live?.length && fig ? (
         <div className="story-live">
           {s.live.map((tex, i) => (
-            <LiveFormula key={i} tex={tex} values={params} results={results} params={fig.params} vars={fig.vars} hot={hot} onHot={onHot} onChange={onParam} />
+            <LiveFormula key={i} tex={tx(tex)} values={params} results={results} params={fig.params} vars={fig.vars} hot={hot} onHot={onHot} onChange={onParam} />
           ))}
         </div>
       ) : s.formula?.length ? (
         <div className="lecture-formula" data-testid="lecture-formula">
-          {s.formula.map((line, i) => <Tex key={i} tex={line} display />)}
+          {s.formula.map((line, i) => <Tex key={i} tex={lectureFormula(lecture.lecture, line)} display />)}
         </div>
       ) : null}
       {s.whatIf?.length ? (
         <div className="story-whatif" role="group" aria-label={T.whatIf}>
           <span>{T.whatIf}</span>
           {s.whatIf.map((w, i) => (
-            <button key={i} type="button" aria-pressed={same(w.params)} aria-label={`${T.whatIf} ${mathToPlain(w.label)}`} onClick={() => onWhatIf(w.params)}>
-              <MathText text={w.label} />
+            <button key={i} type="button" aria-pressed={same(w.params)} aria-label={`${T.whatIf} ${mathToPlain(tx(w.label))}`} onClick={() => onWhatIf(w.params)}>
+              <MathText text={tx(w.label)} />
             </button>
           ))}
         </div>
@@ -309,18 +311,18 @@ function StorySection({ step: s, index, active, present, lecture, figureId, para
             <details key={kind} className={`story-layer story-layer--${kind}`}>
               <summary>{T.layers[kind]}</summary>
               {kind === 'formula' ? (
-                <div className="lecture-formula">{s.formula!.map((line, i) => <Tex key={i} tex={line} display />)}</div>
+                <div className="lecture-formula">{s.formula!.map((line, i) => <Tex key={i} tex={lectureFormula(lecture.lecture, line)} display />)}</div>
               ) : (
-                <p><MathText text={text} /></p>
+                <p><MathText text={tx(text)} /></p>
               )}
             </details>
           ))}
         </div>
       ) : null}
       {s.example && (
-        <section className="lecture-example" aria-label="Worked example">
-          <h4>Example</h4>
-          <p><MathText text={s.example} /></p>
+        <section className="lecture-example" aria-label={T.workedExample}>
+          <h4>{T.example}</h4>
+          <p><MathText text={tx(s.example)} /></p>
         </section>
       )}
       {s.scientists?.length ? (
@@ -329,7 +331,7 @@ function StorySection({ step: s, index, active, present, lecture, figureId, para
             const p = scientists.find((x) => x.slug === slug);
             return p ? (
               <p key={slug} className="story-person" data-slug={slug}>
-                <b>{p.name}</b> <span>{p.years}</span> <MathText text={p.contribution} />
+                <b>{scientistText(slug, 'name', p.name)}</b> <span>{p.years}</span> <MathText text={scientistText(slug, 'contribution', p.contribution)} />
               </p>
             ) : null;
           })}
@@ -337,10 +339,10 @@ function StorySection({ step: s, index, active, present, lecture, figureId, para
       ) : null}
       {e && station && (
         <a className="story-link" href={stationHash(e.station, e.seed ?? null, e.params ?? {}, { n: lecture.lecture, step: index, present })}>
-          {e.label ?? 'Open experiment'} <span>{station.name}</span>
+          <MathText text={e.label ? tx(e.label) : T.openExperiment} /> <span>{station.name}</span>
         </a>
       )}
-      {present && s.notes && <p className="lecture-notes"><b>Teacher notes.</b> <MathText text={s.notes} /></p>}
+      {present && s.notes && <p className="lecture-notes"><b>{T.notes}</b> <MathText text={tx(s.notes)} /></p>}
     </section>
   );
 }

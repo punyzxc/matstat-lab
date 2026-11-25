@@ -3,6 +3,7 @@ import { MathText, Tex } from './math';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import './style.css';
+import './i18n-tables';
 import { StrictMode, useCallback, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Tabs from '@radix-ui/react-tabs';
@@ -23,6 +24,7 @@ import { lectureHash, orbitHash, parseRoute, stationHash, type Route } from './s
 import { findLecture, LectureList, LecturePlayer } from './lectures/player';
 import { SceneDock } from './stations/station-dock';
 import { Plot } from './plot.tsx';
+import { dec, lectureText, locale, plural, t, useLang } from './i18n';
 import { asciiHistogram, collect, histogram, initialSettings, moments, sources, type Distribution, type RunSettings } from './statistics.ts';
 
 /** Legacy stations take `n` (sample size), `scale` and `dist` (0 normal, 1 uniform, 2 exponential) from the hash, clamped to their sliders. */
@@ -46,13 +48,14 @@ const newRun = (settings: RunSettings, immediate: boolean, record = false): Run 
   record, settings, all: collect(settings), shown: immediate ? settings.count : 0, phase: immediate ? 'complete' : 'running',
 });
 
-const number = new Intl.NumberFormat('en-US');
-const fixed = (value: number | null | undefined) => value == null ? '—' : (Math.abs(value) < 0.0005 ? 0 : value).toFixed(3);
+const number = { format: (v: number) => v.toLocaleString(locale()) };
+const fixed = (value: number | null | undefined) => value == null ? '—' : dec((Math.abs(value) < 0.0005 ? 0 : value).toFixed(3));
 const modes = ['Histogram', 'ECDF', 'ASCII'] as const;
+const modeName = (m: (typeof modes)[number]) => m === 'Histogram' ? t('Histogram', 'Гистограмма') : m === 'ECDF' ? t('ECDF', 'ЭФР') : 'ASCII';
 const guide = {
-  Histogram: String.raw`Frequency density · $\dfrac{\text{count}}{n \times \text{bin width}}$`,
-  ECDF: String.raw`Cumulative probability · $F_n(x) = \dfrac{\#\{x_i \le x\}}{n}$`,
-  ASCII: 'Relative bin counts · @ marks occupied levels',
+  get Histogram() { return t(String.raw`Frequency density · $\dfrac{\text{count}}{n \times \text{bin width}}$`, String.raw`Плотность частоты · $\dfrac{\text{число}}{n \times \text{ширина интервала}}$`); },
+  get ECDF() { return t(String.raw`Cumulative probability · $F_n(x) = \dfrac{\#\{x_i \le x\}}{n}$`, String.raw`Накопленная частота · $F_n(x) = \dfrac{\#\{x_i \le x\}}{n}$`); },
+  get ASCII() { return t('Relative bin counts · @ marks occupied levels', 'Относительные частоты интервалов · @ отмечает заполненные уровни'); },
 };
 
 function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete: (value: RunSettings) => void }) {
@@ -143,21 +146,23 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
     setExported(true);
   }
 
-  const status = busy ? `Drawing · ${number.format(run.shown)} of ${number.format(run.settings.count)}` : run.phase === 'paused' ? 'Simulation paused' : `${number.format(run.shown)} observations complete`;
+  const status = busy ? t(`Drawing · ${number.format(run.shown)} of ${number.format(run.settings.count)}`, `Розыгрыш · ${number.format(run.shown)} из ${number.format(run.settings.count)}`)
+    : run.phase === 'paused' ? t('Simulation paused', 'Моделирование приостановлено')
+    : t(`${number.format(run.shown)} observations complete`, `Готово: ${number.format(run.shown)} ${plural(run.shown, 'наблюдение', 'наблюдения', 'наблюдений')}`);
 
   return <div id="workspace" className={projector ? 'station-legacy app--projector' : 'station-legacy'}>
     <div className="workspace-title">
-      <h2>Experiment workspace</h2>
-      <span className="workspace-actions"><Button variant="ghost" aria-pressed={projector} onClick={()=>setProjector(!projector)} title="Toggle projector mode">
-          {projector ? <Minimize size={14} aria-hidden/> : <Maximize size={14} aria-hidden/>}<span>Projector</span></Button>
-        <Button onClick={download} disabled={!sample.length} aria-label="Export CSV"><ArrowDownToLine size={15} aria-hidden /> {exported ? 'Exported' : 'Export CSV'}</Button></span>
+      <h2>{t('Experiment workspace', 'Рабочее место эксперимента')}</h2>
+      <span className="workspace-actions"><Button variant="ghost" aria-pressed={projector} onClick={()=>setProjector(!projector)} title={t('Toggle projector mode', 'Режим проектора')}>
+          {projector ? <Minimize size={14} aria-hidden/> : <Maximize size={14} aria-hidden/>}<span>{t('Projector', 'Проектор')}</span></Button>
+        <Button onClick={download} disabled={!sample.length} aria-label={t('Export CSV', 'Экспорт CSV')}><ArrowDownToLine size={15} aria-hidden /> {exported ? t('Exported', 'Сохранено') : t('Export CSV', 'Экспорт CSV')}</Button></span>
     </div>
 
     <div className="instrument-grid">
-      <Panel label="Simulation parameters" className="parameters">
-        <PanelHeading icon={<SlidersHorizontal size={16} aria-hidden />} title="Parameters" />
+      <Panel label={t('Simulation parameters', 'Параметры моделирования')} className="parameters">
+        <PanelHeading icon={<SlidersHorizontal size={16} aria-hidden />} title={t('Parameters', 'Параметры')} />
         <div className="parameter-body">
-          <label htmlFor="distribution">Distribution</label>
+          <label htmlFor="distribution">{t('Distribution', 'Распределение')}</label>
           <div className="select-field">
             <select id="distribution" name="distribution" value={draft.distribution}
               onChange={event => setDraft({ ...draft, distribution: event.currentTarget.value as Distribution })}>
@@ -165,69 +170,69 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
             </select>
             <ChevronDown size={16} aria-hidden />
           </div>
-          <fieldset aria-label="Sample parameters">
-            <Slider id="sample-size" label="Sample size" value={draft.count} display={number.format(draft.count)}
+          <fieldset aria-label={t('Sample parameters', 'Параметры выборки')}>
+            <Slider id="sample-size" label={t('Sample size', 'Объём выборки')} value={draft.count} display={number.format(draft.count)}
               min={64} max={2048} step={64} onChange={count => setDraft({ ...draft, count })} />
             <Slider id="distribution-scale" label={sources[draft.distribution].parameter} value={draft.scale}
-              display={draft.scale.toFixed(2)} min={0.5} max={2.5} step={0.05} onChange={scale => setDraft({ ...draft, scale })} />
+              display={dec(draft.scale.toFixed(2))} min={0.5} max={2.5} step={0.05} onChange={scale => setDraft({ ...draft, scale })} />
             <div className="seed-field">
-              <label htmlFor="seed">Random seed</label>
+              <label htmlFor="seed">{t('Random seed', 'Зерно генератора')}</label>
               <input inputMode="numeric" id="seed" name="seed" autoComplete="off" value={seedText}
                 aria-invalid={!validSeed} aria-describedby={!validSeed ? 'seed-error' : undefined}
                 onChange={event => setSeedText(event.currentTarget.value)} />
-              {!validSeed && <small id="seed-error">Enter an integer from 0 to 4,294,967,295.</small>}
+              {!validSeed && <small id="seed-error">{t('Enter an integer from 0 to 4,294,967,295.', 'Введите целое число от 0 до 4 294 967 295.')}</small>}
             </div>
           </fieldset>
         </div>
-        <p className="parameter-hint">Every change draws a new sample at once. Type exact values in the boxes.</p>
+        <p className="parameter-hint">{t('Every change draws a new sample at once. Type exact values in the boxes.', 'Любое изменение сразу разыгрывает новую выборку. Точные значения можно ввести в полях.')}</p>
       </Panel>
 
-      <Panel label="Experiment output" className="outputs">
-        <AutoplayBar playback={playback} onStep={nextDraw} stepLabel="New sample" announce status={status}
+      <Panel label={t('Experiment output', 'Результаты эксперимента')} className="outputs">
+        <AutoplayBar playback={playback} onStep={nextDraw} stepLabel={t('New sample', 'Новая выборка')} announce status={status}
           onRestart={() => setRun(newRun(run.settings, reduced === true, true))}
-          progress={run.phase !== 'complete' ? run.shown / run.settings.count : null} progressLabel="Simulation progress" />
+          progress={run.phase !== 'complete' ? run.shown / run.settings.count : null} progressLabel={t('Simulation progress', 'Ход моделирования')} />
         <Tabs.Root value={mode} onValueChange={value => setMode(value as (typeof modes)[number])}>
-          <PanelHeading icon={<Activity size={17} aria-hidden />} title="Distribution output"
-            trailing={<Tabs.List aria-label="Data view" className="tabs">{modes.map(item => <Tabs.Trigger key={item} value={item}>{item}</Tabs.Trigger>)}</Tabs.List>} />
+          <PanelHeading icon={<Activity size={17} aria-hidden />} title={t('Distribution output', 'Распределение выборки')}
+            trailing={<Tabs.List aria-label={t('Data view', 'Вид данных')} className="tabs">{modes.map(item => <Tabs.Trigger key={item} value={item}>{modeName(item)}</Tabs.Trigger>)}</Tabs.List>} />
           <div className="plot-toolbar">
-            <span className="plot-model">{run.settings.distribution === 'normal' ? 'Normal' : model.label} distribution <b><Tex tex={model.notation} /></b></span>
+            <span className="plot-model">{t(`${run.settings.distribution === 'normal' ? 'Normal' : model.label} distribution`, `${model.label.split(' (')[0]} распределение`)} <b><Tex tex={model.notation} /></b></span>
             <label className="theory-toggle">
               <input type="checkbox" checked={theory} disabled={mode === 'ASCII'} onChange={event => setTheory(event.currentTarget.checked)} />
-              <span aria-hidden /><span>Theory overlay</span>
+              <span aria-hidden /><span>{t('Theory overlay', 'Теоретическая кривая')}</span>
             </label>
           </div>
           {modes.map(item => <Tabs.Content key={item} value={item} className="tab-content">
             <motion.div initial={reduced ? false : { opacity: 0.45 }} animate={{ opacity: 1 }} transition={{ duration: reduced ? 0 : 0.16 }}>
-              <p className="plot-axis"><MathText text={item === 'Histogram' && run.phase !== 'complete' ? String.raw`Accumulating density · $\dfrac{\text{count}}{\text{target } n \times \text{bin width}}$` : guide[item]} /></p>
+              <p className="plot-axis"><MathText text={item === 'Histogram' && run.phase !== 'complete' ? t(String.raw`Accumulating density · $\dfrac{\text{count}}{\text{target } n \times \text{bin width}}$`, String.raw`Накопление плотности · $\dfrac{\text{число}}{\text{целевое } n \times \text{ширина интервала}}$`) : guide[item]} /></p>
               {item === 'ASCII' ?
                 <div className="ascii"><pre aria-hidden data-testid="ascii-data">{asciiHistogram(hist.counts, 12, Math.max(1, ...finalBins.counts))}</pre>
-                  <p>Bin counts · {number.format(sample.length)} observations</p></div>
+                  <p>{t(`Bin counts · ${number.format(sample.length)} observations`, `Частоты интервалов · наблюдений: ${number.format(sample.length)}`)}</p></div>
                 : <Plot sample={sample} settings={run.settings} mode={item === 'ECDF' ? 'ecdf' : 'histogram'} showTheory={theory} densityPeak={densityPeak} />}
             </motion.div>
           </Tabs.Content>)}
           <div className="chart-legend">
-            <span><i /> Observed sample</span>
-            {theory && mode !== 'ASCII' && <span><i className="line-key" /> Theoretical model</span>}
-            {hist.outside > 0 && <span>{hist.outside} outside visible range</span>}
+            <span><i /> {t('Observed sample', 'Наблюдаемая выборка')}</span>
+            {theory && mode !== 'ASCII' && <span><i className="line-key" /> {t('Theoretical model', 'Теоретическая модель')}</span>}
+            {hist.outside > 0 && <span>{t(`${hist.outside} outside visible range`, `Вне видимого диапазона: ${hist.outside}`)}</span>}
           </div>
         </Tabs.Root>
         <dl className="stats">
-          <Stat label="Sample mean" actual={fixed(summary?.mean)} theoretical={fixed(theoreticalMean)} id="sample-mean" />
-          <Stat label="Sample variance" actual={fixed(summary?.variance)} theoretical={fixed(theoreticalVariance)} />
-          <Stat label="Std. deviation" actual={fixed(summary?.deviation)} theoretical={fixed(Math.sqrt(theoreticalVariance))} />
-          <Stat label="Observations" referenceLabel="Target" actual={number.format(sample.length)} theoretical={number.format(run.settings.count)} />
+          <Stat label={t('Sample mean', 'Выборочное среднее')} actual={fixed(summary?.mean)} theoretical={fixed(theoreticalMean)} id="sample-mean" />
+          <Stat label={t('Sample variance', 'Выборочная дисперсия')} actual={fixed(summary?.variance)} theoretical={fixed(theoreticalVariance)} />
+          <Stat label={t('Std. deviation', 'Ср. кв. отклонение')} actual={fixed(summary?.deviation)} theoretical={fixed(Math.sqrt(theoreticalVariance))} />
+          <Stat label={t('Observations', 'Наблюдения')} referenceLabel={t('Target', 'Цель')} actual={number.format(sample.length)} theoretical={number.format(run.settings.count)} />
         </dl>
       </Panel>
     </div>
 
-    <Panel label="Theory and bin data" className="theory-panel">
-      <PanelHeading icon={<CircleHelp size={16} aria-hidden />} title="Reading the experiment" />
+    <Panel label={t('Theory and bin data', 'Теория и данные интервалов')} className="theory-panel">
+      <PanelHeading icon={<CircleHelp size={16} aria-hidden />} title={t('Reading the experiment', 'Как читать эксперимент')} />
       <div className="theory-body">
-        <div><p>{model.description}</p><p>Sample variance uses n − 1. The histogram, empirical CDF and ASCII view all use the same seed and observations.</p>{run.settings.distribution === 'normal' && <p>The normal CDF uses a numerical approximation.</p>}</div>
+        <div><p>{model.description}</p><p>{t('Sample variance uses ', 'Выборочная дисперсия вычисляется с делителем ')}<Tex tex="n - 1" />{t('. The histogram, empirical CDF and ASCII view all use the same seed and observations.', '. Гистограмма, эмпирическая функция распределения и ASCII-вид построены по одним и тем же наблюдениям с одним зерном.')}</p>{run.settings.distribution === 'normal' && <p>{t('The normal CDF uses a numerical approximation.', 'Нормальная функция распределения вычисляется приближённо.')}</p>}</div>
         <details>
-          <summary>View bin data</summary>
+          <summary>{t('View bin data', 'Показать данные интервалов')}</summary>
           <div className="table-scroll">
-            <table aria-label="Histogram bins"><thead><tr><th scope="col">Range</th><th scope="col">Count</th><th scope="col">Density</th></tr></thead>
+            <table aria-label={t('Histogram bins', 'Интервалы гистограммы')}><thead><tr><th scope="col">{t('Range', 'Интервал')}</th><th scope="col">{t('Count', 'Частота')}</th><th scope="col">{t('Density', 'Плотность')}</th></tr></thead>
               <tbody>{hist.counts.map((count, index) => {
                 const lo = domain[0] + hist.width * index;
                 return <tr key={index}><th scope="row">{fixed(lo)} – {fixed(lo + hist.width)}</th><td>{count}</td><td>{fixed(hist.density[index])}</td></tr>;
@@ -255,6 +260,7 @@ const readOrbit = (): OrbitId => {
 
 /** The program: one scene. The URL hash decides which orbit is shown and what is open inside the scene. */
 function StationApp() {
+  const lang = useLang();
   const [route, setRoute] = useState<Route>(() => parseRoute(window.location.hash));
   const [orbit, setOrbit] = useState<OrbitId>(() => {
     const station = route.station ? findStation(route.station) : null;
@@ -305,9 +311,9 @@ function StationApp() {
     return () => window.removeEventListener('storage', synchronize);
   }, []);
   useEffect(() => {
-    const title = station?.name ?? (lecture ? `Lecture ${lecture.lecture}` : route.drawer === 'notes' ? 'Lab notes' : route.drawer === 'record' ? 'Sample record' : route.drawer === 'lectures' ? 'Lectures' : orbits.find(o => o.id === orbit)!.name);
+    const title = station?.name ?? (lecture ? t(`Lecture ${lecture.lecture}`, `Лекция ${lecture.lecture}`) : route.drawer === 'notes' ? t('Lab notes', 'Заметки') : route.drawer === 'record' ? t('Sample record', 'Журнал выборки') : route.drawer === 'lectures' ? t('Lectures', 'Лекции') : orbits.find(o => o.id === orbit)!.name);
     document.title = title + ' · STATUM LAB';
-  }, [station, lecture, route.drawer, orbit]);
+  }, [station, lecture, route.drawer, orbit, lang]);
 
   const backHash = back ? lectureHash(back) : null;
   const close = useCallback(() => {
@@ -320,10 +326,10 @@ function StationApp() {
   let overlay = null;
   if (station) {
     const legacy = route.seed == null && !pinned(route) ? settings : legacySettings(settings, route.seed, route.params);
-    const lead = <><MathText text={station.summary} /> <span className="dock-lecture">Lecture {station.lectures}</span>
-      {backHash && <a className="dock-back" href={backHash}>← Back to lecture {back!.n}, step {back!.step}</a>}</>;
+    const lead = <><MathText text={station.summary} /> <span className="dock-lecture">{t(`Lecture ${station.lectures}`, station.lectures)}</span>
+      {backHash && <a className="dock-back" href={backHash}>{t(`← Back to lecture ${back!.n}, step ${back!.step}`, `← Назад к лекции ${back!.n}, шаг ${back!.step}`)}</a>}</>;
     overlay = (
-      <SceneDock key={station.id} title={station.name} eyebrow={<><i /> STATION · ORBIT {orbits.find(o => o.id === station.orbit)!.numeral}</>} lead={lead} onClose={close} testId="station-dock">
+      <SceneDock key={station.id} title={station.name} eyebrow={<><i /> {t('STATION · ORBIT', 'СТАНЦИЯ · ОРБИТА')} {orbits.find(o => o.id === station.orbit)!.numeral}</>} lead={lead} onClose={close} testId="station-dock">
         {station.kind === 'kernel' ? (
           <KernelStation station={station} seed={route.seed ?? DEFAULT_SEED} params={route.params}
             onState={(seed, params) => {
@@ -342,20 +348,20 @@ function StationApp() {
     );
   } else if (lecture && route.lecture) {
     overlay = (
-      <SceneDock key="lecture" className={`scene-dock--lecture${lecture.story ? ' scene-dock--story' : ''}`} title={lecture.title} testId="lecture-dock"
-        eyebrow={<><i /> LECTURE {lecture.lecture}{lecture.status !== 'ready' ? ' · DRAFT SCRIPT' : ''}</>} onClose={close}>
+      <SceneDock key="lecture" className={`scene-dock--lecture${lecture.story ? ' scene-dock--story' : ''}`} title={lectureText(lecture.lecture, lecture.title)} testId="lecture-dock"
+        eyebrow={<><i /> {t('LECTURE', 'ЛЕКЦИЯ')} {lecture.lecture}{lecture.status !== 'ready' ? t(' · DRAFT SCRIPT', ' · ЧЕРНОВИК СЦЕНАРИЯ') : ''}</>} onClose={close}>
         <LecturePlayer lecture={lecture} step={route.lecture.step} present={route.present} />
       </SceneDock>
     );
   } else if (route.drawer === 'lectures') {
     overlay = (
-      <SceneDock key="lectures" side="end" title="Lectures" lead="Walk through a lecture step by step and open its experiments." onClose={close} testId="drawer-lectures">
+      <SceneDock key="lectures" side="end" title={t('Lectures', 'Лекции')} lead={t('Walk through a lecture step by step and open its experiments.', 'Пройдите лекцию шаг за шагом и откройте её эксперименты.')} onClose={close} testId="drawer-lectures">
         <LectureList />
       </SceneDock>
     );
   } else if (route.drawer) {
     overlay = (
-      <SceneDock key={route.drawer} side="end" title={route.drawer === 'notes' ? 'Lab notes' : 'Sample record'} onClose={close} testId={`drawer-${route.drawer}`}>
+      <SceneDock key={route.drawer} side="end" title={route.drawer === 'notes' ? t('Lab notes', 'Заметки') : t('Sample record', 'Журнал выборки')} onClose={close} testId={`drawer-${route.drawer}`}>
         {route.drawer === 'notes' ? <LabNotesContent /> : <SampleRecord settings={settings} />}
       </SceneDock>
     );

@@ -95,3 +95,8 @@ export function snapValue(text, { min = -Infinity, max = Infinity, step = 0 } = 
   const decimals = step > 0 ? Math.max(0, -Math.floor(Math.log10(step) + 1e-9)) + 2 : 6;
   return Number(v.toFixed(Math.min(10, decimals)));
 }
+
+/** Plain TeX of a live formula (symbols kept, numbers as 1), for checks that run KaTeX without trust. */
+export function stripLiveTex(src) {
+  return walk(src, (kind, _key, body) => (kind === 'lv' ? stripLiveTex(body) : '1'));
+}

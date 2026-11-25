@@ -5,6 +5,7 @@ import { MathText, mathToPlain } from '../math';
 import { expandLiveTex, LIVE_KATEX, snapValue } from './live-tex.mjs';
 import type { ParamSpec, VarSpec } from './figures/specs.mjs';
 import { STORY_TEXT as T } from './story-text';
+import { texDec } from '../i18n-core';
 
 export type LiveFormulaProps = {
   tex: string;
@@ -38,7 +39,7 @@ export function LiveFormula({ tex, values, results, params, vars, hot, onHot, on
     return d;
   }, [vars, params]);
   const html = useMemo(
-    () => katex.renderToString(expandLiveTex(tex, { values, results, digits }), { ...LIVE_KATEX, displayMode: display }),
+    () => katex.renderToString(texDec(expandLiveTex(tex, { values, results, digits })), { ...LIVE_KATEX, displayMode: display }),
     [tex, values, results, digits, display],
   );
 

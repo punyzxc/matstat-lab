@@ -3,6 +3,7 @@ import type { KernelStation } from './catalog';
 import { kernelAvailable } from './kernel-station';
 import { stationHash } from './route';
 import { MathText, mathToPlain } from '../math';
+import { t } from '../i18n';
 
 /** The orbit card for a lecture station; same frame as the prototype's instrument previews. */
 export function StationCard({ station, active }: { station: KernelStation; active: boolean }) {
@@ -13,7 +14,7 @@ export function StationCard({ station, active }: { station: KernelStation; activ
       className="orbit-preview station-card"
       data-active={active}
       data-ready={ready}
-      aria-label={`${station.name}. Lecture ${station.lectures}. ${ready ? 'Ready.' : `Kernel in progress, issue ${station.issue}.`} ${mathToPlain(station.summary)}`}
+      aria-label={t(`${station.name}. Lecture ${station.lectures}. ${ready ? 'Ready.' : `Kernel in progress, issue ${station.issue}.`} ${mathToPlain(station.summary)}`, `${station.name}. ${station.lectures}. ${ready ? 'Готова.' : `Ядро в работе, задача ${station.issue}.`} ${mathToPlain(station.summary)}`)}
     >
       <span className="orbit-preview-head">
         <span className="orbit-preview-label">{station.name}</span>
@@ -21,8 +22,8 @@ export function StationCard({ station, active }: { station: KernelStation; activ
       </span>
       <span className="station-card-summary"><MathText text={station.summary} /></span>
       <span className="orbit-preview-provenance">
-        <span>{ready ? 'Seeded kernel' : `Kernel · #${station.issue}`}</span>
-        <span>Lecture {station.lectures}</span>
+        <span>{ready ? t('Seeded kernel', 'Ядро с зерном') : t(`Kernel · #${station.issue}`, `Ядро · #${station.issue}`)}</span>
+        <span>{t(`Lecture ${station.lectures}`, station.lectures)}</span>
       </span>
     </a>
   );

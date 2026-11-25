@@ -7,3 +7,5 @@ export type FigureSpec = {
 export const PALETTE: Record<string, string>;
 export const FIGURES: Readonly<Record<string, FigureSpec>>;
 export function figureParams(id: string, preset?: Record<string, number>): Record<string, number>;
+export const RU: Readonly<Record<string, { title: string; beatTitles: Record<string, string>; params: Record<string, string>; vars: Record<string, string> }>>;
+export function russianSpec(id: string, spec: FigureSpec): FigureSpec;
