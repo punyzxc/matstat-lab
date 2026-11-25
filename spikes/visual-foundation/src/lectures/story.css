@@ -902,3 +902,21 @@ html[data-present] .story {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------- the hypothesis court (L12) */
+.court-errors {
+  font-size: 13px;
+}
+.court-gauge {
+  top: 57%;
+  bottom: auto;
+  grid-template-rows: auto auto auto auto;
+}
+.court-target {
+  color: var(--grey);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.figure--court .figure-label--middle {
+  transform: translateX(-50%);
+}

@@ -11,6 +11,7 @@ import { FIGURES, figureParams } from '../src/lectures/figures/specs.mjs';
 import { ksToNormal, replicate, SOURCES, zHistogram, zSample } from '../src/lectures/figures/clt-model.mjs';
 import { intervalAt, wall } from '../src/lectures/figures/ci-model.mjs';
 import { estimatesAt, LADDER, race, theory } from '../src/lectures/figures/est-model.mjs';
+import { courtCases, errorsOf, powerCurve, regionOf, rejects } from '../src/lectures/figures/test-model.mjs';
 import { validateLecture } from '../src/lectures/script.ts';
 import { ksBand, LAWS, standardizedSums } from '../../lecture-limit-theorems/kernel.mjs';
 import { acceptanceBand, coverageAt, run as runEstimation } from '../../lecture-estimation-intervals/kernel.mjs';
@@ -65,8 +66,9 @@ test('typed values snap to the parameter range and step; text that is not a numb
 });
 
 // ---------------------------------------------------------------- story scripts
-test('L08 and L11 are story lectures; every story script checks against the figure specs', () => {
-  assert.deepEqual(stories.map((s) => s.lecture).sort((a, b) => a - b), [8, 11]);
+test('the flagship lectures are stories; every story script checks against the figure specs', () => {
+  const ids = stories.map((s) => s.lecture);
+  for (const n of [8, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
   const lectureSteps = Object.fromEntries(scripts.map((s) => [s.lecture, s.steps.length]));
   for (const s of scripts) assert.deepEqual(validateLecture(s, { stations, scientists: slugs, figures: FIGURES, liveKeys: liveTexKeys, lectureSteps }), [], `L${s.lecture}`);
 });
@@ -203,6 +205,52 @@ test('race: the same samples feed both divisors; n = 5 shows the bias -sigma^2/n
   assert.ok(Math.abs(station.find((x) => x.key === 'bias-n').observed - (r.meanN - 1)) < 1e-12);
   assert.ok(Math.abs(station.find((x) => x.key === 'bias-n1').observed - (r.meanN1 - 1)) < 1e-12);
   assert.deepEqual(FIGURES['estimate-cloud'].station({ n: 5, sigma: 1, law: 0 }), { station: 'estimation', params: { n: 5, sigma: 1, law: 0, R: 2000, view: 0 } });
+});
+
+// ---------------------------------------------------------------- L12 the hypothesis court
+test('court: the critical region and exact errors of the z-test', () => {
+  const right = regionOf(0.05, 1);
+  assert.equal(right.lower, null);
+  assert.ok(Math.abs(right.upper - 1.6449) < 1e-3);
+  const two = regionOf(0.05, 0);
+  assert.ok(Math.abs(two.upper - 1.96) < 1e-3 && Math.abs(two.lower + 1.96) < 1e-3);
+  assert.ok(rejects(2, right) && !rejects(1, right) && rejects(-2, two) && !rejects(0, two));
+  const e = errorsOf({ n: 16, d: 0.5, alpha: 0.05, tail: 1 });
+  assert.ok(Math.abs(e.delta - 2) < 1e-12);
+  assert.ok(Math.abs(e.power - 0.6388) < 1e-3, `power ${e.power}`);
+  assert.ok(Math.abs(e.beta + e.power - 1) < 1e-12);
+  const h0 = errorsOf({ n: 16, d: 0, alpha: 0.05, tail: 1 });
+  assert.equal(h0.power, null);
+  assert.equal(h0.beta, null);
+});
+
+test('court: a thousand verdicts are the Testing station\'s own (seed 1212), and the rates settle at alpha and the power', () => {
+  const c = courtCases({ n: 16, d: 0.5, alpha: 0.05, tail: 1, seed: 1212, R: 1000 });
+  assert.equal(c.h0.length, 1000);
+  assert.equal(c.h1.length, 1000);
+  assert.equal(c.hits0, 56);
+  assert.equal(c.hits1, 660);
+  const region = regionOf(0.05, 1);
+  assert.equal(c.h0.filter((u) => rejects(u, region)).length, c.hits0, 'the verdicts follow the drawn region');
+  assert.equal(c.h1.filter((u) => rejects(u, region)).length, c.hits1);
+  assert.deepEqual(c, courtCases({ n: 16, d: 0.5, alpha: 0.05, tail: 1, seed: 1212, R: 1000 }), 'reproducible');
+  assert.deepEqual(FIGURES['test-court'].station({ n: 16, a: 0.5, alpha: 0.05, tail: 1, truth: 1 }),
+    { station: 'testing', params: { sigmaKnown: 1, a0: 0, mu: 0.5, sigma: 1, n: 16, alpha: 0.05, tail: 1, R: 1000, view: 0, truth: 1 } });
+});
+
+test('court: the power curve equals alpha at a0, grows with the effect and with n, and the simulation follows it', () => {
+  const grid = Array.from({ length: 31 }, (_, i) => Math.round((-1.5 + i * 0.1) * 100) / 100);
+  for (const n of [4, 16, 100]) {
+    const c = powerCurve({ n, alpha: 0.05, tail: 1, seed: 1212, R: 400, grid });
+    assert.ok(Math.abs(c.exact[grid.indexOf(0)] - 0.05) < 1e-9);
+    for (let i = 1; i < grid.length; i++) assert.ok(c.exact[i] >= c.exact[i - 1] - 1e-12, 'one-sided power is monotone');
+    c.simulated.forEach((p, i) => assert.ok(Math.abs(p - c.exact[i]) < 4 * Math.sqrt(c.exact[i] * (1 - c.exact[i]) / 400) + 0.01, `n ${n}, a ${grid[i]}`));
+  }
+  const two = powerCurve({ n: 16, alpha: 0.05, tail: 0, seed: 1212, R: 400, grid });
+  assert.ok(Math.abs(two.exact[grid.indexOf(0)] - 0.05) < 1e-9);
+  assert.ok(Math.abs(two.exact[grid.indexOf(-1)] - two.exact[grid.indexOf(1)]) < 1e-9, 'two-sided power is symmetric');
+  const small = errorsOf({ n: 4, d: 0.5, alpha: 0.05, tail: 1 }).power, big = errorsOf({ n: 64, d: 0.5, alpha: 0.05, tail: 1 }).power;
+  assert.ok(small < big);
 });
 
 // ---------------------------------------------------------------- #138 math portals
