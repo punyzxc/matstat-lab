@@ -13,6 +13,8 @@ import { intervalAt, wall } from '../src/lectures/figures/ci-model.mjs';
 import { estimatesAt, LADDER, race, theory } from '../src/lectures/figures/est-model.mjs';
 import { describe as describeSample, population, POPULATION } from '../src/lectures/figures/sample-model.mjs';
 import { run as runSampling } from '../../lecture-sampling-goodness-of-fit/kernel.mjs';
+import { corridor, exactTail, kBound, tailDraws, tailShare } from '../src/lectures/figures/lln-model.mjs';
+import { run as runLimits } from '../../lecture-limit-theorems/kernel.mjs';
 import { courtCases, errorsOf, powerCurve, regionOf, rejects } from '../src/lectures/figures/test-model.mjs';
 import { validateLecture } from '../src/lectures/script.ts';
 import { ksBand, LAWS, standardizedSums } from '../../lecture-limit-theorems/kernel.mjs';
@@ -70,7 +72,7 @@ test('typed values snap to the parameter range and step; text that is not a numb
 // ---------------------------------------------------------------- story scripts
 test('the flagship lectures are stories; every story script checks against the figure specs', () => {
   const ids = stories.map((s) => s.lecture);
-  for (const n of [8, 10, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
+  for (const n of [7, 8, 10, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
   const lectureSteps = Object.fromEntries(scripts.map((s) => [s.lecture, s.steps.length]));
   for (const s of scripts) assert.deepEqual(validateLecture(s, { stations, scientists: slugs, figures: FIGURES, liveKeys: liveTexKeys, lectureSteps }), [], `L${s.lecture}`);
 });
@@ -296,6 +298,38 @@ test('living population: every portrait accounts for every observation; the same
   // Glivenko: the largest gap shrinks as n grows
   assert.ok(describeSample({ law: 0, n: 1000, seed: 1010 }).dn < describeSample({ law: 0, n: 10, seed: 1010 }).dn);
   assert.deepEqual(FIGURES['sample-life'].station({ law: 2, n: 100, bins: 0 }), { station: 'sample', params: { law: 2, n: 100, bins: 0, digits: 0, view: 0 } });
+});
+
+// ---------------------------------------------------------------- L7 the corridor of running means
+test('corridor: the tails and the paths are the LLN station\'s own', () => {
+  for (const law of [0, 1, 2, 4]) {
+    const draws = tailDraws({ law, seed: 707 });
+    const station = runLimits({ law, k: 2, N: 2000, view: 1 }, { seed: 707, station: 'lln' }).readouts;
+    assert.equal(tailShare(draws, law, 2), station.find((r) => r.key === 'exact').observed);
+    for (const [N, M, eps] of [[2000, 200, 0.2], [500, 50, 0.05]]) {
+      const c = corridor({ law, N, M, eps, seed: 707 });
+      const corr = runLimits({ law, N, view: 2, M, eps }, { seed: 707, station: 'lln' }).readouts;
+      assert.equal(c.outside.at(-1) / M, corr.find((r) => r.key === 'outside').observed, `law ${law}, N ${N}`);
+      assert.equal(c.ns.at(-1), N);
+    }
+  }
+});
+
+test('corridor: Chebyshev bounds hold and fall; Cauchy has no bound and its share does not fall', () => {
+  for (const law of [0, 1, 2, 3]) {
+    for (const k of [1, 1.5, 2, 3]) assert.ok(exactTail(law, k) <= kBound(law, k) + 1e-12, `law ${law}, k ${k}`);
+    const c = corridor({ law, N: 2000, M: 200, eps: 0.2, seed: 707 });
+    for (let j = 1; j < c.ns.length; j++) assert.ok(c.bound[j] <= c.bound[j - 1] + 1e-15, 'the bound falls with n');
+    assert.ok(c.outside.at(-1) / 200 <= c.bound.at(-1) + 2 / Math.sqrt(200), 'the share stays under the bound up to Monte Carlo error');
+    assert.ok(c.outside.at(-1) < c.outside[5], 'paths gather into the corridor');
+  }
+  assert.equal(kBound(4, 2), null);
+  const cauchy = corridor({ law: 4, N: 2000, M: 200, eps: 0.5, seed: 707 });
+  assert.ok(cauchy.bound.every((b) => b === null));
+  assert.ok(cauchy.outside.at(-1) / 200 > 0.5, 'Cauchy running means stay spread out');
+  assert.deepEqual(corridor({ law: 2, N: 2000, M: 20, eps: 0.2, seed: 707 }), corridor({ law: 2, N: 2000, M: 20, eps: 0.2, seed: 707 }));
+  assert.deepEqual(FIGURES['lln-corridor'].station({ law: 0, k: 2, N: 2000, M: 200, eps: 0.2 }, 'tail'), { station: 'lln', params: { law: 0, N: 2000, k: 2, view: 1 } });
+  assert.deepEqual(FIGURES['lln-corridor'].station({ law: 2, k: 2, N: 2000, M: 200, eps: 0.2 }, 'paths'), { station: 'lln', params: { law: 2, N: 2000, view: 2, M: 200, eps: 0.2 } });
 });
 
 // ---------------------------------------------------------------- #138 math portals

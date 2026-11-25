@@ -90,7 +90,8 @@
         7,
         8
       ],
-      "contribution": "Law of rare events and his law of large numbers."
+      "contribution": "Law of rare events and his law of large numbers.",
+      "more": "He extended Bernoulli's law of large numbers to trials whose success probabilities change from trial to trial, and named the law of large numbers. His law of rare events describes counts of unlikely events in many trials."
     },
     {
       "slug": "bayes",
@@ -219,7 +220,8 @@
         7,
         8
       ],
-      "contribution": "A law whose running means never settle."
+      "contribution": "A law whose running means never settle.",
+      "more": "He gave analysis its rigour: limits, continuity and convergent series. The law named after him, with density $\\dfrac{1}{\\pi(1 + x^2)}$, is the classic counterexample: it has no mean, and the mean of $n$ of its draws has the same law as one draw."
     },
     {
       "slug": "pearson",
