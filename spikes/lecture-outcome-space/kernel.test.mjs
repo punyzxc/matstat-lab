@@ -80,3 +80,76 @@ test('contract: aligned finite series, defaults in range, impossible and certain
   assert.ok(run({ experiment: 1, relA: 0, a: 9, op: 0 }).notes.some((t) => t.includes('impossible')));
   assert.ok(run({ experiment: 1, relA: 0, a: 0, op: 0 }).notes.some((t) => t.includes('certain')));
 });
+
+// #130: the combinatorics generator.
+const comb = (q, seed = 1) => K.run(q, { seed, station: 'combinatorics' });
+const fact = (m) => { let r = 1n; for (let i = 2n; i <= BigInt(m); i++) r *= i; return r; };
+
+test('#130 counts match the closed formulas for a table of cases, with exact big integers', () => {
+  const table = [
+    // [scheme, n, k, count]
+    [0, 1, 0, 1n], [0, 4, 0, 24n], [0, 5, 0, 120n], [0, 20, 0, 2432902008176640000n], [0, 25, 0, 15511210043330985984000000n],
+    [1, 4, 2, 12n], [1, 10, 3, 720n], [1, 5, 0, 1n], [1, 3, 5, 0n], [1, 25, 25, fact(25)],
+    [2, 5, 2, 10n], [2, 10, 5, 252n], [2, 25, 12, 5200300n], [2, 3, 5, 0n], [2, 7, 0, 1n],
+    [3, 3, 2, 9n], [3, 2, 10, 1024n], [3, 25, 25, 25n ** 25n],
+    [4, 3, 2, 6n], [4, 4, 3, 20n], [4, 25, 25, 63205303218876n],
+  ];
+  for (const [scheme, n, k, want] of table) {
+    assert.equal(K.countOf(scheme, n, k), want, `scheme ${scheme}, n ${n}, k ${k}`);
+    assert.equal(comb({ scheme, n, k }).constructions.count, want.toString());
+  }
+  // A_n^k = C_n^k · k! and C̄_n^k = C_{n+k−1}^k on a grid.
+  for (let n = 1; n <= 12; n++) for (let k = 0; k <= 12; k++) {
+    assert.equal(K.countOf(1, n, k), K.countOf(2, n, k) * fact(k));
+    assert.equal(K.countOf(4, n, k), K.countOf(2, n + k - 1, k));
+  }
+});
+
+test('#130 small cases list every construction exactly once, in the right shape', () => {
+  for (const scheme of [0, 1, 2, 3, 4]) for (let n = 1; n <= 5; n++) for (let k = 0; k <= 5; k++) {
+    const N = K.countOf(scheme, n, k);
+    if (N > BigInt(K.ENUMERATE_UP_TO)) continue;
+    const { items, all, size, ordered, repetition } = comb({ scheme, n, k }).constructions;
+    assert.ok(all);
+    assert.equal(BigInt(items.length), N, `scheme ${scheme} n ${n} k ${k}`);
+    assert.equal(new Set(items.map((c) => c.join())).size, items.length, 'no duplicates');
+    for (const c of items) {
+      assert.equal(c.length, size);
+      assert.ok(c.every((o) => o >= 0 && o < n));
+      if (!repetition) assert.equal(new Set(c).size, c.length, 'no repeated object');
+      if (!ordered) assert.deepEqual(c, [...c].sort((p, q) => p - q), 'unordered: sorted');
+    }
+  }
+});
+
+test('#130 large cases show only the count and a seeded sample of valid constructions', () => {
+  for (const [scheme, n, k] of [[0, 12, 0], [1, 10, 4], [2, 20, 10], [3, 6, 5], [4, 20, 10]]) {
+    const a = comb({ scheme, n, k }, 4), b = comb({ scheme, n, k }, 4), c = comb({ scheme, n, k }, 5);
+    const { items, all, size, ordered, repetition } = a.constructions;
+    assert.equal(all, false);
+    assert.equal(items.length, K.SAMPLED);
+    assert.equal(a.readouts.find((r) => r.key === 'count').observed, null, 'nothing is counted by hand');
+    for (const x of items) {
+      assert.equal(x.length, size);
+      assert.ok(x.every((o) => o >= 0 && o < n));
+      if (!repetition) assert.equal(new Set(x).size, x.length);
+      if (!ordered) assert.deepEqual(x, [...x].sort((p, q) => p - q));
+    }
+    assert.equal(JSON.stringify(a), JSON.stringify(b), 'same seed, same sample');
+    assert.notEqual(JSON.stringify(a.constructions.items), JSON.stringify(c.constructions.items), 'new seed, new sample');
+  }
+  // Sampling covers the space: over 400 seeds every one of the 120 pairs of C_16^2 appears.
+  const freq = new Map();
+  for (let seed = 0; seed < 400; seed++) for (const x of comb({ scheme: 2, n: 16, k: 2 }, seed).constructions.items) freq.set(x.join(), (freq.get(x.join()) ?? 0) + 1);
+  assert.equal(freq.size, 120, 'every pair of 16 appears');
+});
+
+test('#130 degenerate inputs are explained: k > n without repetition, and k = 0', () => {
+  const none = comb({ scheme: 2, n: 3, k: 5 });
+  assert.equal(none.constructions.items.length, 0);
+  assert.ok(none.notes.some((t) => t.includes('no construction at all')));
+  assert.ok(!none.formula[0].includes('= 0 = 0'));
+  const empty = comb({ scheme: 1, n: 4, k: 0 });
+  assert.deepEqual(empty.constructions.items, [[]]);
+  assert.ok(empty.notes.some((t) => t.includes('the empty one')));
+});

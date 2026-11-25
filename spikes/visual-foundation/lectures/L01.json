@@ -107,6 +107,24 @@
         "station": "bayes",
         "seed": 1928
       }
+    },
+    {
+      "title": "Every construction, counted",
+      "idea": "Type $n$ and $k$. While there are at most 120 constructions, every one is laid out; above that only the exact count is shown, with a few sampled constructions.",
+      "formula": [
+        "A_n^k = C_n^k \\cdot k!"
+      ],
+      "example": "$n = 4,\\ k = 2$: 12 arrangements, 6 combinations; each combination gives $2! = 2$ orders.",
+      "experiment": {
+        "station": "combinatorics",
+        "seed": 130,
+        "params": {
+          "scheme": 1,
+          "n": 4,
+          "k": 2
+        },
+        "label": "Open the Combinatorics station"
+      }
     }
   ],
   "status": "draft"

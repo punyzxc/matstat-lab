@@ -13,6 +13,7 @@ import { DecisionZones } from './decision-zones';
 import { Beam } from './beam';
 import { OutcomeFlight } from './outcome-flight';
 import { OutcomeSpace } from './outcome-space';
+import { Constructions } from './constructions';
 import { kernelText, locale, plural, t, texDec, useLang } from '../i18n';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
@@ -45,6 +46,7 @@ function localizeResult(kernel: string, r: KernelResult): KernelResult {
     domain: r.domain,
     outcomes: r.outcomes,
     space: r.space,
+    constructions: r.constructions,
     linked: r.linked && { ...r.linked, series: r.linked.series.map((s) => (s.label ? { ...s, label: k(s.label) } : s)), axes: r.linked.axes && { x: k(r.linked.axes.x), y: k(r.linked.axes.y) } },
   };
 }
@@ -133,7 +135,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
     if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series)) return { error: t('The kernel returned no readouts or series.', 'Ядро не вернуло ни показаний, ни графиков.') };
     return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface,
       formula: Array.isArray(out.formula) ? out.formula.filter((l) => typeof l === 'string') : undefined, decisions: out.decisions, beam: out.beam,
-      domain: out.domain, linked: out.linked && Array.isArray(out.linked.series) ? out.linked : undefined, outcomes: out.outcomes, space: out.space };
+      domain: out.domain, linked: out.linked && Array.isArray(out.linked.series) ? out.linked : undefined, outcomes: out.outcomes, space: out.space, constructions: out.constructions };
   }, [outcome]);
   /** What is on screen: the same result with its texts in the current language. */
   const view = useMemo(() => (result && !('error' in result) ? localizeResult(station.kernel, result) : result), [result, station.kernel, lang]);
@@ -235,6 +237,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
             {view.beam && <Beam beam={view.beam} onParam={(key, v) => setParams((p) => ({ ...p, [key]: v }))} />}
             {view.outcomes && outcome?.ok && <OutcomeFlight outcomes={view.outcomes} drawKey={outcome.job.seed} />}
             {view.space && outcome?.ok && <OutcomeSpace space={view.space} drawKey={outcome.job.seed} />}
+            {view.constructions && outcome?.ok && <Constructions data={view.constructions} drawKey={outcome.job.seed} />}
             {view.surface && <Surface3D surface={view.surface} />}
             {view.series.length > 0 && (
               <div className="chart-stage">
