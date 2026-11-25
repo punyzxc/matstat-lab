@@ -65,7 +65,7 @@ export const stations: readonly Station[] = [
     summary: 'Repeat samples: $s^2$ with divisor $n$ is biased, with $n - 1$ it is not. Compare their MSE.' },
   { kind: 'kernel', id: 'confidence', name: 'Confidence Intervals', orbit: 'statistics', lectures: 'L12', kernel: 'lecture-estimation-intervals', issue: 46,
     summary: 'Build normal, $t$ and $\\chi^2$ intervals for the mean and variance; measure how often they cover the truth.' },
-  { kind: 'kernel', id: 'testing', name: 'Hypothesis Testing', orbit: 'statistics', lectures: 'L12', kernel: 'lecture-hypothesis-tests', issue: 97,
+  { kind: 'kernel', id: 'testing', name: 'Hypothesis Testing', orbit: 'statistics', lectures: 'L11', kernel: 'lecture-hypothesis-tests', issue: 97,
     summary: 'Type $H_0\\colon a = a_0$ and the truth; watch repeated tests reject at rate $\\alpha$ or $1 - \\beta$, on a 3D power surface.' },
   { kind: 'kernel', id: 'homogeneity', name: 'Homogeneity', orbit: 'statistics', lectures: 'L11', kernel: 'lecture-estimation-intervals', issue: 46,
     summary: 'Test whether two series of trials share one probability p (z-test, formula 139).' },
