@@ -33,3 +33,26 @@ test('Moments curves morph while the σ slider moves, and the link follows witho
   await expect.poll(halfWidth).toBeGreaterThan(before + 20);
   await expect(page).toHaveURL(/sigma=1\.5/);
 });
+
+// #96: typed ρ, σ_X, σ_Y; r beside ρ with the typeset regression line; ρ = ±1 collapses to a ridge with a caption.
+test('Scatter takes typed rho and both sigmas, shows r beside rho and the regression line, and explains rho = 1', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#station/scatter?seed=7&rho=0.6&sigma1=2&sigma2=1');
+  const dock = page.getByTestId('station-dock');
+  const readouts = dock.getByRole('table', { name: 'Readouts' });
+  const line = readouts.getByRole('row', { name: /Regression line/ });
+  await expect(line.locator('.katex').first()).toBeVisible();
+  await expect(line).toContainText('y=0.3x');
+  await expect(readouts.getByRole('row', { name: /sample r against ρ/ })).toContainText('0.6');
+
+  const rho = dock.getByLabel(/Correlation ρ \(experiment 0\), typed value/);
+  await rho.fill('1');
+  await rho.press('Enter');
+  await expect(page).toHaveURL(/rho=1(&|$)/);
+  await expect(dock.locator('svg.surface-svg')).toHaveAttribute('aria-label', /all probability on the line/);
+  await expect(dock.locator('.station-notes')).toContainText('no density in the plane');
+  const sx = dock.getByLabel(/of ξ \(experiment 0\), typed value/);
+  await sx.fill('1,5');
+  await sx.press('Enter');
+  await expect(page).toHaveURL(/sigma1=1\.5/);
+});
