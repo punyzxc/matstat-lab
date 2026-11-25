@@ -277,6 +277,7 @@ const stationParams = {
     { key: 'sigma', label: 'Spread $\\sigma$ of the data', min: 0.1, max: 5, step: 0.05, default: 1 },
     { key: 'n', label: 'Sample size $n$', min: 2, max: 200, step: 1, default: 12 },
     ALPHA, TAIL, REPS, VIEW,
+    { key: 'truth', label: 'Experiments in the decision zones (0 $H_0$ true, 1 $H_1$ true)', min: 0, max: 1, step: 1, default: 1 },
   ],
   variances: [
     { key: 'rho', label: 'True ratio $\\rho = D(X)/D(Y)$', min: 0.25, max: 4, step: 0.05, default: 2 },
@@ -288,7 +289,7 @@ const stationParams = {
 export const stations = Object.freeze(Object.fromEntries(Object.entries(stationParams).map(([id, params]) => [id, { params }])));
 export const meta = {
   id: 'lecture-hypothesis-tests',
-  lectures: ['L11'],
+  lectures: ['L12'],
   title: 'Critical regions, type I and II errors and power of the z, t and F tests',
   params: stationParams.mean,
 };
@@ -584,8 +585,11 @@ function powerSurface(known, alpha, tail, sizes, effects) {
   return surfaceMemo.z;
 }
 
+/** Experiments per draw that fly into the decision zones (#137): the first replicates of the main simulation. */
+export const DECISIONS = 40;
+
 function runTesting(q, seed) {
-  const { sigmaKnown, a0, mu, sigma, n, alpha, tail: ti, R } = q;
+  const { sigmaKnown, a0, mu, sigma, n, alpha, tail: ti, R, view, truth = 1 } = q;
   const out = runMean(q, seed);
   const tail = tailOf(ti), known = sigmaKnown === 1, stat = known ? 'U' : 'T';
   const dist = known ? { kind: 'z' } : { kind: 't', df: n - 1 }, region = criticalRegion(dist, alpha, tail);
@@ -611,6 +615,36 @@ function runTesting(q, seed) {
     labels: { x: 'true mean $a$', y: 'sample size $n$', z: 'power $1 - \\beta$' },
     title: `Power surface $1 - \\beta(a, n)$: height $\\alpha = ${alpha}$ at $a = a_0$, rising towards 1 as the truth moves into $H_1$`,
     sampleLabel: `Simulated rejection share (${Rs} tests per point)`,
+  };
+  // #136: the power 1 − β shaded under the H₁ law over the critical region, next to α (under H₀) and β.
+  const eff = (mu - a0) / sigma, delta = eff * Math.sqrt(n), k = n - 1;
+  if (view === 0) {
+    const x0 = Math.min(-5, delta - 5), x1 = Math.max(5, delta + 5);
+    const altPdf = known ? (t) => phi(t - delta) : (t) => nctPdf(t, k, delta);
+    const label = '$1 - \\beta$: $H_1$ true, statistic in the critical region';
+    const bands = [
+      { ...regionBand('power-left', label, altPdf, -Infinity, region.lower ?? -Infinity, x0, x1, region.lower !== null), tone: 'default' },
+      { ...regionBand('power-right', label, altPdf, region.upper ?? Infinity, Infinity, x0, x1, region.upper !== null), tone: 'default' },
+    ];
+    out.series.splice(out.series.findIndex((s) => s.id === 'beta') + 1, 0, ...bands);
+  }
+  const get = (key) => out.readouts.find((r) => r.key === key);
+  const power = get('power').theory, beta = get('beta').theory;
+  const K = tail === 'two' ? `|${stat}| > ${fmt(region.upper, 3)}` : tail === 'right' ? `${stat} > ${fmt(region.upper, 3)}` : `${stat} < ${fmt(region.lower, 3)}`;
+  out.formula = [
+    `\\mathcal{K} = \\{\\, ${K} \\,\\} \\qquad \\alpha = P(${stat} \\in \\mathcal{K} \\mid H_0) = ${fmt(alpha, 3)}`,
+    power == null
+      ? `a = a_0 = ${a0}\\colon \\text{ no alternative, so no } \\beta \\text{ and no power}`
+      : `\\beta = P(${stat} \\notin \\mathcal{K} \\mid H_1) = ${fmt(beta, 3)} \\qquad 1 - \\beta = ${fmt(power, 3)}`,
+  ];
+  // #137: the first replicates of this draw, under the chosen truth, as experiments with a decision.
+  const dTruth = truth === 0 || power == null ? 0 : eff;
+  const sample = simulateMean({ n, R: Math.min(DECISIONS, R), seed, sigmaKnown: known, alpha, tail, grid: [dTruth], keepStats: true });
+  out.decisions = {
+    truth: truth === 0 || power == null ? 0 : 1,
+    statistic: sample.stats.map((v) => Number(v.toFixed(4))),
+    reject: sample.stats.map((v) => rejects(v, region)),
+    theory: { alpha, beta: power == null ? null : beta, power: power == null ? null : power },
   };
   out.notes = [
     `Your $H_0\\colon a = ${a0}$; the data are $N(${mu}, ${sigma}^2)$. Every draw is a fresh sample of $n = ${n}$ and ${R} repeated tests: the share of rejections under $H_0$ settles at $\\alpha$, under the true mean at the power $1 - \\beta$.`,
