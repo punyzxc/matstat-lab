@@ -54,6 +54,8 @@ test('a contract kernel renders as a station and its URL reproduces the run', as
   await expect(readout).not.toHaveText(first);
 
   const fresh = await context.newPage();
+  // Same reduced-motion visitor, so autoplay does not grow the sample before the readout is compared.
+  await fresh.emulateMedia({ reducedMotion: 'reduce' });
   await fresh.goto('/#station/contract-fixture?seed=7&n=2000&p=0.3');
   await expect(fresh.getByTestId('station-dock').getByRole('row', { name: /Relative frequency/ })).toHaveText(first);
   // the fixture never appears on an orbit

@@ -119,6 +119,8 @@ test('presenter mode enlarges type, reduces the scene chrome and keeps the count
   await expect(page).toHaveURL(/lecture=1&step=5&present=1$/);
   await page.keyboard.press('Escape');
   await expect(page).toHaveURL(/#lecture\/1\/5\?present=1$/);
+  // The address changes a frame before the lecture dock mounts; wait for it before the next key.
+  await expect(page.getByTestId('step-counter')).toHaveText(/Step 5 \//);
 
   await page.keyboard.press('p');
   await expect(page).toHaveURL(/#lecture\/1\/5$/);
