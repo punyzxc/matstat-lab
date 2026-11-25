@@ -20,15 +20,143 @@
       "experiment": {
         "station": "clt",
         "seed": 808
-      }
+      },
+      "layers": {
+        "intuition": {
+          "en": "One exponential draw is skewed. Add independent draws, centre the sum and divide by its standard deviation. The shape approaches a bell as the number of terms grows.",
+          "ru": "Одно экспоненциальное наблюдение даёт асимметричное распределение. Складывайте независимые наблюдения, центрируйте сумму и делите её на стандартное отклонение. С ростом числа слагаемых форма приближается к колоколу."
+        },
+        "definition": {
+          "en": "For independent identically distributed terms with mean $\\mu$ and finite variance $0<\\sigma^2<\\infty$, the standardised sum converges in distribution to $N(0,1)$.",
+          "ru": "Для независимых одинаково распределённых слагаемых со средним $\\mu$ и конечной дисперсией $0<\\sigma^2<\\infty$ стандартизованная сумма сходится по распределению к $N(0,1)$."
+        },
+        "formula": {
+          "en": "$Z_n=\\dfrac{S_n-n\\mu}{\\sigma\\sqrt{n}}$, $\\mathbb{E}Z_n=0$, $\\operatorname{Var}(Z_n)=1$.",
+          "ru": " $Z_n=\\dfrac{S_n-n\\mu}{\\sigma\\sqrt{n}}$, $\\mathbb{E}Z_n=0$, $\\operatorname{Var}(Z_n)=1$."
+        },
+        "details": {
+          "en": "The iid central limit theorem requires independence and finite variance. It concerns the distribution of standardised sums, not the distribution of the original observations. For finite n the normal curve is an approximation; a finite number of simulated replicates adds Monte Carlo noise.",
+          "ru": "Классическая ЦПТ требует независимости и конечной дисперсии. Она описывает распределение стандартизованных сумм, а не исходных наблюдений. При конечном n нормальная кривая — приближение; конечное число повторений добавляет шум Монте-Карло."
+        }
+      },
+      "whatIf": [
+        {
+          "label": {
+            "en": "n = 50",
+            "ru": "n = 50"
+          },
+          "params": {
+            "n": 50
+          }
+        },
+        {
+          "label": {
+            "en": "Uniform law",
+            "ru": "Равномерный закон"
+          },
+          "params": {
+            "law": 0
+          }
+        },
+        {
+          "label": {
+            "en": "Skewed law",
+            "ru": "Асимметричный закон"
+          },
+          "params": {
+            "law": 1
+          }
+        }
+      ]
     },
     {
       "title": "Lyapunov condition",
       "idea": "Different laws can be added as long as no single term dominates the sum.",
       "scientists": [
         "lyapunov"
+      ],
+      "layers": {
+        "intuition": {
+          "en": "The live figure illustrates the iid special case: 30 terms of the same skewed law. It does not simulate a collection of different laws or test the general Lyapunov condition.",
+          "ru": "Живой график показывает частный случай одинаково распределённых слагаемых: сумму 30 членов одного асимметричного закона. Разные законы и общее условие Ляпунова эта станция не моделирует."
+        },
+        "definition": {
+          "en": "For independent centred terms, put $b_n^2=\\sum_{k=1}^n\\sigma_k^2$. A sufficient condition is $\\sum_{k=1}^n\\mathbb{E}|X_k-\\mu_k|^{2+\\delta}/b_n^{2+\\delta}\\to0$ for some $\\delta>0$.",
+          "ru": "Для независимых центрированных слагаемых положим $b_n^2=\\sum_{k=1}^n\\sigma_k^2$. Достаточное условие: $\\sum_{k=1}^n\\mathbb{E}|X_k-\\mu_k|^{2+\\delta}/b_n^{2+\\delta}\\to0$ при некотором $\\delta>0$."
+        },
+        "details": {
+          "en": "Lyapunov provides a sufficient condition, not a necessary one. The figure demonstrates convergence for one finite-variance model; the experiment is evidence and is not a proof of the theorem.",
+          "ru": "Условие Ляпунова достаточно, но не необходимо. График иллюстрирует сходимость для одного закона с конечной дисперсией; эксперимент служит иллюстрацией, а не доказательством теоремы."
+        }
+      },
+      "whatIf": [
+        {
+          "label": {
+            "en": "n = 50",
+            "ru": "n = 50"
+          },
+          "params": {
+            "n": 50
+          }
+        },
+        {
+          "label": {
+            "en": "Uniform law",
+            "ru": "Равномерный закон"
+          },
+          "params": {
+            "law": 0
+          }
+        },
+        {
+          "label": {
+            "en": "Skewed law",
+            "ru": "Асимметричный закон"
+          },
+          "params": {
+            "law": 1
+          }
+        }
       ]
     }
   ],
-  "status": "draft"
+  "status": "draft",
+  "beats": [
+    {
+      "id": "one-term",
+      "step": 1,
+      "label": {
+        "en": "One skewed term",
+        "ru": "Один асимметричный член"
+      },
+      "experiment": {
+        "station": "clt",
+        "seed": 808,
+        "params": {
+          "law": 1,
+          "n": 1,
+          "R": 1000,
+          "view": 0
+        }
+      }
+    },
+    {
+      "id": "many-terms",
+      "step": 2,
+      "label": {
+        "en": "Sum of 30 independent terms",
+        "ru": "Сумма 30 независимых членов"
+      },
+      "experiment": {
+        "station": "clt",
+        "seed": 808,
+        "params": {
+          "law": 1,
+          "n": 30,
+          "R": 1000,
+          "view": 0
+        }
+      }
+    }
+  ]
 }

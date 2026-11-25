@@ -13,6 +13,7 @@ export type Experiment = {
   /** Button text. Default: "Open experiment". */
   label?: string;
 };
+export type StoryText = string | { en: string; ru: string };
 export type Step = {
   title: string;
   /** One idea, a sentence or a short paragraph. */
@@ -24,6 +25,8 @@ export type Step = {
   /** Slugs from `lectures/scientists.json` mentioned in this step. */
   scientists?: string[];
   experiment?: Experiment;
+  layers?: Partial<Record<'intuition' | 'definition' | 'formula' | 'details', StoryText>>;
+  whatIf?: { label: StoryText; params: Record<string, number>; seed?: number }[];
   /** Optional notes for the teacher; shown only in presenter mode. */
   notes?: string;
 };
@@ -35,12 +38,30 @@ export type Lecture = {
   /** "draft" until the script task (#51–#53) fills it in. */
   status?: 'draft' | 'ready';
   steps: Step[];
+  beats?: { id: string; step: number; label: StoryText; experiment: Experiment }[];
 };
 export type Scientist = { slug: string; name: string; years: string; lectures: number[]; contribution: string };
 
 const isText = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
 const SLUG = /^[a-z][a-z0-9-]*$/;
 const SEED_MAX = 4294967295;
+
+const isObject = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v);
+const isStoryText = (v: unknown): v is StoryText => isText(v) || (isObject(v) && isText(v.en) && isText(v.ru));
+
+export function usesStory(lecture: Lecture): boolean {
+  return lecture.beats !== undefined || lecture.steps.some((step) => step.layers !== undefined || step.whatIf !== undefined);
+}
+
+export function experimentForStep(lecture: Lecture, index1based: number): Experiment | null {
+  if (!Number.isInteger(index1based) || index1based < 1 || index1based > lecture.steps.length) return null;
+  const experiment = lecture.beats?.find((beat) => beat.step === index1based)?.experiment ?? lecture.steps[index1based - 1].experiment;
+  return experiment ? { ...experiment, ...(experiment.params === undefined ? {} : { params: { ...experiment.params } }) } : null;
+}
+
+export function storyText(value: StoryText, lang: 'en' | 'ru'): string {
+  return typeof value === 'string' ? value : value[lang];
+}
 
 /**
  * Checks one lecture script. Returns a list of problems; an empty list means the script is valid.
@@ -66,9 +87,47 @@ export function validateLecture(value: unknown, known: { stations?: string[]; sc
     errors.push('steps must be a non-empty list');
     return errors;
   }
+  const checkSeed = (seed: unknown, at: string) => {
+    if (seed !== undefined && (!Number.isInteger(seed) || (seed as number) < 0 || (seed as number) > SEED_MAX)) errors.push(`${at}: seed must be an integer from 0 to ${SEED_MAX}`);
+  };
+  const checkParams = (params: unknown, at: string) => {
+    if (!isObject(params)) { errors.push(`${at}: params must be an object`); return; }
+    for (const [k, v] of Object.entries(params)) {
+      if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(k)) errors.push(`${at}: parameter name "${k}" is not allowed`);
+      if (k === 'seed' || k === 'lecture' || k === 'step' || k === 'present') errors.push(`${at}: "${k}" is reserved; use experiment.seed`);
+      if (typeof v !== 'number' || !Number.isFinite(v)) errors.push(`${at}: parameter "${k}" must be a finite number`);
+    }
+  };
+  const checkExperiment = (experiment: unknown, at: string, strict = false) => {
+    if (!isObject(experiment)) { errors.push(`${at}: experiment must be an object`); return; }
+    if (!isText(experiment.station)) errors.push(`${at}: experiment.station must be a station id`);
+    else if (known.stations && !known.stations.includes(experiment.station)) errors.push(`${at}: unknown station "${experiment.station}"`);
+    if (strict ? experiment.seed !== undefined : experiment.seed != null) checkSeed(experiment.seed, at);
+    if (strict ? experiment.params !== undefined : experiment.params != null) checkParams(experiment.params, at);
+    if ((strict ? experiment.label !== undefined : experiment.label != null) && !isText(experiment.label)) errors.push(`${at}: experiment.label must be text`);
+  };
+  if (l.beats !== undefined) {
+    if (!Array.isArray(l.beats)) errors.push('beats must be a list');
+    else {
+      const ids = new Set<string>();
+      const steps = new Set<number>();
+      l.beats.forEach((beat, i) => {
+        const at = `beat ${i + 1}`;
+        if (!isObject(beat)) { errors.push(`${at}: not an object`); return; }
+        if (!isText(beat.id)) errors.push(`${at}: id must be text`);
+        else if (ids.has(beat.id)) errors.push(`${at}: duplicate id "${beat.id}"`);
+        else ids.add(beat.id);
+        if (!Number.isInteger(beat.step) || (beat.step as number) < 1 || (beat.step as number) > l.steps.length) errors.push(`${at}: step must refer to a lecture step`);
+        else if (steps.has(beat.step as number)) errors.push(`${at}: duplicate step`);
+        else steps.add(beat.step as number);
+        if (!isStoryText(beat.label)) errors.push(`${at}: label must be text or bilingual text`);
+        checkExperiment(beat.experiment, at, true);
+      });
+    }
+  }
   l.steps.forEach((s, i) => {
     const at = `step ${i + 1}`;
-    if (!s || typeof s !== 'object') return errors.push(`${at}: not an object`);
+    if (!s || typeof s !== 'object' || Array.isArray(s)) return errors.push(`${at}: not an object`);
     if (!isText(s.title)) errors.push(`${at}: title must be a non-empty string`);
     if (!isText(s.idea)) errors.push(`${at}: idea must be a non-empty string`);
     if (s.formula != null && (!Array.isArray(s.formula) || !s.formula.every(isText))) errors.push(`${at}: formula must be a list of text lines`);
@@ -78,21 +137,24 @@ export function validateLecture(value: unknown, known: { stations?: string[]; sc
     if (Array.isArray(s.scientists) && Array.isArray(l.scientists)) {
       for (const slug of s.scientists) if (!l.scientists.includes(slug)) errors.push(`${at}: "${slug}" is missing from the lecture's scientists`);
     }
-    const e = s.experiment;
-    if (e == null) return;
-    if (!isText(e.station)) errors.push(`${at}: experiment.station must be a station id`);
-    else if (known.stations && !known.stations.includes(e.station)) errors.push(`${at}: unknown station "${e.station}"`);
-    if (e.seed != null && (!Number.isInteger(e.seed) || e.seed < 0 || e.seed > SEED_MAX)) errors.push(`${at}: seed must be an integer from 0 to ${SEED_MAX}`);
-    if (e.params != null) {
-      if (typeof e.params !== 'object' || Array.isArray(e.params)) errors.push(`${at}: params must be an object`);
-      else
-        for (const [k, v] of Object.entries(e.params)) {
-          if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(k)) errors.push(`${at}: parameter name "${k}" is not allowed`);
-          if (k === 'seed' || k === 'lecture' || k === 'step' || k === 'present') errors.push(`${at}: "${k}" is reserved; use experiment.seed`);
-          if (typeof v !== 'number' || !Number.isFinite(v)) errors.push(`${at}: parameter "${k}" must be a finite number`);
-        }
+    if (s.experiment != null) checkExperiment(s.experiment, at);
+    if (s.layers !== undefined) {
+      if (!isObject(s.layers)) errors.push(`${at}: layers must be an object`);
+      else for (const [key, value] of Object.entries(s.layers)) {
+        if (!['intuition', 'definition', 'formula', 'details'].includes(key)) errors.push(`${at}: unknown layer "${key}"`);
+        if (!isStoryText(value)) errors.push(`${at}: layer "${key}" must be text or bilingual text`);
+      }
     }
-    if (e.label != null && !isText(e.label)) errors.push(`${at}: experiment.label must be text`);
+    if (s.whatIf !== undefined) {
+      if (!Array.isArray(s.whatIf)) errors.push(`${at}: whatIf must be a list`);
+      else s.whatIf.forEach((item, j) => {
+        const where = `${at}: whatIf ${j + 1}`;
+        if (!isObject(item)) { errors.push(`${where}: not an object`); return; }
+        if (!isStoryText(item.label)) errors.push(`${where}: label must be text or bilingual text`);
+        checkParams(item.params, where);
+        checkSeed(item.seed, where);
+      });
+    }
   });
   return errors;
 }

@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import katex from 'katex';
 import { splitMath } from '../src/math-text.mjs';
-import { fitPortrait, PORTRAIT, PORTRAIT_LIMIT, portraitScale, revealFrames, revealPortrait, validateLecture, validateRoster } from '../src/lectures/script.ts';
+import { fitPortrait, PORTRAIT, PORTRAIT_LIMIT, portraitScale, revealFrames, revealPortrait, validateLecture, validateRoster, usesStory, experimentForStep, storyText } from '../src/lectures/script.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = (p) => JSON.parse(readFileSync(root + p, 'utf8'));
@@ -43,6 +43,25 @@ test('every formula line and every $…$ in the text is valid TeX that KaTeX typ
     });
   }
   assert.ok(formulas >= 44, 'the lectures carry their formulas');
+});
+
+test('story beat labels, layers and what-if chips carry valid math in both languages', () => {
+  let checked = 0;
+  for (const file of files) {
+    const script = read('lectures/' + file);
+    const texts = [
+      ...(script.beats ?? []).map(beat => beat.label),
+      ...script.steps.flatMap(step => [...Object.values(step.layers ?? {}), ...(step.whatIf ?? []).map(chip => chip.label)]),
+    ];
+    for (const text of texts) for (const value of typeof text === 'string' ? [text] : [text.en, text.ru]) {
+      assert.ok(value.trim());
+      for (const part of splitMath(value)) if (part.math) {
+        assert.doesNotThrow(() => katex.renderToString(part.value, { throwOnError: true, strict: 'error' }), `${file}: ${part.value}`);
+        checked++;
+      }
+    }
+  }
+  assert.ok(checked > 0, 'the CLT story includes its mathematical definitions');
 });
 
 test('the validator reports broken scripts', () => {
@@ -113,4 +132,45 @@ test('the typewriter reveal sweeps in without shifting the art and ends on the a
     assert.ok(count >= shown, 'only grows');
     shown = count;
   }
+});
+
+
+test('story helpers preserve legacy scripts and resolve beat overrides without mutation', () => {
+  for (const f of files) {
+    const { beats, ...script } = read('lectures/' + f);
+    script.steps = script.steps.map(({ layers, whatIf, ...step }) => step);
+    assert.equal(usesStory(script), false, `${f}: the legacy shape stays on the old player`);
+  }
+  const legacy = { lecture: 1, title: 'T', steps: [{ title: 'S', idea: 'I', experiment: { station: 'urn', params: { n: 5 } } }] };
+  assert.equal(usesStory(legacy), false);
+  assert.equal(experimentForStep(legacy, 0), null);
+  assert.equal(experimentForStep(legacy, 2), null);
+  const oldExperiment = experimentForStep(legacy, 1);
+  oldExperiment.params.n = 10;
+  assert.equal(legacy.steps[0].experiment.params.n, 5);
+  const story = { ...legacy, beats: [{ id: 'first', step: 1, label: { en: 'Try', ru: 'Попробовать' }, experiment: { station: 'urn', params: { n: 8 } } }] };
+  assert.equal(usesStory(story), true);
+  const override = experimentForStep(story, 1);
+  assert.equal(override.params.n, 8);
+  override.params.n = 3;
+  assert.equal(story.beats[0].experiment.params.n, 8);
+  assert.equal(usesStory({ ...legacy, steps: [{ ...legacy.steps[0], layers: {} }] }), true);
+  assert.equal(usesStory({ ...legacy, steps: [{ ...legacy.steps[0], whatIf: [] }] }), true);
+  assert.equal(storyText('same', 'ru'), 'same');
+  assert.equal(storyText({ en: 'Hello', ru: 'Привет' }, 'en'), 'Hello');
+  assert.equal(storyText({ en: 'Hello', ru: 'Привет' }, 'ru'), 'Привет');
+});
+
+test('story fields validate bilingual text, references, numbers and malformed structures', () => {
+  const base = { lecture: 1, title: 'T', steps: [{ title: 'S', idea: 'I' }] };
+  const validate = (patch) => validateLecture({ ...base, ...patch }, { stations });
+  const step = (patch) => validate({ steps: [{ ...base.steps[0], ...patch }] });
+  const goodBeat = { id: 'one', step: 1, label: { en: 'Try', ru: 'Попробовать' }, experiment: { station: 'urn', seed: 4294967295, params: { n: 2 } } };
+  assert.deepEqual(validate({ beats: [goodBeat], steps: [{ ...base.steps[0], layers: { intuition: 'Think', formula: { en: 'Formula', ru: 'Формула' } }, whatIf: [{ label: 'Try', params: { n: 3 }, seed: 0 }] }] }), []);
+  for (const beats of [null, {}, [null], [[]], [{ ...goodBeat, label: { en: 'Yes', ru: '' } }], [{ ...goodBeat, step: 0 }], [{ ...goodBeat, step: 2 }], [goodBeat, goodBeat], [{ ...goodBeat, experiment: null }], [{ ...goodBeat, experiment: { station: 'missing' } }], [{ ...goodBeat, experiment: { station: 'urn', seed: Infinity } }], [{ ...goodBeat, experiment: { station: 'urn', params: null } }], [{ ...goodBeat, experiment: { station: 'urn', seed: null } }]]) {
+    assert.ok(validate({ beats }).length, JSON.stringify(beats));
+  }
+  assert.ok(validate({ beats: [goodBeat, { ...goodBeat, id: 'two' }] }).length, 'duplicate step');
+  for (const layers of [null, [], { extra: 'x' }, { intuition: null }, { intuition: { en: 'x' } }]) assert.ok(step({ layers }).length, JSON.stringify(layers));
+  for (const whatIf of [null, {}, [null], [[]], [{ label: '', params: {} }], [{ label: 'x', params: null }], [{ label: 'x', params: { 'bad-name': 1 } }], [{ label: 'x', params: { seed: 1 } }], [{ label: 'x', params: { n: NaN } }], [{ label: 'x', params: {}, seed: -1 }]]) assert.ok(step({ whatIf }).length, JSON.stringify(whatIf));
 });
