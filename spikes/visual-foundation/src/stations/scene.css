@@ -1745,3 +1745,9 @@ html:has(.orbital-lab) body {
   color: #8a8a8a;
   font-style: normal;
 }
+
+/* #116: a bundle of many paths as faint hairlines. */
+.chart-series.chart-series--thin {
+  stroke-width: 0.6;
+  opacity: 0.32;
+}
