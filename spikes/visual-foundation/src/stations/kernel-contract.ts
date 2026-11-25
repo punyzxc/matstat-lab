@@ -76,6 +76,10 @@ export type Constructions = { n: number; size: number; ordered: boolean; repetit
 export type Board =
   | { kind: 'needles'; d: number; l: number; strips: number; width: number; needles: number[][]; hits: boolean[] }
   | { kind: 'region'; runs: number[][]; darts: number[][]; hits: boolean[] }
+  /** #119: a region of [0, 1] as `intervals` [x0, width]; `darts[i]` = [x, spread], the spread only for drawing. */
+  | { kind: 'segment'; intervals: number[][]; darts: number[][]; hits: boolean[] }
+  /** #119: points [x, y, z] in the unit cube, `hits[i]` whether each is in the region. */
+  | { kind: 'cube'; darts: number[][]; hits: boolean[] }
   /** #124: Bertrand's three circles; `chords[i]` = [x1, y1, x2, y2] on the unit circle, `long[i]` longer than √3. */
   | { kind: 'chords'; circles: { id: string; label: string; exact: number; share: number; chords: number[][]; long: boolean[] }[] };
 /**
