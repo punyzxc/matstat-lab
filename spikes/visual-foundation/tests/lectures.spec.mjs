@@ -27,8 +27,14 @@ test('a lecture shows one step at a time; arrows and buttons move between steps 
   await page.goto('/#lecture/3/1');
   const player = page.getByTestId('lecture-player');
   await expect(player.getByRole('heading', { level: 3 })).toHaveText('Bernoulli formula');
-  await expect(player.getByRole('math')).toContainText('Pₙ(k) = Cₙᵏ pᵏ qⁿ⁻ᵏ');
-  await expect(player.getByRole('region', { name: 'Worked example' })).toContainText('21/128');
+  // Formulas are typeset (KaTeX), with the TeX source kept in MathML for screen readers.
+  const formula = player.getByTestId('lecture-formula');
+  await expect(formula.locator('.katex-display')).toHaveCount(1);
+  await expect(formula.locator('.katex-html .mfrac, .katex-html .msupsub').first()).toBeVisible();
+  await expect(formula.locator('annotation')).toHaveText(/P_n\(k\) = C_n\^k/);
+  const example = player.getByRole('region', { name: 'Worked example' });
+  await expect(example).toContainText('0.164');
+  await expect(example.locator('annotation').filter({ hasText: '\\frac{21}{128}' })).toHaveCount(1);
   await expect(page.getByTestId('step-counter')).toHaveText('Step 1 / 4');
   expect(await fits(page)).toBe(true);
 

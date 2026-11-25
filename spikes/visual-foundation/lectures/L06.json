@@ -7,8 +7,8 @@
       "title": "Expectation and variance",
       "idea": "The mean is the centre of mass of the distribution; the variance is the mean squared spread around it.",
       "formula": [
-        "M ξ = Σ xᵢ pᵢ  or  ∫ x f(x) dx",
-        "D ξ = M(ξ − Mξ)²"
+        "M\\xi = \\sum_i x_i\\, p_i \\quad \\text{or} \\quad M\\xi = \\int_{-\\infty}^{\\infty} x f(x)\\,dx",
+        "D\\xi = M(\\xi - M\\xi)^2"
       ],
       "experiment": {
         "station": "moments",
@@ -16,10 +16,10 @@
       }
     },
     {
-      "title": "The 3σ rule",
+      "title": "The $3\\sigma$ rule",
       "idea": "For a normal variable almost all values lie within three standard deviations of the mean.",
       "formula": [
-        "P(|ξ − a| < 3σ) = 1 − 2Φ(−3) ≈ 0.9973"
+        "P\\bigl(|\\xi - a| < 3\\sigma\\bigr) = 1 - 2\\Phi(-3) \\approx 0.9973"
       ],
       "experiment": {
         "station": "moments",
@@ -30,7 +30,7 @@
       "title": "Sums and convolution",
       "idea": "The density of a sum of independent variables is the convolution of their densities.",
       "formula": [
-        "f₍ξ+η₎(z) = ∫ f_ξ(x) f_η(z − x) dx"
+        "f_{\\xi+\\eta}(z) = \\int_{-\\infty}^{\\infty} f_\\xi(x)\\, f_\\eta(z - x)\\,dx"
       ],
       "experiment": {
         "station": "convolution",

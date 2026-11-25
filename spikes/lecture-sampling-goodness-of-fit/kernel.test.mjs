@@ -114,8 +114,8 @@ test('AC2: the ECDF states its convention and matches exact steps on ties', () =
   assert.deepEqual(F.y, [1 / 6, 4 / 6, 5 / 6, 1]);
   const res = SAMPLE({ digits: 1, view: 1, n: 200 });
   const conv = readout(res, 'ecdf');
-  assert.equal(conv.observed, 'P(ξ ≤ x)');
-  assert.match(conv.convention, /P\(ξ < x\)/);
+  assert.equal(conv.observed, '$P(\\xi \\le x)$');
+  assert.match(conv.convention, /P\(\\xi < x\)/);
   const sample = K.drawSample(0, 200, 2026).map((v) => Math.round(v * 10) / 10);
   const e = res.series.find((s) => s.kind === 'ecdf');
   assert.ok(e.x.length < 200, 'rounding created ties');
@@ -156,7 +156,7 @@ test('AC3: √n·Dₙ is compared with K(λ), and the band Fₙ ± λₙ(α) is 
   }
   // Decision agrees with the band picture: reject ⇔ F leaves the band somewhere ⇔ Dₙ ≥ λₙ.
   const far = FIT({ law: 2, h0: 0 });
-  assert.equal(readout(far, 'ksdecision').observed, 'reject H₀');
+  assert.equal(readout(far, 'ksdecision').observed, 'reject $H_0$');
   assert.ok(readout(far, 'dn').observed >= readout(far, 'dn').theory);
 });
 
@@ -230,14 +230,14 @@ test('edge cases: df < 1 explained, zero replicates, fast run for a far H₀ at 
   const t0 = performance.now();
   const far = FIT({ law: 1, h0: 2, n: 1000, reps: 0 });
   assert.ok(performance.now() - t0 < 500, 'large n·Dₙ must not use the exact matrix');
-  assert.match(readout(far, 'ksp').convention, /1 − K/);
+  assert.match(readout(far, 'ksp').convention, /1 - K/);
   close(readout(far, 'ksp').observed, readout(far, 'ksp').theory, 0);
 });
 
 test('power: a wrong H₀ is rejected (n = 500)', () => {
   const res = FIT({ law: 1, h0: 0, n: 500 });
-  assert.equal(readout(res, 'chidecision').observed, 'reject H₀');
-  assert.equal(readout(res, 'ksdecision').observed, 'reject H₀');
+  assert.equal(readout(res, 'chidecision').observed, 'reject $H_0$');
+  assert.equal(readout(res, 'ksdecision').observed, 'reject $H_0$');
 });
 
 // ------------------------------------------------------------ lecture pins (L10 worked examples)

@@ -78,7 +78,7 @@ test('L12 example: n = 50, frequency 0.12, H0 p = 0.1, alpha = 0.01, right-sided
   const r = out.readouts.find((x) => x.key === 'l12-example');
   assert.match(String(r.observed), /U = 0\.471/);
   assert.match(String(r.observed), /2\.326/);
-  assert.match(String(r.observed), /keep H₀/);
+  assert.match(String(r.observed), /keep \$H_0\$/);
 });
 
 test('the exact size of the L12 proportion test is not alpha', () => {

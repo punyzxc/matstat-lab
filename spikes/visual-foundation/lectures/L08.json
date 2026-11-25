@@ -11,7 +11,7 @@
       "title": "Standardised sums",
       "idea": "A sum of many independent draws, centred and scaled, is close to the standard normal law.",
       "formula": [
-        "(Sₙ − na) / (σ√n)  →  N(0, 1)"
+        "\\dfrac{S_n - na}{\\sigma\\sqrt{n}} \\;\\xrightarrow[\\;n\\to\\infty\\;]{}\\; N(0,1)"
       ],
       "scientists": [
         "lindeberg",

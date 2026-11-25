@@ -12,8 +12,8 @@
       "title": "Characteristic function",
       "idea": "The characteristic function of a sum of independent variables is the product of their characteristic functions.",
       "formula": [
-        "φ(t) = M e^(itξ)",
-        "φ₍ξ+η₎(t) = φ_ξ(t) φ_η(t)"
+        "\\varphi(t) = M e^{it\\xi}",
+        "\\varphi_{\\xi+\\eta}(t) = \\varphi_\\xi(t)\\, \\varphi_\\eta(t)"
       ]
     },
     {

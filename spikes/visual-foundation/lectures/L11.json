@@ -7,9 +7,9 @@
   "steps": [
     {
       "title": "Unbiased variance",
-      "idea": "Dividing by n underestimates the variance; dividing by n − 1 removes the bias.",
+      "idea": "Dividing by $n$ underestimates the variance; dividing by $n - 1$ removes the bias.",
       "formula": [
-        "s² = Σ (xᵢ − x̄)² / (n − 1)"
+        "s^2 = \\dfrac{1}{n-1} \\sum_{i=1}^{n} (x_i - \\bar{x})^2"
       ],
       "experiment": {
         "station": "estimation",
@@ -27,7 +27,7 @@
       "title": "Confidence interval for the mean",
       "idea": "An interval built from the sample covers the true mean in a stated share of repeated samples.",
       "formula": [
-        "x̄ ± t₍γ, n−1₎ · s / √n"
+        "\\bar{x} \\pm t_{\\gamma,\\,n-1}\\, \\dfrac{s}{\\sqrt{n}}"
       ],
       "scientists": [
         "gosset"

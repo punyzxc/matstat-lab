@@ -5,6 +5,7 @@ import { isKernel, resolveParams, type Kernel, type KernelResult } from './kerne
 import type { KernelStation as KernelStationInfo } from './catalog';
 import { Chart } from './chart';
 import { Surface3D } from './surface-3d';
+import { MathText } from '../math';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
 const sources = import.meta.glob('../../../*/kernel.mjs');
@@ -14,6 +15,8 @@ export const kernelAvailable = (kernel: string) => keyFor(kernel) in sources;
 const format = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 5 });
 const show = (v: number | string | null | undefined) =>
   v == null ? '—' : typeof v === 'number' ? (Number.isFinite(v) ? format.format(v) : String(v)) : v;
+/** A readout cell: numbers formatted, text with `$…$` formulas typeset. */
+const cell = (v: number | string | null | undefined) => <MathText text={show(v)} />;
 
 type Load = { state: 'loading' } | { state: 'missing' } | { state: 'error'; message: string } | { state: 'ready'; kernel: Kernel };
 
@@ -104,7 +107,7 @@ function ReadyStation({ station, kernel, seed, params, onState }: {
           }}
         >
           {declared.map((p) => (
-            <Slider key={p.key} id={`p-${p.key}`} label={p.label} value={draft[p.key]} display={show(draft[p.key])}
+            <Slider key={p.key} id={`p-${p.key}`} label={<MathText text={p.label} />} value={draft[p.key]} display={show(draft[p.key])}
               min={p.min} max={p.max} step={p.step} onChange={(v) => setDraft({ ...draft, [p.key]: v })} />
           ))}
           <div className="seed-field">
@@ -132,9 +135,9 @@ function ReadyStation({ station, kernel, seed, params, onState }: {
               <tbody>
                 {result.readouts.map((r, i) => (
                   <tr key={r.key + i}>
-                    <th scope="row">{r.label}{r.convention && <small>{r.convention}</small>}</th>
-                    <td>{show(r.observed)}{r.unit && r.observed != null ? ` ${r.unit}` : ''}</td>
-                    <td>{show(r.theory)}{r.unit && r.theory != null ? ` ${r.unit}` : ''}</td>
+                    <th scope="row"><MathText text={r.label} />{r.convention && <small><MathText text={r.convention} /></small>}</th>
+                    <td>{cell(r.observed)}{r.unit && r.observed != null ? ` ${r.unit}` : ''}</td>
+                    <td>{cell(r.theory)}{r.unit && r.theory != null ? ` ${r.unit}` : ''}</td>
                   </tr>
                 ))}
               </tbody>
@@ -142,7 +145,7 @@ function ReadyStation({ station, kernel, seed, params, onState }: {
             {result.notes.length > 0 && (
               <div className="station-notes">
                 <PanelHeading icon={<CircleHelp size={16} aria-hidden />} title="Reading the result" />
-                {result.notes.map((n, i) => <p key={i}>{n}</p>)}
+                {result.notes.map((n, i) => <p key={i}><MathText text={n} /></p>)}
               </div>
             )}
           </>
@@ -157,7 +160,7 @@ export function PendingStation({ station }: { station: KernelStationInfo }) {
   return (
     <div className="station-pending">
       <p className="edition"><i /> KERNEL IN PROGRESS</p>
-      <p>{station.summary}</p>
+      <p><MathText text={station.summary} /></p>
       <p>
         The station appears here as soon as <code translate="no">spikes/{station.kernel}/kernel.mjs</code> lands.
       </p>

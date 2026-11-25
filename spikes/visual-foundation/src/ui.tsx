@@ -13,7 +13,7 @@ export function PanelHeading({ icon, title, trailing }: { icon: ReactNode; title
 }
 
 export function Slider({ id, label, value, display, min, max, step, onChange }: {
-  id: string; label: string; value: number; display: string; min: number; max: number; step: number; onChange: (value: number) => void;
+  id: string; label: ReactNode; value: number; display: string; min: number; max: number; step: number; onChange: (value: number) => void;
 }) {
   const percent = (value - min) / (max - min) * 100;
   return <div className="range-field">

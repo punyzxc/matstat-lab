@@ -36,14 +36,14 @@ export function moduleReadout(id: ModuleId, sample: number[], settings: RunSetti
       return {
         label: 'Running sample mean',
         value: v(stats.mean),
-        formula: 'x̄ₙ = Σxᵢ / n',
+        formula: String.raw`\bar{x}_n = \frac{1}{n}\sum_{i=1}^{n} x_i`,
         detail: `The model mean is ${v(mean)}. Absolute error at n = ${n} is ${v(Math.abs(stats.mean - mean))}.`,
       };
     case 'estimation':
       return {
         label: 'Estimated standard error',
         value: v(stats.deviation! / Math.sqrt(n)),
-        formula: 'SE = s / √n',
+        formula: String.raw`\mathrm{SE} = \frac{s}{\sqrt{n}}`,
         detail: `The point estimate is ${v(stats.mean)}. The estimated standard error uses sample standard deviation s = ${v(stats.deviation!)}.`,
       };
     case 'confidence': {
@@ -51,7 +51,7 @@ export function moduleReadout(id: ModuleId, sample: number[], settings: RunSetti
       return {
         label: '95% Chebyshev interval',
         value: `[${v(stats.mean - radius)}, ${v(stats.mean + radius)}]`,
-        formula: 'x̄ ± √(σ² / 0.05n)',
+        formula: String.raw`\bar{x} \pm \sqrt{\frac{\sigma^2}{0.05\,n}}`,
         detail:
           'With independent draws and known finite population variance, this interval has at least 95% repeated-sample coverage.',
       };
@@ -60,21 +60,21 @@ export function moduleReadout(id: ModuleId, sample: number[], settings: RunSetti
       return {
         label: 'Two-sided p-value',
         value: v(signProbability(signs.length, Math.min(above, signs.length - above))),
-        formula: 'K ∼ Binomial(n, ½) under H₀',
+        formula: String.raw`K \sim \mathrm{Bin}\bigl(n, \tfrac12\bigr) \ \text{under}\ H_0`,
         detail: `${above} of ${signs.length} non-tied observations exceed the model median ${v(median)}. The test sums both equally extreme binomial tails.`,
       };
     case 'randomness':
       return {
         label: 'Observed runs',
         value: String(runs),
-        formula: 'R = 1 + number of sign changes',
-        detail: `Each run is a consecutive group on one side of the model median. With ${above} signs above and ${signs.length - above} below in random order, the expected run count is E R = 1 + 2n₁n₂/n = ${v(signs.length ? 1 + (2 * above * (signs.length - above)) / signs.length : 0)}.`,
+        formula: String.raw`R = 1 + \#\{\text{sign changes}\}`,
+        detail: `Each run is a consecutive group on one side of the model median. With ${above} signs above and ${signs.length - above} below in random order, the expected run count is $MR = 1 + \\frac{2n_1n_2}{n}$ = ${v(signs.length ? 1 + (2 * above * (signs.length - above)) / signs.length : 0)}.`,
       };
     default:
       return {
         label: 'Sample mean',
         value: v(stats.mean),
-        formula: 'x̄ = Σxᵢ / n',
+        formula: String.raw`\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i`,
         detail: sources[settings.distribution].description,
       };
   }

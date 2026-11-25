@@ -17,7 +17,7 @@ export type Step = {
   title: string;
   /** One idea, a sentence or a short paragraph. */
   idea: string;
-  /** Formula lines as plain Unicode text (no LaTeX, no network fonts). */
+  /** Formula lines in TeX (KaTeX subset), each typeset as a display formula. Text fields may hold inline `$…$` TeX. */
   formula?: string[];
   /** An optional worked example, plain text; lines are kept. */
   example?: string;

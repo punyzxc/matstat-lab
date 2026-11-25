@@ -225,7 +225,7 @@ export function simulateVariances({ n1, n2, R, seed, alpha, tail, grid, keepStat
     grid.forEach((rho, j) => {
       const ratio = rho * q;
       if (rejects(ratio, region)) hits[j]++;
-      // The lecture's one-sided rule: larger over smaller against F(1 − α) with the larger sample's df first.
+      // The lecture's one-sided rule: larger over smaller against $F(1 - \\alpha)$ with the larger sample's df first.
       if (ratio >= 1 ? ratio > c1 : 1 / ratio > c2) lectureRuleHits[j]++;
       if (keepStats && j === 0) stats.push(ratio);
     });
@@ -252,27 +252,27 @@ export function simulateProportion({ n, p0, R, seed, alpha, tail, grid, keepStat
 }
 
 // ---------------------------------------------------------------- contract
-const TAIL = { key: 'tail', label: 'H₁ (0 two-sided ≠, 1 right >, 2 left <)', min: 0, max: 2, step: 1, default: 1 };
-const ALPHA = { key: 'alpha', label: 'Significance level α', min: 0.001, max: 0.2, step: 0.001, default: 0.05 };
-const REPS = { key: 'R', label: 'Replicates R', min: 200, max: 4000, step: 200, default: 1000 };
+const TAIL = { key: 'tail', label: '$H_1$ (0 two-sided $\\ne$, 1 right $>$, 2 left $<$)', min: 0, max: 2, step: 1, default: 1 };
+const ALPHA = { key: 'alpha', label: 'Significance level $\\alpha$', min: 0.001, max: 0.2, step: 0.001, default: 0.05 };
+const REPS = { key: 'R', label: 'Replicates $R$', min: 200, max: 4000, step: 200, default: 1000 };
 const VIEW = { key: 'view', label: 'View (0 critical region, 1 power curve, 2 type I error)', min: 0, max: 2, step: 1, default: 0 };
 const stationParams = {
   proportion: [
-    { key: 'p0', label: 'H₀: p = p₀', min: 0.05, max: 0.95, step: 0.01, default: 0.1 },
-    { key: 'p', label: 'True p (H₁ when p ≠ p₀)', min: 0.01, max: 0.99, step: 0.01, default: 0.12 },
-    { key: 'n', label: 'Trials n', min: 10, max: 500, step: 1, default: 50 },
+    { key: 'p0', label: '$H_0\\colon p = p_0$', min: 0.05, max: 0.95, step: 0.01, default: 0.1 },
+    { key: 'p', label: 'True $p$ ($H_1$ when $p \\ne p_0$)', min: 0.01, max: 0.99, step: 0.01, default: 0.12 },
+    { key: 'n', label: 'Trials $n$', min: 10, max: 500, step: 1, default: 50 },
     { ...ALPHA, default: 0.01 }, TAIL, REPS, VIEW,
   ],
   mean: [
-    { key: 'sigmaKnown', label: 'σ (1 known: z-test, 0 unknown: t-test)', min: 0, max: 1, step: 1, default: 0 },
-    { key: 'mu', label: 'True M(X) (H₀: a₀ = 0, σ = 1)', min: -1.5, max: 1.5, step: 0.05, default: 0.5 },
-    { key: 'n', label: 'Sample size n', min: 2, max: 200, step: 1, default: 12 },
+    { key: 'sigmaKnown', label: '$\\sigma$ (1 known: $z$-test, 0 unknown: $t$-test)', min: 0, max: 1, step: 1, default: 0 },
+    { key: 'mu', label: 'True $M(X)$ ($H_0\\colon a_0 = 0$, $\\sigma = 1$)', min: -1.5, max: 1.5, step: 0.05, default: 0.5 },
+    { key: 'n', label: 'Sample size $n$', min: 2, max: 200, step: 1, default: 12 },
     ALPHA, TAIL, REPS, VIEW,
   ],
   variances: [
-    { key: 'rho', label: 'True ratio ρ = D(X)/D(Y)', min: 0.25, max: 4, step: 0.05, default: 2 },
-    { key: 'n1', label: 'Sample size n₁ (X)', min: 3, max: 100, step: 1, default: 10 },
-    { key: 'n2', label: 'Sample size n₂ (Y)', min: 3, max: 100, step: 1, default: 15 },
+    { key: 'rho', label: 'True ratio $\\rho = D(X)/D(Y)$', min: 0.25, max: 4, step: 0.05, default: 2 },
+    { key: 'n1', label: 'Sample size $n_1$ ($X$)', min: 3, max: 100, step: 1, default: 10 },
+    { key: 'n2', label: 'Sample size $n_2$ ($Y$)', min: 3, max: 100, step: 1, default: 15 },
     ALPHA, TAIL, REPS, VIEW,
   ],
 };
@@ -320,14 +320,14 @@ function regionBand(id, label, pdf, a, b, x0, x1, active) {
 }
 function criticalBands(region, pdf, x0, x1, unit = '') {
   return [
-    regionBand('crit-left', region.lower !== null ? `critical region < ${fmt(region.lower, 3)}${unit}` : 'critical region (left, unused)', pdf, -Infinity, region.lower ?? -Infinity, x0, x1, region.lower !== null),
-    regionBand('crit-right', region.upper !== null ? `critical region > ${fmt(region.upper, 3)}${unit}` : 'critical region (right, unused)', pdf, region.upper ?? Infinity, Infinity, x0, x1, region.upper !== null),
+    regionBand('crit-left', region.lower !== null ? `critical region $< ${fmt(region.lower, 3)}$${unit}` : 'critical region (left, unused)', pdf, -Infinity, region.lower ?? -Infinity, x0, x1, region.lower !== null),
+    regionBand('crit-right', region.upper !== null ? `critical region $> ${fmt(region.upper, 3)}$${unit}` : 'critical region (right, unused)', pdf, region.upper ?? Infinity, Infinity, x0, x1, region.upper !== null),
   ];
 }
 /** β as bands under the alternative density over the acceptance region (always one band, stable). */
 function betaBand(region, pdf, x0, x1) {
   const a = region.lower ?? x0, b = region.upper ?? x1;
-  const band = regionBand('beta', 'β: H₁ true, statistic in the acceptance region', pdf, a, b, x0, x1, true);
+  const band = regionBand('beta', '$\\beta$: $H_1$ true, statistic in the acceptance region', pdf, a, b, x0, x1, true);
   return { ...band, tone: 'muted' };
 }
 function powerReadouts({ R, hits, theory, nullHits, size, alpha, isNull, exactLabel }) {
@@ -335,21 +335,21 @@ function powerReadouts({ R, hits, theory, nullHits, size, alpha, isNull, exactLa
   const sizeBand = acceptanceBand(R, size, BAND_LEVEL);
   const flag = (h, b) => (h < b.lo ? ' — below the band' : h > b.hi ? ' — above the band' : '');
   return [
-    { key: 'type1', label: 'Type I error: rejection rate when H₀ is true', observed: nullHits / R, theory: size,
-      convention: `${nullHits}/${R} rejections; 99.9% band ${fmt(sizeBand.lo / R, 3)}–${fmt(sizeBand.hi / R, 3)}${flag(nullHits, sizeBand)}${Math.abs(size - alpha) > 1e-9 ? `; nominal α = ${alpha}, exact size ${fmt(size)}` : ''}` },
+    { key: 'type1', label: 'Type I error: rejection rate when $H_0$ is true', observed: nullHits / R, theory: size,
+      convention: `${nullHits}/${R} rejections; 99.9% band ${fmt(sizeBand.lo / R, 3)}–${fmt(sizeBand.hi / R, 3)}${flag(nullHits, sizeBand)}${Math.abs(size - alpha) > 1e-9 ? `; nominal $\\alpha = ${alpha}$, exact size ${fmt(size)}` : ''}` },
     isNull
-      ? { key: 'power', label: 'Power 1 − β at the true value', observed: null, theory: null, convention: 'the true value equals H₀: there is no alternative, every rejection is a type I error' }
-      : { key: 'power', label: 'Power 1 − β at the true value', observed: hits / R, theory, convention: `${hits}/${R} rejections; 99.9% band ${fmt(band.lo / R, 3)}–${fmt(band.hi / R, 3)}${flag(hits, band)}; theory ${exactLabel}` },
-    { key: 'beta', label: 'Type II error β = 1 − power', observed: isNull ? null : 1 - hits / R, theory: isNull ? null : 1 - theory },
+      ? { key: 'power', label: 'Power $1 - \\beta$ at the true value', observed: null, theory: null, convention: 'the true value equals $H_0$: there is no alternative, every rejection is a type I error' }
+      : { key: 'power', label: 'Power $1 - \\beta$ at the true value', observed: hits / R, theory, convention: `${hits}/${R} rejections; 99.9% band ${fmt(band.lo / R, 3)}–${fmt(band.hi / R, 3)}${flag(hits, band)}; theory ${exactLabel}` },
+    { key: 'beta', label: 'Type II error $\\beta = 1 - \\text{power}$', observed: isNull ? null : 1 - hits / R, theory: isNull ? null : 1 - theory },
   ];
 }
 function powerSeries(gridTheory, theory, gridMc, mcTheory, hits, R, xMark, alpha, size) {
   const bands = mcTheory.map((p) => acceptanceBand(R, Math.min(1, Math.max(0, p)), BAND_LEVEL));
   return [
-    { id: 'power-band', kind: 'band', tone: 'signal', label: `99.9% Monte Carlo band (R = ${R})`, x: gridMc, y: bands.map((b) => b.lo / R), y2: bands.map((b) => b.hi / R) },
+    { id: 'power-band', kind: 'band', tone: 'signal', label: `99.9% Monte Carlo band ($R = ${R}$)`, x: gridMc, y: bands.map((b) => b.lo / R), y2: bands.map((b) => b.hi / R) },
     { id: 'power-theory', kind: 'line', tone: 'signal', label: 'exact power', x: gridTheory, y: theory },
     { id: 'power-mc', kind: 'points', tone: 'default', label: 'simulated rejection rate', x: gridMc, y: hits.map((h) => h / R) },
-    { id: 'alpha-line', kind: 'line', tone: 'accent', label: size !== undefined && Math.abs(size - alpha) > 1e-9 ? `α = ${alpha} (exact size ${fmt(size, 3)})` : `α = ${alpha}`, x: [gridTheory[0], gridTheory.at(-1)], y: [alpha, alpha] },
+    { id: 'alpha-line', kind: 'line', tone: 'accent', label: size !== undefined && Math.abs(size - alpha) > 1e-9 ? `$\\alpha = ${alpha}$ (exact size ${fmt(size, 3)})` : `$\\alpha = ${alpha}$`, x: [gridTheory[0], gridTheory.at(-1)], y: [alpha, alpha] },
     { id: 'true-value', kind: 'rule', tone: 'muted', label: 'true value', x: [xMark], y: [0] },
   ];
 }
@@ -358,8 +358,8 @@ function nullHistogram(stats, x0, x1, bins = 40) {
   for (const v of stats) { const k = Math.floor((v - x0) / w); if (k >= 0 && k < bins) c[k]++; }
   return { x: Array.from({ length: bins }, (_, i) => x0 + i * w), y: c.map((k) => k / (stats.length * w)) };
 }
-const decisionText = (reject) => (reject ? 'reject H₀' : 'keep H₀');
-const tailText = { two: 'two-sided (≠)', right: 'right-sided (>)', left: 'left-sided (<)' };
+const decisionText = (reject) => (reject ? 'reject $H_0$' : 'keep $H_0$');
+const tailText = { two: 'two-sided ($\\ne$)', right: 'right-sided ($>$)', left: 'left-sided ($<$)' };
 
 // ---------------------------------------------------------------- Proportion station
 const P_GRID_THEORY = linspace(0.01, 0.99, 99), P_GRID_MC = linspace(0.02, 0.98, 33);
@@ -376,48 +376,48 @@ function runProportion({ p0, p, n, alpha, tail: ti, R, view }, seed) {
   // Critical region on the frequency axis m/n: p₀ ± u_cr·√(p₀q₀/n).
   const toFreq = (u) => (u === null ? null : p0 + u * sd0), fRegion = { lower: toFreq(region.lower), upper: toFreq(region.upper) };
   const readouts = [
-    { key: 'statistic', label: 'Your experiment: U = (m/n − p₀)√n/√(p₀q₀) (2)', observed: own.U, theory: null, convention: `m = ${m} of n = ${n}, frequency ${fmt(m / n, 3)}; true p = ${p}` },
-    { key: 'critical', label: `Critical value u_cr, ${tailText[tail]}`, observed: null, theory: tail === 'two' ? zQ(1 - alpha / 2) : zQ(1 - alpha),
-      convention: tail === 'two' ? `Φ₀(u_cr) = (1 − α)/2 = ${fmt((1 - alpha) / 2)}; Φ₀ is the Laplace function from 0` : `Φ₀(u_cr) = (1 − 2α)/2 = ${fmt((1 - 2 * alpha) / 2)}; Φ₀ is the Laplace function from 0` },
-    { key: 'decision', label: `Decision at α = ${alpha}`, observed: decisionText(own.reject), theory: null, convention: `p-value ${fmt(own.pValue)} from the normal approximation` },
+    { key: 'statistic', label: 'Your experiment: $U = \\dfrac{(m/n - p_0)\\sqrt{n}}{\\sqrt{p_0 q_0}}$ (2)', observed: own.U, theory: null, convention: `$m = ${m}$ of $n = ${n}$, frequency ${fmt(m / n, 3)}; true $p = ${p}$` },
+    { key: 'critical', label: `Critical value $u_{\\mathrm{cr}}$, ${tailText[tail]}`, observed: null, theory: tail === 'two' ? zQ(1 - alpha / 2) : zQ(1 - alpha),
+      convention: tail === 'two' ? `$\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - \\alpha}{2} = ${fmt((1 - alpha) / 2)}$; $\\Phi_0$ is the Laplace function from 0` : `$\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - 2\\alpha}{2} = ${fmt((1 - 2 * alpha) / 2)}$; $\\Phi_0$ is the Laplace function from 0` },
+    { key: 'decision', label: `Decision at $\\alpha = ${alpha}$`, observed: decisionText(own.reject), theory: null, convention: `$p$-value ${fmt(own.pValue)} from the normal approximation` },
     ...powerReadouts({ R, hits: sim.hits[1], theory, nullHits: sim.hits[0], size, alpha, isNull, exactLabel: 'is the exact binomial sum over the critical region' }),
-    { key: 'l12-example', label: 'L12 example: n = 50, frequency 0.12, H₀: p = 0.1, α = 0.01, right-sided',
-      observed: `U = ${fmt(ex.U, 3)}, u_cr = ${fmt(ex.critical, 3)}, ${decisionText(ex.reject)}`, theory: null,
-      convention: `lecture prints u_cr = ${L12_PRINTED.critical} from the table (Φ₀(u_cr) = 0.49); the exact size of this test is ${fmt(ex.exactSize)}, not 0.01` },
+    { key: 'l12-example', label: 'L12 example: $n = 50$, frequency 0.12, $H_0\\colon p = 0.1$, $\\alpha = 0.01$, right-sided',
+      observed: `$U = ${fmt(ex.U, 3)}$, $u_{\\mathrm{cr}} = ${fmt(ex.critical, 3)}$, ${decisionText(ex.reject)}`, theory: null,
+      convention: `lecture prints $u_{\\mathrm{cr}} = ${L12_PRINTED.critical}$ from the table ($\\Phi_0(u_{\\mathrm{cr}}) = 0.49$); the exact size of this test is ${fmt(ex.exactSize)}, not 0.01` },
   ];
   const notes = [
-    'L12 formula (2): U is approximately N(0, 1) under H₀ by the de Moivre–Laplace theorem. The critical region is chosen so that P(U in it | H₀) = α.',
-    'The chart uses the frequency m/n: the critical region is p₀ ± u_cr·√(p₀q₀/n). Stems are the exact binomial probabilities divided by the spacing 1/n, so they compare with the normal density.',
-    `m is discrete, so the real type I error is not α: here it is ${fmt(size)} against nominal α = ${alpha}. The rejection rate under H₀ is checked against this exact size.`,
-    'Power 1 − β is the probability of the critical region when H₁ is true; it grows with |p − p₀| and with n.',
+    'L12 formula (2): $U$ is approximately $N(0, 1)$ under $H_0$ by the de Moivre–Laplace theorem. The critical region is chosen so that $P(U \\in \\text{region} \\mid H_0) = \\alpha$.',
+    'The chart uses the frequency $m/n$: the critical region is $p_0 \\pm u_{\\mathrm{cr}}\\sqrt{p_0 q_0/n}$. Stems are the exact binomial probabilities divided by the spacing $1/n$, so they compare with the normal density.',
+    `$m$ is discrete, so the real type I error is not $\\alpha$: here it is ${fmt(size)} against nominal $\\alpha = ${alpha}$. The rejection rate under $H_0$ is checked against this exact size.`,
+    'Power $1 - \\beta$ is the probability of the critical region when $H_1$ is true; it grows with $|p - p_0|$ and with $n$.',
   ];
   let series, axes;
   if (view === 0) {
     const x = linspace(0, 1, GRID_N), nullPdf = (f) => phi((f - p0) / sd0) / sd0;
     const ms = Array.from({ length: n + 1 }, (_, k) => k);
     series = [
-      { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: 'H₀: normal approximation N(p₀, p₀q₀/n)', x, y: x.map(nullPdf) },
+      { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: '$H_0$: normal approximation $N(p_0,\\, p_0 q_0/n)$', x, y: x.map(nullPdf) },
       ...criticalBands(fRegion, nullPdf, 0, 1),
-      { id: 'null-pmf', kind: 'pmf', tone: 'muted', label: 'H₀: exact Binomial(n, p₀)·n', x: ms.map((k) => k / n), y: ms.map((k) => binomialPmf(k, n, p0) * n) },
-      { id: 'alt-pmf', kind: 'pmf', tone: 'default', label: `true p = ${p}: Binomial(n, p)·n`, x: ms.map((k) => k / n), y: ms.map((k) => binomialPmf(k, n, p) * n) },
+      { id: 'null-pmf', kind: 'pmf', tone: 'muted', label: '$H_0$: exact $\\mathrm{Bin}(n, p_0) \\cdot n$', x: ms.map((k) => k / n), y: ms.map((k) => binomialPmf(k, n, p0) * n) },
+      { id: 'alt-pmf', kind: 'pmf', tone: 'default', label: `true $p = ${p}$: $\\mathrm{Bin}(n, p) \\cdot n$`, x: ms.map((k) => k / n), y: ms.map((k) => binomialPmf(k, n, p) * n) },
       { id: 'observed', kind: 'rule', tone: 'default', label: `your frequency ${fmt(m / n, 3)}`, x: [m / n], y: [0] },
     ];
-    axes = { x: 'relative frequency m/n', y: 'density (probability × n for stems)' };
+    axes = { x: 'relative frequency $m/n$', y: 'density (probability $\\times\\, n$ for stems)' };
   } else if (view === 1) {
     const mc = simulateProportion({ n, p0, R, seed, alpha, tail, grid: P_GRID_MC });
     series = powerSeries(P_GRID_THEORY, P_GRID_THEORY.map((v) => proportionPower(n, p0, v, alpha, tail)), P_GRID_MC,
       P_GRID_MC.map((v) => proportionPower(n, p0, v, alpha, tail)), mc.hits, R, p, alpha, size);
-    series.push({ id: 'null-value', kind: 'rule', tone: 'accent', label: 'p₀', x: [p0], y: [0] });
-    axes = { x: 'true probability p', y: 'P(reject H₀) = power (α at p = p₀)' };
+    series.push({ id: 'null-value', kind: 'rule', tone: 'accent', label: '$p_0$', x: [p0], y: [0] });
+    axes = { x: 'true probability $p$', y: '$P(\\text{reject } H_0)$ = power ($\\alpha$ at $p = p_0$)' };
   } else {
     const ms = Array.from({ length: n + 1 }, (_, k) => k), x = linspace(0, 1, GRID_N), nullPdf = (f) => phi((f - p0) / sd0) / sd0;
     series = [
-      { id: 'null-sim', kind: 'pmf', tone: 'default', label: `simulated m/n under H₀ (R = ${R})`, x: ms.map((k) => k / n), y: sim.counts.map((c) => c / R * n) },
-      { id: 'null-pmf', kind: 'pmf', tone: 'muted', label: 'exact Binomial(n, p₀)·n', x: ms.map((k) => k / n), y: ms.map((k) => binomialPmf(k, n, p0) * n) },
+      { id: 'null-sim', kind: 'pmf', tone: 'default', label: `simulated $m/n$ under $H_0$ ($R = ${R}$)`, x: ms.map((k) => k / n), y: sim.counts.map((c) => c / R * n) },
+      { id: 'null-pmf', kind: 'pmf', tone: 'muted', label: 'exact $\\mathrm{Bin}(n, p_0) \\cdot n$', x: ms.map((k) => k / n), y: ms.map((k) => binomialPmf(k, n, p0) * n) },
       { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: 'normal approximation', x, y: x.map(nullPdf) },
       ...criticalBands(fRegion, nullPdf, 0, 1),
     ];
-    axes = { x: 'relative frequency m/n under H₀', y: 'density (probability × n)' };
+    axes = { x: 'relative frequency $m/n$ under $H_0$', y: 'density (probability $\\times\\, n$)' };
   }
   return { readouts, series, notes, axes };
 }
@@ -435,22 +435,22 @@ function runMean({ sigmaKnown, mu, n, alpha, tail: ti, R, view }, seed) {
   const statName = known ? 'U' : 'T', k = n - 1, delta = mu * Math.sqrt(n);
   const critical = known ? zQ(tail === 'two' ? 1 - alpha / 2 : 1 - alpha) : studentTQuantile(tail === 'two' ? 1 - alpha / 2 : 1 - alpha, k);
   const readouts = [
-    { key: 'statistic', label: known ? 'Your sample: U = (x̄ − a₀)√n/σ (3)' : 'Your sample: T = (x̄ − a₀)√n/s (5)', observed: own.stat, theory: null,
-      convention: `x̄ = ${fmt(own.xbar)}${known ? ', σ = 1 known' : `, s = ${fmt(own.s)} (corrected, divisor n − 1)`}; n = ${n}, true M(X) = ${mu}` },
-    { key: 'critical', label: known ? `Critical value u_cr, ${tailText[tail]}` : `Critical point t_cr(α, k = ${k}), ${tailText[tail]}`, observed: null, theory: critical,
-      convention: known ? (tail === 'two' ? `Φ₀(u_cr) = (1 − α)/2 = ${fmt((1 - alpha) / 2)} (Laplace function from 0)` : `Φ₀(u_cr) = (1 − 2α)/2 = ${fmt((1 - 2 * alpha) / 2)}`)
-        : `computed Student quantile t(${tail === 'two' ? '1 − α/2' : '1 − α'}; ${k}), not a table value` },
-    { key: 'decision', label: `Decision at α = ${alpha}`, observed: decisionText(own.reject), theory: null, convention: `p-value ${fmt(own.pValue)}` },
+    { key: 'statistic', label: known ? 'Your sample: $U = \\dfrac{(\\bar{x} - a_0)\\sqrt{n}}{\\sigma}$ (3)' : 'Your sample: $T = \\dfrac{(\\bar{x} - a_0)\\sqrt{n}}{s}$ (5)', observed: own.stat, theory: null,
+      convention: `$\\bar{x} = ${fmt(own.xbar)}$${known ? ', $\\sigma = 1$ known' : `, $s = ${fmt(own.s)}$ (corrected, divisor $n - 1$)`}; $n = ${n}$, true $M(X) = ${mu}$` },
+    { key: 'critical', label: known ? `Critical value $u_{\\mathrm{cr}}$, ${tailText[tail]}` : `Critical point $t_{\\mathrm{cr}}(\\alpha, k = ${k})$, ${tailText[tail]}`, observed: null, theory: critical,
+      convention: known ? (tail === 'two' ? `$\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - \\alpha}{2} = ${fmt((1 - alpha) / 2)}$ (Laplace function from 0)` : `$\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - 2\\alpha}{2} = ${fmt((1 - 2 * alpha) / 2)}$`)
+        : `computed Student quantile $t(${tail === 'two' ? '1 - \\alpha/2' : '1 - \\alpha'};\\, ${k})$, not a table value` },
+    { key: 'decision', label: `Decision at $\\alpha = ${alpha}$`, observed: decisionText(own.reject), theory: null, convention: `$p$-value ${fmt(own.pValue)}` },
     ...powerReadouts({ R, hits: sim.hits[1], theory, nullHits: sim.hits[0], size: alpha, alpha, isNull,
-      exactLabel: known ? 'is 1 − Φ(u_cr − δ) (and the mirrored tail), δ = (μ − a₀)√n/σ' : `is the noncentral t with δ = ${fmt(delta, 3)}, by numerical integration` }),
+      exactLabel: known ? 'is $1 - \\Phi(u_{\\mathrm{cr}} - \\delta)$ (and the mirrored tail), $\\delta = (\\mu - a_0)\\sqrt{n}/\\sigma$' : `is the noncentral $t$ with $\\delta = ${fmt(delta, 3)}$, by numerical integration` }),
   ];
-  if (!known) readouts.push({ key: 'z-vs-t', label: 'Power if σ were known (z-test)', observed: null, theory: zPower(mu, n, alpha, tail), convention: 'estimating σ costs power at small n' });
+  if (!known) readouts.push({ key: 'z-vs-t', label: 'Power if $\\sigma$ were known ($z$-test)', observed: null, theory: zPower(mu, n, alpha, tail), convention: 'estimating $\\sigma$ costs power at small $n$' });
   const notes = [
-    known ? 'L12 formula (3): with σ known, U = (x̄ − a₀)√n/σ is exactly N(0, 1) under H₀ for normal data.'
-      : `L12 formula (4)–(5): with σ unknown, T = (x̄ − a₀)√n/s has Student's law with k = n − 1 = ${k} degrees of freedom under H₀.`,
-    'The critical value is a computed quantile, so the type I error equals α exactly; the simulated rejection rate under H₀ falls inside its 99.9% band in all but about 1 run in 1000.',
-    known ? 'Under H₁ the statistic is N(δ, 1), δ = (μ − a₀)√n/σ, so the power has a closed form.'
-      : 'Under H₁ the statistic has the noncentral t law; its power is computed by one integral over the χ² of s and checked by simulation.',
+    known ? 'L12 formula (3): with $\\sigma$ known, $U = (\\bar{x} - a_0)\\sqrt{n}/\\sigma$ is exactly $N(0, 1)$ under $H_0$ for normal data.'
+      : `L12 formula (4)–(5): with $\\sigma$ unknown, $T = (\\bar{x} - a_0)\\sqrt{n}/s$ has Student's law with $k = n - 1 = ${k}$ degrees of freedom under $H_0$.`,
+    'The critical value is a computed quantile, so the type I error equals $\\alpha$ exactly; the simulated rejection rate under $H_0$ falls inside its 99.9% band in all but about 1 run in 1000.',
+    known ? 'Under $H_1$ the statistic is $N(\\delta, 1)$, $\\delta = (\\mu - a_0)\\sqrt{n}/\\sigma$, so the power has a closed form.'
+      : 'Under $H_1$ the statistic has the noncentral $t$ law; its power is computed by one integral over the $\\chi^2$ of $s$ and checked by simulation.',
     'The power curve reuses the same simulated draws for every true mean (common random numbers), so neighbouring points are correlated.',
   ];
   let series, axes;
@@ -460,26 +460,26 @@ function runMean({ sigmaKnown, mu, n, alpha, tail: ti, R, view }, seed) {
     const altPdf = known ? (t) => phi(t - delta) : (t) => nctPdf(t, k, delta);
     if (view === 0) {
       series = [
-        { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: known ? 'H₀: N(0, 1)' : `H₀: Student t, k = ${k}`, x: xs, y: xs.map(nullPdf) },
+        { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: known ? '$H_0$: $N(0, 1)$' : `$H_0$: Student $t$, $k = ${k}$`, x: xs, y: xs.map(nullPdf) },
         ...criticalBands(region, nullPdf, x0, x1),
-        { id: 'alt-pdf', kind: 'pdf', tone: 'default', label: known ? `true μ = ${mu}: N(δ, 1)` : `true μ = ${mu}: noncentral t, δ = ${fmt(delta, 2)}`, x: xs, y: xs.map(altPdf) },
+        { id: 'alt-pdf', kind: 'pdf', tone: 'default', label: known ? `true $\\mu = ${mu}$: $N(\\delta, 1)$` : `true $\\mu = ${mu}$: noncentral $t$, $\\delta = ${fmt(delta, 2)}$`, x: xs, y: xs.map(altPdf) },
         betaBand(region, altPdf, x0, x1),
-        { id: 'observed', kind: 'rule', tone: 'default', label: `your ${statName} = ${fmt(own.stat, 3)}`, x: [Math.min(x1, Math.max(x0, own.stat))], y: [0] },
+        { id: 'observed', kind: 'rule', tone: 'default', label: `your $${statName} = ${fmt(own.stat, 3)}$`, x: [Math.min(x1, Math.max(x0, own.stat))], y: [0] },
       ];
     } else {
       const h = nullHistogram(sim.stats, -5, 5), xn = linspace(-5, 5, GRID_N);
       series = [
-        { id: 'null-sim', kind: 'hist', tone: 'default', label: `simulated ${statName} under H₀ (R = ${R})`, x: h.x, y: h.y },
-        { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: known ? 'N(0, 1)' : `Student t, k = ${k}`, x: xn, y: xn.map(nullPdf) },
+        { id: 'null-sim', kind: 'hist', tone: 'default', label: `simulated $${statName}$ under $H_0$ ($R = ${R}$)`, x: h.x, y: h.y },
+        { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: known ? '$N(0, 1)$' : `Student $t$, $k = ${k}$`, x: xn, y: xn.map(nullPdf) },
         ...criticalBands(region, nullPdf, -5, 5),
       ];
     }
-    axes = { x: `statistic ${statName}`, y: 'density' };
+    axes = { x: `statistic $${statName}$`, y: 'density' };
   } else {
     const mc = simulateMean({ n, R, seed, sigmaKnown: known, alpha, tail, grid: D_GRID_MC });
     series = powerSeries(D_GRID_THEORY, D_GRID_THEORY.map(power), D_GRID_MC, D_GRID_MC.map(power), mc.hits, R, mu, alpha);
-    if (!known) series.push({ id: 'power-z', kind: 'line', tone: 'muted', label: 'z-test power (σ known)', x: D_GRID_THEORY, y: D_GRID_THEORY.map((d) => zPower(d, n, alpha, tail)) });
-    axes = { x: 'true mean μ (a₀ = 0, σ = 1)', y: 'P(reject H₀) = power (α at μ = a₀)' };
+    if (!known) series.push({ id: 'power-z', kind: 'line', tone: 'muted', label: '$z$-test power ($\\sigma$ known)', x: D_GRID_THEORY, y: D_GRID_THEORY.map((d) => zPower(d, n, alpha, tail)) });
+    axes = { x: 'true mean $\\mu$ ($a_0 = 0$, $\\sigma = 1$)', y: '$P(\\text{reject } H_0)$ = power ($\\alpha$ at $\\mu = a_0$)' };
   }
   return { readouts, series, notes, axes };
 }
@@ -495,23 +495,23 @@ function runVariances({ rho, n1, n2, alpha, tail: ti, R, view }, seed) {
   const sim = simulateVariances({ n1, n2, R, seed, alpha, tail, grid: [1, rho], keepStats: view === 2 });
   const lectureSize = fPower(1, k1, k2, alpha, tail, { lectureRule: true });
   const readouts = [
-    { key: 'statistic', label: tail === 'two' ? 'Your samples: F = larger s² / smaller s² (6)' : tail === 'right' ? 'Your samples: F = s²_X / s²_Y (H₁: D(X) > D(Y))' : 'Your samples: F = s²_Y / s²_X (H₁: D(X) < D(Y))',
-      observed: own.F, theory: null, convention: `s²_X = ${fmt(own.s2x)} (n₁ = ${n1}), s²_Y = ${fmt(own.s2y)} (n₂ = ${n2}); df (${own.df1}, ${own.df2}), numerator's first; true ρ = ${rho}` },
-    { key: 'critical', label: `Critical point F_cr, ${tailText[tail]}`, observed: null, theory: own.critical,
-      convention: tail === 'two' ? `F(1 − α/2; ${own.df1}, ${own.df2}): two-sided uses α/2 = ${alpha / 2}` : `F(1 − α; ${own.df1}, ${own.df2})` },
-    { key: 'decision', label: `Decision at α = ${alpha}`, observed: decisionText(own.reject), theory: null, convention: `p-value ${fmt(own.pValue)}` },
-    ...powerReadouts({ R, hits: sim.hits[1], theory, nullHits: sim.hits[0], size: alpha, alpha, isNull, exactLabel: 'is P(ρ·F(k₁, k₂) in the critical region), exact' }),
+    { key: 'statistic', label: tail === 'two' ? 'Your samples: $F = s^2_{\\text{larger}} / s^2_{\\text{smaller}}$ (6)' : tail === 'right' ? 'Your samples: $F = s^2_X / s^2_Y$ ($H_1\\colon D(X) > D(Y)$)' : 'Your samples: $F = s^2_Y / s^2_X$ ($H_1\\colon D(X) < D(Y)$)',
+      observed: own.F, theory: null, convention: `$s^2_X = ${fmt(own.s2x)}$ ($n_1 = ${n1}$), $s^2_Y = ${fmt(own.s2y)}$ ($n_2 = ${n2}$); df (${own.df1}, ${own.df2}), numerator's first; true $\\rho = ${rho}$` },
+    { key: 'critical', label: `Critical point $F_{\\mathrm{cr}}$, ${tailText[tail]}`, observed: null, theory: own.critical,
+      convention: tail === 'two' ? `$F(1 - \\alpha/2;\\, ${own.df1}, ${own.df2})$: two-sided uses $\\alpha/2 = ${alpha / 2}$` : `$F(1 - \\alpha;\\, ${own.df1}, ${own.df2})$` },
+    { key: 'decision', label: `Decision at $\\alpha = ${alpha}$`, observed: decisionText(own.reject), theory: null, convention: `$p$-value ${fmt(own.pValue)}` },
+    ...powerReadouts({ R, hits: sim.hits[1], theory, nullHits: sim.hits[0], size: alpha, alpha, isNull, exactLabel: 'is $P\\bigl(\\rho F(k_1, k_2) \\in \\text{critical region}\\bigr)$, exact' }),
   ];
   if (tail !== 'two') {
     const b = acceptanceBand(R, lectureSize, BAND_LEVEL);
-    readouts.push({ key: 'lecture-rule', label: 'Lecture rule for one-sided H₁ (larger over smaller, α): type I error', observed: sim.lectureRuleHits[0] / R, theory: lectureSize,
-      convention: `${sim.lectureRuleHits[0]}/${R}; 99.9% band ${fmt(b.lo / R, 3)}–${fmt(b.hi / R, 3)}. It also rejects when the other sample has the larger s², so its size is 2α, not α` });
+    readouts.push({ key: 'lecture-rule', label: 'Lecture rule for one-sided $H_1$ (larger over smaller, $\\alpha$): type I error', observed: sim.lectureRuleHits[0] / R, theory: lectureSize,
+      convention: `${sim.lectureRuleHits[0]}/${R}; 99.9% band ${fmt(b.lo / R, 3)}–${fmt(b.hi / R, 3)}. It also rejects when the other sample has the larger $s^2$, so its size is $2\\alpha$, not $\\alpha$` });
   }
   const notes = [
-    'L12 formula (6): for normal samples s²_X/s²_Y divided by D(X)/D(Y) has the Fisher–Snedecor law with k₁ = n₁ − 1 and k₂ = n₂ − 1 degrees of freedom.',
-    'Two-sided: the larger s² goes on top with its own df first, and the critical point is F(1 − α/2): this is the same test as the equal-tailed region on s²_X/s²_Y drawn on the chart.',
-    'One-sided H₁: D(X) > D(Y) must use s²_X/s²_Y in that order. Putting the larger s² on top regardless of H₁ doubles the type I error (lecture-rule readout).',
-    'The chart is drawn on the ratio s²_X/s²_Y; under H₁ the ratio is ρ·F(k₁, k₂), so the power is exact.',
+    'L12 formula (6): for normal samples $s^2_X/s^2_Y$ divided by $D(X)/D(Y)$ has the Fisher–Snedecor law with $k_1 = n_1 - 1$ and $k_2 = n_2 - 1$ degrees of freedom.',
+    'Two-sided: the larger $s^2$ goes on top with its own df first, and the critical point is $F(1 - \\alpha/2)$: this is the same test as the equal-tailed region on $s^2_X/s^2_Y$ drawn on the chart.',
+    'One-sided $H_1\\colon D(X) > D(Y)$ must use $s^2_X/s^2_Y$ in that order. Putting the larger $s^2$ on top regardless of $H_1$ doubles the type I error (lecture-rule readout).',
+    'The chart is drawn on the ratio $s^2_X/s^2_Y$; under $H_1$ the ratio is $\\rho F(k_1, k_2)$, so the power is exact.',
   ];
   let series, axes;
   const nullPdf = (v) => (v <= 0 ? 0 : Math.exp(0.5 * (k1 * Math.log(k1) + k2 * Math.log(k2)) + (k1 / 2 - 1) * Math.log(v) - (k1 + k2) / 2 * Math.log(k2 + k1 * v) - (logGamma(k1 / 2) + logGamma(k2 / 2) - logGamma((k1 + k2) / 2))));
@@ -520,28 +520,28 @@ function runVariances({ rho, n1, n2, alpha, tail: ti, R, view }, seed) {
     if (view === 0) {
       const altPdf = (v) => nullPdf(v / rho) / rho;
       series = [
-        { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: `H₀ (ρ = 1): F(${k1}, ${k2})`, x: xg, y: xg.map(nullPdf) },
+        { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: `$H_0$ ($\\rho = 1$): $F(${k1}, ${k2})$`, x: xg, y: xg.map(nullPdf) },
         ...criticalBands(region, nullPdf, 0, x1),
-        { id: 'alt-pdf', kind: 'pdf', tone: 'default', label: `true ρ = ${rho}: ρ·F(${k1}, ${k2})`, x: xg, y: xg.map(altPdf) },
+        { id: 'alt-pdf', kind: 'pdf', tone: 'default', label: `true $\\rho = ${rho}$: $\\rho F(${k1}, ${k2})$`, x: xg, y: xg.map(altPdf) },
         betaBand(region, altPdf, 0, x1),
-        { id: 'observed', kind: 'rule', tone: 'default', label: `your s²_X/s²_Y = ${fmt(own.ratio, 3)}`, x: [Math.min(x1, own.ratio)], y: [0] },
+        { id: 'observed', kind: 'rule', tone: 'default', label: `your $s^2_X/s^2_Y = ${fmt(own.ratio, 3)}$`, x: [Math.min(x1, own.ratio)], y: [0] },
       ];
     } else {
       const h = nullHistogram(sim.stats, 0, x1);
       series = [
-        { id: 'null-sim', kind: 'hist', tone: 'default', label: `simulated s²_X/s²_Y under H₀ (R = ${R})`, x: h.x, y: h.y },
-        { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: `F(${k1}, ${k2})`, x: xg, y: xg.map(nullPdf) },
+        { id: 'null-sim', kind: 'hist', tone: 'default', label: `simulated $s^2_X/s^2_Y$ under $H_0$ ($R = ${R}$)`, x: h.x, y: h.y },
+        { id: 'null-pdf', kind: 'pdf', tone: 'signal', label: `$F(${k1}, ${k2})$`, x: xg, y: xg.map(nullPdf) },
         ...criticalBands(region, nullPdf, 0, x1),
       ];
     }
-    axes = { x: 'ratio s²_X / s²_Y', y: 'density' };
+    axes = { x: 'ratio $s^2_X / s^2_Y$', y: 'density' };
   } else {
     const mc = simulateVariances({ n1, n2, R, seed, alpha, tail, grid: RHO_GRID_MC });
     const pw = (r) => fPower(r, k1, k2, alpha, tail);
     series = powerSeries(RHO_GRID_THEORY, RHO_GRID_THEORY.map(pw), RHO_GRID_MC, RHO_GRID_MC.map(pw), mc.hits, R, rho, alpha);
     if (tail !== 'two') series.push({ id: 'power-lecture', kind: 'line', tone: 'muted', label: 'lecture one-sided rule (larger over smaller)', x: RHO_GRID_THEORY, y: RHO_GRID_THEORY.map((r) => fPower(r, k1, k2, alpha, tail, { lectureRule: true })) });
     else series.push({ id: 'power-lecture', kind: 'line', tone: 'muted', label: 'lecture rule (same as two-sided)', x: RHO_GRID_THEORY, y: RHO_GRID_THEORY.map((r) => fPower(r, k1, k2, alpha, tail)) });
-    axes = { x: 'true ratio ρ = D(X)/D(Y)', y: 'P(reject H₀) = power (α at ρ = 1)' };
+    axes = { x: 'true ratio $\\rho = D(X)/D(Y)$', y: '$P(\\text{reject } H_0)$ = power ($\\alpha$ at $\\rho = 1$)' };
   }
   return { readouts, series, notes, axes };
 }

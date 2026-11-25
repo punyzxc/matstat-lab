@@ -1,4 +1,5 @@
 import { useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { MathText, SvgMathText, mathToPlain } from '../math';
 import { RotateCcw } from 'lucide-react';
 import { Button } from '../ui';
 import type { Surface } from './kernel-contract';
@@ -92,7 +93,7 @@ export function Surface3D({ surface }: { surface: Surface }) {
   const xt = niceTicks(x0, x1, 4), yt = niceTicks(y0, y1, 4), zt = niceTicks(0, zmax, 3);
   const axisTitle = (mid: number[], text: string) => {
     const o = out(P(mid[0], mid[1], ZLO), 32);
-    return <text className="surface-title" x={o.x} y={o.y + 3} textAnchor={anchor(o.ux)}>{text}</text>;
+    return <SvgMathText className="surface-title" x={o.x} y={o.y + 3} anchor={anchor(o.ux)} text={text} width={200} />;
   };
 
   const rotate = (dyaw: number, dpitch: number) =>
@@ -122,13 +123,13 @@ export function Surface3D({ surface }: { surface: Surface }) {
 
   const title = surface.title ?? `Joint density of ${labels.x} and ${labels.y}`;
   const aria =
-    `${title}: 3D surface of the theoretical density ${labels.z} over ${labels.x} and ${labels.y}` +
+    `${mathToPlain(title)}: 3D surface of the theoretical density ${mathToPlain(labels.z)} over ${mathToPlain(labels.x)} and ${mathToPlain(labels.y)}` +
     `${zSample ? ', with the sample density drawn as stems' : ''}.`;
 
   return (
     <figure className="surface">
       <div className="surface-bar">
-        <span className="surface-heading">{title}</span>
+        <span className="surface-heading"><MathText text={title} /></span>
         <Button variant="ghost" onClick={() => setView(DEFAULT_VIEW)}><RotateCcw size={14} aria-hidden /> Reset view</Button>
       </div>
       <svg
@@ -172,11 +173,11 @@ export function Surface3D({ surface }: { surface: Surface }) {
           })}
           {axisTitle([0, yEdge], labels.x)}
           {axisTitle([xEdge, 0], labels.y)}
-          <text className="surface-title" x={zHead.x + (zLeft ? -7 : 7)} y={zHead.y - 10} textAnchor={zLeft ? 'end' : 'start'}>{labels.z}</text>
+          <SvgMathText className="surface-title" x={zHead.x + (zLeft ? -7 : 7)} y={zHead.y - 10} anchor={zLeft ? 'end' : 'start'} text={labels.z} width={200} />
         </g>
       </svg>
       <figcaption>
-        <span className="chart-key chart-key--line tone-signal"><i />Theory {labels.z}</span>
+        <span className="chart-key chart-key--line tone-signal"><i />Theory <MathText text={labels.z} /></span>
         {zSample && <span className="surface-key-sample"><i />Sample density (2D histogram)</span>}
         <span id={hintId} className="surface-hint">Drag or use arrow keys to rotate.</span>
       </figcaption>

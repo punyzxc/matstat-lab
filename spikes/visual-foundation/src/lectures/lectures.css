@@ -72,7 +72,7 @@
   text-decoration: none;
   border-left: 2px solid transparent;
 }
-.lecture-steps a span {
+.lecture-steps a > span:first-child {
   font: 10px/1.6 var(--mono);
   min-width: 1.6em;
 }
@@ -115,9 +115,8 @@
   border-left: 2px solid var(--signal);
   background: rgb(232 228 133 / 0.05);
   color: var(--ink);
-  font: 1.08em / 1.7 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', var(--mono);
-  white-space: pre-wrap;
-  font-variant-numeric: tabular-nums;
+  display: grid;
+  gap: 0.5em;
 }
 .lecture-example {
   margin: 0 0 14px;
@@ -274,11 +273,11 @@
 }
 
 /* Presenter mode: projector-sized type, the scene chrome reduced to the dock. */
-html[data-present] .lab-bar .orbit-switch,
-html[data-present] .lab-bar .lab-session,
+html[data-present] .lab-bar,
 html[data-present] .orbit-heading,
 html[data-present] .orbital-engine,
-html[data-present] .orbital-nodes {
+html[data-present] .orbital-nodes,
+html[data-present] .orbit-console {
   visibility: hidden;
 }
 html[data-present] .scene-dock {

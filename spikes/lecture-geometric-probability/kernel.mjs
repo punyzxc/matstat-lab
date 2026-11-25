@@ -43,23 +43,23 @@ function runFrequency({ p, N }, seed) {
   const inside = finals.filter((f) => Math.abs(f - p) <= half).length;
   return {
     readouts: [
-      { key: 'final', label: `Relative frequency after n = ${N}, first sequence`, observed: r6(finals[0]), theory: r6(p),
+      { key: 'final', label: `Relative frequency after $n = ${N}$, first sequence`, observed: r6(finals[0]), theory: r6(p),
         convention: `${counts[0].at(-1)} hits of ${N}` },
-      { key: 'band', label: 'Predeclared band p ± 3√(p(1 − p)/n)', observed: `${inside} of ${PATHS} inside`, theory: `± ${fmt(half)}` },
+      { key: 'band', label: 'Predeclared band $p \\pm 3\\sqrt{p(1-p)/n}$', observed: `${inside} of ${PATHS} inside`, theory: `± ${fmt(half)}` },
       { key: 'spread', label: `Spread of the ${PATHS} final frequencies`, observed: r6(Math.max(...finals) - Math.min(...finals)),
-        theory: `≈ ${fmt(Math.sqrt((p * (1 - p)) / N))} per sequence`, convention: 'falls like 1/√n' },
+        theory: `$\\approx ${fmt(Math.sqrt((p * (1 - p)) / N))}$ per sequence`, convention: 'falls like $1/\\sqrt{n}$' },
     ],
     series: [
-      { id: 'band', kind: 'band', tone: 'signal', label: 'p ± 3√(p(1 − p)/n)', x: lx,
+      { id: 'band', kind: 'band', tone: 'signal', label: '$p \\pm 3\\sqrt{p(1-p)/n}$', x: lx,
         y: ns.map((n) => Math.max(0, p - band3(p, n))), y2: ns.map((n) => Math.min(1, p + band3(p, n))) },
-      { id: 'p', kind: 'line', tone: 'signal', label: `p = ${p}`, x: [0, lN], y: [p, p] },
+      { id: 'p', kind: 'line', tone: 'signal', label: `$p = ${p}$`, x: [0, lN], y: [p, p] },
       ...counts.map((row, j) => ({ id: 'path' + j, kind: 'line', tone: j === 0 ? 'accent' : 'default',
-        label: j === 0 ? `relative frequency m/n, ${PATHS} sequences` : undefined, x: lx, y: row.map((c, k) => c / ns[k]) })),
+        label: j === 0 ? `relative frequency $m/n$, ${PATHS} sequences` : undefined, x: lx, y: row.map((c, k) => c / ns[k]) })),
     ],
-    axes: { x: 'log₁₀ n (n = 10, 100, 1000 at 1, 2, 3)', y: 'relative frequency m/n' },
+    axes: { x: '$\\lg n$ ($n = 10, 100, 1000$ at 1, 2, 3)', y: 'relative frequency $m/n$' },
     notes: [
-      'Statistical definition (L1): the probability of an event is the number near which its relative frequency m/n settles in long series of trials.',
-      'Early on the frequency swings widely; its typical distance from p shrinks like 1/√n, which is why the band narrows. Bernoulli\'s theorem (L7) proves this.',
+      'Statistical definition (L1): the probability of an event is the number near which its relative frequency $m/n$ settles in long series of trials.',
+      'Early on the frequency swings widely; its typical distance from $p$ shrinks like $1/\\sqrt{n}$, which is why the band narrows. Bernoulli\'s theorem (L7) proves this.',
     ],
   };
 }
@@ -98,11 +98,11 @@ function runDarts({ view, N }, seed) {
       series: [
         ...rows.map(({ s }) => ({ id: 'exact-' + s.id, kind: 'line', tone: 'signal', label: undefined, x: [0, lN], y: [s.exact, s.exact] })),
         ...rows.map(({ s, y }, j) => ({ id: 'freq-' + s.id, kind: 'line', tone: j === 0 ? 'accent' : j === 1 ? 'default' : 'muted',
-          label: `${s.label} → ${['1/2', '1/3', '1/4'][j]}`, x: lx, y })),
+          label: `${s.label} $\\to ${['\\tfrac12', '\\tfrac13', '\\tfrac14'][j]}$`, x: lx, y })),
       ],
-      axes: { x: 'log₁₀ n, chords drawn', y: 'share of chords longer than √3' },
+      axes: { x: '$\\lg n$, chords drawn', y: 'share of chords longer than $\\sqrt{3}$' },
       notes: [
-        'Bertrand (L1, example 2): "a chord taken at random" is not defined until we say how. Three natural ways give three different answers: 1/2, 1/3 and 1/4.',
+        'Bertrand (L1, example 2): "a chord taken at random" is not defined until we say how. Three natural ways give three different answers: $\\tfrac12$, $\\tfrac13$ and $\\tfrac14$.',
         'Each answer is correct for its own experiment; the simulation confirms all three. None of them is "the" answer: the lecture\'s choice of 0.5 (the largest) is a convention, not a theorem.',
       ],
     };
@@ -121,42 +121,42 @@ function runDarts({ view, N }, seed) {
   const half = band3(exact, N);
   const freq = hits / N;
   const readouts = [
-    { key: 'freq', label: view === 0 ? 'Share of x with sin²x ≤ 1/2' : 'Share of points with x² + y² ≤ 1', observed: r6(freq), theory: r6(exact),
+    { key: 'freq', label: view === 0 ? 'Share of $x$ with $\\sin^2 x \\le \\tfrac12$' : 'Share of points with $x^2 + y^2 \\le 1$', observed: r6(freq), theory: r6(exact),
       convention: `± ${fmt(half)} (3 SE); ${Math.abs(freq - exact) <= half ? 'inside' : 'outside'} the band` },
-    { key: 'measure', label: 'Exact measure ratio mes A / mes D', observed: null, theory: view === 0 ? '(π/4 + π/4) / π = 1/2' : '(π/4) / 1 ≈ 0.7854' },
+    { key: 'measure', label: 'Exact measure ratio $\\operatorname{mes} A / \\operatorname{mes} D$', observed: null, theory: view === 0 ? '$\\dfrac{\\pi/4 + \\pi/4}{\\pi} = \\dfrac12$' : '$\\dfrac{\\pi/4}{1} \\approx 0.7854$' },
   ];
-  if (view === 1) readouts.push({ key: 'pi', label: 'Estimate of π = 4 · share', observed: r6(4 * freq), theory: r6(Math.PI), convention: `± ${fmt(4 * half)}` });
+  if (view === 1) readouts.push({ key: 'pi', label: 'Estimate of $\\pi = 4 \\cdot \\text{share}$', observed: r6(4 * freq), theory: r6(Math.PI), convention: `± ${fmt(4 * half)}` });
   const fine = view === 0 ? grid(0, Math.PI, 181) : grid(0, 1, 101);
   return {
     readouts,
     series: view === 0 ? [
-      { id: 'curve', kind: 'line', tone: 'signal', label: 'y = 0.5 − sin²x (y exists where it is ≥ 0)', x: fine, y: fine.map((x) => 0.5 - Math.sin(x) ** 2) },
+      { id: 'curve', kind: 'line', tone: 'signal', label: '$y = 0.5 - \\sin^2 x$ ($\\sqrt{y}$ exists where $y \\ge 0$)', x: fine, y: fine.map((x) => 0.5 - Math.sin(x) ** 2) },
       { id: 'zero', kind: 'line', tone: 'muted', x: [0, Math.PI], y: [0, 0] },
       { id: 'hits', kind: 'points', tone: 'accent', label: `hits (first ${Math.min(N, SHOW)} throws)`, x: hitX, y: hitY },
       { id: 'misses', kind: 'points', tone: 'muted', label: 'misses', x: missX, y: missY },
     ] : [
       { id: 'hits', kind: 'points', tone: 'accent', label: `inside (first ${Math.min(N, SHOW)} throws)`, x: hitX, y: hitY },
       { id: 'misses', kind: 'points', tone: 'muted', label: 'outside', x: missX, y: missY },
-      { id: 'arc', kind: 'line', tone: 'signal', label: 'x² + y² = 1', x: fine, y: fine.map((x) => Math.sqrt(Math.max(0, 1 - x * x))) },
+      { id: 'arc', kind: 'line', tone: 'signal', label: '$x^2 + y^2 = 1$', x: fine, y: fine.map((x) => Math.sqrt(Math.max(0, 1 - x * x))) },
     ],
-    axes: view === 0 ? { x: 'x, thrown uniformly on [0, π]', y: '0.5 − sin²x (points jittered)' } : { x: 'x', y: 'y' },
+    axes: view === 0 ? { x: '$x$, thrown uniformly on $[0, \\pi]$', y: '$0.5 - \\sin^2 x$ (points jittered)' } : { x: 'x', y: 'y' },
     notes: view === 0
-      ? ['Geometric method (L1, L4): a point thrown at random into D lands in A with probability mes A / mes D.',
-        'L1 example 1: √(0.5 − sin²x) exists when sin²x ≤ 1/2, that is on [0, π/4] and [3π/4, π]. Half of [0, π], so P = 1/2.']
-      : ['A point thrown at random into the unit square lands in the quarter disc with probability equal to its area, π/4.',
-        'So the hit share times 4 estimates π: the Monte Carlo idea in one picture. The error shrinks like 1/√n.'],
+      ? ['Geometric method (L1, L4): a point thrown at random into $D$ lands in $A$ with probability $\\operatorname{mes} A / \\operatorname{mes} D$.',
+        'L1 example 1: $\\sqrt{0.5 - \\sin^2 x}$ exists when $\\sin^2 x \\le \\tfrac12$, that is on $[0, \\pi/4]$ and $[3\\pi/4, \\pi]$. Half of $[0, \\pi]$, so $P = \\tfrac12$.']
+      : ['A point thrown at random into the unit square lands in the quarter disc with probability equal to its area, $\\pi/4$.',
+        'So the hit share times 4 estimates $\\pi$: the Monte Carlo idea in one picture. The error shrinks like $1/\\sqrt{n}$.'],
   };
 }
 
 // ---------------------------------------------------------------- contract
 const stationParams = {
   frequency: [
-    { key: 'p', label: 'Probability of the event p', min: 0.05, max: 0.95, step: 0.05, default: 0.5 },
-    { key: 'N', label: 'Trials N', min: 100, max: 20000, step: 100, default: 2000 },
+    { key: 'p', label: 'Probability of the event $p$', min: 0.05, max: 0.95, step: 0.05, default: 0.5 },
+    { key: 'N', label: 'Trials $N$', min: 100, max: 20000, step: 100, default: 2000 },
   ],
   darts: [
-    { key: 'view', label: 'View (0 sin² example, 1 quarter disc, 2 Bertrand chords)', min: 0, max: 2, step: 1, default: 2 },
-    { key: 'N', label: 'Throws N', min: 100, max: 20000, step: 100, default: 4000 },
+    { key: 'view', label: 'View (0 $\\sin^2$ example, 1 quarter disc, 2 Bertrand chords)', min: 0, max: 2, step: 1, default: 2 },
+    { key: 'N', label: 'Throws $N$', min: 100, max: 20000, step: 100, default: 4000 },
   ],
 };
 export const stations = Object.freeze({

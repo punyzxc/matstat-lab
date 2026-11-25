@@ -222,7 +222,7 @@
         10,
         12
       ],
-      "contribution": "The χ² goodness-of-fit test; long coin-toss runs."
+      "contribution": "The $\\chi^2$ goodness-of-fit test; long coin-toss runs."
     },
     {
       "slug": "glivenko",

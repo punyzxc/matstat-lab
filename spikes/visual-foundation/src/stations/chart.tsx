@@ -1,4 +1,5 @@
 import { useId, useMemo } from 'react';
+import { MathText, SvgMathText, mathToPlain } from '../math';
 import type { Series } from './kernel-contract';
 import { lerp, lerpArray } from './surface-math.mjs';
 import { useTween } from './use-tween';
@@ -100,10 +101,10 @@ export function Chart({
     return d + `H${sx(x1).toFixed(1)}`;
   };
   const base = sy(Math.max(y0, Math.min(0, y1)));
-  const label = series.map((s) => s.label ?? s.id).join(', ');
+  const label = series.map((s) => mathToPlain(s.label ?? s.id)).join(', ');
   return (
     <figure className="chart">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${label}${xLabel ? ` against ${xLabel}` : ''}`}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${label}${xLabel ? ` against ${mathToPlain(xLabel)}` : ''}`}>
         <defs>
           <clipPath id={clip}>
             <rect x={L} y={T} width={W - L - R} height={H - T - B} />
@@ -146,13 +147,13 @@ export function Chart({
           <path d={`M${L},${T}V${H - B}H${W - R}`} />
           {yt.map((v) => <text key={'ty' + v} x={L - 7} y={sy(v) + 3.5} textAnchor="end">{tickText(v, ys_)}</text>)}
           {xt.map((v) => <text key={'tx' + v} x={sx(v)} y={H - B + 15} textAnchor="middle">{tickText(v, xs_)}</text>)}
-          {xLabel && <text className="chart-title" x={(L + W - R) / 2} y={H - 6} textAnchor="middle">{xLabel}</text>}
-          {yLabel && <text className="chart-title" x={L - 44} y={12} textAnchor="start">{yLabel}</text>}
+          {xLabel && <SvgMathText className="chart-title" x={(L + W - R) / 2} y={H - 6} anchor="middle" text={xLabel} />}
+          {yLabel && <SvgMathText className="chart-title" x={L - 44} y={12} anchor="start" text={yLabel} />}
         </g>
       </svg>
       <figcaption>
         {series.filter((s) => s.label).map((s, si) => (
-          <span key={s.id + si} className={`chart-key chart-key--${s.kind} tone-${s.tone ?? 'default'}`}><i />{s.label}</span>
+          <span key={s.id + si} className={`chart-key chart-key--${s.kind} tone-${s.tone ?? 'default'}`}><i /><MathText text={s.label} /></span>
         ))}
       </figcaption>
     </figure>
