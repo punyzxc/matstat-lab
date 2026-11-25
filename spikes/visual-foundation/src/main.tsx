@@ -331,10 +331,10 @@ function StationApp() {
     overlay = (
       <SceneDock key={station.id} title={station.name} eyebrow={<><i /> {t('STATION · ORBIT', 'СТАНЦИЯ · ОРБИТА')} {orbits.find(o => o.id === station.orbit)!.numeral}</>} lead={lead} onClose={close} testId="station-dock">
         {station.kind === 'kernel' ? (
-          <KernelStation station={station} seed={route.seed ?? DEFAULT_SEED} params={route.params} texts={route.texts}
-            onState={(seed, params, texts) => {
+          <KernelStation station={station} seed={route.seed ?? DEFAULT_SEED} params={route.params} texts={route.texts} snaps={route.snaps}
+            onState={(seed, params, texts, snaps) => {
               // Replace, not push: autoplay draws must not flood the back button, and no hashchange re-mounts the station.
-              const hash = stationHash(station.id, seed, params, back, texts);
+              const hash = stationHash(station.id, seed, params, back, texts, snaps);
               if (window.location.hash !== hash) window.history.replaceState(window.history.state, '', hash);
             }} />
         ) : station.module === 'distribution' ? (

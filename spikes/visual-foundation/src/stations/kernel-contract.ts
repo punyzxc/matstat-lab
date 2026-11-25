@@ -15,10 +15,10 @@ export type TextCheck = { message: string; template: string; values: string[] } 
 export type KernelMeta = { id: string; lectures: string[]; title: string; params: KernelParam[] };
 export type Readout = { key: string; label: string; observed?: number | string | null; theory?: number | string | null; unit?: string; convention?: string };
 export type SeriesKind = 'pmf' | 'pdf' | 'cdf' | 'hist' | 'ecdf' | 'line' | 'points' | 'band' | 'rule';
-/** `tone`: default (observed), signal (theory / reference), muted (context), accent (critical region, highlight). */
+/** `tone`: default (observed), signal (theory / reference), muted (context), accent (critical region, highlight); ghost-a…d are drawn by the station for snapshots (#114), never by a kernel. */
 /** `thin` (lines only): a faint hairline, for bundles of many paths (#116). */
 /** `marker` (points only): a larger filled `dot` or an `open` circle, as for the ends of the steps of a right-continuous CDF. */
-export type Series = { id: string; kind: SeriesKind; x: number[]; y: number[]; y2?: number[]; unit?: string; label?: string; tone?: 'default' | 'signal' | 'muted' | 'accent'; marker?: 'dot' | 'open'; thin?: boolean };
+export type Series = { id: string; kind: SeriesKind; x: number[]; y: number[]; y2?: number[]; unit?: string; label?: string; tone?: 'default' | 'signal' | 'muted' | 'accent' | `ghost-${'a' | 'b' | 'c' | 'd'}`; marker?: 'dot' | 'open'; thin?: boolean };
 /**
  * A 3D surface over a regular grid (up to ~41x41). `z[j][i]` is the theoretical density at (x[i], y[j]);
  * `zSample[j][i]` is the sample's 2D-histogram density on the same grid (cell centred at the grid node).

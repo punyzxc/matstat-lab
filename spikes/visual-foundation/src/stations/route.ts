@@ -16,6 +16,8 @@ export type Route = {
   params: Record<string, number>;
   /** Typed text parameters, such as a region `y < x^2` (#90). */
   texts: Record<string, string>;
+  /** Snapshots of the station (#114), as written in the address: `snap=A7~n:10`. */
+  snaps: string[];
   drawer: 'notes' | 'record' | 'lectures' | null;
   /** The open lecture walkthrough, if any. */
   lecture: { n: number; step: number } | null;
@@ -24,7 +26,7 @@ export type Route = {
   present: boolean;
 };
 
-const empty = (): Route => ({ orbit: null, station: null, seed: null, params: {}, texts: {}, drawer: null, lecture: null, back: null, present: false });
+const empty = (): Route => ({ orbit: null, station: null, seed: null, params: {}, texts: {}, snaps: [], drawer: null, lecture: null, back: null, present: false });
 const lectureNumber = (v: unknown) => (typeof v === 'string' && /^\d{1,2}$/.test(v) && +v >= 1 && +v <= 12 ? +v : null);
 const stepNumber = (v: unknown) => (typeof v === 'string' && /^\d{1,3}$/.test(v) && +v >= 1 ? +v : null);
 const legacy: Record<string, string> = { workspace: 'distribution' };
@@ -60,6 +62,8 @@ export function parseRoute(hash: string): Route {
       if (SEED.test(raw) && Number(raw) <= 4294967295) route.seed = Number(raw);
     } else if (key === 'present') {
       route.present = raw === '1';
+    } else if (key === 'snap') {
+      if (raw.length <= 400 && route.snaps.length < 4) route.snaps.push(raw);
     } else if (key === 'lecture' || key === 'step') {
       continue;
     } else if (NUMBER.test(raw) && Number.isFinite(Number(raw))) route.params[key] = Number(raw);
@@ -74,11 +78,12 @@ export function parseRoute(hash: string): Route {
 }
 
 export type LectureRef = { n: number; step: number; present?: boolean };
-export function stationHash(id: string, seed?: number | null, params: Record<string, number> = {}, from?: LectureRef | null, texts: Record<string, string> = {}) {
+export function stationHash(id: string, seed?: number | null, params: Record<string, number> = {}, from?: LectureRef | null, texts: Record<string, string> = {}, snaps: readonly string[] = []) {
   const query = [
     ...(seed == null ? [] : [`seed=${seed}`]),
     ...Object.entries(params).map(([k, v]) => `${encodeURIComponent(k)}=${v}`),
     ...Object.entries(texts).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`),
+    ...snaps.map((s) => `snap=${encodeURIComponent(s).replace(/%7E/gi, '~').replace(/%3A/gi, ':')}`),
     ...(from ? [`lecture=${from.n}`, `step=${from.step}`, ...(from.present ? ['present=1'] : [])] : []),
   ].join('&');
   return `#station/${id}${query ? `?${query}` : ''}`;
