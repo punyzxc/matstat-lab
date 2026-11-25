@@ -464,6 +464,9 @@ html:has(.orbital-lab) body {
 .chart-series--hist.tone-muted rect {
   fill: #4b4b4b;
 }
+.chart-series--hist.tone-accent rect {
+  fill: var(--signal);
+}
 .chart-series--pmf circle {
   fill: var(--ink);
   stroke: none;

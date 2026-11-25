@@ -67,7 +67,6 @@
  "$H_0$: $F(x)$, [[1]]": "$H_0$: $F(x)$, [[1]]",
  "[[1]] fitted": "[[1]] с оценёнными параметрами",
  "$F_n(x)$, sample from [[1]]": "$F_n(x)$, выборка (закон: [[1]])",
- "$D_n$ attained at $x = [[1]]$": "$D_n$ достигается при $x = [[1]]$",
  "Kolmogorov (L10, L12): $D_n = [[1]] = \\max(D^+ = [[2]],\\ D^- = [[3]])$. $H_0$ is rejected when $D_n \\ge \\lambda_n(\\alpha)$, that is when the graph of $F$ leaves the band $F_n \\pm \\lambda_n(\\alpha)$.": "Критерий Колмогорова (лекции 10 и 12): $D_n = [[1]] = \\max(D^+ = [[2]],\\ D^- = [[3]])$. $H_0$ отвергается при $D_n \\ge \\lambda_n(\\alpha)$, то есть когда график $F$ выходит за полосу $F_n \\pm \\lambda_n(\\alpha)$.",
  "The test needs a continuous $F$ with every parameter known in advance. Here $H_0$ is fully specified.": "Критерий требует непрерывной $F$, все параметры которой известны заранее. Здесь $H_0$ задана полностью.",
  "$H_0$ parameters were estimated from this sample. The Kolmogorov critical values then no longer hold: for the normal and exponential laws the test becomes far too lenient (compare the false-rejection rate with $\\alpha$). Use Pearson with $r$ estimated parameters instead, and read its own false-rejection rate: the L12 midpoint estimates hold $\\alpha$ only roughly.": "Параметры $H_0$ оценены по этой же выборке. Критические точки Колмогорова тогда уже неверны: для нормального и показательного законов критерий становится слишком мягким (сравните долю ложных отвержений с $\\alpha$). Вместо него используйте критерий Пирсона с $r$ оценёнными параметрами и смотрите на его собственную долю ложных отвержений: оценки по серединам интервалов из лекции 12 сохраняют $\\alpha$ лишь приближённо.",
@@ -84,5 +83,19 @@
  "L10 gives the degrees of freedom as \"number of intervals − 1\" and counts parameters from there. The general rule is the one in L12: $k = s - 1 - r$.": "В лекции 10 число степеней свободы задано как «число интервалов − 1», а число параметров вычитается из него. Общее правило — из лекции 12: $k = s - 1 - r$.",
  "Monte Carlo: [[1]] samples were drawn from $H_0$ itself ([[2]]) with the same seed and different streams. A correct level-$\\alpha$ test rejects about $\\alpha$ of them.[[3]]": "Метод Монте-Карло: из самой $H_0$ ([[2]]) взято выборок: [[1]], зерно то же, потоки разные. Верный критерий уровня $\\alpha$ отвергает примерно долю $\\alpha$ из них.[[3]]",
  "Skewness and excess kurtosis (L12): both are 0 for a normal law. Values far beyond about two standard errors argue against normality.": "Асимметрия и эксцесс (лекция 12): для нормального закона оба равны 0. Значения, далеко выходящие за две стандартные ошибки, говорят против нормальности.",
- " Replicates were capped at [[1]] to keep $nR \\le [[2]]$.": " Число повторений ограничено значением [[1]], чтобы $nR \\le [[2]]$."
+ " Replicates were capped at [[1]] to keep $nR \\le [[2]]$.": " Число повторений ограничено значением [[1]], чтобы $nR \\le [[2]]$.",
+ "Show (0 Kolmogorov: the largest gap, 1 Pearson: cell by cell)": "Показать (0 Колмогоров: наибольший разрыв, 1 Пирсон: по интервалам)",
+ "$D_n = [[1]]$ at $x_0 = [[2]]$": "$D_n = [[1]]$ в точке $x_0 = [[2]]$",
+ "$\\dfrac{(m_i - np_i)^2}{np_i}$, sum $\\chi^2 = [[1]]$": "$\\dfrac{(m_i - np_i)^2}{np_i}$, сумма $\\chi^2 = [[1]]$",
+ "largest term: cell [[1]], $[[2]]$": "наибольшее слагаемое: интервал [[1]], $[[2]]$",
+ "cell $i$": "интервал $i$",
+ "observed $m_i$": "наблюдаемые $m_i$",
+ "expected $np_i$": "ожидаемые $np_i$",
+ "count": "число",
+ "\\lambda_n(\\alpha) = [[1]], \\quad D_n [[2]] \\lambda_n(\\alpha) \\;\\Rightarrow\\; \\text{reject } H_0": "\\lambda_n(\\alpha) = [[1]], \\quad D_n [[2]] \\lambda_n(\\alpha) \\;\\Rightarrow\\; H_0 \\text{ отвергается}",
+ "\\lambda_n(\\alpha) = [[1]], \\quad D_n [[2]] \\lambda_n(\\alpha) \\;\\Rightarrow\\; \\text{do not reject } H_0": "\\lambda_n(\\alpha) = [[1]], \\quad D_n [[2]] \\lambda_n(\\alpha) \\;\\Rightarrow\\; \\text{нет оснований отвергнуть } H_0",
+ "k = s - 1 - r = [[1]], \\quad \\chi^2_{1-\\alpha}(k) = [[2]], \\quad p = [[3]] \\;\\Rightarrow\\; \\text{reject } H_0": "k = s - 1 - r = [[1]], \\quad \\chi^2_{1-\\alpha}(k) = [[2]], \\quad p = [[3]] \\;\\Rightarrow\\; H_0 \\text{ отвергается}",
+ "k = s - 1 - r = [[1]], \\quad \\chi^2_{1-\\alpha}(k) = [[2]], \\quad p = [[3]] \\;\\Rightarrow\\; \\text{do not reject } H_0": "k = s - 1 - r = [[1]], \\quad \\chi^2_{1-\\alpha}(k) = [[2]], \\quad p = [[3]] \\;\\Rightarrow\\; \\text{нет оснований отвергнуть } H_0",
+ "k = s - 1 - r = [[1]] < 1 \\;\\Rightarrow\\; \\text{the test cannot run}": "k = s - 1 - r = [[1]] < 1 \\;\\Rightarrow\\; \\text{критерий неприменим}",
+ "term $(m_i - np_i)^2 / np_i$": "слагаемое $(m_i - np_i)^2 / np_i$"
 }
