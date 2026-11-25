@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11),
-// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court, #125 the living population (L10).
+// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court, #125 the living population (L10), the corridor of running means (L7).
 const fits = (page) => page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
 
 test.beforeEach(async ({ page }) => {
@@ -273,6 +273,38 @@ test('L10 living population: the sample becomes a table that sums to n, and a ho
   await page.goto('/#lecture/10/7');
   await expect(page.locator('[data-step="7"]').getByTestId('live-formula').first().locator('[data-v="dn"][data-role="res"]')).toHaveText('0.101');
   expect(await fits(page)).toBe(true);
+});
+
+test('L7 corridor: Chebyshev against the real tails, then 200 running means whose share outside the corridor falls under the bound', async ({ page }) => {
+  await page.goto('/#lecture/7/1');
+  await expect(page.getByTestId('story-beat')).toHaveText('Chebyshev against the real tails');
+  const tail = page.locator('[data-step="1"]').getByTestId('live-formula');
+  // reduced motion draws all 20000 at once: 960 of them lie 2 sigma or more from the mean (seed 707), as on the LLN station
+  await expect(tail.nth(0).locator('[data-v="tailsim"][data-role="res"]')).toHaveText('0.048');
+  await expect(tail.nth(1).locator('[data-v="kbound"][data-role="res"]')).toHaveText('0.25');
+  const k = tail.nth(0).locator('[data-v="k"][data-role="edit"]');
+  await k.click();
+  await page.locator('[data-step="1"]').getByRole('textbox').fill('3');
+  await page.locator('[data-step="1"]').getByRole('textbox').press('Enter');
+  await expect(tail.nth(1).locator('[data-v="kbound"][data-role="res"]')).toHaveText('0.1111');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/lln\?seed=707&law=0&N=2000&k=3&view=1&lecture=7&step=1$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/7/3');
+  await expect(page.getByTestId('story-beat')).toHaveText('Running means in a corridor');
+  const corridor = page.locator('[data-step="3"]').getByTestId('live-formula');
+  await expect(corridor.nth(0).locator('[data-v="bound"][data-role="res"]')).toHaveText('0.013');
+  await expect(page.getByTestId('lln-count')).toContainText('0 of 200');
+  const eps = corridor.nth(0).locator('[data-v="eps"][data-role="edit"]');
+  await eps.click();
+  await page.locator('[data-step="3"]').getByRole('textbox').fill('0.02');
+  await page.locator('[data-step="3"]').getByRole('textbox').press('Enter');
+  await expect(page.getByTestId('lln-count')).not.toContainText(' 0 of 200');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/lln\?seed=707&law=2&N=2000&view=2&M=200&eps=0.02&lecture=7&step=3$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/7/5');
+  await expect(page.getByTestId('lln-count')).toContainText('no Chebyshev bound');
 });
 
 test('old step-by-step lectures keep their player', async ({ page }) => {

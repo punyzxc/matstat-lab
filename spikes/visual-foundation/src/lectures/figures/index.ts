@@ -7,6 +7,7 @@ import { CiWall } from './ci-wall';
 import { EstimateCloud } from './estimate-cloud';
 import { TestCourt } from './test-court';
 import { SampleLife } from './sample-life';
+import { LlnCorridor } from './lln-corridor';
 
 /** Live lecture figures by id. The spec (specs.mjs) says what they share; the component draws them. */
 const components: Record<string, ComponentType<FigureProps>> = {
@@ -15,6 +16,7 @@ const components: Record<string, ComponentType<FigureProps>> = {
   'estimate-cloud': EstimateCloud,
   'test-court': TestCourt,
   'sample-life': SampleLife,
+  'lln-corridor': LlnCorridor,
 };
 
 const russian = new Map<string, FigureSpec>();

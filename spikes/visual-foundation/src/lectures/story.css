@@ -942,3 +942,70 @@ html[data-present] .story {
 .figure--sample .figure-label--middle {
   transform: translateX(-50%);
 }
+
+/* ---------------------------------------------------------------- the corridor of running means (L7) */
+.lln-bars {
+  position: absolute;
+  top: 56%;
+  right: 3%;
+  width: 31%;
+  display: grid;
+  gap: 22px;
+  pointer-events: none;
+}
+.lln-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 10px;
+  align-items: center;
+}
+.lln-bar-label {
+  grid-column: 1 / -1;
+  color: var(--grey);
+  font: 11px var(--mono);
+  letter-spacing: 0.06em;
+}
+.lln-bar i {
+  position: relative;
+  height: 10px;
+  max-width: 100%;
+  min-width: 2px;
+  background: var(--coral, #ff8a6b);
+  box-shadow: 0 0 14px rgb(255 138 107 / 0.4);
+  transition: width 200ms var(--ease);
+}
+.lln-bar.is-bound i {
+  background: var(--signal);
+  box-shadow: 0 0 14px rgb(232 228 133 / 0.35);
+}
+.lln-bar b {
+  color: var(--ink);
+  font: 400 clamp(18px, 1.8vw, 26px) / 1 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+.lln-bar.is-hot b {
+  color: var(--signal);
+  text-shadow: 0 0 14px rgb(232 228 133 / 0.6);
+}
+.lln-count {
+  position: absolute;
+  left: 6%;
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  color: #bdbdb9;
+  font-size: 12.5px;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.lln-count em {
+  color: var(--signal);
+  font-style: normal;
+}
+.lln-count.is-hot span {
+  color: var(--signal);
+}
+.figure--lln[data-beat='share'] .lln-count {
+  left: 8%;
+}
