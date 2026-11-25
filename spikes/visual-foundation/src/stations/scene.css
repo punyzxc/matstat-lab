@@ -662,6 +662,71 @@ html:has(.orbital-lab) body {
   stroke-width: 0.5;
   stroke-linejoin: round;
 }
+.surface-quad[data-on],
+.surface-bar3d[data-on] path {
+  stroke: var(--ink);
+  stroke-width: 1.1;
+}
+/* #84: bars (P(k) over a grid), an approximation sheet laid over them, a wall curve and a point readout. */
+.surface-bar-side {
+  fill: color-mix(in srgb, var(--signal) calc(var(--h, 0) * 55%), #121212);
+  stroke: rgb(232 228 133 / 0.22);
+  stroke-width: 0.5;
+}
+.surface-bar-top {
+  fill: color-mix(in srgb, var(--signal) calc(25% + var(--h, 0) * 70%), #1a1a1a);
+  stroke: rgb(232 228 133 / 0.4);
+  stroke-width: 0.5;
+}
+.surface-overlay {
+  fill: rgb(244 244 242 / 0.07);
+  stroke: rgb(244 244 242 / 0.45);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.surface-wall-plane {
+  fill: rgb(255 255 255 / 0.025);
+  stroke: #2c2c2c;
+}
+.surface-wall-curve {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.surface-cursor line {
+  stroke: var(--ink);
+  stroke-dasharray: 2 3;
+}
+.surface-cursor circle {
+  fill: var(--black);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.surface-key-overlay i,
+.surface-key-wall i {
+  display: inline-block;
+  width: 14px;
+  height: 7px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border: 1px solid rgb(244 244 242 / 0.6);
+  background: rgb(244 244 242 / 0.1);
+}
+.surface-key-wall i {
+  height: 0;
+  border-width: 1px 0 0;
+  border-top: 2px solid var(--ink);
+  background: none;
+}
+.surface-readout {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.surface-readout:empty {
+  display: none;
+}
 .surface-stem line {
   stroke: var(--ink);
   stroke-width: 0.8;

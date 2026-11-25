@@ -32,6 +32,13 @@ export type Surface = {
   title?: string;
   /** Legend text for the `zSample` stems; defaults to the 2D-histogram wording. */
   sampleLabel?: string;
+  /** #84: draw `z` as a field of boxes, one per node, instead of a surface. */
+  bars?: boolean;
+  /** #84: a translucent surface on the same grid over the main one (an approximation), with its legend text. */
+  overlay?: number[][];
+  overlayLabel?: string;
+  /** #86: a reference curve z(x) drawn on the far wall. */
+  wall?: { x: number[]; z: number[]; label: string };
 };
 /**
  * Single experiments with a test decision (#137): `statistic[i]` and whether it was rejected, under the
