@@ -100,3 +100,35 @@ test('trace summary: mean and spread across draws', () => {
   assert.equal(t.sd, 1);
   assert.equal(t.theory, 2);
 });
+
+// #113: the time machine replays any draw from its seed, so its memory is bounded however long it runs.
+import { seedAtDraw, drawOfSeed, timelineAppend, clampSpeed, SPEEDS } from '../src/stations/autoplay-math.mjs';
+
+test('time machine: draw d of an experiment from seed s is seed s + d − 1, and back', () => {
+  assert.equal(seedAtDraw(2026, 1), 2026);
+  assert.equal(seedAtDraw(2026, 10), 2035);
+  assert.equal(seedAtDraw(0xffffffff, 2), 0); // wraps like the seed field
+  for (const [o, d] of [[1, 1], [7, 500], [0xfffffff0, 40], [123456, 9999]]) assert.equal(drawOfSeed(o, seedAtDraw(o, d)), d);
+});
+
+test('time machine: stepping back drops the future, and the record stays bounded', () => {
+  const origin = 50;
+  let list = [];
+  for (let d = 1; d <= 10000; d++) list = timelineAppend(list, { seed: seedAtDraw(origin, d) }, origin, 240);
+  assert.equal(list.length, 240);
+  assert.equal(drawOfSeed(origin, list.at(-1).seed), 10000);
+  assert.equal(drawOfSeed(origin, list[0].seed), 10000 - 239);
+  const back = timelineAppend(list, { seed: seedAtDraw(origin, 9990) }, origin, 240);
+  assert.equal(drawOfSeed(origin, back.at(-1).seed), 9990);
+  assert.ok(back.every((e, i) => i === 0 || drawOfSeed(origin, e.seed) > drawOfSeed(origin, back[i - 1].seed)));
+  assert.equal(back.length, 240 - 11 + 1);
+});
+
+test('typed pace: kept between ¼ and 8, 1 when not a number', () => {
+  assert.deepEqual(SPEEDS, [0.25, 0.5, 1, 2, 4, 8]);
+  assert.equal(clampSpeed(3), 3);
+  assert.equal(clampSpeed(0.1), 0.25);
+  assert.equal(clampSpeed(100), 8);
+  assert.equal(clampSpeed(NaN), 1);
+  assert.equal(clampSpeed(-2), 1);
+});

@@ -2053,3 +2053,190 @@ html:has(.orbital-lab) body {
   animation: none;
   transition: none;
 }
+
+/* #113: typed pace and the time machine row. */
+.autoplay-pace,
+.autoplay-draw {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font: 11px var(--mono);
+  color: #a8a8a8;
+}
+.autoplay-pace input,
+.autoplay-draw input {
+  width: 46px;
+  padding: 4px 6px;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  font: 12px var(--mono);
+  text-align: right;
+}
+.autoplay-pace input:focus-visible,
+.autoplay-draw input:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+}
+.autoplay-timeline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.autoplay-scrub {
+  flex: 1;
+  min-width: 80px;
+  accent-color: var(--signal);
+}
+.autoplay-reach {
+  font: 11px var(--mono);
+  color: #8a8a8a;
+}
+
+/* ---- snapshots (#114): ghosts of saved draws under the live chart, one colour per slot */
+.chart-series[class*='tone-ghost-'],
+.snap-chip,
+.chart-key[class*='tone-ghost-'] {
+  --ghost: #8cc7e6;
+}
+.chart-series.tone-ghost-b,
+.chart-key.tone-ghost-b,
+.snap-chip[data-slot='b'] {
+  --ghost: #ec9a86;
+}
+.chart-series.tone-ghost-c,
+.chart-key.tone-ghost-c,
+.snap-chip[data-slot='c'] {
+  --ghost: #b9a2f2;
+}
+.chart-series.tone-ghost-d,
+.chart-key.tone-ghost-d,
+.snap-chip[data-slot='d'] {
+  --ghost: #93dcae;
+}
+.chart-series[class*='tone-ghost-'] {
+  stroke: var(--ghost);
+  stroke-width: 1.35;
+  opacity: 0.9;
+}
+.chart-series--hist[class*='tone-ghost-'] rect {
+  fill: color-mix(in srgb, var(--ghost) 14%, transparent);
+  stroke: var(--ghost);
+  stroke-width: 1;
+}
+.chart-series--pmf[class*='tone-ghost-'] circle,
+.chart-series--points[class*='tone-ghost-'] circle {
+  fill: var(--ghost);
+}
+.chart-key[class*='tone-ghost-'] i {
+  border-color: var(--ghost);
+}
+.chart-key--hist[class*='tone-ghost-'] i {
+  background: color-mix(in srgb, var(--ghost) 30%, transparent);
+  outline: 1px solid var(--ghost);
+}
+.snap-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 10px 0 4px;
+  font: 11px var(--mono);
+  color: var(--quiet);
+}
+.snap-take,
+.snap-toggle,
+.snap-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--grey);
+  font: inherit;
+  cursor: pointer;
+}
+.snap-take {
+  padding: 0 10px;
+}
+.snap-take kbd {
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  font: 10px var(--mono);
+  color: var(--quiet);
+}
+.snap-take:hover:not(:disabled),
+.snap-toggle:hover,
+.snap-icon:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.snap-take:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.snap-take:focus-visible,
+.snap-toggle:focus-visible,
+.snap-icon:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+}
+.snap-hint {
+  color: #7a7a7a;
+}
+.snap-chip {
+  display: inline-flex;
+  align-items: center;
+  animation: snap-in 260ms var(--ease) both;
+}
+.snap-chip > button + button {
+  border-left: 0;
+}
+.snap-toggle {
+  padding: 0 9px 0 8px;
+  border-color: color-mix(in srgb, var(--ghost) 55%, var(--rule));
+  color: var(--ink);
+}
+.snap-toggle i {
+  width: 14px;
+  height: 0;
+  border-top: 2px solid var(--ghost);
+}
+.snap-toggle b {
+  color: var(--ghost);
+  font-weight: 600;
+}
+.snap-toggle small {
+  color: var(--quiet);
+  font-size: 10px;
+}
+.snap-icon {
+  justify-content: center;
+  width: 28px;
+  padding: 0;
+}
+.snap-chip[data-hidden] .snap-toggle {
+  color: var(--quiet);
+  border-style: dashed;
+}
+.snap-chip[data-hidden] .snap-toggle i {
+  border-top-style: dashed;
+  opacity: 0.6;
+}
+.snap-chip[data-elsewhere] .snap-toggle i {
+  opacity: 0.35;
+}
+@keyframes snap-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .snap-chip {
+    animation: none;
+  }
+}
