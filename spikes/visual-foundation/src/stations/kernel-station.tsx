@@ -10,7 +10,7 @@ import { Chart } from './chart';
 import { Surface3D } from './surface-3d';
 import { MathText, Tex, mathToPlain } from '../math';
 import { DecisionZones } from './decision-zones';
-import { kernelText, locale, plural, t, useLang } from '../i18n';
+import { kernelText, locale, plural, t, texDec, useLang } from '../i18n';
 import { LiveFormula, LiveFormulaScope, useLiveVariable } from '../live-formula';
 import { STANDARD_DEVIATION_FORMULA } from '../live-formula-model.mjs';
 
@@ -33,11 +33,13 @@ function localizeResult(kernel: string, r: KernelResult): KernelResult {
   const k = <T extends string | undefined>(s: T) => kernelText(kernel, s) as T;
   const v = (x: number | string | null | undefined) => (typeof x === 'string' ? k(x) : x);
   return {
+    ...r,
     readouts: r.readouts.map((x) => ({ ...x, label: k(x.label), convention: k(x.convention), unit: k(x.unit), observed: v(x.observed), theory: v(x.theory) })),
     series: r.series.map((s) => (s.label ? { ...s, label: k(s.label) } : s)),
     notes: r.notes.map((n) => k(n)),
     axes: r.axes && { x: k(r.axes.x), y: k(r.axes.y) },
     surface: r.surface && { ...r.surface, title: k(r.surface.title), sampleLabel: k(r.surface.sampleLabel), labels: { x: k(r.surface.labels.x), y: k(r.surface.labels.y), z: k(r.surface.labels.z) } },
+    formula: r.formula?.map((line) => texDec(k(line))),
   };
 }
 /** A readout cell: numbers formatted, text with `$…$` formulas typeset. */
