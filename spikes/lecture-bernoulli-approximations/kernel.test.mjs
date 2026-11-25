@@ -1,0 +1,95 @@
+// node --test spikes/lecture-bernoulli-approximations/kernel.test.mjs
+// Issue #39 acceptance criteria, checked against the worked-examples audit fixtures and exact rational values.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import * as k from './kernel.mjs';
+
+const close = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg ?? ''} ${a} vs ${b} (tol ${tol})`);
+const fixtures = JSON.parse(fs.readFileSync(new URL('../lecture-worked-examples-audit/fixtures/references.json', import.meta.url)));
+const ref = (id) => Object.values(fixtures).flat().find((e) => e && e.id === id);
+const readout = (r, key) => r.readouts.find((x) => x.key === key);
+
+test('#39 the binomial law is evaluated in log space and sums to 1 within 1e-12 for n up to 10⁴', () => {
+  for (const n of [1, 7, 50, 500, 5000, 10000]) for (const p of [0.001, 0.01, 0.2, 0.5, 0.97]) {
+    const law = k.binomialLaw(n, p);
+    let s = 0;
+    for (const v of law) { assert.ok(Number.isFinite(v) && v >= 0); s += v; }
+    close(s, 1, 1e-12, `n ${n} p ${p}`);
+  }
+  // Exact rationals: P_7(5) at p = 1/2 is 21/128 (L3 step 1); C(10, 3) / 2^10 = 120/1024.
+  close(k.binomialPmf(7, 0.5, 5), 21 / 128, 1e-15);
+  close(k.binomialPmf(10, 0.5, 3), 120 / 1024, 1e-15);
+  assert.equal(k.binomialPmf(10, 0.5, 11), 0);
+});
+
+test('#39 the most probable number follows np − q ≤ k₀ ≤ np + p, with two modes when (n + 1)p is an integer', () => {
+  assert.deepEqual(k.mostProbable(5000, 0.01), [ref('L03-binomial-mode').recomputed]);
+  for (const n of [1, 2, 5, 9, 10, 37, 100, 999]) for (const p of [0.05, 0.1, 0.25, 0.3, 0.5, 0.6, 0.9]) {
+    const law = k.binomialLaw(n, p), top = Math.max(...law);
+    const modes = law.flatMap((v, j) => (v >= top * (1 - 1e-12) ? [j] : []));
+    assert.deepEqual(k.mostProbable(n, p), modes, `n ${n} p ${p}`);
+    for (const m of modes) assert.ok(n * p - (1 - p) - 1e-9 <= m && m <= n * p + p + 1e-9);
+  }
+  assert.deepEqual(k.mostProbable(9, 0.5), [4, 5]);
+});
+
+test('#39 L3 ex. 2: exact 0.0566 and 0.5375 next to the local, plain and corrected approximations, each with its error', () => {
+  const r = k.run({ n: 5000, p: 0.01, k: 50, lo: 0, hi: 50 }, { seed: 1 });
+  close(readout(r, 'pk').theory, ref('L03-binomial-pmf').recomputed, 1e-6);
+  close(readout(r, 'range').theory, ref('L03-binomial-cdf').recomputed, 1e-6);
+  close(readout(r, 'local').theory, ref('L03-local-normal').recomputed.local_normal, 1e-6);
+  close(readout(r, 'plain').theory, ref('L03-plain-normal-cdf').recomputed.plain_normal, 1e-6);
+  close(readout(r, 'corrected').theory, ref('L03-plain-normal-cdf').recomputed.continuity_corrected, 1e-6);
+  for (const key of ['local', 'poisson', 'plain', 'corrected']) assert.match(readout(r, key).convention, /error/);
+  for (const key of ['plain', 'corrected']) assert.match(readout(r, key).convention, /CDF from \$-\\infty\$/);
+  assert.match(r.formula.join(' '), /0\.5375/);
+  // The typo example: P(at least one) by Poisson with λ = 0.1 is 1 − e^(−0.1) = 0.09516.
+  close(1 - k.poissonPmf(0.1, 0), ref('L03-typos').recomputed.poisson, 1e-12);
+});
+
+test('#39 L9 examples: exact binomial 0.9520, 0.5307, 0.7963 next to the lecture normal answers', () => {
+  for (const id of ['L09-defects', 'L09-first-grade', 'L09-guarantee']) {
+    const f = ref(id), { n, lo, hi } = f.inputs, p = Number(f.inputs.p);
+    const r = k.run({ n, p, lo, hi, k: lo }, { seed: 9 });
+    close(readout(r, 'range').theory, f.recomputed.exact, 1e-6, id);
+    close(readout(r, 'plain').theory, f.recomputed.plain_normal, 1e-6, id);
+    close(readout(r, 'corrected').theory, f.recomputed.continuity_corrected, 1e-6, id);
+    // Simulated series agree with the exact sum within the predeclared 4 SE band.
+    const band = Number(/± ([\d.]+)/.exec(readout(r, 'range').convention)[1]);
+    close(readout(r, 'range').observed, f.recomputed.exact, band + 1e-4, `${id} simulated`);
+  }
+});
+
+test('#39 frequency accuracy: the normal design uses the exact quantile (13 530 for ε = 0.01, γ = 0.98, p = 0.5) beside Chebyshev', () => {
+  const s = k.frequencySize(0.5, 0.01, 0.98);
+  close(s.z, ref('L03-coin-size').recomputed.z_0_99, 1e-9);
+  close(s.normalExact, ref('L03-coin-size').recomputed.continuous_normal_n, 1e-4);
+  assert.equal(s.normal, 13530);
+  assert.equal(s.chebyshev, 125000);
+  const r = k.run({ view: 1, p: 0.5, eps: 0.01, gamma: 0.98, R: 4000 }, { seed: 4 });
+  assert.equal(readout(r, 'normal').theory, 13530);
+  close(readout(r, 'inside').observed, readout(r, 'inside').theory, 4 * Math.sqrt(0.02 * 0.98 / 4000) + 1e-3);
+});
+
+test('#115 prerequisite: Poisson wins at n = 100, p = 0.02 and the normal at n = 100, p = 0.5', () => {
+  const at = (p) => k.run({ n: 100, p, k: 2, lo: 0, hi: 100 }, { seed: 1 });
+  const small = at(0.02), half = at(0.5);
+  assert.ok(readout(small, 'maxPoisson').theory < readout(small, 'maxLocal').theory);
+  assert.ok(readout(half, 'maxLocal').theory < readout(half, 'maxPoisson').theory);
+});
+
+test('contract: seeded runs repeat byte for byte, defaults and extremes run, series are finite', () => {
+  const params = k.stations.bernoulli.params;
+  const cases = [{}, Object.fromEntries(params.map((p) => [p.key, p.min])), Object.fromEntries(params.map((p) => [p.key, p.max]))];
+  for (const base of cases) for (const view of [0, 1]) {
+    const q = { ...base, view, ...(base.p === 0.999 ? { eps: 0.2 } : {}) };
+    const a = k.run(q, { seed: 42 }), b = k.run(q, { seed: 42 });
+    assert.equal(JSON.stringify(a), JSON.stringify(b));
+    assert.ok(a.readouts.length && a.series.length && a.notes.length && a.formula.length);
+    for (const s of a.series) { assert.equal(s.x.length, s.y.length); for (const v of [...s.x, ...s.y]) assert.ok(Number.isFinite(v), s.id); }
+  }
+  assert.notEqual(JSON.stringify(k.run({}, { seed: 1 }).series[0]), JSON.stringify(k.run({}, { seed: 2 }).series[0]));
+  assert.equal(k.meta.id, 'lecture-bernoulli-approximations');
+  assert.throws(() => k.run({ p: 0 }), /strictly between/);
+});
