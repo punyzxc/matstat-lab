@@ -25,7 +25,11 @@
       ],
       "experiment": {
         "station": "darts",
-        "seed": 404
+        "seed": 404,
+        "params": {
+          "view": 1,
+          "N": 10000
+        }
       }
     }
   ],

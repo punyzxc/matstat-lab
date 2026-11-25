@@ -461,6 +461,13 @@ html:has(.orbital-lab) body {
   stroke: none;
   opacity: 0.75;
 }
+.chart-series--points.tone-muted circle {
+  fill: #6a6a6a;
+}
+.chart-series--points:is(.tone-accent, .tone-signal) circle {
+  fill: var(--signal);
+  opacity: 0.9;
+}
 .chart-series--band {
   fill: rgb(244 244 242 / 0.08);
   stroke: none;

@@ -65,7 +65,11 @@
       "experiment": {
         "station": "frequency",
         "seed": 4040,
-        "label": "Watch the frequency settle"
+        "label": "Watch the frequency settle",
+        "params": {
+          "p": 0.5,
+          "N": 10000
+        }
       }
     },
     {
@@ -82,7 +86,11 @@
       "experiment": {
         "station": "darts",
         "seed": 1889,
-        "label": "Throw the three chord schemes"
+        "label": "Throw the three chord schemes",
+        "params": {
+          "view": 2,
+          "N": 20000
+        }
       }
     },
     {
