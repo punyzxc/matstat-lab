@@ -1,5 +1,5 @@
 // #109 live formulas, #110 story lectures, #111 the normal factory, #112 the confidence interval wall,
-// #135 clouds of estimates and the n vs n - 1 race.
+// #135 clouds of estimates and the n vs n - 1 race, #138 math portals.
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -67,7 +67,8 @@ test('typed values snap to the parameter range and step; text that is not a numb
 // ---------------------------------------------------------------- story scripts
 test('L08 and L11 are story lectures; every story script checks against the figure specs', () => {
   assert.deepEqual(stories.map((s) => s.lecture).sort((a, b) => a - b), [8, 11]);
-  for (const s of scripts) assert.deepEqual(validateLecture(s, { stations, scientists: slugs, figures: FIGURES, liveKeys: liveTexKeys }), [], `L${s.lecture}`);
+  const lectureSteps = Object.fromEntries(scripts.map((s) => [s.lecture, s.steps.length]));
+  for (const s of scripts) assert.deepEqual(validateLecture(s, { stations, scientists: slugs, figures: FIGURES, liveKeys: liveTexKeys, lectureSteps }), [], `L${s.lecture}`);
 });
 
 test('every live line typesets with sample numbers, and story text has no Unicode look-alike math', () => {
@@ -202,4 +203,29 @@ test('race: the same samples feed both divisors; n = 5 shows the bias -sigma^2/n
   assert.ok(Math.abs(station.find((x) => x.key === 'bias-n').observed - (r.meanN - 1)) < 1e-12);
   assert.ok(Math.abs(station.find((x) => x.key === 'bias-n1').observed - (r.meanN1 - 1)) < 1e-12);
   assert.deepEqual(FIGURES['estimate-cloud'].station({ n: 5, sigma: 1, law: 0 }), { station: 'estimation', params: { n: 5, sigma: 1, law: 0, R: 2000, view: 0 } });
+});
+
+// ---------------------------------------------------------------- #138 math portals
+test('portals: every portal target exists, opens a story step with a figure, and broken portals are reported', () => {
+  const byN = Object.fromEntries(scripts.map((s) => [s.lecture, s]));
+  let count = 0;
+  for (const s of stories)
+    s.steps.forEach((step, i) => {
+      for (const p of step.portals ?? []) {
+        count++;
+        const target = byN[p.lecture]?.steps[p.step - 1];
+        assert.ok(target, `L${s.lecture} step ${i + 1}: portal to L${p.lecture} step ${p.step} exists`);
+        assert.ok(byN[p.lecture].story, `L${s.lecture} step ${i + 1}: a portal shows a live figure, so it points into a story lecture`);
+      }
+    });
+  assert.ok(count >= 3, 'the story lectures are linked by portals');
+  const base = { lecture: 8, title: 'T', story: true, steps: [{ title: 'S', idea: 'I', figure: { id: 'clt-factory', beat: 'source' } }] };
+  const known = { figures: FIGURES, lectureSteps: { 8: 1, 11: 7 } };
+  const withPortals = (portals) => validateLecture({ ...base, steps: [{ ...base.steps[0], portals }] }, known);
+  assert.deepEqual(withPortals([{ lecture: 11, step: 7 }]), []);
+  assert.match(withPortals([{ lecture: 11, step: 8 }]).join(), /does not exist/);
+  assert.match(withPortals([{ lecture: 3, step: 1 }]).join(), /does not exist/);
+  assert.match(withPortals([{ lecture: 8, step: 1 }]).join(), /its own lecture/);
+  assert.match(withPortals([{ lecture: 11 }]).join(), /needs a lecture and a step/);
+  assert.match(validateLecture({ ...base, story: false, steps: [{ title: 'S', idea: 'I', portals: [{ lecture: 11, step: 1 }] }] }, known).join(), /need "story": true/);
 });

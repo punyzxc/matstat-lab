@@ -36,4 +36,10 @@ export const STORY_TEXT = {
   get workedExample() { return t('Worked example', 'Разобранный пример'); },
   get notes() { return t('Teacher notes.', 'Заметки преподавателя.'); },
   get openExperiment() { return t('Open experiment', 'Открыть эксперимент'); },
+  get portals() { return t('Related', 'Связано'); },
+  get portal() { return t('Portal', 'Портал'); },
+  get lecture() { return t('Lecture', 'Лекция'); },
+  get goThere() { return t('Go there', 'Перейти туда'); },
+  get back() { return t('Back', 'Назад'); },
+  get portalHint() { return t('A live preview of another lecture. Esc returns here.', 'Живой фрагмент другой лекции. Esc возвращает сюда.'); },
 };

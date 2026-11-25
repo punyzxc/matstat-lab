@@ -10,10 +10,8 @@ import { lectureFormula, lectureText, plural, scientistText, t } from '../i18n';
 import './lectures.css';
 import { StoryPlayer } from './story';
 
-/** Every lecture script in `spikes/visual-foundation/lectures/LNN.json`, bundled at build time. */
-const files = import.meta.glob<Lecture>('../../lectures/L[0-9][0-9].json', { eager: true, import: 'default' });
-export const lectures: Lecture[] = Object.values(files).sort((a, b) => a.lecture - b.lecture);
-export const findLecture = (n: number) => lectures.find((l) => l.lecture === n) ?? null;
+import { findLecture, lectures } from './catalog';
+export { findLecture, lectures };
 const scientists = (roster as { scientists: Scientist[] }).scientists;
 const findScientist = (slug: string) => scientists.find((s) => s.slug === slug);
 
@@ -44,7 +42,8 @@ const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isConte
  * ← → (and PageUp/PageDown, which presentation clickers send) move between steps, Home/End jump, P toggles presenter mode.
  */
 export function LecturePlayer(props: { lecture: Lecture; step: number; present: boolean }) {
-  return props.lecture.story ? <StoryPlayer {...props} /> : <StepPlayer {...props} />;
+  // keyed by lecture: a portal's "go there" opens another lecture with a fresh player
+  return props.lecture.story ? <StoryPlayer key={props.lecture.lecture} {...props} /> : <StepPlayer key={props.lecture.lecture} {...props} />;
 }
 
 function StepPlayer({ lecture, step, present }: { lecture: Lecture; step: number; present: boolean }) {

@@ -9,7 +9,9 @@ import { lectureHash, stationHash } from '../stations/route';
 import { findFigure, figureParams } from './figures';
 import { LiveFormula } from './live-formula';
 import { STORY_TEXT as T } from './story-text';
-import type { FigureRef, Lecture, Scientist, Step } from './script';
+import type { Lecture, Portal, Scientist, Step } from './script';
+import { resolveFigures } from './catalog';
+import { PortalButton, PortalView } from './portal';
 import roster from '../../lectures/scientists.json';
 import './story.css';
 
@@ -17,11 +19,6 @@ const scientists = (roster as { scientists: Scientist[] }).scientists;
 const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
 type Mode = 'demo' | 'explore';
 
-/** Each step's figure: its own, or the last one before it. */
-function resolveFigures(steps: Step[]): FigureRef[] {
-  let last: FigureRef = steps.find((s) => s.figure)?.figure ?? { id: 'clt-factory', beat: 'source' };
-  return steps.map((s) => (last = s.figure ? { ...s.figure, params: { ...(s.figure.id === last.id ? last.params : {}), ...s.figure.params } } : last));
-}
 
 /**
  * A lecture as one scrolling story (#110): the text on the left, a live figure on the right that follows the step
@@ -41,6 +38,13 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
   const [results, setResults] = useState<Record<string, number | null>>({});
   const [playing, setPlaying] = useState(true);
   const [runKey, setRunKey] = useState(0);
+  // an open math portal (#138), and the link that opened it, to give focus back
+  const [portal, setPortal] = useState<Portal | null>(null);
+  const portalFrom = useRef<HTMLElement | null>(null);
+  const closePortal = useCallback(() => {
+    setPortal(null);
+    requestAnimationFrame(() => portalFrom.current?.focus());
+  }, []);
   const col = useRef<HTMLDivElement>(null);
   const sections = useRef<(HTMLElement | null)[]>([]);
   const synced = useRef(active);
@@ -107,7 +111,7 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
   // ---- keys
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || typing(e.target)) return;
+      if (portal || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || typing(e.target)) return;
       const k = e.key;
       if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown') scrollToStep(active + 1);
       else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') scrollToStep(active - 1);
@@ -122,7 +126,7 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [active, total, present, lecture.lecture, scrollToStep]);
+  }, [active, total, present, lecture.lecture, scrollToStep, portal]);
   useEffect(() => {
     if (present) document.documentElement.dataset.present = '';
     return () => {
@@ -182,6 +186,10 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
               apply(next, i + 1);
             }}
             onFocusStep={() => i + 1 !== active && scrollToStep(i + 1)}
+            onPortal={(p, from) => {
+              portalFrom.current = from;
+              setPortal(p);
+            }}
           />
         ))}
         <div className="story-tail" aria-hidden="true" />
@@ -219,10 +227,11 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
         </header>
         <div className="story-figure" style={{ viewTransitionName: 'lab-figure' }}>
           {Figure && (
-            <Figure key={ref.id} beat={ref.beat} params={params} seed={spec!.seed} hot={hot} onHot={setHot} playing={playing}
+            <Figure key={ref.id} beat={ref.beat} params={params} seed={spec!.seed} hot={hot} onHot={setHot} playing={playing && !portal}
               reduced={reduced} runKey={runKey} onResults={setResults} />
           )}
         </div>
+        {portal && <PortalView key={`${portal.lecture}/${portal.step}`} portal={portal} reduced={reduced} present={present} onClose={closePortal} />}
         {mode === 'explore' && spec && (
           <div className="story-explore" data-testid="story-explore">
             {Object.entries(spec.params).map(([k, p]) => (
@@ -265,10 +274,11 @@ type SectionProps = {
   step: Step; index: number; total: number; active: boolean; present: boolean; lecture: Lecture; figureId: string;
   params: Record<string, number>; results: Record<string, number | null>; hot: string | null;
   onHot: (k: string | null) => void; onParam: (k: string, v: number) => void; onWhatIf: (p: Record<string, number>) => void; onFocusStep: () => void;
+  onPortal: (p: Portal, from: HTMLElement) => void;
   ref: (el: HTMLElement | null) => void;
 };
 
-function StorySection({ step: s, index, active, present, lecture, figureId, params, results, hot, onHot, onParam, onWhatIf, onFocusStep, ref }: SectionProps) {
+function StorySection({ step: s, index, active, present, lecture, figureId, params, results, hot, onHot, onParam, onWhatIf, onFocusStep, onPortal, ref }: SectionProps) {
   const fig = findFigure(figureId)?.spec;
   const tx = (v: string) => lectureText(lecture.lecture, v);
   const e = s.experiment, station = e ? findStation(e.station) : null;
@@ -335,6 +345,12 @@ function StorySection({ step: s, index, active, present, lecture, figureId, para
               </p>
             ) : null;
           })}
+        </div>
+      ) : null}
+      {s.portals?.length ? (
+        <div className="story-portals" role="group" aria-label={T.portals}>
+          <span>{T.portals}</span>
+          {s.portals.map((p, i) => <PortalButton key={i} portal={p} onOpen={onPortal} />)}
         </div>
       ) : null}
       {e && station && (
