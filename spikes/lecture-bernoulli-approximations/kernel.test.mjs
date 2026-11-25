@@ -114,3 +114,21 @@ test('#115 each machine row of n trials collapses into its own count k, and the 
   for (const row of rows) row.cells.forEach((c, j) => (hits[j] += c));
   for (const h of hits) close(h / 4000, 2 / 5, 4 * Math.sqrt(0.24 / 4000));
 });
+
+// #128: the exact sum, the corrected integral theorem and the simulated share meet as R grows.
+test('#128 the meeting strip: exact, approximate and simulated P(lo ≤ k ≤ hi), the simulated gap shrinking with R', () => {
+  const gap = (R) => {
+    let s = 0;
+    for (let seed = 1; seed <= 12; seed++) {
+      const m = k.run({ view: 0, n: 100, p: 0.3, k: 30, lo: 20, hi: 35, R }, { seed, station: 'bernoulli' }).meet;
+      s += Math.abs(m.sim.value - m.exact.value);
+    }
+    return s / 12;
+  };
+  const out = k.run({ view: 0, n: 100, p: 0.3, k: 30, lo: 20, hi: 35, R: 4000 }, { seed: 3, station: 'bernoulli' });
+  const ids = new Set(out.series.map((s) => s.id));
+  for (const part of ['exact', 'approx', 'sim']) assert.ok(ids.has(out.meet[part].series), part);
+  assert.equal(out.meet.exact.value, out.readouts.find((r) => r.key === 'range').theory);
+  assert.equal(out.meet.approx.value, out.readouts.find((r) => r.key === 'corrected').theory);
+  assert.ok(gap(20000) < gap(100) / 4, `${gap(100)} → ${gap(20000)}`);
+});

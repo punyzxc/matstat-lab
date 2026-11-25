@@ -108,5 +108,9 @@
  "Geometric method (L4): a point thrown at random into $[0, 1]$ lands in $A$ with probability $\\operatorname{mes} A$, the length of $A$. The share of hits settles at it.": "Геометрический метод (лекция 4): точка, брошенная наудачу на $[0, 1]$, попадает в $A$ с вероятностью $\\operatorname{mes} A$, равной длине $A$. Доля попаданий устанавливается около неё.",
  "Geometric method (L4): a point thrown at random into the unit cube lands in $A$ with probability $\\operatorname{mes} A$, the volume of $A$. The share of hits settles at it.": "Геометрический метод (лекция 4): точка, брошенная наудачу в единичный куб, попадает в $A$ с вероятностью $\\operatorname{mes} A$, равной объёму $A$. Доля попаданий устанавливается около неё.",
  "The length is integrated numerically: the midpoint rule on a grid of [[1]] cells, accurate to about ±[[2]] (the change from a grid twice as coarse).": "Длина вычислена численно: методом средних прямоугольников на сетке из [[1]] ячеек, с точностью около ±[[2]] (изменение по сравнению с вдвое более грубой сеткой).",
- "The volume is integrated numerically: the midpoint rule on a [[1]] × [[1]] × [[1]] grid, accurate to about ±[[2]] (the change from a grid twice as coarse).": "Объём вычислен численно: методом средних прямоугольников на сетке [[1]] × [[1]] × [[1]], с точностью около ±[[2]] (изменение по сравнению с вдвое более грубой сеткой)."
+ "The volume is integrated numerically: the midpoint rule on a [[1]] × [[1]] × [[1]] grid, accurate to about ±[[2]] (the change from a grid twice as coarse).": "Объём вычислен численно: методом средних прямоугольников на сетке [[1]] × [[1]] × [[1]], с точностью около ±[[2]] (изменение по сравнению с вдвое более грубой сеткой).",
+ "exact, $\\tfrac12$": "точно, $\\tfrac12$",
+ "exact, $\\pi/4$": "точно, $\\pi/4$",
+ "share of $n = [[1]]$ throws": "доля из $n = [[1]]$ бросков",
+ "quadrature, $\\pm [[1]]$": "квадратура, $\\pm [[1]]$"
 }

@@ -47,5 +47,8 @@
  "frequency $k/n$": "частота $k/n$",
  "$npq = [[1]] < 9$: the normal approximations are rough here; compare their errors with Poisson's.": "$npq = [[1]] < 9$: нормальные приближения здесь грубые; сравните их погрешности с пуассоновской.",
  "$P(k/n)$ exact": "$P(k/n)$ точно",
- "n_{\\text{Chebyshev}} = \\dfrac{pq}{(1 - \\gamma)\\,\\varepsilon^2} = [[1]]": "n_{\\text{Чебышёв}} = \\dfrac{pq}{(1 - \\gamma)\\,\\varepsilon^2} = [[1]]"
+ "n_{\\text{Chebyshev}} = \\dfrac{pq}{(1 - \\gamma)\\,\\varepsilon^2} = [[1]]": "n_{\\text{Чебышёв}} = \\dfrac{pq}{(1 - \\gamma)\\,\\varepsilon^2} = [[1]]",
+ "exact Bernoulli sum": "точная сумма по формуле Бернулли",
+ "integral theorem, $k \\pm \\tfrac12$": "интегральная теорема, $k \\pm \\tfrac12$",
+ "share of $R = [[1]]$ series": "доля из $R = [[1]]$ серий"
 }

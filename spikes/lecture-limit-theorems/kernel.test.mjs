@@ -259,3 +259,35 @@ test('#122 the empirical φ of simulated sums lands within 4/√n of φ_X φ_Y; 
     assert.equal(r.phasor.xs.length, 3000);
   }
 });
+
+// #128: exact P(|Z| ≤ 1) from the law of the sum, the CLT limit, and the simulated share.
+test('#128 exact P(|Z| ≤ 1): Erlang, Poisson, Irwin–Hall and normal against brute force; the CLT limit as n grows', () => {
+  // n = 1: one term, directly.
+  const [U, , E, P] = [k.LAWS[1], null, k.LAWS[2], k.LAWS[3]];
+  assert.ok(Math.abs(k.within1Exact(E, 1) - (1 - Math.exp(-2))) < 1e-12); // |X − 1| ≤ 1 ⇔ 0 ≤ X ≤ 2
+  assert.ok(Math.abs(k.within1Exact(U, 1) - 2 * Math.sqrt(1 / 12)) < 1e-12);
+  assert.ok(Math.abs(k.within1Exact(P, 1) - Math.exp(-1) * 2.5) < 1e-12); // k = 0, 1, 2
+  assert.ok(Math.abs(k.erlangCdf(3, 2) - (1 - 4 * Math.exp(-3))) < 1e-12);
+  for (const L of [U, E, P]) assert.ok(Math.abs(k.within1Exact(L, 30) - 0.682689) < 0.01, L.id);
+  assert.equal(k.within1Exact(U, 31), null); // the alternating sum is no longer trustworthy there
+  const out = k.run({ law: 1, n: 5, R: 4000, view: 0 }, { seed: 3, station: 'clt' });
+  assert.ok(out.meet.exact && out.meet.approx && out.meet.sim);
+  assert.equal(out.meet.approx.series, 'pdf');
+  assert.equal(out.meet.sim.series, 'hist');
+  const cauchy = k.run({ law: 4, N: 2000, k: 3, view: 0, M: 200, eps: 0.2 }, { seed: 3, station: 'lln' });
+  assert.equal(cauchy.meet, undefined); // no mean, nothing to meet
+  const lln = k.run({ law: 0, N: 2000, k: 3, view: 0, M: 200, eps: 0.2 }, { seed: 3, station: 'lln' });
+  assert.deepEqual([lln.meet.exact.value, lln.meet.approx], [0, undefined]);
+});
+
+test('#128 the simulated share approaches the exact one as R grows', () => {
+  const gap = (R) => {
+    let s = 0;
+    for (let seed = 1; seed <= 12; seed++) {
+      const m = k.run({ law: 1, n: 5, R, view: 0 }, { seed, station: 'clt' }).meet;
+      s += Math.abs(m.sim.value - m.exact.value);
+    }
+    return s / 12;
+  };
+  assert.ok(gap(10000) < gap(1000) / 2, `${gap(1000)} → ${gap(10000)}`);
+});

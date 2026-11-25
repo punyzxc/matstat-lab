@@ -68,12 +68,15 @@ export function Chart({
   yLabel,
   height = 260,
   domain,
+  focus,
 }: {
   series: Series[];
   xLabel?: string;
   yLabel?: string;
   height?: number;
   domain?: { x?: [number, number]; y?: [number, number] };
+  /** A series id to light; the others dim while it is set (#128). */
+  focus?: string | null;
 }) {
   const clip = useId();
   const dx0 = domain?.x?.[0], dx1 = domain?.x?.[1], dy0 = domain?.y?.[0], dy1 = domain?.y?.[1];
@@ -105,7 +108,7 @@ export function Chart({
   const label = series.map((s) => mathToPlain(s.label ?? s.id)).join(', ');
   return (
     <figure className="chart">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${label}${xLabel ? t(` against ${mathToPlain(xLabel)}`, ` по оси ${mathToPlain(xLabel)}`) : ''}`}>
+      <svg viewBox={`0 0 ${W} ${H}`} data-focus={focus && series.some((s) => s.id === focus) ? focus : undefined} role="img" aria-label={`${label}${xLabel ? t(` against ${mathToPlain(xLabel)}`, ` по оси ${mathToPlain(xLabel)}`) : ''}`}>
         <defs>
           <clipPath id={clip}>
             <rect x={L} y={T} width={W - L - R} height={H - T - B} />
@@ -117,7 +120,7 @@ export function Chart({
         </g>
         <g clipPath={`url(#${clip})`}>
           {series.map((s, si) => {
-            const cls = `chart-series chart-series--${s.kind} tone-${s.tone ?? 'default'}${s.thin ? ' chart-series--thin' : ''}`;
+            const cls = `chart-series chart-series--${s.kind} tone-${s.tone ?? 'default'}${s.thin ? ' chart-series--thin' : ''}${focus && s.id === focus ? ' chart-series--lit' : ''}`;
             if (s.kind === 'band' && s.y2) {
               const up = pts(s, s.y2), lo = pts(s);
               if (!up.length) return null;

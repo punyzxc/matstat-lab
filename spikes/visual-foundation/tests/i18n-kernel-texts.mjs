@@ -19,6 +19,7 @@ const shown = (r) => ({
   axes: r.axes,
   surface: r.surface && [r.surface.labels, r.surface.title, r.surface.sampleLabel],
   linked: r.linked && [r.linked.series?.map((s) => s.label), r.linked.axes],
+  meet: r.meet && [r.meet.label, r.meet.exact?.label, r.meet.approx?.label, r.meet.sim?.label],
 });
 
 /** A small deterministic generator for parameter sweeps. */
