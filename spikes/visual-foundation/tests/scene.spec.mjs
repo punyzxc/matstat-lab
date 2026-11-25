@@ -44,10 +44,10 @@ test('the header has no separate views: orbits switch in place and tools open as
   await expect(orbits.getByRole('link')).toHaveCount(4);
   await orbits.getByRole('link', { name: 'I Probability' }).click();
   await expect(page).toHaveURL(/#orbit\/probability$/);
-  await expect(page.locator('.orbit-node')).toHaveCount(5);
+  await expect(page.locator('.orbit-node')).toHaveCount(6); // five stations plus Outcomes and events (#129)
   await page.getByRole('link', { name: 'Sample record' }).click();
   await expect(page.getByTestId('drawer-record')).toBeVisible();
-  await expect(page.locator('.orbit-node')).toHaveCount(5);
+  await expect(page.locator('.orbit-node')).toHaveCount(6);
 });
 
 test('a station link reopens the same station, seed and parameters in a fresh tab', async ({ page, context }) => {

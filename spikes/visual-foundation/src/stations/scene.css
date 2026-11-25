@@ -1202,3 +1202,208 @@ html:has(.orbital-lab) body {
 .chart-series--points.chart-marker--dot circle {
   stroke: none;
 }
+
+/* #129: the outcome space as objects; A solid, B dashed, the event shown filled. */
+.outcome-space {
+  margin: 4px 0 12px;
+}
+.outcome-space-head {
+  margin: 0 0 6px;
+  color: #a8a8a8;
+  font: 11px var(--mono);
+}
+.outcome-space-head b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.outcome-space-count {
+  color: var(--signal);
+}
+.outcome-space svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.os-box {
+  fill: rgb(244 244 242 / 0.03);
+  stroke: #2e2e2e;
+  stroke-width: 1;
+}
+.os-cell[data-e] .os-box {
+  fill: rgb(232 228 133 / 0.3);
+}
+.os-cell[data-a] .os-box {
+  stroke: #d8d8d8;
+  stroke-width: 1.6;
+}
+.os-cell[data-b] .os-box {
+  stroke: var(--signal);
+  stroke-dasharray: 4 3;
+  stroke-width: 1.6;
+}
+.os-cell[data-a][data-b] .os-box {
+  stroke: #d8d8d8;
+  stroke-dasharray: 10 3 3 3;
+}
+.os-die rect {
+  fill: #e9e9e6;
+  stroke: none;
+}
+.os-die circle {
+  fill: #151515;
+}
+.os-cell:not([data-e]) .os-die rect {
+  fill: #8d8d8a;
+}
+.os-coin circle {
+  fill: #2b2b2b;
+  stroke: #9a9a9a;
+}
+.os-coin[data-heads] circle {
+  fill: #d9d5a0;
+  stroke: none;
+}
+.os-coin text {
+  fill: #e6e6e6;
+  font: 600 11px var(--mono);
+  text-anchor: middle;
+}
+.os-coin[data-heads] text {
+  fill: #141414;
+}
+.os-card text {
+  fill: #e6e6e6;
+  text-anchor: middle;
+}
+.os-card[data-red] text {
+  fill: #f08a7e;
+}
+.os-rank {
+  font: 600 15px var(--mono);
+}
+.os-suit {
+  font: 17px system-ui, sans-serif;
+}
+.os-cell[data-flash] .os-box {
+  animation: os-flash 0.9s ease-out both;
+}
+@keyframes os-flash {
+  from {
+    fill: rgb(244 244 242 / 0.75);
+  }
+}
+.outcome-space svg[data-reduced] .os-cell[data-flash] .os-box {
+  animation: none;
+}
+
+/* #130: the combinatorics generator. */
+.constructions {
+  margin: 4px 0 12px;
+}
+.cx-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font: 11px var(--mono);
+  color: #a8a8a8;
+}
+.cx-var {
+  padding: 3px 8px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: default;
+}
+.cx-var[data-on],
+.cx-var:focus-visible {
+  border-color: var(--signal);
+  outline: none;
+}
+.cx-count {
+  color: var(--signal);
+}
+.cx-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px;
+  margin-bottom: 8px;
+  border: 1px dashed transparent;
+  border-radius: 6px;
+}
+.cx-pool[data-on] {
+  border-color: var(--signal);
+}
+.cx-obj,
+.cx-slot {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font: 600 11px var(--mono);
+  color: #111;
+}
+.cx-obj {
+  border: 0;
+  cursor: default;
+}
+.cx-obj[data-on],
+.cx-obj:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+}
+.constructions [data-o='0'] { background: #e8e485; }
+.constructions [data-o='1'] { background: #9fd3c7; }
+.constructions [data-o='2'] { background: #f0a58f; }
+.constructions [data-o='3'] { background: #b7b2f0; }
+.constructions [data-o='4'] { background: #d9d9d6; }
+.constructions [data-o='5'] { background: #f2c97d; }
+.constructions [data-o='6'] { background: #9cc6f0; }
+.constructions [data-o='7'] { background: #d7a6d9; }
+.cx-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 340px;
+  overflow-y: auto;
+}
+.cx-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 5px;
+  border: 1px solid #2c2c2c;
+  border-radius: 5px;
+  animation: cx-in 0.35s ease-out both;
+}
+.cx-item[data-on] {
+  border-color: var(--signal);
+}
+.cx-item[data-dim] {
+  opacity: 0.3;
+}
+.constructions[data-focus='k'] .cx-slot {
+  box-shadow: 0 0 0 2px var(--signal);
+}
+.cx-br,
+.cx-empty {
+  color: #9a9a9a;
+  font: 16px var(--mono);
+}
+@keyframes cx-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+}
+.constructions[data-reduced] .cx-item {
+  animation: none;
+}
