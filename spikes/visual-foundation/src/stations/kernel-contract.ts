@@ -39,6 +39,12 @@ export type Surface = {
   overlayLabel?: string;
   /** #86: a reference curve z(x) drawn on the far wall. */
   wall?: { x: number[]; z: number[]; label: string };
+  /** #86: the height scale stops here; taller values are cut (the point readout still gives them). */
+  zCeil?: number;
+  /** #86: legend text for the main surface, instead of "Theory …". */
+  keyLabel?: string;
+  /** #86: a TeX note per row (per y), appended to the point readout, e.g. that slice's Kolmogorov distance. */
+  rowNotes?: string[];
 };
 /**
  * Single experiments with a test decision (#137): `statistic[i]` and whether it was rejected, under the

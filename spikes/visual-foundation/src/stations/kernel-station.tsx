@@ -49,7 +49,7 @@ function localizeResult(kernel: string, r: KernelResult): KernelResult {
     series: r.series.map((s) => (s.label ? { ...s, label: k(s.label) } : s)),
     notes: r.notes.map((n) => k(n)),
     axes: r.axes && { x: k(r.axes.x), y: k(r.axes.y) },
-    surface: r.surface && { ...r.surface, title: k(r.surface.title), sampleLabel: k(r.surface.sampleLabel), labels: { x: k(r.surface.labels.x), y: k(r.surface.labels.y), z: k(r.surface.labels.z) } },
+    surface: r.surface && { ...r.surface, title: k(r.surface.title), sampleLabel: k(r.surface.sampleLabel), ...(r.surface.wall ? { wall: { ...r.surface.wall, label: k(r.surface.wall.label) } } : {}), ...(r.surface.overlayLabel ? { overlayLabel: k(r.surface.overlayLabel) } : {}), ...(r.surface.keyLabel ? { keyLabel: k(r.surface.keyLabel) } : {}), labels: { x: k(r.surface.labels.x), y: k(r.surface.labels.y), z: k(r.surface.labels.z) } },
     formula: r.formula?.map((line) => texDec(k(line))),
     decisions: r.decisions,
     beam: r.beam,

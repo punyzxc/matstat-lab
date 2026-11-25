@@ -306,7 +306,115 @@ export function standardizedSums(law, n, R, seed) {
   return out;
 }
 
-function runClt({ law: li, n, R, view }, seed) {
+// ---------------------------------------------------------------- CLT ridge (#86)
+/** Sources of the ridge: the finite-variance laws, Bernoulli(p) and Cauchy (centre 0, scale 1: no mean, no variance). */
+export const RIDGE_SOURCES = Object.freeze(['uniform', 'exponential', 'bernoulli', 'poisson', 'cauchy']);
+const RIDGE_BINS = 32;
+/** A display ceiling for the ridge: a lattice law at small n puts its mass in a few spikes far above φ(0) ≈ 0.399. */
+export const RIDGE_CEIL = 1.2;
+export function ridgeLaw(source, p = 0.3) {
+  if (source === 'bernoulli') {
+    return { id: 'bernoulli', label: `Bernoulli, $p = ${p}$`, mean: p, sd: Math.sqrt(p * (1 - p)), discrete: true,
+      draw: (seed, s, i) => (uni(seed, s, i) < p ? 1 : 0) };
+  }
+  return LAWS.find((l) => l.id === source);
+}
+/**
+ * Standardized sums S*_n = (Sₙ − n·MX)/(σ√n) for n = 1..nMax along the same R paths: term t of path r is draw
+ * (stream 900 + 2·t·7919, index r), so slice n + 1 adds one term to slice n. For Cauchy the centre is 0 and the scale 1
+ * (S_n/√n, the CLT's own scaling), which spreads out instead of settling. Returns rows[n − 1] = Float64Array(R).
+ */
+export function ridgeSums(law, nMax, R, seed) {
+  const centre = law.mean ?? 0, sd = law.sd ?? 1;
+  const rows = Array.from({ length: nMax }, () => new Float64Array(R));
+  for (let r = 0; r < R; r++) {
+    let s = 0;
+    for (let t = 0; t < nMax; t++) {
+      s += law.draw(seed, 900 + 2 * t * 7919, r);
+      rows[t][r] = (s - (t + 1) * centre) / (sd * Math.sqrt(t + 1));
+    }
+  }
+  return rows;
+}
+
+/**
+ * A lattice slice (#86): S_n takes integer values k, i.e. S*_n takes x_k = (k − n·MX)/(σ√n), a step h = 1/(σ√n) apart.
+ * The height at x_k is the sample share of k over h (the local limit theorem's scaling, so it tends to φ), joined
+ * linearly between neighbouring values and read at the grid points xs.
+ */
+export function latticeSlice(row, n, law, R, xs) {
+  const scale = law.sd * Math.sqrt(n), h = 1 / scale, centre = n * law.mean;
+  const counts = new Map();
+  for (const v of row) {
+    const k = Math.round(v * scale + centre);
+    counts.set(k, (counts.get(k) ?? 0) + 1);
+  }
+  const H = (k) => (counts.get(k) ?? 0) / R / h;
+  return xs.map((x) => {
+    const u = x * scale + centre, k0 = Math.floor(u), f = u - k0;
+    return r6(H(k0) * (1 - f) + H(k0 + 1) * f);
+  });
+}
+
+function runRidge({ source: si, p, nmax, R }, seed) {
+  const id = RIDGE_SOURCES[si] ?? 'uniform';
+  const law = ridgeLaw(id, p);
+  const cauchy = id === 'cauchy';
+  const rows = ridgeSums(law, nmax, R, seed);
+  const w = (Z_HI - Z_LO) / RIDGE_BINS;
+  const xs = Array.from({ length: RIDGE_BINS }, (_, i) => r6(Z_LO + (i + 0.5) * w));
+  const ns = Array.from({ length: nmax }, (_, i) => i + 1);
+  const z = rows.map((row, j) => {
+    if (law.discrete) return latticeSlice(row, j + 1, law, R, xs);
+    const counts = new Array(RIDGE_BINS).fill(0);
+    for (const v of row) {
+      const k = Math.floor((v - Z_LO) / w);
+      if (k >= 0 && k < RIDGE_BINS) counts[k]++;
+    }
+    return counts.map((c) => r6(c / (R * w)));
+  });
+  const ds = rows.map((row) => r6(kolmogorovDistance(row, normalCdf)));
+  const band = ksBand(R);
+  const settled = ds.findIndex((d) => d <= band);
+  const head = cauchy ? 'Cauchy terms: $S_n/\\sqrt{n}$ flattens instead of settling' : `${law.label}: $S_n^* = \\dfrac{S_n - n\\,MX}{\\sigma\\sqrt{n}}$`;
+  const tall = law.discrete && z.some((row) => row.some((v) => v > RIDGE_CEIL));
+  const notes = cauchy
+    ? ['The Cauchy law has no mean and no variance, so the CLT does not apply: $S_n/n$ is again Cauchy, and $S_n/\\sqrt{n}$ is Cauchy with scale $\\sqrt{n}$. The ridge flattens and leaks out of the window instead of settling onto $\\varphi$, and the distance to $\\Phi$ grows towards $\\tfrac12$.']
+    : ['Lindeberg–Lévy (L8): for i.i.d. terms with finite variance the law of $S_n^*$ tends to $N(0, 1)$. Each slice of the ridge is the histogram of $S_n^*$ over the same $R$ paths, one more term per slice; the far wall carries the exact $\\varphi(x) = \\dfrac{1}{\\sqrt{2\\pi}}\\,e^{-x^2/2}$.',
+      law.discrete
+        ? 'A lattice law (Bernoulli, Poisson) gives $S_n^*$ isolated values $1/(\\sigma\\sqrt{n})$ apart: each slice shows the share of every value divided by that step, which tends to $\\varphi$ (the local limit theorem). The CDF still jumps, so the Kolmogorov distance falls only like $1/\\sqrt{n}$ (Berry–Esseen).'
+        : id === 'exponential' ? 'A skewed term (exponential) leans to the left for small $n$ and straightens slowly: the Berry–Esseen error is of order $1/\\sqrt{n}$.'
+          : 'A symmetric term (uniform) settles fast: by $n = 3$ the slice is hard to tell from $\\varphi$.'];
+  if (tall) notes.push(`Spikes taller than ${RIDGE_CEIL} are cut at that height; the point readout gives their true value.`);
+  return {
+    readouts: [
+      { key: 'ks-first', label: 'Kolmogorov distance to $\\Phi$ at $n = 1$', observed: ds[0] },
+      { key: 'ks-last', label: `Kolmogorov distance to $\\Phi$ at $n = ${nmax}$`, observed: ds.at(-1), theory: cauchy ? 'does not tend to 0' : `noise floor $\\approx ${fmt(band)}$`,
+        convention: `99.9% band of $R = ${R}$ draws from $N(0, 1)$ itself` },
+      { key: 'settled', label: 'First $n$ inside the noise floor', observed: settled < 0 ? null : settled + 1,
+        theory: cauchy ? 'never: the CLT does not apply' : settled < 0 ? `not yet by $n = ${nmax}$` : null },
+    ],
+    series: [
+      { id: 'floor', kind: 'band', tone: 'signal', label: 'Monte Carlo noise floor (99.9%)', x: [1, nmax], y: [0, 0], y2: [band, band] },
+      { id: 'ks', kind: 'line', tone: 'default', label: '$D_n = \\sup_x |F_n(x) - \\Phi(x)|$', x: ns, y: ds },
+      { id: 'ks-dots', kind: 'points', tone: 'default', x: ns, y: ds },
+    ],
+    axes: { x: '$n$, terms in the sum', y: '$D_n$' },
+    surface: {
+      x: xs, y: ns, z,
+      labels: { x: '$x$', y: '$n$', z: 'density' },
+      title: head,
+      keyLabel: law.discrete ? 'share of each value of $S_n^*$ over the lattice step, one slice per $n$' : 'histogram of the standardized sums, one slice per $n$',
+      zCeil: RIDGE_CEIL,
+      wall: { x: grid(Z_LO, Z_HI, 81).map(r6), z: grid(Z_LO, Z_HI, 81).map((x) => r6(normPdf(x))), label: 'exact $\\varphi(x)$ on the far wall' },
+      rowNotes: ds.map((d, j) => `$D_{${j + 1}} = ${d}$`),
+    },
+    notes,
+  };
+}
+
+function runClt({ law: li, n, R, view, source, p, nmax }, seed) {
+  if (view === 3) return runRidge({ source: source ?? 0, p: p ?? 0.3, nmax: nmax ?? 30, R }, seed);
   const law = LAWS[CLT_LAWS[li]];
   const band = ksBand(R);
   const notes = [
@@ -557,10 +665,13 @@ const stationParams = {
     { key: 'eps', label: 'Corridor half-width $\\varepsilon$', min: 0.01, max: 2, step: 0.01, default: 0.2, when: { view: [2] } },
   ],
   clt: [
-    { key: 'law', label: 'Law of one term (0 uniform, 1 exponential, 2 Poisson, 3 normal)', min: 0, max: 3, step: 1, default: 1 },
-    { key: 'n', label: 'Terms in the sum $n$', min: 1, max: 100, step: 1, default: 5 },
+    { key: 'law', label: 'Law of one term (0 uniform, 1 exponential, 2 Poisson, 3 normal)', min: 0, max: 3, step: 1, default: 1, when: { view: [0, 1, 2] } },
+    { key: 'n', label: 'Terms in the sum $n$', min: 1, max: 100, step: 1, default: 5, when: { view: [0, 1, 2] } },
     { key: 'R', label: 'Replicates $R$', min: 1000, max: 10000, step: 1000, default: 4000 },
-    { key: 'view', label: 'View (0 histogram, 1 distance vs $n$, 2 Poisson lemma)', min: 0, max: 2, step: 1, default: 0 },
+    { key: 'view', label: 'View (0 histogram, 1 distance vs $n$, 2 Poisson lemma, 3 ridge over $n$)', min: 0, max: 3, step: 1, default: 0 },
+    { key: 'source', label: 'Law of one term (0 uniform, 1 exponential, 2 Bernoulli, 3 Poisson, 4 Cauchy)', min: 0, max: 4, step: 1, default: 1, when: { view: [3] } },
+    { key: 'p', label: 'Bernoulli probability $p$', min: 0.01, max: 0.99, step: 0.01, default: 0.3, when: { view: [3], source: [2] } },
+    { key: 'nmax', label: 'Largest $n$ on the ridge', min: 2, max: 40, step: 1, default: 30, when: { view: [3] } },
   ],
 };
 stationParams.charfn = [
