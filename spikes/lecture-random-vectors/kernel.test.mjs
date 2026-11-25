@@ -253,3 +253,51 @@ test('surface: theory density on the grid integrates to about 1 and matches the 
   }));
   assert.ok(worst < 5, `largest cell deviation ${worst} SE (cell-centre density vs cell average)`);
 });
+
+// ---------------------------------------------------------------- #96: Scatter in 3D with typed ρ, σ_X, σ_Y
+test('#96 scatter: sigma_X and sigma_Y are typed; theory scales with both', () => {
+  const keys = K.stations.scatter.params.map((p) => p.key);
+  for (const k of ['rho', 'sigma1', 'sigma2', 'n']) assert.ok(keys.includes(k), k);
+  const rho = -0.4, s1 = 1.8, s2 = 0.7, n = 20000;
+  const res = K.run({ ...defaults('scatter'), mode: 0, rho, sigma1: s1, sigma2: s2, n }, { seed: 12, station: 'scatter' });
+  close(readout(res, 'cov').theory, rho * s1 * s2, 1e-6, 'theory covariance');
+  close(readout(res, 'cov').observed, rho * s1 * s2, 5 * s1 * s2 / Math.sqrt(n), 'sample covariance');
+  close(readout(res, 'slope63').theory, rho * s2 / s1, 1e-6, 'slope (63)');
+  close(readout(res, 'r').observed, rho, 0.03, 'r near rho');
+  // The density surface integrates to about 1 and its histogram matches it.
+  const s = res.surface, dx = s.x[1] - s.x[0], dy = s.y[1] - s.y[0];
+  close(s.z.flat().reduce((a, v) => a + v, 0) * dx * dy, 1, 0.02, 'density volume');
+  close(s.zSample.flat().reduce((a, v, k) => a + v, 0) * dx * dy, 1, 0.05, 'histogram volume');
+});
+
+test('#96 scatter: r and rho sit side by side, and the regression line is typeset', () => {
+  const res = K.run({ ...defaults('scatter'), mode: 0, rho: 0.6, sigma1: 2, sigma2: 1, n: 2000 }, { seed: 3, station: 'scatter' });
+  const keys = res.readouts.map((r) => r.key);
+  assert.equal(keys.indexOf('line'), keys.indexOf('r') + 1, 'the line follows r');
+  const line = readout(res, 'line');
+  assert.match(line.label, /\\rho\\,\\dfrac\{\\sigma_Y\}\{\\sigma_X\}\\,x/);
+  assert.equal(line.theory, '$y = 0.3\\,x$');
+  assert.match(line.observed, /^\$y = -?[\d.]+\\,x [+-] [\d.]+\$$/);
+});
+
+test('#96 scatter: rho = ±1 degenerates to a ridge on the line, with a caption saying why', () => {
+  for (const rho of [1, -1]) {
+    const res = K.run({ ...defaults('scatter'), mode: 0, rho, sigma1: 1, sigma2: 2, n: 3000 }, { seed: 8, station: 'scatter' });
+    assert.equal(readout(res, 'r').observed, rho, 'r = rho exactly');
+    const s = res.surface;
+    s.y.forEach((y, j) => s.x.forEach((x, i) => {
+      if (Math.abs(y - rho * 2 * x) > (s.y[1] - s.y[0]) / 2 + 1e-9) assert.equal(s.z[j][i], 0, 'no mass off the line');
+    }));
+    assert.ok(s.z.flat().some((v) => v > 0), 'a ridge on the line');
+    s.z.flat().forEach((v) => assert.ok(Number.isFinite(v)));
+    assert.match(res.notes[0], /no density in the plane/);
+    assert.match(s.title, /all probability on the line/);
+    for (const r of res.readouts) for (const v of [r.observed, r.theory]) if (typeof v === 'number') assert.ok(Number.isFinite(v), r.key);
+  }
+});
+
+test('#96 scatter: the same parameters and seed give the same histogram', () => {
+  const p = { ...defaults('scatter'), mode: 0, rho: 0.3, sigma1: 1.4, sigma2: 0.8, n: 1500 };
+  assert.equal(JSON.stringify(K.run(p, { seed: 44, station: 'scatter' }).surface), JSON.stringify(K.run(p, { seed: 44, station: 'scatter' }).surface));
+  assert.notEqual(JSON.stringify(K.run(p, { seed: 45, station: 'scatter' }).surface.zSample), JSON.stringify(K.run(p, { seed: 44, station: 'scatter' }).surface.zSample));
+});
