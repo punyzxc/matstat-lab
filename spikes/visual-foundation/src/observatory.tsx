@@ -67,6 +67,12 @@ export function Observatory({
   const visible = useVisibleField(field);
   // The Earth always turns. Only the system reduced-motion preference holds the scene still.
   const animating = !reduced && visible;
+  // The first-light intro plays once per visit, not on every orbit switch.
+  const [intro, setIntro] = useState(true);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIntro(false), 1600);
+    return () => clearTimeout(timer);
+  }, []);
   const opened = useRef<string | null>(null);
   useEffect(() => {
     const previous = opened.current;
@@ -82,7 +88,7 @@ export function Observatory({
   const current = orbits.find((o) => o.id === orbit)!;
   const active = openStation ?? focus ?? hover ?? (orbitStations.some((s) => s.id === lastVisited) ? lastVisited! : orbitStations[0].id);
   return (
-    <div className="atlas orbital-lab" data-dock={overlay ? 'open' : 'closed'}>
+    <div className="atlas orbital-lab" data-dock={overlay ? 'open' : 'closed'} data-intro={intro}>
       <a className="skip" href="#stations" onClick={(e) => { e.preventDefault(); document.querySelector<HTMLElement>('.orbital-nodes a')?.focus(); }}>
         Skip to stations
       </a>

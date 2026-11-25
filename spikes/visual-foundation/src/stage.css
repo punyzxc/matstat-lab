@@ -272,7 +272,7 @@ html:not([data-present]) .orbital-lab > .scene-dock--end {
   .orbital-lab .orbital-reticle {
     animation: stage-fade-in 1800ms 300ms var(--ease) both;
   }
-  .orbital-lab .orbit-node > * {
+  .orbital-lab[data-intro='true'] .orbit-node > * {
     animation: stage-node-in 700ms var(--ease) both;
     animation-delay: inherit;
   }
