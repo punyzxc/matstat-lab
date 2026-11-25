@@ -378,7 +378,9 @@ const CF_GRID = 241;
 const d4 = (v) => String(Number((Math.abs(v) < 5e-13 ? 0 : v).toPrecision(4)));
 const cTex = ([re, im]) => `${d4(re)} ${im < 0 ? '-' : '+'} ${d4(Math.abs(im))}\\,i`;
 
-function runCharfn({ law: li, t, motion, n, p, m, lambda, a, s }, seed) {
+function runCharfn(q0, seed) {
+  if (q0.view === 1) return runCharfnSum(q0, seed);
+  const { law: li, t, motion, n, p, m, lambda, a, s } = q0;
   const law = CF_LAWS[li];
   const q = { p, m, lambda, a, s };
   const u = (k, i) => uni(seed, 1300 + 7 * k, i);
@@ -423,6 +425,84 @@ function runCharfn({ law: li, t, motion, n, p, m, lambda, a, s }, seed) {
   };
 }
 
+// #122: the sum of independent X and Y has the product of their characteristic functions.
+const SUM_BINS = 60;
+const isInteger = (law) => law.id === 'bernoulli' || law.id === 'binomial' || law.id === 'poisson';
+
+function runCharfnSum({ law: lx, law2: ly, t, motion, n, p, m, lambda, a, s, p2, m2, lambda2, a2, s2 }, seed) {
+  const X = CF_LAWS[lx], Y = CF_LAWS[ly];
+  const qx = { p, m, lambda, a, s }, qy = { p: p2, m: m2, lambda: lambda2, a: a2, s: s2 };
+  const ux = (k, i) => uni(seed, 1300 + 7 * k, i), uy = (k, i) => uni(seed, 1500 + 7 * k, i);
+  const xs = Array.from({ length: n }, (_, i) => X.draw(ux, i, qx));
+  const ys = Array.from({ length: n }, (_, i) => Y.draw(uy, i, qy));
+  const sums = xs.map((x, i) => x + ys[i]);
+  const T = Math.min(tRange(X, qx), tRange(Y, qy));
+  const ts = grid(-T, T, CF_GRID);
+  const fx = ts.map((v) => X.phi(v, qx)), fy = ts.map((v) => Y.phi(v, qy));
+  const prod = fx.map((z, i) => [z[0] * fy[i][0] - z[1] * fy[i][1], z[0] * fy[i][1] + z[1] * fy[i][0]]);
+  const emp = ts.map((v) => empiricalPhi(sums, v));
+  const px = X.phi(t, qx), py = Y.phi(t, qy);
+  const ph = [px[0] * py[0] - px[1] * py[1], px[0] * py[1] + px[1] * py[0]];
+  const eh = empiricalPhi(sums, t);
+  const band = 4 / Math.sqrt(n);
+  const near = (u, v) => Math.abs(u - v) <= band;
+  const mu = X.mean(qx) + Y.mean(qy), v2 = X.variance(qx) + Y.variance(qy);
+  const mean = sums.reduce((u, v) => u + v, 0) / n;
+  const varS = sums.reduce((u, v) => u + (v - mean) ** 2, 0) / Math.max(1, n - 1);
+  const readouts = [
+    { key: 're', label: `$\\operatorname{Re}\\varphi_{X+Y}(t)$ at $t = ${t}$`, observed: r6(eh[0]), theory: r6(ph[0]),
+      convention: `product $\\varphi_X\\varphi_Y$; ± ${fmt(band, 3)} (4 SE); ${near(eh[0], ph[0]) ? 'inside' : 'outside'}` },
+    { key: 'im', label: `$\\operatorname{Im}\\varphi_{X+Y}(t)$ at $t = ${t}$`, observed: r6(eh[1]), theory: r6(ph[1] + 0),
+      convention: `product $\\varphi_X\\varphi_Y$; ± ${fmt(band, 3)} (4 SE); ${near(eh[1], ph[1]) ? 'inside' : 'outside'}` },
+    { key: 'mean', label: '$M(X+Y) = MX + MY$', observed: r6(mean), theory: r6(mu) },
+    { key: 'var', label: '$D(X+Y) = DX + DY$ for independent terms', observed: r6(varS), theory: r6(v2) },
+  ];
+  // The histogram of the sums: integer laws on both sides give integer sums, drawn as frequencies.
+  let hist;
+  if (isInteger(X) && isInteger(Y)) {
+    const top = Math.max(...sums), counts = new Array(top + 1).fill(0);
+    for (const v of sums) counts[v]++;
+    hist = { id: 'hist', kind: 'pmf', tone: 'default', label: `frequencies of $X + Y$, $n = ${n}$`, x: counts.map((_, k) => k), y: counts.map((c) => c / n) };
+  } else {
+    const sd = Math.sqrt(v2), lo = mu - 4.5 * sd, hi = mu + 4.5 * sd, w = (hi - lo) / SUM_BINS;
+    const counts = new Array(SUM_BINS).fill(0);
+    for (const v of sums) { const k = Math.floor((v - lo) / w); if (k >= 0 && k < SUM_BINS) counts[k]++; }
+    hist = { id: 'hist', kind: 'hist', tone: 'default', label: `histogram of $X + Y$, $n = ${n}$`, x: counts.map((_, k) => lo + k * w), y: counts.map((c) => c / (n * w)) };
+  }
+  const notes = [
+    'L9: for independent $X$ and $Y$, $\\varphi_{X+Y}(t) = M e^{it(X+Y)} = M e^{itX} \\cdot M e^{itY} = \\varphi_X(t)\\,\\varphi_Y(t)$. Adding variables convolves their laws, but multiplies their characteristic functions.',
+    'On the plane, multiplying complex numbers multiplies their lengths and adds their angles: the arrow of the product turns by the angles of $\\varphi_X(t)$ and $\\varphi_Y(t)$ together. The mean of the vectors $e^{it(x_j + y_j)}$ of the simulated sums lands on it.',
+  ];
+  return {
+    readouts,
+    series: [hist],
+    axes: { x: '$x$', y: 'share' },
+    linked: {
+      series: [
+        { id: 'reX', kind: 'line', tone: 'muted', label: '$\\operatorname{Re}\\varphi_X(t)$', x: ts, y: fx.map((z) => z[0]) },
+        { id: 'reY', kind: 'line', tone: 'default', label: '$\\operatorname{Re}\\varphi_Y(t)$', x: ts, y: fy.map((z) => z[0]) },
+        { id: 'reProd', kind: 'line', tone: 'signal', label: '$\\operatorname{Re}\\,\\varphi_X\\varphi_Y$', x: ts, y: prod.map((z) => z[0]) },
+        { id: 'reEmp', kind: 'line', tone: 'default', thin: true, label: `$\\operatorname{Re}\\hat\\varphi_{X+Y}$ of the sums, $n = ${n}$`, x: ts, y: emp.map((z) => z[0]) },
+        { id: 't', kind: 'rule', tone: 'muted', label: `$t = ${t}$`, x: [t], y: [0] },
+      ],
+      axes: { x: '$t$', y: '$\\operatorname{Re}\\varphi$' },
+      domain: { x: [-T, T], y: [-1.05, 1.05] },
+    },
+    formula: [
+      `\\varphi_{X+Y}(t) = M\\,e^{it(X+Y)} = M\\,e^{itX}\\, M\\,e^{itY} = \\varphi_X(t)\\,\\varphi_Y(t)`,
+      `\\varphi_X(${t})\\,\\varphi_Y(${t}) = \\left(${cTex(px)}\\right)\\left(${cTex(py)}\\right) = ${cTex(ph)}`,
+      `\\hat\\varphi_{X+Y}(${t}) = \\dfrac{1}{n}\\sum_{j=1}^{n} e^{i t (x_j + y_j)} = ${cTex(eh)}`,
+    ],
+    phasor: { xs: sums.map((v) => r6(v)), shown: Math.min(n, PHASOR_SHOWN), T, t, motion: motion === 0, ts: ts.map(r6),
+      exact: prod.map((z) => [r6(z[0]), r6(z[1] + 0)]), symmetric: false,
+      parts: [
+        { key: 'X', exact: fx.map((z) => [r6(z[0]), r6(z[1] + 0)]) },
+        { key: 'Y', exact: fy.map((z) => [r6(z[0]), r6(z[1] + 0)]) },
+      ] },
+    notes,
+  };
+}
+
 // ---------------------------------------------------------------- contract
 const stationParams = {
   convolution: [
@@ -445,6 +525,7 @@ const stationParams = {
   ],
 };
 stationParams.charfn = [
+  { key: 'view', label: 'View (0 one law, 1 sum $X + Y$)', min: 0, max: 1, step: 1, default: 0 },
   { key: 'law', label: 'Law (0 Bernoulli, 1 binomial, 2 Poisson, 3 uniform, 4 normal, 5 exponential)', min: 0, max: 5, step: 1, default: 4 },
   { key: 'motion', label: 'Parameter $t$ (0 sweeps by itself, 1 stays at the typed value)', min: 0, max: 1, step: 1, default: 0 },
   { key: 't', label: 'Value of $t$', min: -20, max: 20, step: 0.01, default: 1 },
@@ -454,6 +535,12 @@ stationParams.charfn = [
   { key: 'lambda', label: 'Rate $\\lambda$', min: 0.1, max: 10, step: 0.1, default: 2, when: { law: [2, 5] } },
   { key: 'a', label: 'Centre $a$', min: -3, max: 3, step: 0.1, default: 0, when: { law: [3, 4] } },
   { key: 's', label: 'Spread $s$ (half-width or $\\sigma$)', min: 0.1, max: 3, step: 0.1, default: 1, when: { law: [3, 4] } },
+  { key: 'law2', label: 'Law of $Y$ (0 Bernoulli, 1 binomial, 2 Poisson, 3 uniform, 4 normal, 5 exponential)', min: 0, max: 5, step: 1, default: 3, when: { view: [1] } },
+  { key: 'p2', label: 'Probability $p$ of $Y$', min: 0.01, max: 0.99, step: 0.01, default: 0.5, when: { view: [1], law2: [0, 1] } },
+  { key: 'm2', label: 'Trials $m$ of $Y$', min: 1, max: 30, step: 1, default: 6, when: { view: [1], law2: [1] } },
+  { key: 'lambda2', label: 'Rate $\\lambda$ of $Y$', min: 0.1, max: 10, step: 0.1, default: 1, when: { view: [1], law2: [2, 5] } },
+  { key: 'a2', label: 'Centre $a$ of $Y$', min: -3, max: 3, step: 0.1, default: 0, when: { view: [1], law2: [3, 4] } },
+  { key: 's2', label: 'Spread $s$ of $Y$', min: 0.1, max: 3, step: 0.1, default: 1, when: { view: [1], law2: [3, 4] } },
 ];
 export const stations = Object.freeze({
   convolution: { params: stationParams.convolution, live: true },

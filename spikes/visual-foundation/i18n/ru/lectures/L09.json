@@ -5,5 +5,8 @@
   "Exact versus approximate": "Точное и приближённое значения",
   "The normal approximation of a binomial probability has an error you can measure.": "У нормального приближения биномиальной вероятности есть погрешность, которую можно измерить.",
   "Lecture answer 0.92135 (normal), exact binomial 0.9520.": "Ответ в лекции 0.92135 (нормальное приближение), точное биномиальное значение 0.9520.",
-  "Spin the unit vectors of the characteristic function": "Покрутите единичные векторы характеристической функции"
+  "Spin the unit vectors of the characteristic function": "Покрутите единичные векторы характеристической функции",
+  "Sum of independent variables": "Сумма независимых величин",
+  "Adding independent variables multiplies their characteristic functions: the arrow of the sum turns by both angles at once.": "При сложении независимых величин их характеристические функции перемножаются: стрелка суммы поворачивается сразу на оба угла.",
+  "Multiply two characteristic functions": "Перемножьте две характеристические функции"
 }

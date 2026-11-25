@@ -29,6 +29,27 @@
       }
     },
     {
+      "title": "Sum of independent variables",
+      "idea": "Adding independent variables multiplies their characteristic functions: the arrow of the sum turns by both angles at once.",
+      "formula": [
+        "\\varphi_{\\xi+\\eta}(t) = M e^{it\\xi}\\, M e^{it\\eta} = \\varphi_\\xi(t)\\,\\varphi_\\eta(t)"
+      ],
+      "experiment": {
+        "station": "charfn",
+        "seed": 122,
+        "params": {
+          "view": 1,
+          "law": 5,
+          "law2": 3,
+          "motion": 0,
+          "t": 1,
+          "n": 1500,
+          "lambda": 1
+        },
+        "label": "Multiply two characteristic functions"
+      }
+    },
+    {
       "title": "Exact versus approximate",
       "idea": "The normal approximation of a binomial probability has an error you can measure.",
       "example": "Lecture answer 0.92135 (normal), exact binomial 0.9520.",

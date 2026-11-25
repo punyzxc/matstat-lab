@@ -45,3 +45,37 @@ test('Characteristic function: a typed t, φ(0) = 1, and the lecture 9 link open
   await expect(page).toHaveURL(/#station\/charfn\?seed=121&/);
   await expect(page.getByTestId('station-dock').getByRole('heading', { name: 'Characteristic function', exact: true })).toBeVisible();
 });
+
+// #122: the sums X + Y; their empirical φ lands on the product φ_X φ_Y, and one t is marked on every curve.
+test('Sum view: histogram of X + Y, factor arrows, and the product matches the simulated sums', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#station/charfn?seed=5&view=1&law=5&law2=3&motion=1&t=1&n=3000&lambda=1&a2=0&s2=1');
+  const dock = page.getByTestId('station-dock');
+  const ph = dock.getByRole('region', { name: 'Characteristic function on the complex plane' });
+  await expect(ph.locator('.ph-factor-arrow')).toHaveCount(2);
+  await expect(ph.locator('.ph-strip-part')).toHaveCount(4);
+  await expect(ph.locator('.ph-factor[data-part="X"]')).toContainText('0.500 + 0.500i'); // 1/(1 - i)
+  await expect(ph.locator('.ph-factor[data-part="Y"]')).toContainText('0.841 + 0i'); // sin 1
+  // Product (0.5 + 0.5i) · 0.8415 = 0.4207 + 0.4207i; the mean of the sums' vectors is within 4/√n.
+  await expect(dock.getByRole('group', { name: 'Live formula' })).toContainText('0.4207');
+  const dot = ph.locator('.ph-mean-dot').first();
+  await expect.poll(async () => Number(await dot.getAttribute('data-re'))).toBeGreaterThan(0.4207 - 0.073);
+  expect(Number(await dot.getAttribute('data-re'))).toBeLessThan(0.4207 + 0.073);
+  expect(Math.abs(Number(await dot.getAttribute('data-im')) - 0.4207)).toBeLessThan(0.073);
+  await expect(dock.locator('.chart-series--hist')).toHaveCount(1);
+
+  // A drag on the Im strip moves the one shared cursor on all strips.
+  const hit = ph.locator('.ph-strip[data-part="im"] .ph-hit');
+  await hit.scrollIntoViewIfNeeded();
+  const box = await hit.boundingBox();
+  await page.mouse.click(box.x + box.width * 0.25, box.y + box.height / 2);
+  await expect(page).toHaveURL(/[?&]t=-3(\.|&|$)/, { timeout: 5000 });
+  const xs = await ph.locator('.ph-cursor').evaluateAll((ls) => ls.map((l) => l.getAttribute('x1')));
+  expect(xs).toHaveLength(2);
+  expect(xs[0]).toBe(xs[1]);
+
+  await page.goto('/#lecture/9/2');
+  await page.getByRole('link', { name: /Multiply two characteristic functions/ }).first().click();
+  await expect(page).toHaveURL(/#station\/charfn\?seed=122&/);
+  await expect(page).toHaveURL(/view=1/);
+});

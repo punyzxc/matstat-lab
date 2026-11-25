@@ -1921,3 +1921,43 @@ html:has(.orbital-lab) body {
   stroke: var(--signal);
   stroke-width: 1;
 }
+
+/* #122: the factors of φ_X φ_Y. */
+.ph-factor[data-part='X'] {
+  color: #9a9a9a;
+}
+.ph-factor[data-part='Y'] {
+  color: #e6e6e6;
+}
+.ph-factor-arrow line {
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.ph-factor-arrow[data-part='X'] line {
+  stroke: #8a8a8a;
+}
+.ph-factor-arrow[data-part='Y'] line {
+  stroke: #e6e6e6;
+}
+.ph-factor-arrow[data-part='X'] circle {
+  fill: #8a8a8a;
+}
+.ph-factor-arrow[data-part='Y'] circle {
+  fill: #e6e6e6;
+}
+.ph-factor-arrow text {
+  fill: #c8c8c8;
+  font: 11px var(--mono);
+}
+.ph-strip-part {
+  fill: none;
+  stroke-width: 1;
+  opacity: 0.55;
+}
+.ph-strip-part[data-part='X'] {
+  stroke: #8a8a8a;
+}
+.ph-strip-part[data-part='Y'] {
+  stroke: #e6e6e6;
+  stroke-dasharray: 3 3;
+}
