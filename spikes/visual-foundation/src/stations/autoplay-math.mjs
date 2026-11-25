@@ -119,8 +119,31 @@ export function grownSize(param, target, k) {
   return fitToRange(Math.max(param.min, target * GROWTH[k]), param.min, Math.max(param.min, target), param.step);
 }
 
-/** Speeds offered in the play bar, as multipliers of the base pace. */
-export const SPEEDS = [0.5, 1, 2, 4];
+/** Speeds offered in the play bar, as multipliers of the base pace; any value in SPEED_RANGE can be typed. */
+export const SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
+export const SPEED_RANGE = [0.25, 8];
+/** A typed pace, kept inside SPEED_RANGE (1 when it is not a number). */
+export function clampSpeed(v) {
+  return Number.isFinite(v) && v > 0 ? Math.min(SPEED_RANGE[1], Math.max(SPEED_RANGE[0], v)) : 1;
+}
+
+// ---------------------------------------------------------------- time machine (#113)
+// A draw of a kernel station is fully determined by the experiment's parameters and its seed, and draw d of an
+// experiment that started at seed `origin` uses seed origin + d − 1. So the timeline needs no stored results: any
+// draw is replayed from its seed, and memory stays constant however many draws were made.
+/** The seed of draw d (1-based) of an experiment that started at `origin`. */
+export const seedAtDraw = (origin, d) => (origin + d - 1) >>> 0;
+/** The draw number (1-based) that `seed` has in an experiment that started at `origin`. */
+export const drawOfSeed = (origin, seed) => ((seed - origin) >>> 0) + 1;
+/**
+ * The recorded history after a draw lands: entries of later draws are dropped (they belong to a future the person
+ * stepped back from), the new one is appended, and at most `cap` are kept.
+ */
+export function timelineAppend(list, entry, origin, cap) {
+  const at = drawOfSeed(origin, entry.seed);
+  const kept = list.filter((e) => drawOfSeed(origin, e.seed) < at);
+  return [...kept, entry].slice(-cap);
+}
 
 /**
  * Milliseconds between draws: the base pace divided by the speed, but never faster than three times

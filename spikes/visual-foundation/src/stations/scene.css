@@ -2053,3 +2053,44 @@ html:has(.orbital-lab) body {
   animation: none;
   transition: none;
 }
+
+/* #113: typed pace and the time machine row. */
+.autoplay-pace,
+.autoplay-draw {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font: 11px var(--mono);
+  color: #a8a8a8;
+}
+.autoplay-pace input,
+.autoplay-draw input {
+  width: 46px;
+  padding: 4px 6px;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  font: 12px var(--mono);
+  text-align: right;
+}
+.autoplay-pace input:focus-visible,
+.autoplay-draw input:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+}
+.autoplay-timeline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.autoplay-scrub {
+  flex: 1;
+  min-width: 80px;
+  accent-color: var(--signal);
+}
+.autoplay-reach {
+  font: 11px var(--mono);
+  color: #8a8a8a;
+}
