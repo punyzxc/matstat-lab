@@ -4,11 +4,13 @@ import { getLang } from '../../i18n-core';
 import type { FigureProps } from './kit';
 import { CltFactory } from './clt-factory';
 import { CiWall } from './ci-wall';
+import { EstimateCloud } from './estimate-cloud';
 
 /** Live lecture figures by id. The spec (specs.mjs) says what they share; the component draws them. */
 const components: Record<string, ComponentType<FigureProps>> = {
   'clt-factory': CltFactory,
   'ci-wall': CiWall,
+  'estimate-cloud': EstimateCloud,
 };
 
 const russian = new Map<string, FigureSpec>();

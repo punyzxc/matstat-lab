@@ -637,3 +637,28 @@ html[data-present] .story {
   animation-duration: 420ms;
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
+/* ---------------------------------------------------------------- estimate clouds (#135) */
+.figure-count {
+  color: #8a8a86;
+  font: 11px var(--mono);
+}
+.figure--est .figure-mark {
+  transform: translate(-50%, -100%);
+}
+.est-coral { color: #ff8a6b; }
+.est-cyan { color: #7fd6e8; }
+.est-mint { color: #8fe3b0; font-size: 11.5px; }
+.est-rung { font-size: 11px; transform: translateY(-50%); }
+.figure-chip.est-coral { border-color: rgb(255 138 107 / 0.5); }
+.figure-chip.est-cyan { border-color: rgb(127 214 232 / 0.5); }
+
+/* KaTeX stacks fraction parts in tall boxes that overlap their neighbours: only the live symbols take the pointer,
+   so a value in a denominator (\dfrac{σ}{\sqrt{n}}) is as easy to click as any other. */
+.live-formula-tex .vlist,
+.live-formula-tex .vlist-r {
+  pointer-events: none;
+}
+.live-formula-tex .live-var {
+  pointer-events: auto;
+}
