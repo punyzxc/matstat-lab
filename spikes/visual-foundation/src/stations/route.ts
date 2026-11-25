@@ -14,6 +14,8 @@ export type Route = {
   station: string | null;
   seed: number | null;
   params: Record<string, number>;
+  /** Typed text parameters, such as a region `y < x^2` (#90). */
+  texts: Record<string, string>;
   drawer: 'notes' | 'record' | 'lectures' | null;
   /** The open lecture walkthrough, if any. */
   lecture: { n: number; step: number } | null;
@@ -22,7 +24,7 @@ export type Route = {
   present: boolean;
 };
 
-const empty = (): Route => ({ orbit: null, station: null, seed: null, params: {}, drawer: null, lecture: null, back: null, present: false });
+const empty = (): Route => ({ orbit: null, station: null, seed: null, params: {}, texts: {}, drawer: null, lecture: null, back: null, present: false });
 const lectureNumber = (v: unknown) => (typeof v === 'string' && /^\d{1,2}$/.test(v) && +v >= 1 && +v <= 12 ? +v : null);
 const stepNumber = (v: unknown) => (typeof v === 'string' && /^\d{1,3}$/.test(v) && +v >= 1 ? +v : null);
 const legacy: Record<string, string> = { workspace: 'distribution' };
@@ -61,6 +63,7 @@ export function parseRoute(hash: string): Route {
     } else if (key === 'lecture' || key === 'step') {
       continue;
     } else if (NUMBER.test(raw) && Number.isFinite(Number(raw))) route.params[key] = Number(raw);
+    else if (raw.length <= 200) route.texts[key] = raw;
   }
   if (route.station) {
     const q = new URLSearchParams(query);
@@ -71,10 +74,11 @@ export function parseRoute(hash: string): Route {
 }
 
 export type LectureRef = { n: number; step: number; present?: boolean };
-export function stationHash(id: string, seed?: number | null, params: Record<string, number> = {}, from?: LectureRef | null) {
+export function stationHash(id: string, seed?: number | null, params: Record<string, number> = {}, from?: LectureRef | null, texts: Record<string, string> = {}) {
   const query = [
     ...(seed == null ? [] : [`seed=${seed}`]),
     ...Object.entries(params).map(([k, v]) => `${encodeURIComponent(k)}=${v}`),
+    ...Object.entries(texts).map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`),
     ...(from ? [`lecture=${from.n}`, `step=${from.step}`, ...(from.present ? ['present=1'] : [])] : []),
   ].join('&');
   return `#station/${id}${query ? `?${query}` : ''}`;

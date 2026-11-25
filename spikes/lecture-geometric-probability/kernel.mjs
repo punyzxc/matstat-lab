@@ -3,6 +3,7 @@
 // Pure ES module: no DOM. Randomness only from fixtureUint32 (fixture-mix32-v1).
 // Contract: docs/research/lecture-module-map.md; research: docs/research/lecture-geometric-probability.md.
 import { fixtureUint32 } from '../simulation-engine/engine.mjs';
+import { RegionError, compileRegion, parseRegion, regionArea, regionRuns, regionTex } from './region.mjs';
 
 /** Uniform on (0, 1), never 0 or 1, from one counter-based draw. */
 const uni = (seed, stream, i) => (fixtureUint32(seed, stream, i) + 0.5) / 2 ** 32;
@@ -80,7 +81,9 @@ export const BERTRAND = Object.freeze([
     long: (u, _v) => Math.sqrt(u) < 0.5 }, // midpoint radius r = √u is uniform over the disc's area
 ]);
 
-function runDarts({ view, N }, seed) {
+function runDarts({ view, N, l, d, region }, seed) {
+  if (view === 3) return runBuffon({ N, l, d }, seed);
+  if (view === 4) return runRegion({ N, region: region ?? DEFAULT_REGION }, seed);
   if (view === 2) {
     const ns = checkpoints(N), lx = ns.map((n) => Math.log10(n)), lN = Math.log10(N);
     const rows = BERTRAND.map((s, j) => {
@@ -148,6 +151,150 @@ function runDarts({ view, N }, seed) {
   };
 }
 
+// ---------------------------------------------------------------- Buffon's needle (#90)
+export const NEEDLES = 80; // needles drawn on the board; the counts use all N
+export const BOARD = Object.freeze({ strips: 4, width: 6 }); // the board: 4 strips of height d, 6d wide
+/** P(a needle of length l crosses a line) for lines d apart, l ≤ d: 2l/(πd). */
+export const buffonP = (l, d) => (2 * l) / (Math.PI * d);
+/**
+ * Needle i: its centre lies at `off` = d·u (stream 50) above the line below it, at angle θ = π·v (stream 51) to the
+ * lines; it crosses a line when the nearer line is within its half-projection: min(off, d − off) ≤ (l/2)·sin θ.
+ * Streams 52 and 53 only place the needle on the board (column and strip), so the picture shows the counted needles.
+ */
+export function buffonNeedle(seed, i, l, d) {
+  const off = d * uni(seed, 50, i), theta = Math.PI * uni(seed, 51, i);
+  const hit = Math.min(off, d - off) <= (l / 2) * Math.sin(theta);
+  return { off, theta, hit };
+}
+
+function runBuffon({ N, l: lTyped, d }, seed) {
+  const l = Math.min(lTyped, d);
+  const p = buffonP(l, d);
+  const ns = checkpoints(N), lN = Math.log10(N);
+  const est = [], estX = [], needles = [], hits = [];
+  let m = 0, k = 0;
+  for (let i = 1; i <= N; i++) {
+    const nd = buffonNeedle(seed, i, l, d);
+    if (nd.hit) m++;
+    if (i <= NEEDLES) {
+      const strip = Math.floor(BOARD.strips * uni(seed, 53, i));
+      needles.push([r6(BOARD.width * d * uni(seed, 52, i)), r6(strip * d + nd.off), r6(nd.theta)]);
+      hits.push(nd.hit);
+    }
+    if (i === ns[k]) {
+      if (m > 0) { estX.push(Math.log10(i)); est.push((2 * l * i) / (d * m)); }
+      k++;
+    }
+  }
+  const se = (n) => Math.PI * Math.sqrt((1 - p) / (n * p)); // delta method: sd of 2l/(d·m/n) around π
+  const piHat = m > 0 ? (2 * l * N) / (d * m) : null;
+  const half = 3 * se(N);
+  const notes = [
+    "Buffon's needle (L4): a needle of length $l$ dropped at random on lines $d$ apart crosses one with probability $P = \\dfrac{2l}{\\pi d}$. The position of its centre and its angle are uniform, so $P$ is the area under $\\tfrac{l}{2}\\sin\\theta$ over the rectangle $[0, \\pi] \\times [0, \\tfrac{d}{2}]$.",
+    'Turn it round: the share of crossings $m/n$ estimates $P$, so $\\hat\\pi = \\dfrac{2ln}{dm}$ estimates $\\pi$. Its error shrinks like $1/\\sqrt{n}$: about 100 times more needles for each new correct digit.',
+  ];
+  if (lTyped > d) notes.unshift(`The needle is longer than the spacing ($l = ${lTyped} > d = ${d}$); the formula needs $l \\le d$, so the needle is cut to $l = d = ${d}$.`);
+  const fmtN = (v) => String(Number(v.toPrecision(5)));
+  return {
+    readouts: [
+      { key: 'pi', label: 'Estimate $\\hat\\pi = \\dfrac{2ln}{dm}$', observed: r6(piHat), theory: r6(Math.PI),
+        convention: `± ${fmt(half)} (3 SE); ${piHat != null && Math.abs(piHat - Math.PI) <= half ? 'inside' : 'outside'} the band` },
+      { key: 'cross', label: 'Share of needles crossing a line $m/n$', observed: r6(m / N), theory: r6(p), convention: `$P = \\dfrac{2l}{\\pi d}$, ${m} of ${N} needles` },
+      { key: 'digits', label: 'Correct digits of $\\pi$', observed: piHat == null ? null : Math.max(0, Math.floor(-Math.log10(Math.abs(piHat - Math.PI) / Math.PI))), theory: null,
+        convention: 'one more digit needs about 100 times more needles' },
+    ],
+    series: [
+      { id: 'band', kind: 'band', tone: 'signal', label: '$\\pi \\pm 3\\,\\mathrm{SE}$', x: ns.map((n) => Math.log10(n)),
+        y: ns.map((n) => Math.PI - 3 * se(n)), y2: ns.map((n) => Math.PI + 3 * se(n)) },
+      { id: 'pi', kind: 'line', tone: 'signal', label: '$\\pi$', x: [0, lN], y: [Math.PI, Math.PI] },
+      { id: 'estimate', kind: 'line', tone: 'accent', label: '$\\hat\\pi$ after $n$ needles', x: estX, y: est },
+    ],
+    axes: { x: '$\\lg n$, needles dropped', y: '$\\hat\\pi = 2ln/(dm)$' },
+    domain: { x: [0, lN], y: [Math.PI - 1, Math.PI + 1] },
+    formula: [
+      `P = \\dfrac{2l}{\\pi d} = \\dfrac{2 \\cdot ${l}}{\\pi \\cdot ${d}} = ${fmtN(p)}`,
+      piHat == null ? `\\hat\\pi = \\dfrac{2ln}{dm}, \\quad m = 0`
+        : `\\hat\\pi = \\dfrac{2ln}{dm} = \\dfrac{2 \\cdot ${l} \\cdot ${N}}{${d} \\cdot ${m}} = ${fmtN(piHat)}`,
+    ],
+    board: { kind: 'needles', d, l, strips: BOARD.strips, width: BOARD.width * d, needles, hits },
+    notes,
+  };
+}
+
+// ---------------------------------------------------------------- a typed region (#90)
+export const DEFAULT_REGION = 'y < x^2';
+export const DARTS = 400; // darts drawn on the board; the counts use all N
+export const AREA_GRID = 1000;
+const regions = new Map();
+/** The region typed as text, parsed, compiled, integrated and outlined once per text. Throws a RegionError. */
+export function prepareRegion(text) {
+  const key = String(text ?? '').trim();
+  let r = regions.get(key);
+  if (!r) {
+    const tree = parseRegion(key);
+    const inside = compileRegion(tree);
+    r = { inside, tex: regionTex(tree), ...regionArea(inside, AREA_GRID), runs: regionRuns(inside).map((q) => q.map(r6)) };
+    if (regions.size > 64) regions.clear();
+    regions.set(key, r);
+  }
+  return r;
+}
+/** Checks a typed text parameter before the host sends it: null when valid, else the error with its template. */
+export function checkText(station, key, value) {
+  if (station !== 'darts' || key !== 'region') return null;
+  try {
+    prepareRegion(value);
+    return null;
+  } catch (e) {
+    if (e instanceof RegionError) return { message: e.message, template: e.template, values: e.values };
+    return { message: String(e?.message ?? e), template: String(e?.message ?? e), values: [] };
+  }
+}
+
+function runRegion({ N, region }, seed) {
+  const R = prepareRegion(region);
+  const ns = checkpoints(N), lN = Math.log10(N);
+  const freq = [], darts = [], hits = [];
+  let m = 0, k = 0;
+  for (let i = 1; i <= N; i++) {
+    const x = uni(seed, 30, i), y = uni(seed, 31, i);
+    const hit = R.inside(x, y);
+    if (hit) m++;
+    if (i <= DARTS) { darts.push([r6(x), r6(y)]); hits.push(hit); }
+    if (i === ns[k]) { freq.push(m / i); k++; }
+  }
+  const a = R.area, half = band3(a, N), share = m / N;
+  const fmtN = (v) => String(Number(v.toPrecision(4)));
+  const notes = [
+    'Geometric method (L4): a dart thrown at random into the unit square lands in $A$ with probability $\\operatorname{mes} A$, the area of $A$. The share of hits settles at it.',
+    `The area is integrated numerically: the midpoint rule on a ${AREA_GRID} × ${AREA_GRID} grid, accurate to about ±${fmt(R.error, 4)} (half the cells the boundary crosses).`,
+  ];
+  if (a === 0) notes.unshift('No point of the square satisfies the region: it is empty, so no dart can land in it.');
+  else if (a === 1) notes.unshift('Every point of the square satisfies the region: every dart lands in it.');
+  return {
+    readouts: [
+      { key: 'share', label: 'Share of darts in $A$, $m/n$', observed: r6(share), theory: r6(a),
+        convention: `± ${fmt(half)} (3 SE); ${Math.abs(share - a) <= half + R.error ? 'inside' : 'outside'} the band` },
+      { key: 'area', label: 'Area of $A$, numerically integrated', observed: null, theory: r6(a), convention: `± ${fmt(R.error, 4)} on a ${AREA_GRID} × ${AREA_GRID} grid` },
+      { key: 'hits', label: 'Darts in $A$', observed: m, theory: r6(a * N), convention: `of $n = ${N}$` },
+    ],
+    series: [
+      { id: 'band', kind: 'band', tone: 'signal', label: '$\\operatorname{mes} A \\pm 3\\sqrt{p(1-p)/n}$', x: ns.map((n) => Math.log10(n)),
+        y: ns.map((n) => Math.max(0, a - band3(a, n))), y2: ns.map((n) => Math.min(1, a + band3(a, n))) },
+      { id: 'area', kind: 'line', tone: 'signal', label: '$\\operatorname{mes} A$', x: [0, lN], y: [a, a] },
+      { id: 'freq', kind: 'line', tone: 'accent', label: 'share of darts in $A$', x: ns.map((n) => Math.log10(n)), y: freq },
+    ],
+    axes: { x: '$\\lg n$, darts thrown', y: 'share of darts in $A$' },
+    domain: { x: [0, lN], y: [0, 1] },
+    formula: [
+      `A = \\{(x, y) \\in [0, 1]^2 : ${R.tex}\\}`,
+      `\\dfrac{m}{n} = \\dfrac{${m}}{${N}} = ${fmtN(share)} \\approx \\operatorname{mes} A = ${fmtN(a)}`,
+    ],
+    board: { kind: 'region', runs: R.runs, darts, hits },
+    notes,
+  };
+}
+
 // ---------------------------------------------------------------- contract
 const stationParams = {
   frequency: [
@@ -155,13 +302,18 @@ const stationParams = {
     { key: 'N', label: 'Trials $N$', min: 100, max: 20000, step: 100, default: 2000 },
   ],
   darts: [
-    { key: 'view', label: 'View (0 $\\sin^2$ example, 1 quarter disc, 2 Bertrand chords)', min: 0, max: 2, step: 1, default: 2 },
+    { key: 'view', label: "View (0 $\\sin^2$ example, 1 quarter disc, 2 Bertrand chords, 3 Buffon's needle, 4 your region)", min: 0, max: 4, step: 1, default: 2 },
     { key: 'N', label: 'Throws $N$', min: 100, max: 20000, step: 100, default: 4000 },
+    { key: 'l', label: 'Needle length $l$', min: 0.1, max: 2, step: 0.05, default: 0.8, when: { view: [3] } },
+    { key: 'd', label: 'Line spacing $d$', min: 0.2, max: 2, step: 0.1, default: 1, when: { view: [3] } },
   ],
 };
 export const stations = Object.freeze({
   frequency: { params: stationParams.frequency, live: true },
-  darts: { params: stationParams.darts, live: true },
+  darts: { params: stationParams.darts, live: true, texts: [
+    { key: 'region', label: 'Region $A$ in the unit square', default: DEFAULT_REGION, when: { view: [4] },
+      presets: ['y < x^2', 'x^2 + y^2 < 1', '|x - 0.5| + |y - 0.5| < 0.4', 'y < sin(pi x)', 'y > x and y < 2x', '0.2 < x < 0.8 or y > 0.9'] },
+  ] },
 });
 export const meta = {
   id: 'lecture-geometric-probability',

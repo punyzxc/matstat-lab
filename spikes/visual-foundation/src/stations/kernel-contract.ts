@@ -2,7 +2,16 @@
  * The shared lecture-kernel contract (docs/research/lecture-module-map.md).
  * A kernel is a plain ES module `spikes/<id>/kernel.mjs`; it never touches the DOM.
  */
-export type KernelParam = { key: string; label: string; min: number; max: number; step: number; default: number };
+/** `when`: show the parameter only while other parameters take one of the listed values, e.g. `{ view: [3] }`. */
+export type ParamCondition = Record<string, number[]>;
+export type KernelParam = { key: string; label: string; min: number; max: number; step: number; default: number; when?: ParamCondition };
+/**
+ * A typed text parameter (#90), such as a region `y < x^2`. The host validates it with the kernel's `checkText`
+ * before every run, so the kernel only ever receives a valid text; `presets` are offered as chips.
+ */
+export type TextParam = { key: string; label: string; default: string; presets?: string[]; when?: ParamCondition };
+/** A text the kernel rejected: the English `message`, and its `template` with `[[n]]` holes for `values` (for translation). */
+export type TextCheck = { message: string; template: string; values: string[] } | null;
 export type KernelMeta = { id: string; lectures: string[]; title: string; params: KernelParam[] };
 export type Readout = { key: string; label: string; observed?: number | string | null; theory?: number | string | null; unit?: string; convention?: string };
 export type SeriesKind = 'pmf' | 'pdf' | 'cdf' | 'hist' | 'ecdf' | 'line' | 'points' | 'band' | 'rule';
@@ -58,6 +67,14 @@ export type Space = { kind: 'dice' | 'coins' | 'cards'; cols: number; parts: num
  * `all`, else a sample); `count` is the exact number as a decimal string (it can exceed 2^53).
  */
 export type Constructions = { n: number; size: number; ordered: boolean; repetition: boolean; items: number[][]; all: boolean; count: string };
+/**
+ * A board of live throws (#90): Buffon's needles over lines `d` apart (`needles[i]` = [x, y, θ] of the centre and
+ * angle, `hits[i]` whether it crosses a line), or darts in the unit square over a typed region drawn as `runs` of
+ * grid cells [x0, y0, width, height].
+ */
+export type Board =
+  | { kind: 'needles'; d: number; l: number; strips: number; width: number; needles: number[][]; hits: boolean[] }
+  | { kind: 'region'; runs: number[][]; darts: number[][]; hits: boolean[] };
 export type KernelResult = {
   readouts: Readout[];
   series: Series[];
@@ -74,14 +91,31 @@ export type KernelResult = {
   outcomes?: Outcomes;
   space?: Space;
   constructions?: Constructions;
+  board?: Board;
 };
 export type Kernel = {
   meta: KernelMeta;
-  run: (params: Record<string, number>, options: { seed: number; station?: string }) => KernelResult;
+  run: (params: Record<string, number | string>, options: { seed: number; station?: string }) => KernelResult;
   /** Optional: one kernel may serve several stations (e.g. Moments, Transform, Scatter). */
   /** `live`: the host re-runs the kernel on every slider move (draft parameters) and morphs the output. */
-  stations?: Record<string, { params?: KernelParam[]; live?: boolean }>;
+  stations?: Record<string, { params?: KernelParam[]; live?: boolean; texts?: TextParam[] }>;
+  /** Validates a text parameter: null when it can run, otherwise what is wrong. */
+  checkText?: (station: string, key: string, value: string) => TextCheck;
 };
+
+/** Whether a parameter applies under the current numeric parameters (no `when`: always). */
+export const applies = (when: ParamCondition | undefined, params: Record<string, number>) =>
+  !when || Object.entries(when).every(([k, vs]) => vs.includes(params[k]));
+
+/** Text parameters: defaults, then each override the kernel accepts. */
+export function resolveTexts(kernel: Pick<Kernel, 'checkText'>, station: string, texts: TextParam[], overrides: Record<string, string> = {}) {
+  const out: Record<string, string> = {};
+  for (const p of texts) {
+    const raw = overrides[p.key];
+    out[p.key] = typeof raw === 'string' && raw.trim() && !kernel.checkText?.(station, p.key, raw) ? raw : p.default;
+  }
+  return out;
+}
 
 /** Defaults for every declared parameter, then any valid override clamped to its range and step grid. */
 export function resolveParams(params: KernelParam[], overrides: Record<string, number> = {}) {

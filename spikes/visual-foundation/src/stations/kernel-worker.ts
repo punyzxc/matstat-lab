@@ -23,7 +23,7 @@ function load(id: string) {
   return p;
 }
 
-export type RunRequest = { id: number; kernel: string; station: string; params: Record<string, number>; seed: number };
+export type RunRequest = { id: number; kernel: string; station: string; params: Record<string, number | string>; seed: number };
 export type RunReply = { id: number; ok: true; result: unknown; ms: number } | { id: number; ok: false; error: string; ms: number };
 
 self.onmessage = async (e: MessageEvent<RunRequest>) => {

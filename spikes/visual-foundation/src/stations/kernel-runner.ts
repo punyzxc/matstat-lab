@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Kernel } from './kernel-contract';
 import type { RunReply, RunRequest } from './kernel-worker';
 
-export type Job = { params: Record<string, number>; seed: number; tag?: unknown };
+export type Job = { params: Record<string, number>; seed: number; tag?: unknown; texts?: Record<string, string> };
 export type Outcome = { job: Job; ok: true; result: unknown; ms: number } | { job: Job; ok: false; error: string; ms: number };
 
 /**
@@ -22,7 +22,7 @@ export function useKernelRunner(kernelId: string, station: string, kernel: Kerne
   const runLocal = (j: Job) => {
     const t0 = performance.now();
     try {
-      const result = kernel.run(j.params, { seed: j.seed, station });
+      const result = kernel.run({ ...j.params, ...j.texts }, { seed: j.seed, station });
       return { job: j, ok: true as const, result, ms: performance.now() - t0 };
     } catch (e) {
       return { job: j, ok: false as const, error: e instanceof Error ? e.message : String(e), ms: performance.now() - t0 };
@@ -79,7 +79,7 @@ export function useKernelRunner(kernelId: string, station: string, kernel: Kerne
     }
     const id = ++seq.current;
     inFlight.current = { id, job: j };
-    worker.current.postMessage({ id, kernel: kernelId, station, params: j.params, seed: j.seed } satisfies RunRequest);
+    worker.current.postMessage({ id, kernel: kernelId, station, params: { ...j.params, ...j.texts }, seed: j.seed } satisfies RunRequest);
   };
 
   useEffect(() => {
