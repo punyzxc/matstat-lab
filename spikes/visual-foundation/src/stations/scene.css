@@ -1674,3 +1674,80 @@ html:has(.orbital-lab) body {
   fill: #8a8a8a;
   font: 10px var(--mono);
 }
+
+/* #124: Bertrand's three circles; a circle in focus lights its line of the live formula. */
+.live-formula-line {
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+.live-formula-line[data-on] {
+  background: rgba(232, 228, 133, 0.14);
+}
+.chord-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 620px;
+}
+.chord-circle {
+  padding: 6px;
+  border: 1px solid #262626;
+  border-radius: 6px;
+  outline: none;
+}
+.chord-circle:hover,
+.chord-circle:focus-visible {
+  border-color: var(--signal);
+}
+.chord-circle svg {
+  display: block;
+  width: 100%;
+}
+.chord-disc {
+  fill: #0d0d0d;
+  stroke: #5a5a5a;
+}
+.chord-tri {
+  fill: none;
+  stroke: #3e3e3e;
+  stroke-dasharray: 3 3;
+}
+.chord {
+  stroke: #6a6a6a;
+  stroke-width: 1;
+  animation: chord-in 0.35s ease-out both;
+}
+.chord[data-long] {
+  stroke: var(--signal);
+  stroke-width: 1.4;
+}
+@keyframes chord-in {
+  from {
+    opacity: 0;
+  }
+}
+.board[data-reduced] .chord {
+  animation: none;
+}
+.chord-caption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 8px;
+  margin-top: 4px;
+  font: 11px var(--mono);
+  color: #a8a8a8;
+}
+.chord-share {
+  color: var(--signal);
+}
+.chord-share i {
+  color: #8a8a8a;
+  font-style: normal;
+}
+
+/* #116: a bundle of many paths as faint hairlines. */
+.chart-series.chart-series--thin {
+  stroke-width: 0.6;
+  opacity: 0.32;
+}

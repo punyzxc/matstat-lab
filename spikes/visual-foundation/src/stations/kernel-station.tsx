@@ -204,6 +204,8 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
   const past = history.key === expKey ? history.draws : [];
 
   const [tracked, setTracked] = useState<string | null>(null);
+  /** A line of the live formula lit by the picture (#124: hovering a circle lights its method's formula). */
+  const [lineFocus, setLineFocus] = useState<number | null>(null);
   const [ridgeOn, setRidgeOn] = useState(false);
   const shown = result && !('error' in result) ? result : null;
   const trackable = shown?.readouts.filter((r) => numeric(r.observed)) ?? [];
@@ -250,14 +252,14 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
           <>
             {view.formula && view.formula.length > 0 && (
               <div className="live-formula" aria-label={t('Live formula', 'Живая формула')} role="group">
-                {view.formula.map((line, i) => <Tex key={i} tex={line} display />)}
+                {view.formula.map((line, i) => <div key={i} className="live-formula-line" data-on={lineFocus === i || undefined}><Tex tex={line} display /></div>)}
               </div>
             )}
             {view.beam && <Beam beam={view.beam} onParam={(key, v) => setParams((p) => ({ ...p, [key]: v }))} />}
             {view.outcomes && outcome?.ok && <OutcomeFlight outcomes={view.outcomes} drawKey={outcome.job.seed} />}
             {view.space && outcome?.ok && <OutcomeSpace space={view.space} drawKey={outcome.job.seed} />}
             {view.constructions && outcome?.ok && <Constructions data={view.constructions} drawKey={outcome.job.seed} />}
-            {view.board && outcome?.ok && <Board board={view.board} drawKey={outcome.job.seed} />}
+            {view.board && outcome?.ok && <Board board={view.board} drawKey={outcome.job.seed} onFocusLine={setLineFocus} />}
             {view.square && outcome?.ok && <EventSquare square={view.square} drawKey={outcome.job.seed} onParam={(key, v) => setParams((p) => ({ ...p, [key]: v }))} />}
             {view.surface && <Surface3D surface={view.surface} />}
             {view.series.length > 0 && (

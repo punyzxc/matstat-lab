@@ -16,8 +16,9 @@ export type KernelMeta = { id: string; lectures: string[]; title: string; params
 export type Readout = { key: string; label: string; observed?: number | string | null; theory?: number | string | null; unit?: string; convention?: string };
 export type SeriesKind = 'pmf' | 'pdf' | 'cdf' | 'hist' | 'ecdf' | 'line' | 'points' | 'band' | 'rule';
 /** `tone`: default (observed), signal (theory / reference), muted (context), accent (critical region, highlight). */
+/** `thin` (lines only): a faint hairline, for bundles of many paths (#116). */
 /** `marker` (points only): a larger filled `dot` or an `open` circle, as for the ends of the steps of a right-continuous CDF. */
-export type Series = { id: string; kind: SeriesKind; x: number[]; y: number[]; y2?: number[]; unit?: string; label?: string; tone?: 'default' | 'signal' | 'muted' | 'accent'; marker?: 'dot' | 'open' };
+export type Series = { id: string; kind: SeriesKind; x: number[]; y: number[]; y2?: number[]; unit?: string; label?: string; tone?: 'default' | 'signal' | 'muted' | 'accent'; marker?: 'dot' | 'open'; thin?: boolean };
 /**
  * A 3D surface over a regular grid (up to ~41x41). `z[j][i]` is the theoretical density at (x[i], y[j]);
  * `zSample[j][i]` is the sample's 2D-histogram density on the same grid (cell centred at the grid node).
@@ -74,7 +75,9 @@ export type Constructions = { n: number; size: number; ordered: boolean; repetit
  */
 export type Board =
   | { kind: 'needles'; d: number; l: number; strips: number; width: number; needles: number[][]; hits: boolean[] }
-  | { kind: 'region'; runs: number[][]; darts: number[][]; hits: boolean[] };
+  | { kind: 'region'; runs: number[][]; darts: number[][]; hits: boolean[] }
+  /** #124: Bertrand's three circles; `chords[i]` = [x1, y1, x2, y2] on the unit circle, `long[i]` longer than √3. */
+  | { kind: 'chords'; circles: { id: string; label: string; exact: number; share: number; chords: number[][]; long: boolean[] }[] };
 /**
  * Two events in the unit square (#117): A = `A` and B = `B` as [x0, x1, y0, y1], their exact probabilities, whether
  * |P(AB) − P(A)P(B)| is within the kernel's tolerance, the first `points` of the draw with their class `cls`

@@ -1,0 +1,9 @@
+id,module,seed,rng_version,algorithm_version,draw,value
+audit-precision,distribution,17,hand-fixture-v1,oracle-v1,1,-5e-324
+audit-precision,distribution,17,hand-fixture-v1,oracle-v1,2,0
+audit-precision,distribution,17,hand-fixture-v1,oracle-v1,3,0.9999999999999999
+audit-precision,distribution,17,hand-fixture-v1,oracle-v1,4,1
+audit-precision,distribution,17,hand-fixture-v1,oracle-v1,5,1.0000000000000002
+audit-precision,distribution,17,hand-fixture-v1,oracle-v1,6,1.9999999999999998
+audit-precision,distribution,17,hand-fixture-v1,oracle-v1,7,2
+audit-precision,distribution,17,hand-fixture-v1,oracle-v1,8,2.0000000000000004

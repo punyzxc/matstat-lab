@@ -1,0 +1,1662 @@
+{
+  "subject": "Independent one-scene audit, issue #56",
+  "testedSource": "1f4187f2db7e66c8397cc8f5d9a192a59dc84cda",
+  "playwright": "1.65.1",
+  "startTime": "2026-11-25T09:25:35.139Z",
+  "durationMs": 46692.532,
+  "counts": {
+    "expected": 14,
+    "unexpected": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "routeViewportPairs": 108,
+    "routes": 27,
+    "pendingKernelRoutes": [
+      "#station/urn",
+      "#station/bernoulli"
+    ],
+    "stationAlerts": []
+  },
+  "limits": [
+    "Single installed Edge browser on Windows; English UI; reduced motion.",
+    "Rendered visibility is a geometry/style check, not a pixel occlusion or accessibility certification.",
+    "Internal clipped/scrolling panels and aria-hidden decoration excluded from horizontal element overflow; root dimensions and scrolling checked separately.",
+    "Hidden deep links have no opener card; tested title focus and Escape, not return to a nonexistent opener.",
+    "Default station parameters only, plus three explicit contract-fixture replay combinations. Pending kernels are host-shell coverage only."
+  ],
+  "cases": [
+    {
+      "title": "all 27 routes fit and preserve scene at 1280x720",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6632,
+          "errors": [],
+          "attachments": [
+            {
+              "name": "runtime.json",
+              "value": {
+                "browser": "158.0.4370.33",
+                "node": "v26.13.1",
+                "platform": "win32",
+                "channel": "msedge",
+                "port": "4196"
+              }
+            },
+            {
+              "name": "geometry.json",
+              "value": [
+                {
+                  "route": "#orbit/probability",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/variables",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/limits",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/statistics",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/urn",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 1,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/frequency",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/darts",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/bayes",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/bernoulli",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 1,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/distribution",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/moments",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/transform",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/scatter",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/convolution",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/convergence",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/lln",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/clt",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/sample",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/fit",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/estimation",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/confidence",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/testing",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/homogeneity",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/randomness",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/contract-fixture",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#notes",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#record",
+                  "width": 1280,
+                  "height": 720,
+                  "scrollWidth": 1280,
+                  "scrollHeight": 720,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "all 27 routes fit and preserve scene at 1366x768",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6771,
+          "errors": [],
+          "attachments": [
+            {
+              "name": "geometry.json",
+              "value": [
+                {
+                  "route": "#orbit/probability",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/variables",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/limits",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/statistics",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/urn",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 1,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/frequency",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/darts",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/bayes",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/bernoulli",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 1,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/distribution",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/moments",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/transform",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/scatter",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/convolution",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/convergence",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/lln",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/clt",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/sample",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/fit",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/estimation",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/confidence",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/testing",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/homogeneity",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/randomness",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/contract-fixture",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#notes",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#record",
+                  "width": 1366,
+                  "height": 768,
+                  "scrollWidth": 1366,
+                  "scrollHeight": 768,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "all 27 routes fit and preserve scene at 1440x900",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6642,
+          "errors": [],
+          "attachments": [
+            {
+              "name": "geometry.json",
+              "value": [
+                {
+                  "route": "#orbit/probability",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/variables",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/limits",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/statistics",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/urn",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 1,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/frequency",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/darts",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/bayes",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/bernoulli",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 1,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/distribution",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/moments",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/transform",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/scatter",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/convolution",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/convergence",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/lln",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/clt",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/sample",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/fit",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/estimation",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/confidence",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/testing",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/homogeneity",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/randomness",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/contract-fixture",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#notes",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#record",
+                  "width": 1440,
+                  "height": 900,
+                  "scrollWidth": 1440,
+                  "scrollHeight": 900,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "all 27 routes fit and preserve scene at 1920x1080",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 6882,
+          "errors": [],
+          "attachments": [
+            {
+              "name": "geometry.json",
+              "value": [
+                {
+                  "route": "#orbit/probability",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/variables",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/limits",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#orbit/statistics",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/urn",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 1,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/frequency",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/darts",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/bayes",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/bernoulli",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 1,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/distribution",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/moments",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/transform",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/scatter",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/convolution",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/convergence",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/lln",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/clt",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/sample",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/fit",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/estimation",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/confidence",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/testing",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/homogeneity",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/randomness",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#station/contract-fixture",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#notes",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                },
+                {
+                  "route": "#record",
+                  "width": 1920,
+                  "height": 1080,
+                  "scrollWidth": 1920,
+                  "scrollHeight": 1080,
+                  "scrollX": 0,
+                  "scrollY": 0,
+                  "overflow": [],
+                  "pendingKernel": 0,
+                  "stationAlerts": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "keyboard opens every visible station of probability and returns to its opener",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 2020,
+          "errors": [],
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "title": "keyboard opens every visible station of variables and returns to its opener",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 2169,
+          "errors": [],
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "title": "keyboard opens every visible station of limits and returns to its opener",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 2006,
+          "errors": [],
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "title": "keyboard opens every visible station of statistics and returns to its opener",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 2411,
+          "errors": [],
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "title": "hidden randomness deep link has a focused dock and closes with Escape",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 1394,
+          "errors": [],
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "title": "hidden contract-fixture deep link has a focused dock and closes with Escape",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 1028,
+          "errors": [],
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "title": "fresh isolated context replays fixture seed=0 n=100 p=0",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 2000,
+          "errors": [],
+          "attachments": [
+            {
+              "name": "replayed-readouts.json",
+              "value": {
+                "route": "#station/contract-fixture?seed=0&n=100&p=0",
+                "original": [
+                  "QuantityObservedTheoryTrack",
+                  "Relative frequency m/nm/nm/n00",
+                  "Hits mmm00"
+                ],
+                "replay": [
+                  "QuantityObservedTheoryTrack",
+                  "Relative frequency m/nm/nm/n00",
+                  "Hits mmm00"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "fresh isolated context replays fixture seed=17 n=2000 p=0.3",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 1996,
+          "errors": [],
+          "attachments": [
+            {
+              "name": "replayed-readouts.json",
+              "value": {
+                "route": "#station/contract-fixture?seed=17&n=2000&p=0.3",
+                "original": [
+                  "QuantityObservedTheoryTrack",
+                  "Relative frequency m/nm/nm/n0.28250.3",
+                  "Hits mmm565600"
+                ],
+                "replay": [
+                  "QuantityObservedTheoryTrack",
+                  "Relative frequency m/nm/nm/n0.28250.3",
+                  "Hits mmm565600"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "fresh isolated context replays fixture seed=4294967295 n=5000 p=1",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 2012,
+          "errors": [],
+          "attachments": [
+            {
+              "name": "replayed-readouts.json",
+              "value": {
+                "route": "#station/contract-fixture?seed=4294967295&n=5000&p=1",
+                "original": [
+                  "QuantityObservedTheoryTrack",
+                  "Relative frequency m/nm/nm/n11",
+                  "Hits mmm5,0005,000"
+                ],
+                "replay": [
+                  "QuantityObservedTheoryTrack",
+                  "Relative frequency m/nm/nm/n11",
+                  "Hits mmm5,0005,000"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "malformed percent escapes, unknown IDs and invalid seeds do not blank the scene",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 1511,
+          "errors": [],
+          "attachments": [
+            {
+              "name": "malformed-routes.json",
+              "value": [
+                {
+                  "input": "#station/%E0%A4%A",
+                  "renderedURL": "http://127.0.0.1:4196/#station/%E0%A4%A",
+                  "uncaughtErrors": []
+                },
+                {
+                  "input": "#orbit/no-such-orbit",
+                  "renderedURL": "http://127.0.0.1:4196/#orbit/no-such-orbit",
+                  "uncaughtErrors": []
+                },
+                {
+                  "input": "#station/no-such-station",
+                  "renderedURL": "http://127.0.0.1:4196/#station/no-such-station",
+                  "uncaughtErrors": []
+                },
+                {
+                  "input": "#station/%",
+                  "renderedURL": "http://127.0.0.1:4196/#station/%",
+                  "uncaughtErrors": []
+                },
+                {
+                  "input": "#station/contract-fixture?seed=%E0",
+                  "renderedURL": "http://127.0.0.1:4196/#station/contract-fixture?seed=%E0",
+                  "uncaughtErrors": []
+                },
+                {
+                  "input": "#station/contract-fixture?seed=-1",
+                  "renderedURL": "http://127.0.0.1:4196/#station/contract-fixture?seed=-1",
+                  "uncaughtErrors": []
+                },
+                {
+                  "input": "#station/contract-fixture?seed=4294967296",
+                  "renderedURL": "http://127.0.0.1:4196/#station/contract-fixture?seed=4294967296",
+                  "uncaughtErrors": []
+                },
+                {
+                  "input": "#station/contract-fixture?seed=1.5",
+                  "renderedURL": "http://127.0.0.1:4196/#station/contract-fixture?seed=1.5",
+                  "uncaughtErrors": []
+                },
+                {
+                  "input": "#station/contract-fixture?seed=1e3",
+                  "renderedURL": "http://127.0.0.1:4196/#station/contract-fixture?seed=1e3",
+                  "uncaughtErrors": []
+                },
+                {
+                  "input": "#station/contract-fixture?seed=",
+                  "renderedURL": "http://127.0.0.1:4196/#station/contract-fixture?seed=",
+                  "uncaughtErrors": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
