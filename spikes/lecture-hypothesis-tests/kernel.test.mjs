@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   meta, stations, run, TAILS, criticalRegion, proportionTest, meanTest, fTest, lectureExample,
-  proportionPower, proportionSize, zPower, tPower, fPower, acceptanceBand, simulateMean, simulateVariances, simulateProportion,
+  proportionPower, proportionSize, zPower, tPower, fPower, acceptanceBand, simulateMean, simulateVariances, simulateProportion, surfaceSizes,
 } from './kernel.mjs';
 import { normalQuantile, studentTQuantile, fisherQuantile, fisherCdf, normalCdf, studentTCdf, logGamma } from './special.mjs';
 
@@ -193,7 +193,7 @@ test('the lecture one-sided rule (larger over smaller with alpha) doubles the ty
 // ---------------------------------------------------------------- contract
 test('kernel follows the contract: deterministic, finite, aligned arrays, every station and view', () => {
   assert.equal(meta.id, 'lecture-hypothesis-tests');
-  assert.deepEqual(meta.lectures, ['L12']);
+  assert.deepEqual(meta.lectures, ['L11']); // course index #79: lecture 11 is hypothesis testing
   for (const [id, st] of Object.entries(stations)) {
     for (const p of st.params) assert.ok(p.min <= p.default && p.default <= p.max, `${id}.${p.key}`);
     const view = st.params.find((p) => p.key === 'view');
@@ -224,4 +224,73 @@ test('series ids and lengths stay stable across alpha and the effect slider (smo
       assert.equal(shapes.size, 1, `${station} view ${view}`);
     }
   }
+});
+
+// ---------------------------------------------------------------- #97: the scene's Testing station
+test('testing station: typed H0, true mean, spread, n, alpha and H1 are all parameters', () => {
+  const keys = stations.testing.params.map((p) => p.key);
+  for (const k of ['sigmaKnown', 'a0', 'mu', 'sigma', 'n', 'alpha', 'tail', 'R', 'view']) assert.ok(keys.includes(k), k);
+});
+
+test('testing station: shifting a0 and scaling sigma changes nothing but the units (same statistic, same power)', () => {
+  for (const sigmaKnown of [0, 1]) {
+    const base = run({ sigmaKnown, mu: 0.25, n: 15, R: 400 }, { seed: SEED, station: 'mean' });
+    const moved = run({ sigmaKnown, a0: 3, mu: 3.5, sigma: 2, n: 15, R: 400 }, { seed: SEED, station: 'testing' });
+    const get = (o, key) => o.readouts.find((r) => r.key === key);
+    close(get(moved, 'statistic').observed, get(base, 'statistic').observed, 1e-9, 'statistic');
+    for (const key of ['type1', 'power']) {
+      assert.equal(get(moved, key).observed, get(base, key).observed, key);
+      close(get(moved, key).theory, get(base, key).theory, 1e-12, key);
+    }
+  }
+});
+
+test('testing station: rejection shares sit in their bands, alpha under H0 and the power under H1', () => {
+  for (const tail of [0, 1, 2]) {
+    const h0 = run({ a0: 1, mu: 1, sigma: 2, n: 20, tail, R: 2000 }, { seed: SEED, station: 'testing' });
+    const type1 = h0.readouts.find((r) => r.key === 'type1');
+    const band = acceptanceBand(2000, 0.05, 0.001);
+    assert.ok(type1.observed * 2000 >= band.lo && type1.observed * 2000 <= band.hi, `H0 tail ${tail}: ${type1.observed}`);
+    assert.equal(h0.readouts.find((r) => r.key === 'power').observed, null, 'no power without an alternative');
+    const h1 = run({ a0: 1, mu: tail === 2 ? 0 : 2, sigma: 2, n: 20, tail, R: 2000 }, { seed: SEED, station: 'testing' });
+    const power = h1.readouts.find((r) => r.key === 'power');
+    const pb = acceptanceBand(2000, power.theory, 0.001);
+    assert.ok(power.observed * 2000 >= pb.lo && power.observed * 2000 <= pb.hi, `H1 tail ${tail}: ${power.observed} vs ${power.theory}`);
+  }
+});
+
+test('testing station: the decision rule is typeset with the computed critical point', () => {
+  const out = run({ sigmaKnown: 0, a0: 2, n: 10, alpha: 0.05, tail: 0 }, { seed: SEED, station: 'testing' });
+  const rule = out.readouts.find((r) => r.key === 'rule');
+  assert.match(rule.label, /H_0\\colon a = 2\$ against \$H_1\\colon a \\ne 2/);
+  assert.match(rule.observed, /\|T\| > t_\{\\mathrm\{cr\}\}/);
+  assert.equal(rule.theory, `$|T| > ${studentTQuantile(0.975, 9).toFixed(3)}$`);
+  assert.match(rule.convention, /\\dfrac\{\(\\bar\{x\} - a_0\)\\sqrt\{n\}\}\{s\}/);
+});
+
+test('testing station: the 3D power surface has the alpha valley at a0, grows with n, and its stems are seeded', () => {
+  for (const [sigmaKnown, tail] of [[1, 0], [0, 1]]) {
+    const params = { sigmaKnown, tail, a0: -1, sigma: 0.5, n: 30, alpha: 0.05, R: 400 };
+    const out = run(params, { seed: SEED, station: 'testing' });
+    const s = out.surface;
+    assert.ok(s.y.includes(30), 'the chosen n is a row');
+    assert.deepEqual(s.y, surfaceSizes(30));
+    assert.equal(s.z.length, s.y.length);
+    assert.equal(s.zSample.length, s.y.length);
+    const mid = (s.x.length - 1) / 2;
+    close(s.x[mid], -1, 1e-12, 'a0 is the middle column');
+    s.z.forEach((row) => close(row[mid], 0.05, 1e-6, 'valley = alpha'));
+    const right = s.x.length - 4; // a > a0, inside every H1
+    for (let j = 1; j < s.y.length; j++) assert.ok(s.z[j][right] >= s.z[j - 1][right] - 1e-6, 'power grows with n');
+    s.zSample.flat().forEach((v) => assert.ok(v >= 0 && v <= 1));
+    assert.equal(JSON.stringify(run(params, { seed: SEED, station: 'testing' }).surface), JSON.stringify(s), 'same seed, same stems');
+    assert.notEqual(JSON.stringify(run(params, { seed: SEED + 1, station: 'testing' }).surface.zSample), JSON.stringify(s.zSample));
+  }
+});
+
+test('testing station: n changes redraw the power curve', () => {
+  const curve = (n) => run({ view: 1, n, R: 200 }, { seed: SEED, station: 'testing' }).series.find((s) => s.id === 'power-theory').y;
+  const a = curve(5), b = curve(50);
+  assert.equal(a.length, b.length);
+  assert.ok(b[b.length - 5] > a[a.length - 5], 'more data, more power');
 });

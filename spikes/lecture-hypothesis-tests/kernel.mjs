@@ -269,6 +269,15 @@ const stationParams = {
     { key: 'n', label: 'Sample size $n$', min: 2, max: 200, step: 1, default: 12 },
     ALPHA, TAIL, REPS, VIEW,
   ],
+  // The scene's Hypothesis Testing station (#97): the mean test with your own H0, true mean and spread.
+  testing: [
+    { key: 'sigmaKnown', label: '$\\sigma$ (0 unknown: $t$-test, 1 known: $z$-test)', min: 0, max: 1, step: 1, default: 0 },
+    { key: 'a0', label: '$H_0\\colon a = a_0$', min: -10, max: 10, step: 0.05, default: 0 },
+    { key: 'mu', label: 'True mean $a$ ($H_1$ holds when $a \\ne a_0$)', min: -10, max: 10, step: 0.05, default: 0.5 },
+    { key: 'sigma', label: 'Spread $\\sigma$ of the data', min: 0.1, max: 5, step: 0.05, default: 1 },
+    { key: 'n', label: 'Sample size $n$', min: 2, max: 200, step: 1, default: 12 },
+    ALPHA, TAIL, REPS, VIEW,
+  ],
   variances: [
     { key: 'rho', label: 'True ratio $\\rho = D(X)/D(Y)$', min: 0.25, max: 4, step: 0.05, default: 2 },
     { key: 'n1', label: 'Sample size $n_1$ ($X$)', min: 3, max: 100, step: 1, default: 10 },
@@ -279,7 +288,7 @@ const stationParams = {
 export const stations = Object.freeze(Object.fromEntries(Object.entries(stationParams).map(([id, params]) => [id, { params }])));
 export const meta = {
   id: 'lecture-hypothesis-tests',
-  lectures: ['L12'],
+  lectures: ['L11'],
   title: 'Critical regions, type I and II errors and power of the z, t and F tests',
   params: stationParams.mean,
 };
@@ -300,6 +309,7 @@ export function run(params, { seed, station = 'mean' } = {}) {
   const st = stationParams[station] ? station : 'mean', q = resolve(stationParams[st], params), s = (seed >>> 0);
   if (st === 'proportion') return runProportion(q, s);
   if (st === 'variances') return runVariances(q, s);
+  if (st === 'testing') return runTesting(q, s);
   return runMean(q, s);
 }
 
@@ -424,19 +434,24 @@ function runProportion({ p0, p, n, alpha, tail: ti, R, view }, seed) {
 
 // ---------------------------------------------------------------- Mean station
 const D_GRID_THEORY = linspace(-1.5, 1.5, 61), D_GRID_MC = linspace(-1.5, 1.5, 31);
-function runMean({ sigmaKnown, mu, n, alpha, tail: ti, R, view }, seed) {
+/**
+ * The mean test. The Mean station keeps a₀ = 0 and σ = 1; the Testing station passes its own a₀ and σ.
+ * Every law here depends only on the standardized effect d = (a − a₀)/σ, so the simulation runs on d.
+ */
+function runMean({ sigmaKnown, mu, n, alpha, tail: ti, R, view, a0 = 0, sigma = 1 }, seed) {
   const tail = tailOf(ti), known = sigmaKnown === 1;
   const dist = known ? { kind: 'z' } : { kind: 't', df: n - 1 }, region = criticalRegion(dist, alpha, tail);
-  const x = Array.from({ length: n }, (_, i) => mu + gauss(seed, STREAM.ownMean, i));
-  const own = meanTest(x, 0, alpha, tail, known ? 1 : null);
+  const x = Array.from({ length: n }, (_, i) => mu + sigma * gauss(seed, STREAM.ownMean, i));
+  const own = meanTest(x, a0, alpha, tail, known ? sigma : null);
   const power = (d) => (known ? zPower(d, n, alpha, tail) : tPower(d, n, alpha, tail));
-  const theory = power(mu), isNull = Math.abs(mu) < 1e-12;
-  const sim = simulateMean({ n, R, seed, sigmaKnown: known, alpha, tail, grid: [0, mu], keepStats: view === 2 });
-  const statName = known ? 'U' : 'T', k = n - 1, delta = mu * Math.sqrt(n);
+  const eff = (mu - a0) / sigma, toMean = (d) => a0 + sigma * d;
+  const theory = power(eff), isNull = Math.abs(eff) < 1e-12;
+  const sim = simulateMean({ n, R, seed, sigmaKnown: known, alpha, tail, grid: [0, eff], keepStats: view === 2 });
+  const statName = known ? 'U' : 'T', k = n - 1, delta = eff * Math.sqrt(n);
   const critical = known ? zQ(tail === 'two' ? 1 - alpha / 2 : 1 - alpha) : studentTQuantile(tail === 'two' ? 1 - alpha / 2 : 1 - alpha, k);
   const readouts = [
     { key: 'statistic', label: known ? 'Your sample: $U = \\dfrac{(\\bar{x} - a_0)\\sqrt{n}}{\\sigma}$ (3)' : 'Your sample: $T = \\dfrac{(\\bar{x} - a_0)\\sqrt{n}}{s}$ (5)', observed: own.stat, theory: null,
-      convention: `$\\bar{x} = ${fmt(own.xbar)}$${known ? ', $\\sigma = 1$ known' : `, $s = ${fmt(own.s)}$ (corrected, divisor $n - 1$)`}; $n = ${n}$, true $M(X) = ${mu}$` },
+      convention: `$\\bar{x} = ${fmt(own.xbar)}$${known ? `, $\\sigma = ${sigma}$ known` : `, $s = ${fmt(own.s)}$ (corrected, divisor $n - 1$)`}; $n = ${n}$, ${a0 === 0 ? '' : `$a_0 = ${a0}$, `}true $M(X) = ${mu}$` },
     { key: 'critical', label: known ? `Critical value $u_{\\mathrm{cr}}$, ${tailText[tail]}` : `Critical point $t_{\\mathrm{cr}}(\\alpha, k = ${k})$, ${tailText[tail]}`, observed: null, theory: critical,
       convention: known ? (tail === 'two' ? `$\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - \\alpha}{2} = ${fmt((1 - alpha) / 2)}$ (Laplace function from 0)` : `$\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - 2\\alpha}{2} = ${fmt((1 - 2 * alpha) / 2)}$`)
         : `computed Student quantile $t(${tail === 'two' ? '1 - \\alpha/2' : '1 - \\alpha'};\\, ${k})$, not a table value` },
@@ -444,7 +459,7 @@ function runMean({ sigmaKnown, mu, n, alpha, tail: ti, R, view }, seed) {
     ...powerReadouts({ R, hits: sim.hits[1], theory, nullHits: sim.hits[0], size: alpha, alpha, isNull,
       exactLabel: known ? 'is $1 - \\Phi(u_{\\mathrm{cr}} - \\delta)$ (and the mirrored tail), $\\delta = (\\mu - a_0)\\sqrt{n}/\\sigma$' : `is the noncentral $t$ with $\\delta = ${fmt(delta, 3)}$, by numerical integration` }),
   ];
-  if (!known) readouts.push({ key: 'z-vs-t', label: 'Power if $\\sigma$ were known ($z$-test)', observed: null, theory: zPower(mu, n, alpha, tail), convention: 'estimating $\\sigma$ costs power at small $n$' });
+  if (!known) readouts.push({ key: 'z-vs-t', label: 'Power if $\\sigma$ were known ($z$-test)', observed: null, theory: zPower(eff, n, alpha, tail), convention: 'estimating $\\sigma$ costs power at small $n$' });
   const notes = [
     known ? 'L12 formula (3): with $\\sigma$ known, $U = (\\bar{x} - a_0)\\sqrt{n}/\\sigma$ is exactly $N(0, 1)$ under $H_0$ for normal data.'
       : `L12 formula (4)–(5): with $\\sigma$ unknown, $T = (\\bar{x} - a_0)\\sqrt{n}/s$ has Student's law with $k = n - 1 = ${k}$ degrees of freedom under $H_0$.`,
@@ -477,9 +492,9 @@ function runMean({ sigmaKnown, mu, n, alpha, tail: ti, R, view }, seed) {
     axes = { x: `statistic $${statName}$`, y: 'density' };
   } else {
     const mc = simulateMean({ n, R, seed, sigmaKnown: known, alpha, tail, grid: D_GRID_MC });
-    series = powerSeries(D_GRID_THEORY, D_GRID_THEORY.map(power), D_GRID_MC, D_GRID_MC.map(power), mc.hits, R, mu, alpha);
-    if (!known) series.push({ id: 'power-z', kind: 'line', tone: 'muted', label: '$z$-test power ($\\sigma$ known)', x: D_GRID_THEORY, y: D_GRID_THEORY.map((d) => zPower(d, n, alpha, tail)) });
-    axes = { x: 'true mean $\\mu$ ($a_0 = 0$, $\\sigma = 1$)', y: '$P(\\text{reject } H_0)$ = power ($\\alpha$ at $\\mu = a_0$)' };
+    series = powerSeries(D_GRID_THEORY.map(toMean), D_GRID_THEORY.map(power), D_GRID_MC.map(toMean), D_GRID_MC.map(power), mc.hits, R, mu, alpha);
+    if (!known) series.push({ id: 'power-z', kind: 'line', tone: 'muted', label: '$z$-test power ($\\sigma$ known)', x: D_GRID_THEORY.map(toMean), y: D_GRID_THEORY.map((d) => zPower(d, n, alpha, tail)) });
+    axes = { x: a0 === 0 && sigma === 1 ? 'true mean $\\mu$ ($a_0 = 0$, $\\sigma = 1$)' : `true mean $a$ ($a_0 = ${a0}$, $\\sigma = ${sigma}$)`, y: '$P(\\text{reject } H_0)$ = power ($\\alpha$ at $\\mu = a_0$)' };
   }
   return { readouts, series, notes, axes };
 }
@@ -544,4 +559,63 @@ function runVariances({ rho, n1, n2, alpha, tail: ti, R, view }, seed) {
     axes = { x: 'true ratio $\\rho = D(X)/D(Y)$', y: '$P(\\text{reject } H_0)$ = power ($\\alpha$ at $\\rho = 1$)' };
   }
   return { readouts, series, notes, axes };
+}
+
+// ---------------------------------------------------------------- Testing station (scene, #97)
+// The mean test with a typed H₀ (a₀), true mean a, spread σ and n, plus the power surface 1 − β(a, n) in 3D.
+const SURF_COLS = 25, SURF_ROWS = 10, SURF_R = 240;
+/** Standardized effects d = (a − a₀)/σ across the surface: wide enough that the power at your n reaches about 1. */
+export const surfaceEffects = (n) => linspace(-1, 1, SURF_COLS).map((u) => u * Math.min(2.5, Math.max(0.4, 4.5 / Math.sqrt(n))));
+/** About ten sample sizes from 2 up to about twice the chosen n, always including n itself. */
+export function surfaceSizes(n) {
+  const near = (v) => v !== n && Math.abs(v - n) <= Math.max(1, n * 0.12);
+  const top = Math.min(200, Math.max(40, 2 * n)), sizes = new Set([n]);
+  for (let i = 0; i < SURF_ROWS - 1; i++) sizes.add(Math.round(2 * (top / 2) ** (i / (SURF_ROWS - 2))));
+  return [...sizes].filter((v) => v >= 2 && v <= 200 && !near(v)).sort((a, b) => a - b);
+}
+// The exact surface depends on (test, α, H₁, sizes) only, so autoplay draws reuse it.
+let surfaceMemo = { key: '', z: null };
+function powerSurface(known, alpha, tail, sizes, effects) {
+  const key = [known, alpha, tail, sizes.join(','), effects[0]].join('|');
+  if (surfaceMemo.key !== key) {
+    const pw = known ? zPower : tPower;
+    surfaceMemo = { key, z: sizes.map((m) => effects.map((d) => pw(d, m, alpha, tail))) };
+  }
+  return surfaceMemo.z;
+}
+
+function runTesting(q, seed) {
+  const { sigmaKnown, a0, mu, sigma, n, alpha, tail: ti, R } = q;
+  const out = runMean(q, seed);
+  const tail = tailOf(ti), known = sigmaKnown === 1, stat = known ? 'U' : 'T';
+  const dist = known ? { kind: 'z' } : { kind: 't', df: n - 1 }, region = criticalRegion(dist, alpha, tail);
+  const crit = known ? 'u_{\\mathrm{cr}}' : 't_{\\mathrm{cr}}';
+  const formula = known ? `${stat} = \\dfrac{(\\bar{x} - a_0)\\sqrt{n}}{\\sigma}` : `${stat} = \\dfrac{(\\bar{x} - a_0)\\sqrt{n}}{s}`;
+  const h1 = tail === 'two' ? `a \\ne ${a0}` : tail === 'right' ? `a > ${a0}` : `a < ${a0}`;
+  const rule = tail === 'two' ? `|${stat}| > ${crit}` : tail === 'right' ? `${stat} > ${crit}` : `${stat} < -${crit}`;
+  const numeric = tail === 'two' ? `|${stat}| > ${fmt(region.upper, 3)}` : tail === 'right' ? `${stat} > ${fmt(region.upper, 3)}` : `${stat} < ${fmt(region.lower, 3)}`;
+  const at = out.readouts.findIndex((r) => r.key === 'decision');
+  out.readouts.splice(at, 0, {
+    key: 'rule', label: `Decision rule: $H_0\\colon a = ${a0}$ against $H_1\\colon ${h1}$`,
+    observed: `reject $H_0$ when $${rule}$`, theory: `$${numeric}$`,
+    convention: `$${formula}$ is ${known ? 'standard normal' : `Student with $k = ${n - 1}$`} under $H_0$, so $P(\\text{reject} \\mid H_0) = \\alpha$`,
+  });
+  // The power surface: exact 1 − β over the true mean and n; stems are simulated rejection rates on the same grid.
+  const sizes = surfaceSizes(n), effects = surfaceEffects(n), z = powerSurface(known, alpha, tail, sizes, effects), Rs = Math.min(R, SURF_R);
+  const zSample = sizes.map((m, j) => {
+    const mc = simulateMean({ n: m, R: Rs, seed: (seed + 7919 * (j + 1)) >>> 0, sigmaKnown: known, alpha, tail, grid: effects });
+    return mc.hits.map((h) => h / Rs);
+  });
+  out.surface = {
+    x: effects.map((d) => a0 + sigma * d), y: sizes, z, zSample,
+    labels: { x: 'true mean $a$', y: 'sample size $n$', z: 'power $1 - \\beta$' },
+    title: `Power surface $1 - \\beta(a, n)$: height $\\alpha = ${alpha}$ at $a = a_0$, rising towards 1 as the truth moves into $H_1$`,
+    sampleLabel: `Simulated rejection share (${Rs} tests per point)`,
+  };
+  out.notes = [
+    `Your $H_0\\colon a = ${a0}$; the data are $N(${mu}, ${sigma}^2)$. Every draw is a fresh sample of $n = ${n}$ and ${R} repeated tests: the share of rejections under $H_0$ settles at $\\alpha$, under the true mean at the power $1 - \\beta$.`,
+    ...out.notes,
+    'The surface has height $\\alpha$ at $a = a_0$ and rises towards 1 on the $H_1$ side: a larger $n$ or a larger $|a - a_0|/\\sigma$ makes a false $H_0$ easier to reject.',
+  ];
+  return out;
 }

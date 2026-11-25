@@ -178,7 +178,7 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
       </svg>
       <figcaption>
         <span className="chart-key chart-key--line tone-signal"><i /><MathText text={keyLabel ?? `Theory ${labels.z}`} /></span>
-        {zSample && <span className="surface-key-sample"><i />Sample density (2D histogram)</span>}
+        {zSample && <span className="surface-key-sample"><i /><MathText text={shown.sampleLabel ?? 'Sample density (2D histogram)'} /></span>}
         <span id={hintId} className="surface-hint">Drag or use arrow keys to rotate.</span>
       </figcaption>
     </figure>
