@@ -116,15 +116,41 @@ export function validateRoster(value: unknown): string[] {
   return errors;
 }
 
-/** The portrait slot: the owner's art is clipped to this many columns and lines. */
+/** The portrait slot: art up to this size shows at full size; larger art is scaled down to fit, never wrapped. */
 export const PORTRAIT = { columns: 40, lines: 20 } as const;
+/** Beyond this the file is surely not a portrait; the rest is cut so a pasted log cannot freeze the page. */
+export const PORTRAIT_LIMIT = { columns: 200, lines: 100 } as const;
 
-/** Plain-text art fitted to the slot; null when the file is empty or is not plain text (e.g. an HTML fallback page). */
+/** Plain-text art, whole lines kept; null when the file is empty or is not plain text (e.g. an HTML fallback page). */
 export function fitPortrait(text: string | null | undefined): string | null {
   if (text == null) return null;
-  const clean = text.replace(/^﻿/, '').replace(/\r\n?/g, '\n').replace(/\t/g, '    ');
+  const clean = text.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').replace(/\t/g, '    ');
   if (!clean.trim()) return null;
   if (/^\s*<(!doctype|html|head|body)/i.test(clean)) return null;
-  const lines = clean.replace(/\n+$/, '').split('\n').slice(0, PORTRAIT.lines);
-  return lines.map((line) => Array.from(line).slice(0, PORTRAIT.columns).join('')).join('\n');
+  const lines = clean.replace(/\n+$/, '').split('\n').slice(0, PORTRAIT_LIMIT.lines);
+  return lines.map((line) => Array.from(line).slice(0, PORTRAIT_LIMIT.columns).join('').replace(/\s+$/, '')).join('\n');
 }
+
+/** Columns and lines of fitted art, and the scale (at most 1) that fits it into the slot. */
+export function portraitScale(art: string) {
+  const rows = art.split('\n');
+  const columns = Math.max(1, ...rows.map((r) => Array.from(r).length));
+  const lines = rows.length;
+  return { columns, lines, scale: Math.min(1, PORTRAIT.columns / columns, PORTRAIT.lines / lines) };
+}
+
+/**
+ * The typewriter reveal at frame `k`: a diagonal sweep, so every line types at once from the left and lower
+ * lines start a little later. Hidden characters become spaces, so the art never shifts while it appears.
+ * Returns the art itself once `k` passes the last character.
+ */
+export function revealPortrait(art: string, k: number): string {
+  const rows = art.split('\n');
+  if (k >= revealFrames(art)) return art;
+  return rows.map((row, r) => Array.from(row).map((ch, c) => (c + 2 * r < k ? ch : ' ')).join('').replace(/\s+$/, '')).join('\n');
+}
+/** Frames until the sweep has typed every character. */
+export const revealFrames = (art: string) => {
+  const rows = art.split('\n');
+  return Math.max(0, ...rows.map((row, r) => Array.from(row).length + 2 * r));
+};

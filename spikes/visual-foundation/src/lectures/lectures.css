@@ -238,6 +238,16 @@
   font: var(--cell) / 1.15 var(--mono);
   white-space: pre;
 }
+.portrait-art:not(.portrait-placeholder) {
+  display: grid;
+  place-items: center;
+}
+/* Larger art keeps every line whole: the text shrinks to the slot instead of wrapping or clipping. */
+.portrait-text {
+  font-size: calc(var(--cell) * var(--fit, 1));
+  line-height: 1.15;
+  white-space: pre;
+}
 .portrait-placeholder {
   display: grid;
   place-content: center;
