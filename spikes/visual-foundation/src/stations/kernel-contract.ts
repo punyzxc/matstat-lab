@@ -47,6 +47,12 @@ export type Beam = { x: number[]; p: number[]; mean: number; sampleMean: number;
 export type Outcomes = { values: number[]; picks: number[]; support: number[]; pmf: number[]; counts: number[]; n: number; x: number };
 /** A second chart under the main one, sharing its x axis (for example $F(x)$ under $f(x)$). */
 export type LinkedChart = { series: Series[]; axes?: { x?: string; y?: string }; domain?: { x?: [number, number]; y?: [number, number] } };
+/**
+ * The outcome space of L1 (#129): `parts[i]` describes outcome i (two dice: [ω₁, ω₂]; three coins: 1 heads, 0 tails;
+ * cards: [rank 6…14, suit 1…4]); its membership in A, B and the event shown (`event`, TeX); `flashes` are the
+ * outcomes hit by the first trials of this draw; the event holds `m` of the `n` outcomes.
+ */
+export type Space = { kind: 'dice' | 'coins' | 'cards'; cols: number; parts: number[][]; inA: boolean[]; inB: boolean[]; inE: boolean[]; flashes: number[]; event: string; m: number; n: number };
 export type KernelResult = {
   readouts: Readout[];
   series: Series[];
@@ -61,6 +67,7 @@ export type KernelResult = {
   domain?: { x?: [number, number]; y?: [number, number] };
   linked?: LinkedChart;
   outcomes?: Outcomes;
+  space?: Space;
 };
 export type Kernel = {
   meta: KernelMeta;

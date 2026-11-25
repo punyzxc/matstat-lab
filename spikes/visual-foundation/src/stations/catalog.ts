@@ -20,6 +20,8 @@ export type Station = LegacyStation | KernelStation;
 export const stations: readonly Station[] = [
   { kind: 'kernel', id: 'urn', name: 'Urn', orbit: 'probability', lectures: 'L1', kernel: 'lecture-combinatorics', issue: 38,
     summary: 'Count ordered and unordered samples with and without replacement, then draw them.' },
+  { kind: 'kernel', id: 'events', name: 'Outcomes and events', orbit: 'probability', lectures: 'L1', kernel: 'lecture-outcome-space', issue: 129,
+    summary: 'Every outcome of $\\Omega$ as an object: pick $A$ and $B$, light up $A \\cup B$, $AB$, $\\bar{A}$ and read $P = \\dfrac{m}{n}$.' },
   { kind: 'kernel', id: 'frequency', name: 'Frequency', orbit: 'probability', lectures: 'L1', kernel: 'lecture-geometric-probability', issue: 40,
     summary: 'Watch the relative frequency of an event settle near its probability.' },
   { kind: 'kernel', id: 'darts', name: 'Darts', orbit: 'probability', lectures: 'L1 · L4', kernel: 'lecture-geometric-probability', issue: 40,
@@ -73,6 +75,7 @@ export const stations: readonly Station[] = [
 /** Russian names and summaries (i18n/README.md); the English above stays the source. */
 const ru: Record<string, { name: string; summary: string }> = {
   urn: { name: 'Урна', summary: 'Упорядоченные и неупорядоченные выборки с возвращением и без: подсчитайте и разыграйте.' },
+  events: { name: 'Исходы и события', summary: 'Каждый исход $\\Omega$ как объект: выберите $A$ и $B$, подсветите $A \\cup B$, $AB$, $\\bar{A}$ и прочитайте $P = \\dfrac{m}{n}$.' },
   frequency: { name: 'Частота', summary: 'Посмотрите, как относительная частота события устанавливается около его вероятности.' },
   darts: { name: 'Дартс', summary: 'Бросайте точки в область: сравните долю попаданий с отношением площадей и три способа Бертрана провести хорду.' },
   bayes: { name: 'Байес', summary: 'Условная, полная и апостериорная вероятности как подсчёт смоделированных исходов.' },

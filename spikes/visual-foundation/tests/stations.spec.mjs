@@ -60,7 +60,7 @@ test('a contract kernel renders as a station and its URL reproduces the run', as
   await expect(fresh.getByTestId('station-dock').getByRole('row', { name: /Relative frequency/ })).toHaveText(first);
   // the fixture never appears on an orbit
   await fresh.goto('/#orbit/probability');
-  await expect(fresh.locator('.orbit-node')).toHaveCount(5);
+  await expect(fresh.locator('.orbit-node')).toHaveCount(6); // the six visible stations of orbit I, without the fixture
 });
 
 test('a broken link or a failing station never blanks the program', async ({ page }) => {
