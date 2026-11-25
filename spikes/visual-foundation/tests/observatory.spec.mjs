@@ -23,7 +23,7 @@ test('globe, module links and preview motion share the pause control', async ({ 
   await page.getByRole('button', { name: 'Pause motion' }).click();
   const paused = await frame();
   await expect(page.locator('.orbit-link-focal')).toHaveCount(0);
-  await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(2);
+  await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(1);
   await page.waitForTimeout(170);
   expect(await frame()).toBe(paused);
   await page.getByRole('button', { name: 'Wireframe' }).click();
@@ -39,7 +39,6 @@ test('all six orbital windows are direct entry links and preserve the last opene
     ['II Random variables', 'Distribution Explorer'],
     ['III Limit theorems', 'Convergence'],
     ['IV Statistics', 'Hypothesis Testing'],
-    ['IV Statistics', 'Randomness'],
   ]) {
     await page.getByRole('navigation', { name: 'Lecture orbits' }).getByRole('link', { name: orbit }).click();
     const node = page.locator('.orbital-nodes').getByRole('link', { name: new RegExp('^' + name) });
@@ -52,7 +51,7 @@ test('all six orbital windows are direct entry links and preserve the last opene
     await expect(node).toHaveAccessibleName(/Last opened/);
   }
   await page.reload();
-  await expect(page.locator('[data-module="randomness"]')).toHaveAccessibleName(/Last opened/);
+  await expect(page.locator('[data-module="testing"]')).toHaveAccessibleName(/Last opened/);
 });
 
 test('narrow screens keep all connected windows and immediate static previews', async ({ page }) => {

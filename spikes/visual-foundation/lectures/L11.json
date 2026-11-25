@@ -44,6 +44,19 @@
           "view": 1
         }
       }
+    },
+    {
+      "title": "Homogeneity of two series",
+      "idea": "Two series of trials give frequencies m₁/n₁ and m₂/n₂. Are they samples of one probability p? Pool them and compare the difference with its standard error.",
+      "formula": [
+        "z = (m₁/n₁ − m₂/n₂) / √(p̂(1 − p̂)(1/n₁ + 1/n₂)),  p̂ = (m₁ + m₂)/(n₁ + n₂)",
+        "reject homogeneity when |z| > z₁₋α/₂"
+      ],
+      "experiment": {
+        "station": "homogeneity",
+        "seed": 139,
+        "label": "Run the two-series test"
+      }
     }
   ],
   "status": "draft"

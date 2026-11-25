@@ -6,7 +6,6 @@ import { historyPrefix } from '../src/last-results.ts';
 test('orbital previews use independent saved samples and label unsaved sample previews', async ({ page }) => {
   const snapshots = {
     distribution: { settings: { distribution: 'exponential', scale: 1.25, count: 64, seed: 25 }, size: 64 },
-    convergence: { settings: { distribution: 'uniform', scale: 1.5, count: 128, seed: 63 }, size: 19 },
     testing: { settings: { distribution: 'exponential', scale: 2, count: 64, seed: 47 }, size: 29 },
   };
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -45,10 +44,11 @@ test('orbital previews use independent saved samples and label unsaved sample pr
   await page.getByRole('link', { name: 'IV Statistics' }).click();
   const lastOpened = windows.and(page.locator('[data-module="testing"]'));
   await expect(lastOpened).toHaveAccessibleName(/Last opened/);
-  const randomness = windows.and(page.locator('[data-module="randomness"]'));
-  await expect(randomness).toHaveAttribute('data-saved', 'false');
-  await expect(randomness).toHaveAccessibleName(/Randomness.*Seeded preview/);
-  await randomness.focus();
+  await page.getByRole('link', { name: 'III Limit theorems' }).click();
+  const convergence = windows.and(page.locator('[data-module="convergence"]'));
+  await expect(convergence).toHaveAttribute('data-saved', 'false');
+  await expect(convergence).toHaveAccessibleName(/Convergence.*Seeded preview/);
+  await convergence.focus();
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(/#station\/randomness$/);
+  await expect(page).toHaveURL(/#station\/convergence$/);
 });
