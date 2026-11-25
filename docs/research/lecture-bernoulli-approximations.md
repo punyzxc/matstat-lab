@@ -7,6 +7,7 @@ This is the research for `lecture-bernoulli-approximations` ([#39](https://githu
 **Deliverables.**
 - `spikes/lecture-bernoulli-approximations/kernel.mjs` and `kernel.test.mjs` (`node --test`, 9 tests, all passing).
 - The kernel follows the shared contract in [`lecture-module-map.md`](lecture-module-map.md) and serves the catalog station `bernoulli` (`spikes/visual-foundation/src/stations/catalog.ts`, issue 39).
+- A Russian dictionary for every text the kernel shows, `spikes/visual-foundation/i18n/ru/kernels/lecture-bernoulli-approximations.json`. The lab speaks Russian by default, and `npm test` in `spikes/visual-foundation` (58 tests) requires one for every kernel. Every label keeps its mathematics inside `$…$`.
 - There is no UI code.
 
 ## Sources

@@ -87,27 +87,27 @@ export function sampleSize(eps, gamma, p) {
 /** example: 0 = custom sliders; 1..7 = the worked examples of L3 and L9, with the lecture's printed answer. */
 export const EXAMPLES = Object.freeze([
   null,
-  { ref: 'L3 ex. 1', n: 7, p: 0.75, k1: 5, k2: 5, lecture: { exact: 0.311 }, note: 'The text says "each of five days" but computes n = 7, k = 5; the preset follows the formula.' },
+  { ref: 'L3 ex. 1', n: 7, p: 0.75, k1: 5, k2: 5, lecture: { exact: 0.311 }, note: 'The text says "each of five days" but computes $n = 7$, $k = 5$; the preset follows the formula.' },
   { ref: 'L3 ex. 2a', n: 5000, p: 0.01, k1: 50, k2: 50, lecture: { exact: 0.0572, local: 0.057 }, note: 'The lecture prints 0.0572 for the exact value; the exact value is 0.0566.' },
   { ref: 'L3 ex. 2b', n: 5000, p: 0.01, k1: 0, k2: 50, lecture: { exact: 0.5033, integral: 0.5 }, note: 'The lecture prints 0.5033 for the exact sum; the exact value is 0.5375. The plain integral formula gives 0.5; with continuity correction it is much closer.' },
-  { ref: 'L3 typos', n: 100, p: 0.001, k1: 1, k2: 100, lecture: { poisson: 0.0952 }, note: 'At least one typo on a page: 1 − e^(−0.1) by Poisson; the exact value is 1 − 0.999¹⁰⁰.' },
-  { ref: 'L9 ex. defects', n: 50, p: 0.2, k1: 6, k2: 50, lecture: { integral: 0.92135 }, note: 'L9 writes ½(Ф(16)+Ф(1)) with Ф(1) = 0.8427, i.e. erf(1); in the Φ-from-−∞ convention this is Φ(√2) = 0.9214.' },
+  { ref: 'L3 typos', n: 100, p: 0.001, k1: 1, k2: 100, lecture: { poisson: 0.0952 }, note: 'At least one typo on a page: $1 - e^{-0.1}$ by Poisson; the exact value is $1 - 0.999^{100}$.' },
+  { ref: 'L9 ex. defects', n: 50, p: 0.2, k1: 6, k2: 50, lecture: { integral: 0.92135 }, note: 'L9 writes $\\tfrac12(\\Phi(16) + \\Phi(1))$ with $\\Phi(1) = 0.8427$, that is $\\mathrm{erf}(1)$; with $\\Phi$ counted from $-\\infty$ this is $\\Phi(\\sqrt2) = 0.9214$.' },
   { ref: 'L9 ex. first grade', n: 200, p: 0.6, k1: 120, k2: 150, lecture: { integral: 0.5 }, note: 'The integral formula without continuity correction gives 0.5; the exact value is 0.5307.' },
-  { ref: 'L9 ex. service life', n: 15000, p: 0.04, k1: 570, k2: 630, lecture: { integral: 0.7888 }, note: 'L9 uses 2Ф₀-type tables: 2·0.3944 = 0.7888; the exact value is 0.7963.' },
+  { ref: 'L9 ex. service life', n: 15000, p: 0.04, k1: 570, k2: 630, lecture: { integral: 0.7888 }, note: 'L9 uses tables of $2\\Phi_0$: $2 \\cdot 0.3944 = 0.7888$; the exact value is 0.7963.' },
 ]);
 
 // ---------- contract ----------
 const params = [
-  { key: 'view', label: 'View: 1 approximations, 2 sample size', min: 1, max: 2, step: 1, default: 1 },
-  { key: 'example', label: 'Lecture example (0 = sliders)', min: 0, max: EXAMPLES.length - 1, step: 1, default: 3, when: { view: [1] } },
-  { key: 'n', label: 'n, trials', min: 1, max: MAX_N, step: 1, default: 100, when: { view: [1], example: [0] } },
-  { key: 'p', label: 'p, success probability', min: 0, max: 1, step: 0.001, default: 0.3, when: { view: [1], example: [0] } },
-  { key: 'k1', label: 'k₁, interval start', min: 0, max: MAX_N, step: 1, default: 25, when: { view: [1], example: [0] } },
-  { key: 'k2', label: 'k₂, interval end', min: 0, max: MAX_N, step: 1, default: 35, when: { view: [1], example: [0] } },
-  { key: 'R', label: 'Simulated repetitions of the n trials', min: 100, max: 20000, step: 100, default: 2000, when: { view: [1] } },
-  { key: 'eps', label: 'ε, allowed deviation of the frequency', min: 0.001, max: 0.2, step: 0.001, default: 0.01, when: { view: [2] } },
-  { key: 'gamma', label: 'γ, confidence', min: 0.5, max: 0.999, step: 0.001, default: 0.98, when: { view: [2] } },
-  { key: 'pFreq', label: 'p (0.5 is the worst case)', min: 0.001, max: 0.999, step: 0.001, default: 0.5, when: { view: [2] } },
+  { key: 'view', label: 'View (1 approximations · 2 sample size)', min: 1, max: 2, step: 1, default: 1 },
+  { key: 'example', label: 'Lecture example (0 sliders · 1 L3 ex. 1 · 2 L3 ex. 2a · 3 L3 ex. 2b · 4 L3 typos · 5 L9 defects · 6 L9 first grade · 7 L9 service life)', min: 0, max: EXAMPLES.length - 1, step: 1, default: 3, when: { view: [1] } },
+  { key: 'n', label: 'Trials $n$', min: 1, max: MAX_N, step: 1, default: 100, when: { view: [1], example: [0] } },
+  { key: 'p', label: 'Success probability $p$', min: 0, max: 1, step: 0.001, default: 0.3, when: { view: [1], example: [0] } },
+  { key: 'k1', label: 'Interval start $k_1$', min: 0, max: MAX_N, step: 1, default: 25, when: { view: [1], example: [0] } },
+  { key: 'k2', label: 'Interval end $k_2$', min: 0, max: MAX_N, step: 1, default: 35, when: { view: [1], example: [0] } },
+  { key: 'R', label: 'Simulated repetitions $R$ of the $n$ trials', min: 100, max: 20000, step: 100, default: 2000, when: { view: [1] } },
+  { key: 'eps', label: 'Allowed deviation of the frequency $\\varepsilon$', min: 0.001, max: 0.2, step: 0.001, default: 0.01, when: { view: [2] } },
+  { key: 'gamma', label: 'Confidence $\\gamma$', min: 0.5, max: 0.999, step: 0.001, default: 0.98, when: { view: [2] } },
+  { key: 'pFreq', label: 'Probability $p$ (0.5 is the worst case)', min: 0.001, max: 0.999, step: 0.001, default: 0.5, when: { view: [2] } },
 ];
 export const meta = { id: 'lecture-bernoulli-approximations', lectures: ['L3', 'L9'], title: 'Bernoulli scheme: exact law, de Moivre–Laplace and Poisson', params };
 export const stations = { bernoulli: { params } };
@@ -153,32 +153,33 @@ function runApproximations(prm, seed) {
   const ks = Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
   const freq = new Array(ks.length).fill(0);
   for (const c of counts) if (c >= lo && c <= hi) freq[c - lo] += 1 / R;
-  const pointLabel = `P_n(${kp})`;
+  const pointLabel = `$P_n(${kp})$`;
   const readouts = [
     { key: 'exactPoint', label: `${pointLabel}, exact (formula 11)`, theory: r(exactPoint), observed: r(counts.filter((c) => c === kp).length / R), band: band(exactPoint, R), convention: 'exact' },
-    { key: 'local', label: `${pointLabel} ≈ φ(x)/√(npq), local de Moivre–Laplace (15)`, theory: r(local), error: local == null ? null : r(Math.abs(local - exactPoint)), convention: 'φ density' },
-    { key: 'poissonPoint', label: `${pointLabel} ≈ λᵏe^(−λ)/k!, Poisson (18)`, theory: r(poisPoint), error: r(Math.abs(poisPoint - exactPoint)), convention: 'Poisson' },
-    { key: 'exactInt', label: `P(${k1} ≤ k ≤ ${k2}), exact`, theory: r(exactInt), observed: r(hits / R), band: band(exactInt, R), convention: 'exact' },
-    { key: 'integral', label: `P(${k1} ≤ k ≤ ${k2}) ≈ Φ(b) − Φ(a), integral de Moivre–Laplace (17)`, theory: r(intPlain), error: intPlain == null ? null : r(Math.abs(intPlain - exactInt)), convention: 'Φ (CDF from −∞)' },
-    { key: 'integralCC', label: `same with continuity correction, Φ(b + 0.5/√npq) − Φ(a − 0.5/√npq)`, theory: r(intCC), error: intCC == null ? null : r(Math.abs(intCC - exactInt)), convention: 'Φ (CDF from −∞)' },
-    { key: 'poissonInt', label: `P(${k1} ≤ k ≤ ${k2}) ≈ Σ Poisson`, theory: r(poisInt), error: r(Math.abs(poisInt - exactInt)), convention: 'Poisson' },
-    { key: 'k0', label: mode.twoModes ? 'k₀, two most probable numbers ((n+1)p is an integer)' : 'k₀, most probable number (13)', theory: mode.modes.join(' and '), convention: '(n+1)p = ' + r(mode.np1p) },
+    { key: 'local', label: `$P_n(${kp}) \\approx \\varphi(x)/\\sqrt{npq}$, local de Moivre–Laplace theorem (15)`, theory: r(local), error: local == null ? null : r(Math.abs(local - exactPoint)), convention: 'density $\\varphi$' },
+    { key: 'poissonPoint', label: `$P_n(${kp}) \\approx \\lambda^k e^{-\\lambda}/k!$, Poisson (18)`, theory: r(poisPoint), error: r(Math.abs(poisPoint - exactPoint)), convention: 'Poisson' },
+    { key: 'exactInt', label: `$P(${k1} \\le k \\le ${k2})$, exact`, theory: r(exactInt), observed: r(hits / R), band: band(exactInt, R), convention: 'exact' },
+    { key: 'integral', label: `$P(${k1} \\le k \\le ${k2}) \\approx \\Phi(b) - \\Phi(a)$, integral de Moivre–Laplace theorem (17)`, theory: r(intPlain), error: intPlain == null ? null : r(Math.abs(intPlain - exactInt)), convention: '$\\Phi$, counted from $-\\infty$' },
+    { key: 'integralCC', label: `the same with continuity correction, $\\Phi(b + 0.5/\\sqrt{npq}) - \\Phi(a - 0.5/\\sqrt{npq})$`, theory: r(intCC), error: intCC == null ? null : r(Math.abs(intCC - exactInt)), convention: '$\\Phi$, counted from $-\\infty$' },
+    { key: 'poissonInt', label: `$P(${k1} \\le k \\le ${k2})$ as a sum of Poisson terms`, theory: r(poisInt), error: r(Math.abs(poisInt - exactInt)), convention: 'Poisson' },
+    { key: 'k0', label: mode.twoModes ? 'Two most probable numbers $k_0$ ($(n+1)p$ is an integer)' : 'Most probable number $k_0$ (13)', theory: mode.modes.join('; '), convention: `$(n+1)p = ${r(mode.np1p)}$` },
   ];
   if (ex) {
-    readouts.push({ key: 'lecture', label: `${ex.ref}: the lecture's printed values`, theory: Object.entries(ex.lecture).map(([k, v]) => `${k} ${v}`).join(', '), convention: 'lecture' });
+    const what = { exact: 'exact value', local: 'local approximation', integral: 'integral approximation', poisson: 'Poisson approximation' };
+    for (const [k, v] of Object.entries(ex.lecture)) readouts.push({ key: `lecture_${k}`, label: `${ex.ref}: the lecture's ${what[k]}`, theory: v, convention: 'printed in the lecture' });
   }
   const series = [
-    { id: 'pmf', kind: 'pmf', tone: 'signal', label: 'exact P_n(k)', x: ks, y: ks.map((k) => r(pmf[k])) },
-    { id: 'sim', kind: 'hist', tone: 'default', label: `simulated frequency, R = ${R}`, x: ks.map((k) => k - 0.5), y: freq.map(r) },
+    { id: 'pmf', kind: 'pmf', tone: 'signal', label: 'exact $P_n(k)$', x: ks, y: ks.map((k) => r(pmf[k])) },
+    { id: 'sim', kind: 'hist', tone: 'default', label: `simulated frequency, $R = ${R}$`, x: ks.map((k) => k - 0.5), y: freq.map(r) },
   ];
   if (normalOk) {
     const grid = Array.from({ length: 161 }, (_, i) => lo + (i * (hi - lo)) / 160);
-    series.push({ id: 'local', kind: 'line', tone: 'accent', label: 'φ((k − np)/√npq)/√npq', x: grid.map(r), y: grid.map((x) => r(phi((x - lambda) / sd) / sd)) });
+    series.push({ id: 'local', kind: 'line', tone: 'accent', label: '$\\varphi\\big((k - np)/\\sqrt{npq}\\big)/\\sqrt{npq}$', x: grid.map(r), y: grid.map((x) => r(phi((x - lambda) / sd) / sd)) });
   }
-  series.push({ id: 'poisson', kind: 'points', tone: 'muted', label: 'Poisson λᵏe^(−λ)/k!', x: ks, y: ks.map((k) => r(poissonPmf(lambda, k))) });
-  series.push({ id: 'interval', kind: 'rule', tone: 'muted', label: 'k₁ and k₂', x: [k1, k2], y: [0, 0] });
+  series.push({ id: 'poisson', kind: 'points', tone: 'muted', label: 'Poisson $\\lambda^k e^{-\\lambda}/k!$', x: ks, y: ks.map((k) => r(poissonPmf(lambda, k))) });
+  series.push({ id: 'interval', kind: 'rule', tone: 'muted', label: '$k_1$ and $k_2$', x: [k1, k2], y: [0, 0] });
   return {
-    axes: { x: 'k, number of successes', y: 'probability' },
+    axes: { x: 'number of successes $k$', y: 'probability' },
     readouts,
     series,
     notes: [
@@ -197,22 +198,22 @@ function runSampleSize(prm) {
   const table = eps === 0.01 && gamma === 0.98 && pFreq === 0.5 ? Math.ceil((2.3 / (2 * 0.01)) ** 2) : null;
   const gammas = Array.from({ length: 50 }, (_, i) => 0.5 + (i * 0.49) / 49);
   return {
-    axes: { x: 'γ, confidence', y: 'n, trials' },
+    axes: { x: 'confidence $\\gamma$', y: 'trials $n$' },
     readouts: [
-      { key: 'z', label: 'z = Φ⁻¹((1 + γ)/2)', theory: r(s.z), convention: 'Φ (CDF from −∞)' },
-      { key: 'nNormal', label: 'n from 2Φ(ε√(n/pq)) − 1 ≥ γ (formula 20)', theory: s.normal, convention: 'Φ (CDF from −∞)' },
-      { key: 'nCheb', label: 'n from Chebyshev, pq/(nε²) ≤ 1 − γ', theory: s.chebyshev, convention: 'Chebyshev' },
-      ...(table ? [{ key: 'lectureTable', label: 'L3 with the table value z = 2.3', theory: table, convention: 'lecture table (rounded z)' }] : []),
+      { key: 'z', label: '$z = \\Phi^{-1}((1 + \\gamma)/2)$', theory: r(s.z), convention: '$\\Phi$, counted from $-\\infty$' },
+      { key: 'nNormal', label: '$n$ from $2\\Phi(\\varepsilon\\sqrt{n/(pq)}) - 1 \\ge \\gamma$ (formula 20)', theory: s.normal, convention: '$\\Phi$, counted from $-\\infty$' },
+      { key: 'nCheb', label: '$n$ from Chebyshev, $pq/(n\\varepsilon^2) \\le 1 - \\gamma$', theory: s.chebyshev, convention: 'Chebyshev' },
+      ...(table ? [{ key: 'lectureTable', label: 'L3 with the table value $z = 2.3$', theory: table, convention: 'lecture table (rounded z)' }] : []),
     ],
     series: [
       { id: 'normal', kind: 'line', tone: 'signal', label: 'normal approximation', x: gammas.map(r), y: gammas.map((g) => sampleSize(eps, g, pFreq).normal) },
       { id: 'cheb', kind: 'line', tone: 'muted', label: 'Chebyshev bound', x: gammas.map(r), y: gammas.map((g) => sampleSize(eps, g, pFreq).chebyshev) },
-      { id: 'now', kind: 'rule', tone: 'accent', label: 'chosen γ', x: [gamma], y: [0] },
+      { id: 'now', kind: 'rule', tone: 'accent', label: 'chosen $\\gamma$', x: [gamma], y: [0] },
     ],
     notes: [
       'Formula (20): $P(|m/n - p| \\le \\varepsilon) \\approx 2\\Phi(\\varepsilon\\sqrt{n/(pq)}) - 1$; solved for $n$ with the exact quantile.',
       'Chebyshev needs no normal approximation, so its $n$ is always larger: here by a factor $1/((1-\\gamma) z^2)$.',
-      ...(table ? [`L3 reads $z \\approx 2.3$ from the table and gets 13 225; the exact $z_{0.99} = ${s.z.toFixed(4)}$ gives ${s.normal}.`] : []),
+      ...(table ? [`L3 reads $z \\approx 2.3$ from the table and gets 13225; the exact $z_{0.99} = ${s.z.toFixed(4)}$ gives ${s.normal}.`] : []),
     ],
   };
 }

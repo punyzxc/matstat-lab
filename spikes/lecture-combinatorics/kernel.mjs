@@ -193,17 +193,17 @@ function runUrn({ scheme, n, k, R }, seed) {
   const pSame = k === 0 ? null : repetition ? ratio(BigInt(n), BigInt(n) ** BigInt(k)) : k === 1 ? 1 : 0;
   const lectureBoxes = identicalBallsInBoxes(n, k);
   const readouts = [
-    { key: 'count', label: `Number of samples, ${URN_SCHEMES[scheme].title}`, observed: listed ? outcomes.length : null, theory: N.toString(), unit: 'samples', convention: listed ? 'observed: every sample enumerated and counted' : `more than ${LIST_UP_TO} (or none): exact count only` },
-    { key: 'cbar', label: 'Combinations with repetition $\\bar{C}_n^{\\,k} = C_{n+k-1}^{\\,k}$ (k balls from n, order ignored)', theory: binom(n + k - 1, k).toString(), unit: 'samples', convention: 'formula' },
+    { key: 'count', label: `Number of samples, ${URN_SCHEMES[scheme].title}`, observed: listed ? outcomes.length : null, theory: N.toString(), unit: 'samples', convention: listed ? 'observed: every sample enumerated and counted' : `more than ${LIST_UP_TO} or none: exact count only` },
+    { key: 'cbar', label: 'Combinations with repetition $\\bar{C}_n^{\\,k} = C_{n+k-1}^{\\,k}$ ($k$ balls from $n$, order ignored)', theory: binom(n + k - 1, k).toString(), unit: 'samples', convention: 'formula' },
     { key: 'lectureBoxes', label: 'Lecture ex. 6: $C_{n+k-1}^{\\,k-1}$ counts $n$ identical balls in $k$ boxes', theory: k === 0 ? null : lectureBoxes.toString(), unit: 'placements', convention: 'a different problem: equals $\\bar{C}_n^{\\,k}$ only when $n = k$' },
-    { key: 'same', label: 'P(all $k$ balls carry the same number), drawn one at a time', theory: r6(pSame), observed: N > 0n && k > 0 ? r6(allEqual / R) : null, band: pSame == null ? null : band(pSame, R), convention: 'exact, sequential draws' },
+    { key: 'same', label: 'Probability that all $k$ balls carry the same number, drawn one at a time', theory: r6(pSame), observed: N > 0n && k > 0 ? r6(allEqual / R) : null, band: pSame == null ? null : band(pSame, R), convention: 'exact, sequential draws' },
   ];
   if (ordered === false && repetition) {
     readouts.push({ key: 'sameNaive', label: 'The same event if all $\\bar{C}_n^{\\,k}$ samples were equally likely', theory: k === 0 ? null : r6(Number(n) / Number(binom(n + k - 1, k))), convention: 'wrong model: multisets are not equally likely' });
   }
   const series = listed
     ? [
-        { id: 'exact', kind: 'pmf', tone: 'accent', label: 'exact P(sample)', x: outcomes.map((_, j) => j), y: exact.map(({ p, q }) => r6(ratio(p, q))) },
+        { id: 'exact', kind: 'pmf', tone: 'accent', label: 'exact probability of each sample', x: outcomes.map((_, j) => j), y: exact.map(({ p, q }) => r6(ratio(p, q))) },
         { id: 'freq', kind: 'points', tone: 'muted', label: 'simulated frequency', x: outcomes.map((_, j) => j), y: hits.map((h) => r6(h / R)) },
         ...(exact.every(({ p, q }) => band(ratio(p, q), R))
           ? [{ id: 'band', kind: 'band', tone: 'muted', label: `$\\pm${BAND_Z}$ s.e.`, x: outcomes.map((_, j) => j), y: exact.map(({ p, q }) => band(ratio(p, q), R)[0]), y2: exact.map(({ p, q }) => band(ratio(p, q), R)[1]) }]
@@ -234,7 +234,7 @@ function runHyper({ N, K, r, s, R }, seed) {
   const xs = p.map((_, j) => j);
   const bands = P.map((v) => band(v, R));
   const readouts = [
-    { key: 'ps', label: `P(A_${s}) = C_${K}^{${s}} C_${N - K}^{${r - s}} / C_${N}^{${r}}`, theory: r6(P[s]), exact: fraction(p[s], q), observed: r6(freq[s] / R), band: bands[s], convention: 'exact, formula (3)' },
+    { key: 'ps', label: `$P(A_{${s}}) = C_{${K}}^{${s}}\\,C_{${N - K}}^{${r - s}} / C_{${N}}^{${r}}$`, theory: r6(P[s]), exact: fraction(p[s], q), observed: r6(freq[s] / R), band: bands[s], convention: 'exact, formula (3)' },
     { key: 'sum', label: '$\\sum_s P(A_s)$', theory: fraction(sum, q), observed: r6(freq.reduce((a, b) => a + b, 0) / R), convention: 'exact: Vandermonde, $\\sum_s C_k^s C_{n-k}^{r-s} = C_n^r$' },
     { key: 'mean', label: 'Mean red count $rk/n$', theory: r6(mean), observed: r6(freq.reduce((a, c, j) => a + c * j, 0) / R), convention: 'exact' },
     { key: 'variance', label: 'Variance $r\\frac{k}{n}(1-\\frac{k}{n})\\frac{n-r}{n-1}$', theory: r6(variance), convention: 'exact' },
@@ -264,13 +264,13 @@ function runBoxes({ balls, boxes, R }, seed) {
   const xs = p.map((_, e) => e);
   const bands = P.map((v) => band(v, R));
   const readouts = xs.map((e) => ({
-    key: `empty${e}`, label: `P(exactly ${e} empty ${e === 1 ? 'box' : 'boxes'})`, theory: r6(P[e]), exact: fraction(p[e], q), observed: r6(freq[e] / R), band: bands[e],
+    key: `empty${e}`, label: `$P(e = ${e})$, $e$ the number of empty boxes`, theory: r6(P[e]), exact: fraction(p[e], q), observed: r6(freq[e] / R), band: bands[e],
     convention: 'exact: $C_m^e\\,S(n, m-e)\\,(m-e)!/m^n$',
     ...(balls === 5 && boxes === 5 ? { lecture: LECTURE_N5[e] } : {}),
   }));
   readouts.push({ key: 'total', label: 'Placements $m^n$', theory: q.toString(), unit: 'placements', convention: 'each ball picks its box independently' });
   const series = [
-    { id: 'pmf', kind: 'pmf', tone: 'accent', label: 'exact P(e empty)', x: xs, y: P.map(r6) },
+    { id: 'pmf', kind: 'pmf', tone: 'accent', label: 'exact $P(e)$', x: xs, y: P.map(r6) },
     { id: 'freq', kind: 'points', tone: 'muted', label: 'simulated frequency', x: xs, y: freq.map((f) => r6(f / R)) },
   ];
   const bx = xs.filter((e) => bands[e]);

@@ -117,7 +117,7 @@ test('AC4: L9 examples show exact 0.9520, 0.5307, 0.7963 next to the lecture nor
     assert.equal(exact.toFixed(4), digits, `exact ex ${ex}`);
     const out = byKey(run({ example: Number(ex) }, { seed: 1 }));
     close(out.exactInt.theory, exact, 1e-12, `kernel ex ${ex}`);
-    assert.ok(out.lecture.theory.includes(String(lectureValue)), `lecture value ${lectureValue} shown`);
+    assert.equal(out.lecture_integral.theory, lectureValue, `lecture value ${lectureValue} shown`);
     assert.ok(out.integral.error > 0.005, 'the plain normal value visibly differs from the exact one');
   }
   // The L9 "defects" value is erf-based: ½(1 + erf(1)) = Φ(√2) = 0.92135.
@@ -127,7 +127,7 @@ test('AC4: L9 examples show exact 0.9520, 0.5307, 0.7963 next to the lecture nor
 test('AC5: every normal-approximation readout names its function', () => {
   for (let ex = 0; ex < EXAMPLES.length; ex++) {
     for (const r of run({ example: ex }, { seed: 3 }).readouts) {
-      if (['local', 'integral', 'integralCC'].includes(r.key)) assert.match(r.convention, /φ|Φ|erf/, r.key);
+      if (['local', 'integral', 'integralCC'].includes(r.key)) assert.match(r.convention, /\\varphi|\\Phi|erf/, r.key);
       assert.ok(r.convention, `${r.key} has a convention`);
     }
   }
