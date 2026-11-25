@@ -227,6 +227,7 @@ test('every station is deterministic and emits only finite numbers', () => {
     ...[0, 1, 2, 3, 4, 5, 6, 7].map((law) => ['moments', { law }]),
     ['moments', { law: 6, a: 0.5, b: 3 }], ['moments', { law: 7, a: 0.5, b: 0.7 }],
     ['balance', {}], ['balance', { p1: 0, p2: 0, p3: 0, p4: 0 }],
+    ...[0, 1, 2, 3].map((source) => ['cdf', { source }]), ...[0, 1, 2, 3, 4].map((map) => ['cdf', { map }]), ['cdf', { map: 4, a: 0, b: 0 }],
     ...[0, 1, 2, 3].map((phi) => ['transform', { phi }]),
     ['transform', { phi: 2, lambda: 0.2, beta: 4 }],
     ...[0, 1, 2, 3, 4].map((mode) => ['scatter', { mode }]),
@@ -398,4 +399,61 @@ test('#132 beam: the fulcrum is Σ x_i p_i, the torque about it is zero, and typ
   close(half.beam.mean, mean, 1e-9, 'rescaled law has the same centre');
   assert.equal(readout(half, 'total').observed, 0.5);
   assert.ok(half.notes.some((t) => t.includes('not 1')));
+});
+
+// #131: the random variable constructor and the live distribution function.
+test('#131 dice mapping: X(ω) on 36 outcomes stacks into the exact law', () => {
+  const sum = K.diceMapping(0);
+  assert.equal(sum.length, 36);
+  assert.equal(sum.filter((v) => v === 7).length, 6);
+  assert.deepEqual([...new Set(K.diceMapping(3))].sort(), [0, 1, 2]);
+  assert.equal(K.diceMapping(3).filter((v) => v === 2).length, 1);
+  assert.equal(K.diceMapping(4, 2, -1)[6 * 2 + 4], 2 * 3 - 5, 'row ω₁ = 3, column ω₂ = 5');
+  const res = K.run({ ...defaults('cdf'), source: 0, map: 0, x: 7, n: 3600 }, { seed: 6, station: 'cdf' });
+  const o = res.outcomes;
+  assert.deepEqual(o.support, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  close(o.pmf.reduce((a, b) => a + b, 0), 1, 1e-5, 'pmf sums to 1');
+  assert.equal(o.counts.reduce((a, b) => a + b, 0), 3600);
+  assert.equal(o.picks.length, K.FLIGHTS);
+  assert.ok(o.picks.every((k) => Number.isInteger(k) && k >= 0 && k < 36));
+  close(readout(res, 'F').theory, 21 / 36, 1e-6, 'F(7) = 21/36');
+  close(readout(res, 'F').observed, 21 / 36, 4 * Math.sqrt((21 / 36) * (15 / 36) / 3600), 'sample share');
+  assert.ok(res.formula[0].includes('\\dfrac{21}{36}'));
+});
+
+test('#131 discrete CDF: right-continuous steps with jumps p_k', () => {
+  for (const map of [0, 1, 2, 3, 4]) {
+    const res = K.run({ ...defaults('cdf'), source: 0, map, n: 200 }, { seed: 1, station: 'cdf' });
+    const { support, pmf } = res.outcomes;
+    const cdf = res.linked.series.find((s) => s.id === 'cdf'), open = res.linked.series.find((s) => s.id === 'cdf-open');
+    assert.deepEqual(cdf.x, support);
+    for (let i = 0; i < support.length; i++) {
+      close(cdf.y[i] - open.y[i], pmf[i], 2e-5, `map ${map}: jump at ${support[i]}`);
+      if (i) close(open.y[i], cdf.y[i - 1], 2e-5, `map ${map}: flat between values`);
+    }
+    close(cdf.y.at(-1), 1, 1e-9, 'F reaches 1');
+    // Between two values F does not move; at a value it already includes the jump.
+    const at = (x) => readout(K.run({ ...defaults('cdf'), source: 0, map, x, n: 10 }, { seed: 1, station: 'cdf' }), 'F').theory;
+    const v = support[Math.floor(support.length / 2)];
+    close(at(v), cdf.y[support.indexOf(v)], 2e-6, 'F(x_k) includes the jump');
+    close(at(v - 0.05), open.y[support.indexOf(v)], 2e-6, 'just left of x_k');
+  }
+});
+
+test('#131 continuous laws: the shaded area equals F(x) within quadrature tolerance', () => {
+  const exact = { 1: (x) => Math.min(1, Math.max(0, x)), 2: (x) => (x < 0 ? 0 : 1 - Math.exp(-x)), 3: (x) => K.Phi(x) };
+  for (const source of [1, 2, 3]) {
+    for (const x of [-1.5, -0.2, 0, 0.35, 1, 2.4, 5]) {
+      const res = K.run({ ...defaults('cdf'), source, x, n: 2000 }, { seed: 9, station: 'cdf' });
+      const area = readout(res, 'area');
+      close(area.theory, exact[source](x), 1e-6, `source ${source} F(${x})`);
+      close(area.observed, area.theory, 1e-5, `source ${source}: quadrature at ${x}`);
+      close(readout(res, 'F').observed, area.theory, 4 * Math.sqrt(0.25 / 2000) + 1e-9, `source ${source}: sample share at ${x}`);
+      const band = res.series.find((s) => s.id === 'area');
+      assert.equal(band.x.length, 121, 'stable length, so the area glides');
+      assert.ok(band.x.every((t) => t <= Math.max(x, res.domain.x[0]) + 1e-9), 'the band stops at x');
+      const pt = res.linked.series.find((s) => s.id === 'cdf-closed');
+      close(pt.y[0], area.theory, 1e-5, 'the linked CDF marks the same value');
+    }
+  }
 });

@@ -1115,3 +1115,90 @@ html:has(.orbital-lab) body {
   color: var(--signal);
   font-size: 12px;
 }
+
+/* #131: outcomes of two dice flying to the values of X, and the right-continuous CDF markers. */
+.outcome-flight {
+  margin: 4px 0 12px;
+}
+.outcome-flight-head {
+  margin: 0 0 6px;
+  color: #a8a8a8;
+  font: 11px var(--mono);
+}
+.outcome-flight-head b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.outcome-flight svg {
+  display: block;
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+}
+.of-face text {
+  fill: #8a8a8a;
+  font: 10px var(--mono);
+  text-anchor: middle;
+}
+.of-axis-title .svg-math-box {
+  color: #bdbdbd;
+  font-size: 12px;
+}
+.of-cell rect {
+  fill: rgb(244 244 242 / 0.03);
+  stroke: #333;
+}
+.of-cell text {
+  fill: #9a9a9a;
+  font: 10.5px var(--mono);
+  text-anchor: middle;
+}
+.of-cell[data-in] rect {
+  fill: rgb(232 228 133 / 0.14);
+  stroke: rgb(232 228 133 / 0.55);
+}
+.of-cell[data-in] text {
+  fill: var(--ink);
+}
+.of-line {
+  stroke: #555;
+}
+.of-col text {
+  fill: #8a8a8a;
+  font: 10px var(--mono);
+  text-anchor: middle;
+}
+.of-col-sample {
+  fill: rgb(244 244 242 / 0.28);
+}
+.of-col[data-in] .of-col-sample {
+  fill: rgb(232 228 133 / 0.4);
+}
+.of-col-theory {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: 1.2;
+}
+.of-bound {
+  stroke: var(--signal);
+  stroke-dasharray: 4 3;
+}
+.of-dot {
+  fill: var(--ink);
+  animation: dz-fly 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.of-dot[data-in] {
+  fill: var(--signal);
+}
+.outcome-flight svg[data-reduced] .of-dot {
+  animation: none;
+}
+.chart-series--points.chart-marker--open circle {
+  fill: #0b0b0b;
+  stroke: var(--signal);
+  stroke-width: 1.4;
+  opacity: 1;
+}
+.chart-series--points.chart-marker--dot circle {
+  stroke: none;
+}

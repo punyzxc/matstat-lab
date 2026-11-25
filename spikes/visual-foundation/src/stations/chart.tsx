@@ -139,7 +139,7 @@ export function Chart({
                 <g key={i}><line x1={sx(x)} x2={sx(x)} y1={base} y2={sy(y)} />{r > 0 && <circle cx={sx(x)} cy={sy(y)} r={r} />}</g>
               ))}</g>;
             }
-            if (s.kind === 'points') return <g key={s.id + si} className={cls}>{pts(s).map(([x, y], i) => <circle key={i} cx={sx(x)} cy={sy(y)} r={1.8} />)}</g>;
+            if (s.kind === 'points') return <g key={s.id + si} className={`${cls}${s.marker ? ` chart-marker--${s.marker}` : ''}`}>{pts(s).map(([x, y], i) => <circle key={i} cx={sx(x)} cy={sy(y)} r={s.marker ? 3.6 : 1.8} />)}</g>;
             if (s.kind === 'rule') return <g key={s.id + si} className={cls}>{s.x.filter(finite).map((x, i) => <line key={i} x1={sx(x)} x2={sx(x)} y1={T} y2={H - B} />)}</g>;
             return <path key={s.id + si} className={cls} d={s.kind === 'ecdf' ? steps(s) : poly(s)} />;
           })}

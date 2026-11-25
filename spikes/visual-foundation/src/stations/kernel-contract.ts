@@ -7,7 +7,8 @@ export type KernelMeta = { id: string; lectures: string[]; title: string; params
 export type Readout = { key: string; label: string; observed?: number | string | null; theory?: number | string | null; unit?: string; convention?: string };
 export type SeriesKind = 'pmf' | 'pdf' | 'cdf' | 'hist' | 'ecdf' | 'line' | 'points' | 'band' | 'rule';
 /** `tone`: default (observed), signal (theory / reference), muted (context), accent (critical region, highlight). */
-export type Series = { id: string; kind: SeriesKind; x: number[]; y: number[]; y2?: number[]; unit?: string; label?: string; tone?: 'default' | 'signal' | 'muted' | 'accent' };
+/** `marker` (points only): a larger filled `dot` or an `open` circle, as for the ends of the steps of a right-continuous CDF. */
+export type Series = { id: string; kind: SeriesKind; x: number[]; y: number[]; y2?: number[]; unit?: string; label?: string; tone?: 'default' | 'signal' | 'muted' | 'accent'; marker?: 'dot' | 'open' };
 /**
  * A 3D surface over a regular grid (up to ~41x41). `z[j][i]` is the theoretical density at (x[i], y[j]);
  * `zSample[j][i]` is the sample's 2D-histogram density on the same grid (cell centred at the grid node).
@@ -38,6 +39,14 @@ export type Decisions = {
  * changes it; `step` is that parameter's grid.
  */
 export type Beam = { x: number[]; p: number[]; mean: number; sampleMean: number; range: [number, number]; keys: string[]; step: number };
+/**
+ * The outcome space of two dice mapped by X (#131): `values[i]` is X(ω) for the i-th of 36 outcomes (row ω₁, column
+ * ω₂); `picks` are the outcome indices of the first experiments of this draw; `counts[k]` how many of the `n`
+ * experiments gave `support[k]`, whose exact probability is `pmf[k]`; `x` is the bound of the event {X ≤ x}.
+ */
+export type Outcomes = { values: number[]; picks: number[]; support: number[]; pmf: number[]; counts: number[]; n: number; x: number };
+/** A second chart under the main one, sharing its x axis (for example $F(x)$ under $f(x)$). */
+export type LinkedChart = { series: Series[]; axes?: { x?: string; y?: string }; domain?: { x?: [number, number]; y?: [number, number] } };
 export type KernelResult = {
   readouts: Readout[];
   series: Series[];
@@ -48,6 +57,10 @@ export type KernelResult = {
   formula?: string[];
   decisions?: Decisions;
   beam?: Beam;
+  /** Fixed axis ranges of the main chart. */
+  domain?: { x?: [number, number]; y?: [number, number] };
+  linked?: LinkedChart;
+  outcomes?: Outcomes;
 };
 export type Kernel = {
   meta: KernelMeta;
