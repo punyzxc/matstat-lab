@@ -278,6 +278,156 @@ function pearsonView(pearson, n, alpha) {
   };
 }
 
+// ---------------------------------------------------------------- #126: representativeness
+// A random sample takes every member of the population with the same chance; a biased one takes them only from a
+// region [lo, hi] (a survey in one district). The biased one is a sample of the law of ξ given lo ≤ ξ ≤ hi: its
+// mean settles at E(ξ | lo ≤ ξ ≤ hi), not at a, however large n is.
+const SUPPORT = [[-Infinity, Infinity], [1 - R3, 1 + R3], [0, Infinity]];
+/**
+ * Φ⁻¹(p) by Acklam's rational approximation (relative error below 1.2·10⁻⁹): the error curve draws tens of
+ * thousands of points, and the Newton-refined normalQuantile would cost ten times more for digits no picture shows.
+ */
+const AC = [-3.969683028665376e1, 2.209460984245205e2, -2.759285104469687e2, 1.38357751867269e2, -3.066479806614716e1, 2.506628277459239];
+const AD = [-5.447609879822406e1, 1.615858368580409e2, -1.556989798598866e2, 6.680131188771972e1, -1.328068155288572e1];
+const AE = [-7.784894002430293e-3, -3.223964580411365e-1, -2.400758277161838, -2.549732539343734, 4.374664141464968, 2.938163982698783];
+const AF = [7.784695709041462e-3, 3.224671290700398e-1, 2.445134137142996, 3.754408661907416];
+export function fastNormalQuantile(p) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  const tail = (q) => (((((AE[0] * q + AE[1]) * q + AE[2]) * q + AE[3]) * q + AE[4]) * q + AE[5]) / ((((AF[0] * q + AF[1]) * q + AF[2]) * q + AF[3]) * q + 1);
+  if (p < 0.02425) return tail(Math.sqrt(-2 * Math.log(p)));
+  if (p > 1 - 0.02425) return -tail(Math.sqrt(-2 * Math.log1p(-p)));
+  const q = p - 0.5, r = q * q;
+  return ((((((AC[0] * r + AC[1]) * r + AC[2]) * r + AC[3]) * r + AC[4]) * r + AC[5]) * q) / (((((AD[0] * r + AD[1]) * r + AD[2]) * r + AD[3]) * r + AD[4]) * r + 1);
+}
+/** F⁻¹(p) of LAWS[law]. */
+export function quantile(law, p) {
+  if (law === 0) return 1 + fastNormalQuantile(p);
+  if (law === 1) return 1 - R3 + 2 * R3 * p;
+  return -Math.log1p(-p);
+}
+/** The law of ξ given lo ≤ ξ ≤ hi: its probability, mean and variance (Simpson on the support, 4000 intervals). */
+export function truncatedMoments(law, lo, hi) {
+  const L = LAWS[law], [s0, s1] = SUPPORT[law];
+  const a = Math.max(lo, s0), b = Math.min(hi, s1);
+  const mass = b > a ? L.cdf(b) - L.cdf(a) : 0;
+  if (!(mass > 0)) return { mass: 0, mean: NaN, variance: NaN };
+  const N = 4000, h = (b - a) / N;
+  let m1 = 0, m2 = 0;
+  for (let i = 0; i <= N; i++) {
+    const x = a + i * h, w = (i === 0 || i === N ? 1 : i % 2 ? 4 : 2) * L.pdf(x);
+    m1 += w * x;
+    m2 += w * x * x;
+  }
+  m1 *= h / 3 / mass;
+  m2 *= h / 3 / mass;
+  return { mass, mean: m1, variance: m2 - m1 * m1 };
+}
+/** n draws from LAWS[law] given lo ≤ ξ ≤ hi, by the inverse transform on [F(lo), F(hi)]; `at(i)` gives the i-th uniform. */
+function drawWindow(law, n, lo, hi, at) {
+  const L = LAWS[law], f0 = Number.isFinite(lo) ? L.cdf(lo) : 0, f1 = Number.isFinite(hi) ? L.cdf(hi) : 1;
+  const x = new Array(n);
+  for (let i = 0; i < n; i++) x[i] = Math.min(hi, Math.max(lo, quantile(law, f0 + (f1 - f0) * at(i))));
+  return x;
+}
+/** The biased sample of the station: n members taken only from [lo, hi], stream 1. */
+export const biasedSample = (law, n, lo, hi, seed) => drawWindow(law, n, lo, hi, (i) => unit(seed, 1, i));
+export const ERROR_NS = [10, 20, 50, 100, 200, 500, 1000];
+/**
+ * Mean error |x̄ − a| over `reps` repeated samples at each n of ERROR_NS, for the random and the biased sampler
+ * (streams 2 and 3; sample r at size index j uses indices (j·reps + r)·1000 + i).
+ */
+export function errorCurve(law, lo, hi, reps, seed) {
+  const a = LAWS[law].mean;
+  const curve = (stream, l, h) => ERROR_NS.map((n, j) => {
+    let total = 0;
+    for (let r = 0; r < reps; r++) {
+      const base = (j * reps + r) * 1000;
+      const x = drawWindow(law, n, l, h, (i) => unit(seed, stream, base + i));
+      total += Math.abs(x.reduce((s, v) => s + v, 0) / n - a);
+    }
+    return total / reps;
+  });
+  return { ns: ERROR_NS, random: curve(2, -Infinity, Infinity), biased: curve(3, lo, hi) };
+}
+/** Histogram heights W_r/h of `sample` on the given edges (values outside count in no bar). */
+function heightsOn(sample, edges) {
+  const k = edges.length - 1, h = edges[1] - edges[0], c = new Array(k).fill(0);
+  for (const v of sample) {
+    const r = Math.min(k - 1, Math.floor((v - edges[0]) / h));
+    if (r >= 0 && v <= edges[k]) c[r]++;
+  }
+  return c.map((m) => m / sample.length / h);
+}
+
+function runRepresentative({ law = 0, n = 100, bins = 0, lo: lo0 = 1.5, hi: hi0 = 4, reps = 100 }, seed) {
+  const L = LAWS[law];
+  const lo = Math.min(lo0, hi0), hi = Math.max(lo0, hi0);
+  const T = truncatedMoments(law, lo, hi);
+  if (!(T.mass > 1e-6)) throw new Error('The region holds almost none of the population: widen it.');
+  const random = drawSample(law, n, seed), biased = biasedSample(law, n, lo, hi, seed);
+  const mr = shapeMoments(random), mb = shapeMoments(biased);
+  const k = bins > 0 ? bins : defaultBinCount(n);
+  const all = [...random, ...biased];
+  let x0 = Math.min(...all), x1 = Math.max(...all);
+  if (x1 === x0) { x0 -= 0.5; x1 += 0.5; }
+  const h = (x1 - x0) / k, edges = Array.from({ length: k + 1 }, (_, r) => (r === k ? x1 : x0 + r * h));
+  const hr = heightsOn(random, edges), hb = heightsOn(biased, edges);
+  const xs = grid([Math.min(L.range[0], x0), Math.max(L.range[1], x1)]);
+  const top = Math.max(...xs.map(L.pdf), ...hr, ...hb) * 1.05;
+  // The biased histogram as an outline over the same bars, closed down to the axis at both ends.
+  const stepX = edges.flatMap((e) => [e, e]);
+  const stepY = [0, ...hb.flatMap((v) => [v, v]), 0];
+  const E = errorCurve(law, lo, hi, reps, seed), lx = E.ns.map((v) => Math.log10(v));
+  const bias = T.mean - L.mean, sd = Math.sqrt(L.variance);
+  const f4 = (v) => fmt(v, 4), f3 = (v) => fmt(v, 3);
+  const region = `${f3(lo)} \\le \\xi \\le ${f3(hi)}`;
+  return {
+    axes: { x: '$x$', y: 'density ($W_r/h$)' },
+    domain: { y: [0, top] },
+    readouts: [
+      { key: 'meanR', label: 'Random sample: mean $\\bar{x}$', observed: mr.mean, theory: L.mean, convention: 'theory: $a = M\\xi$' },
+      { key: 'meanB', label: 'Biased sample: mean $\\bar{x}$', observed: mb.mean, theory: L.mean,
+        convention: `it settles at $M(\\xi \\mid ${region}) = ${f4(T.mean)}$ instead` },
+      { key: 's2R', label: 'Random sample: variance $s^2$', observed: mr.s2, theory: L.variance, convention: 'theory: $\\sigma^2 = D\\xi$' },
+      { key: 's2B', label: 'Biased sample: variance $s^2$', observed: mb.s2, theory: L.variance,
+        convention: `it settles at $D(\\xi \\mid ${region}) = ${f4(T.variance)}$ instead` },
+      { key: 'mass', label: 'Share of the population in the region', observed: null, theory: T.mass },
+      { key: 'errR', label: `Random: mean error $|\\bar{x} - a|$ at $n = 1000$`, observed: E.random.at(-1), theory: sd * Math.sqrt(2 / Math.PI / 1000),
+        convention: 'theory: $\\sigma\\sqrt{2/(\\pi n)}$, falls as $1/\\sqrt{n}$' },
+      { key: 'errB', label: `Biased: mean error $|\\bar{x} - a|$ at $n = 1000$`, observed: E.biased.at(-1), theory: Math.abs(bias),
+        convention: 'theory: the bias $|M(\\xi \\mid \\text{region}) - a|$, it does not fall' },
+    ],
+    series: [
+      { id: 'region', kind: 'band', tone: 'muted', label: `region of the biased sampler: $${region}$`, x: [lo, hi], y: [0, 0], y2: [top, top] },
+      { id: 'hist', kind: 'hist', tone: 'default', label: `random sample, $n = ${n}$`, x: edges.slice(0, -1), y: hr },
+      { id: 'biased', kind: 'line', tone: 'accent', label: `biased sample, $n = ${n}$`, x: stepX, y: stepY },
+      { id: 'pdf', kind: 'pdf', tone: 'signal', label: `$f(x)$ of the population, ${L.label}`, x: xs, y: xs.map(L.pdf) },
+      { id: 'a', kind: 'rule', tone: 'default', label: `$a = M\\xi = ${f4(L.mean)}$`, x: [L.mean], y: [] },
+      { id: 'meanB', kind: 'rule', tone: 'accent', label: `$\\bar{x}$ of the biased sample`, x: [mb.mean], y: [] },
+    ],
+    linked: {
+      series: [
+        { id: 'theoryR', kind: 'line', tone: 'signal', label: '$\\sigma\\sqrt{2/(\\pi n)}$', x: lx, y: E.ns.map((v) => sd * Math.sqrt(2 / Math.PI / v)) },
+        { id: 'bias', kind: 'line', tone: 'muted', label: `bias $|M(\\xi \\mid \\text{region}) - a| = ${f4(Math.abs(bias))}$`, x: [lx[0], lx.at(-1)], y: [Math.abs(bias), Math.abs(bias)] },
+        { id: 'errR', kind: 'points', tone: 'default', marker: 'dot', label: `random sampler, mean of ${reps} samples`, x: lx, y: E.random },
+        { id: 'errB', kind: 'points', tone: 'accent', marker: 'dot', label: `biased sampler, mean of ${reps} samples`, x: lx, y: E.biased },
+      ],
+      axes: { x: '$\\lg n$', y: 'mean error $|\\bar{x} - a|$' },
+      domain: { x: [0.9, 3.1] },
+    },
+    formula: [
+      `\\bar{x}_{\\text{random}} = ${f4(mr.mean)} \\approx a = ${f4(L.mean)}, \\qquad \\bar{x}_{\\text{biased}} = ${f4(mb.mean)} \\approx M(\\xi \\mid ${region}) = ${f4(T.mean)}`,
+      `s^2_{\\text{random}} = ${f4(mr.s2)} \\approx \\sigma^2 = ${f4(L.variance)}, \\qquad s^2_{\\text{biased}} = ${f4(mb.s2)} \\approx D(\\xi \\mid ${region}) = ${f4(T.variance)}`,
+    ],
+    notes: [
+      'Representativeness (L10): a sample describes the population only if every member had the same chance to enter it. The random sampler does that; the biased one takes members only from the shaded region.',
+      `The biased sample is a sample of the law of $\\xi$ given $${region}$: its histogram copies $f(x)$ cut to the region and renormalised, and its mean settles at $${f4(T.mean)}$, not at $a = ${f4(L.mean)}$.`,
+      'Lower chart: the mean error over repeated samples. The random one falls as $1/\\sqrt{n}$; the biased one stops at the bias. A larger biased sample is only more sure of the wrong answer.',
+    ],
+  };
+}
+
 // ---------------------------------------------------------------- contract
 const P = {
   law: { key: 'law', label: `True law (${lawLabel})`, min: 0, max: 2, step: 1, default: 0 },
@@ -289,7 +439,10 @@ export const stations = {
       P.law, P.n,
       { key: 'bins', label: 'Intervals $k$ ($0 = 5 \\lg n$)', min: 0, max: 40, step: 1, default: 0 },
       { key: 'digits', label: 'Round values to $d$ decimals (0 = no rounding)', min: 0, max: 3, step: 1, default: 0 },
-      { key: 'view', label: 'View (0 histogram, 1 empirical CDF)', min: 0, max: 1, step: 1, default: 0 },
+      { key: 'view', label: 'View (0 histogram, 1 empirical CDF, 2 random against biased)', min: 0, max: 2, step: 1, default: 0 },
+      { key: 'lo', label: 'Biased sampler region: left end $x_1$', min: -3, max: 7, step: 0.1, default: 1.5, when: { view: [2] } },
+      { key: 'hi', label: 'Biased sampler region: right end $x_2$', min: -3, max: 7, step: 0.1, default: 4, when: { view: [2] } },
+      { key: 'reps', label: 'Repeated samples per $n$ for the error curve', min: 20, max: 400, step: 10, default: 100, when: { view: [2] } },
     ],
   },
   fit: {
@@ -320,7 +473,8 @@ export function run(params, { seed, station } = {}) {
   return station === 'fit' ? runFit(params, seed) : runSample(params, seed);
 }
 
-function runSample({ law = 0, n = 100, bins = 0, digits = 0, view = 0 }, seed) {
+function runSample({ law = 0, n = 100, bins = 0, digits = 0, view = 0, ...rest }, seed) {
+  if (view === 2) return runRepresentative({ law, n, bins, lo: rest.lo, hi: rest.hi, reps: rest.reps }, seed);
   const L = LAWS[law];
   const sample = drawSample(law, n, seed).map((v) => roundTo(v, digits));
   const k = bins > 0 ? bins : defaultBinCount(n);

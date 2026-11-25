@@ -291,3 +291,43 @@ test('#127 the gap bar is exactly D_n long and stands at its argmax; Pearson bar
     assert.deepEqual(k0.readouts, k1.readouts);
   }
 });
+
+// #126: representativeness. A biased sampler takes members only from [lo, hi]; a random one from the whole population.
+test('#126 the conditional law: exact moments of the uniform and exponential windows, the symmetric normal one', () => {
+  const u = K.truncatedMoments(1, 0, 2); // inside U(1 − √3, 1 + √3): uniform on [0, 2]
+  assert.ok(Math.abs(u.mean - 1) < 1e-9 && Math.abs(u.variance - 1 / 3) < 1e-9);
+  assert.ok(Math.abs(u.mass - 2 / (2 * Math.sqrt(3))) < 1e-12);
+  const e = K.truncatedMoments(2, 1, 2), E1 = Math.exp(-1), E2 = Math.exp(-2);
+  assert.ok(Math.abs(e.mean - (2 * E1 - 3 * E2) / (E1 - E2)) < 1e-9, String(e.mean));
+  const nrm = K.truncatedMoments(0, 0, 2);
+  assert.ok(Math.abs(nrm.mean - 1) < 1e-9);
+  assert.equal(K.truncatedMoments(2, -3, -1).mass, 0);
+  assert.throws(() => K.run({ view: 2, law: 2, lo: -3, hi: -1 }, { seed: 1, station: 'sample' }), /almost none/);
+});
+
+test('#126 the biased sample stays in its region; the random one is the station’s own sample', () => {
+  const out = K.run({ view: 2, law: 0, n: 300, lo: 4, hi: 1.5, reps: 20 }, { seed: 8, station: 'sample' }); // bounds in either order
+  const b = K.biasedSample(0, 300, 1.5, 4, 8);
+  assert.ok(b.every((v) => v >= 1.5 && v <= 4));
+  const mean = (x) => x.reduce((s, v) => s + v, 0) / x.length;
+  assert.ok(Math.abs(out.readouts.find((r) => r.key === 'meanB').observed - mean(b)) < 1e-12);
+  assert.ok(Math.abs(out.readouts.find((r) => r.key === 'meanR').observed - mean(K.drawSample(0, 300, 8))) < 1e-12);
+  assert.deepEqual(out, K.run({ view: 2, law: 0, n: 300, lo: 4, hi: 1.5, reps: 20 }, { seed: 8, station: 'sample' }));
+  // The two histograms have the same bars, so they can be read against each other and against f(x).
+  const hist = out.series.find((s) => s.id === 'hist'), step = out.series.find((s) => s.id === 'biased');
+  assert.equal(step.x.length, 2 * hist.x.length + 2);
+  assert.equal(step.y[0], 0);
+  assert.equal(step.y.at(-1), 0);
+});
+
+test('#126 on fixtures, the random mean error falls as 1/√n while the biased one does not shrink', () => {
+  for (const law of [0, 1, 2]) {
+    const T = K.truncatedMoments(law, 1.5, 4), bias = Math.abs(T.mean - 1);
+    const E = K.errorCurve(law, 1.5, 4, 200, 2026);
+    const first = E.random[0], last = E.random.at(-1);
+    assert.ok(last < first / 5, `law ${law}: random ${first} → ${last}`); // √(1000/10) = 10
+    assert.ok(Math.abs(last - Math.sqrt(2 / Math.PI / 1000)) < 0.006, `law ${law}: σ√(2/πn) ${last}`);
+    assert.ok(E.biased.every((v) => Math.abs(v - bias) < 0.12), `law ${law}: biased ${E.biased}`);
+    assert.ok(E.biased.at(-1) > 0.95 * E.biased[0], `law ${law}: the biased error does not shrink`);
+  }
+});
