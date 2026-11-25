@@ -48,10 +48,10 @@ export const stations: readonly Station[] = [
     summary: 'Build the variation series, frequency table, histogram and empirical CDF.' },
   { kind: 'kernel', id: 'fit', name: 'Fit', orbit: 'statistics', lectures: 'L10 · L12', kernel: 'lecture-sampling-goodness-of-fit', issue: 45,
     summary: 'Test a hypothesised law with the Kolmogorov and Pearson χ² criteria.' },
-  { kind: 'legacy', id: 'estimation', name: 'Estimation', orbit: 'statistics', lectures: 'L11', module: 'estimation',
-    summary: 'Estimate the population mean and measure the uncertainty of your estimate.' },
-  { kind: 'legacy', id: 'confidence', name: 'Confidence Intervals', orbit: 'statistics', lectures: 'L11', module: 'confidence',
-    summary: 'Build a confidence interval for the mean with a known population variance.' },
+  { kind: 'kernel', id: 'estimation', name: 'Estimation', orbit: 'statistics', lectures: 'L11', kernel: 'lecture-estimation-intervals', issue: 46,
+    summary: 'Repeat the sample many times: see the bias of s² with divisor n vanish with n − 1, and compare MSE with theory.' },
+  { kind: 'kernel', id: 'confidence', name: 'Confidence Intervals', orbit: 'statistics', lectures: 'L11', kernel: 'lecture-estimation-intervals', issue: 46,
+    summary: 'Build normal, t and χ² intervals for the mean and variance; measure how often they cover the truth.' },
   { kind: 'legacy', id: 'testing', name: 'Hypothesis Testing', orbit: 'statistics', lectures: 'L12', module: 'testing',
     summary: 'Use an exact two-sided sign test to compare a sample with the model median.' },
   { kind: 'legacy', id: 'randomness', name: 'Randomness', orbit: 'statistics', lectures: 'extra', module: 'randomness',
@@ -63,5 +63,6 @@ export const stations: readonly Station[] = [
 /** Each orbit holds at most six stations: the six slots around the globe. */
 export const stationsOf = (orbit: OrbitId) => stations.filter((s) => s.orbit === orbit && !s.hidden);
 export const findStation = (id: string) => stations.find((s) => s.id === id);
+/** Prototype module ids equal station ids, so a module whose station moved to a kernel keeps its orbit. */
 export const orbitOfModule = (module: ModuleId): OrbitId =>
-  stations.find((s): s is LegacyStation => s.kind === 'legacy' && s.module === module)?.orbit ?? 'variables';
+  stations.find((s) => (s.kind === 'legacy' && s.module === module) || s.id === module)?.orbit ?? 'variables';

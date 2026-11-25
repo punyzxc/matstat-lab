@@ -7,15 +7,13 @@ test('orbital previews use independent saved samples and label unsaved sample pr
   const snapshots = {
     distribution: { settings: { distribution: 'exponential', scale: 1.25, count: 64, seed: 25 }, size: 64 },
     convergence: { settings: { distribution: 'uniform', scale: 1.5, count: 128, seed: 63 }, size: 19 },
-    estimation: { settings: { distribution: 'normal', scale: 1, count: 64, seed: 81 }, size: 33 },
-    confidence: { settings: { distribution: 'uniform', scale: 1, count: 64, seed: 31 }, size: 20 },
     testing: { settings: { distribution: 'exponential', scale: 2, count: 64, seed: 47 }, size: 29 },
   };
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(
     ({ prefix, runs }) => {
       for (const [id, run] of Object.entries(runs)) localStorage.setItem(prefix + id, JSON.stringify(run));
-      localStorage.setItem(prefix + 'last-visited', 'confidence');
+      localStorage.setItem(prefix + 'last-visited', 'testing');
     },
     { prefix: historyPrefix, runs: snapshots },
   );
@@ -45,7 +43,7 @@ test('orbital previews use independent saved samples and label unsaved sample pr
     }
   }
   await page.getByRole('link', { name: 'IV Statistics' }).click();
-  const lastOpened = windows.and(page.locator('[data-module="confidence"]'));
+  const lastOpened = windows.and(page.locator('[data-module="testing"]'));
   await expect(lastOpened).toHaveAccessibleName(/Last opened/);
   const randomness = windows.and(page.locator('[data-module="randomness"]'));
   await expect(randomness).toHaveAttribute('data-saved', 'false');
