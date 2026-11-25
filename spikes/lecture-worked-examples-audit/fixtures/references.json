@@ -1,0 +1,1992 @@
+{
+  "schema": "lecture-reference-audit/v1",
+  "source_commit": "8dfee73781e39d6946d76c07866f2a0534a3d988",
+  "provenance": "PDF page numbers are one-based; lNNN lines follow pypdf extraction with extract_sources.py. PDFs remain only on the course-lectures branch.",
+  "precision": "Decimal 80-digit finite binomial sums; exact Fraction enumeration for counts/data; binary64 erf, adaptive Simpson Student integration, half-integer gamma recurrence and 90-step bisection for quantiles. Not interval arithmetic.",
+  "lecture_coverage": {
+    "L01": "All evaluated counts, occupancy/geometric examples, numerical frequency illustrations. Generic combinatorial derivations and history are separately classified.",
+    "L02": "Fair-die numeric result and five-option worked posterior; remaining arguments are symbolic.",
+    "L03": "All evaluated examples, both normal reworkings, rough central band, typo approximation and coin size.",
+    "L04": "Duplicate geometric worked examples audited with their own page anchors.",
+    "L05": "No fixed-parameter evaluated numeric example; six parameterized distribution/CDF examples. Jump convention audited.",
+    "L06": "All evaluated tables and numeric conclusions; convolution polynomial families have independent rational grid diagnostics; other parameterized transforms classified separately.",
+    "L07": "Three-sigma comparisons audited; Cauchy and LLN examples are symbolic/no numerical answer.",
+    "L08": "No finite fixed-parameter numerical worked answer. Bernoulli/Uniform CLT examples symbolic; Poisson limit explicitly distinguished from finite probability.",
+    "L09": "All eight evaluated Chebyshev / normal-binomial worked examples.",
+    "L10": "LP/rain examples, numerical CDF and Pearson tables; invalid/incomplete data explicitly prevent a valid GOF decision.",
+    "L11": "All sample/interval/coin examples plus tail illustration; data-derived and separately given-summary intervals both recorded.",
+    "L12": "Only worked numerical test is the proportion test; a=3 and lambda=2 are hypothesis-definition examples without calculated answers."
+  },
+  "values": [
+    {
+      "id": "L01-three-digit",
+      "lecture": "L01",
+      "title": "Three-digit integers",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "page": 13,
+        "lines": "l011-l014"
+      },
+      "lecture_value": 900,
+      "recomputed": 900,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Enumeration of integers 100..999",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L01-permutations",
+      "lecture": "L01",
+      "title": "Three-volume arrangements",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "page": 13,
+        "lines": "l030-l032"
+      },
+      "lecture_value": 6,
+      "recomputed": 6,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "3!",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L01-repetition",
+      "lecture": "L01",
+      "title": "Combinations with repetition pin",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "page": 16,
+        "lines": "l001-l011"
+      },
+      "lecture_value": "C(n+k-1,k-1)",
+      "recomputed": {
+        "n": 3,
+        "k": 2,
+        "correct": 6,
+        "printed_formula": 4
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Enumerate unordered multisets for n=3,k=2",
+      "note": "Derived diagnostic input; source is a symbolic formula, not a printed numerical example.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L01-empty-boxes",
+      "lecture": "L01",
+      "title": "Five balls in five boxes: 0..4 empty boxes",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "page": 25,
+        "lines": "l022-l050",
+        "related": [
+          {
+            "page": 22,
+            "lines": "l055-l062"
+          }
+        ]
+      },
+      "lecture_value": [
+        "24/625",
+        "48/125",
+        "12/25",
+        "12/125",
+        "1/625"
+      ],
+      "recomputed": {
+        "counts": [
+          120,
+          1200,
+          1500,
+          300,
+          5
+        ],
+        "denominator": 3125,
+        "probabilities": [
+          0.0384,
+          0.384,
+          0.48,
+          0.096,
+          0.0016
+        ]
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Enumerate all 5^5 labeled assignments",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L01-sine-square",
+      "lecture": "L01",
+      "title": "Existence of sqrt(1/2-sin^2(x))",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "page": 27,
+        "lines": "l010-l014",
+        "related": [
+          {
+            "page": 26,
+            "lines": "l026-l038"
+          }
+        ]
+      },
+      "lecture_value": 0.5,
+      "recomputed": 0.5000000000000001,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Length of four arcs in [0,2*pi); sin is squared, verified in PDF",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L01-bertrand",
+      "lecture": "L01",
+      "title": "Bertrand: sampling scheme matters",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "page": 28,
+        "lines": "l001-l029",
+        "related": [
+          {
+            "page": 27,
+            "lines": "l015-l038"
+          }
+        ]
+      },
+      "lecture_value": {
+        "radius": "1/2",
+        "endpoints": "1/3",
+        "claimed_unique": 0.5
+      },
+      "recomputed": {
+        "uniform_radius_midpoint": 0.5,
+        "uniform_endpoints": 0.3333333333333333,
+        "uniform_disc_midpoint": 0.25
+      },
+      "verdict": "ambiguous",
+      "phi": "none",
+      "method": "Radius fractions; central angle fraction; disc area ratio",
+      "note": "Third scheme is an independently supplied diagnostic. No unique unqualified answer.",
+      "inputs": {},
+      "reusable": false
+    },
+    {
+      "id": "L04-sine-square",
+      "lecture": "L04",
+      "title": "Existence of sqrt(1/2-sin^2(x))",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L04.pdf",
+        "page": 2,
+        "lines": "l010-l014",
+        "related": [
+          {
+            "page": 1,
+            "lines": "l026-l038"
+          }
+        ]
+      },
+      "lecture_value": 0.5,
+      "recomputed": 0.5000000000000001,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Length of four arcs in [0,2*pi); sin is squared, verified in PDF",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L04-bertrand",
+      "lecture": "L04",
+      "title": "Bertrand: sampling scheme matters",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L04.pdf",
+        "page": 3,
+        "lines": "l001-l029",
+        "related": [
+          {
+            "page": 2,
+            "lines": "l015-l038"
+          }
+        ]
+      },
+      "lecture_value": {
+        "radius": "1/2",
+        "endpoints": "1/3",
+        "claimed_unique": 0.5
+      },
+      "recomputed": {
+        "uniform_radius_midpoint": 0.5,
+        "uniform_endpoints": 0.3333333333333333,
+        "uniform_disc_midpoint": 0.25
+      },
+      "verdict": "ambiguous",
+      "phi": "none",
+      "method": "Radius fractions; central angle fraction; disc area ratio",
+      "note": "Third scheme is an independently supplied diagnostic. No unique unqualified answer.",
+      "inputs": {},
+      "reusable": false
+    },
+    {
+      "id": "L01-observed-frequency",
+      "lecture": "L01",
+      "title": "450 heads in 1000 tosses",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "page": 29,
+        "lines": "l009-l016"
+      },
+      "lecture_value": {
+        "frequency": 0.45,
+        "deviation_percent": 5
+      },
+      "recomputed": {
+        "frequency": 0.45,
+        "absolute_deviation": 0.04999999999999999,
+        "percentage_points": 5
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Exact count ratio; 5 percentage points, not relative 5 percent",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L01-historical-frequencies",
+      "lecture": "L01",
+      "title": "Buffon and Pearson count ratios",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "page": 31,
+        "lines": "l006-l008"
+      },
+      "lecture_value": {
+        "Buffon_counts": [
+          2048,
+          4040
+        ],
+        "Pearson_counts": [
+          12012,
+          24000
+        ]
+      },
+      "recomputed": {
+        "Buffon_ratio": 0.5069306930693069,
+        "Pearson_ratio": 0.5005
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Arithmetic of reported observations; historical truth not audited",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L02-die-even",
+      "lecture": "L02",
+      "title": "Fair die: even result",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L02.pdf",
+        "page": 5,
+        "lines": "l025-l048",
+        "related": [
+          {
+            "page": 5,
+            "lines": "l049-l055"
+          },
+          {
+            "page": 6,
+            "lines": "l001-l008"
+          }
+        ]
+      },
+      "lecture_value": "1/2",
+      "recomputed": 0.5,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Enumerate six faces",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L02-guessing-student",
+      "lecture": "L02",
+      "title": "Five-option posterior",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L02.pdf",
+        "page": 7,
+        "lines": "l001-l019"
+      },
+      "lecture_value": "Penultimate (1-p)/(4p+1), final p/(4p+1)",
+      "recomputed": {
+        "formula": "(1-p)/(1+4*p)",
+        "diagnostics": {
+          "0": 1.0,
+          "1/4": 0.375,
+          "1": 0.0
+        }
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Bayes: guessing-and-correct=(1-p)/5; correct=p+(1-p)/5",
+      "note": "PDF final equality drops 1-; correct penultimate expression retained. Diagnostic p values are independently supplied.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L03-five-days",
+      "lecture": "L03",
+      "title": "Five days versus exactly five of seven",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "page": 4,
+        "lines": "l002-l008"
+      },
+      "lecture_value": 0.311,
+      "recomputed": {
+        "written_five_successive_days": 0.2373046875,
+        "solved_exactly_five_of_seven": 0.31146240234375
+      },
+      "verdict": "ambiguous",
+      "phi": "none",
+      "method": "Exact rational powers/binomial coefficient",
+      "note": "Two different events; do not silently replace the wording.",
+      "inputs": {},
+      "reusable": false
+    },
+    {
+      "id": "L03-binomial-pmf",
+      "lecture": "L03",
+      "title": "5000 trials, p=.01, exactly 50",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "page": 4,
+        "lines": "l010-l020"
+      },
+      "lecture_value": 0.0572,
+      "recomputed": 0.056608751771437434,
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "80-digit Decimal binomial recurrence",
+      "note": "",
+      "inputs": {
+        "n": 5000,
+        "p": ".01",
+        "lo": 50,
+        "hi": 50
+      },
+      "reusable": true
+    },
+    {
+      "id": "L03-binomial-cdf",
+      "lecture": "L03",
+      "title": "5000 trials, p=.01, at most 50",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "page": 4,
+        "lines": "l021-l031"
+      },
+      "lecture_value": 0.5033,
+      "recomputed": 0.5375171649663754,
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "80-digit Decimal exact-law finite sum",
+      "note": "",
+      "inputs": {
+        "n": 5000,
+        "p": ".01",
+        "lo": 0,
+        "hi": 50
+      },
+      "reusable": true
+    },
+    {
+      "id": "L03-binomial-mode",
+      "lecture": "L03",
+      "title": "Mode of Bin(5000,.01)",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "page": 4,
+        "lines": "l036-l040"
+      },
+      "lecture_value": 51,
+      "recomputed": 50,
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Compare adjacent PMF ratios; floor((n+1)p)=50",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L03-local-normal",
+      "lecture": "L03",
+      "title": "Local normal approximation to P(X=50)",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "page": 6,
+        "lines": "l043-l061",
+        "related": [
+          {
+            "page": 4,
+            "lines": "l010-l020"
+          }
+        ]
+      },
+      "lecture_value": 0.057,
+      "recomputed": {
+        "local_normal": 0.056703186644084164,
+        "exact": 0.056608751771437434
+      },
+      "verdict": "approximation",
+      "phi": "none",
+      "method": "Normal density at mean / sqrt(npq)",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L03-plain-normal-cdf",
+      "lecture": "L03",
+      "title": "Uncorrected normal approximation at mean",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "page": 8,
+        "lines": "l064-l081",
+        "related": [
+          {
+            "page": 4,
+            "lines": "l010-l031"
+          }
+        ]
+      },
+      "lecture_value": 0.5,
+      "recomputed": {
+        "plain_normal": 0.4999999999994057,
+        "continuity_corrected": 0.5283277464128073,
+        "exact": 0.5375171649663754
+      },
+      "verdict": "approximation",
+      "phi": "normal_cdf",
+      "method": "erf-based normal CDF, separately compare exact sum",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L03-central-band",
+      "lecture": "L03",
+      "title": "Rough P(40<=X<=60)",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "page": 9,
+        "lines": "l003-l008"
+      },
+      "lecture_value": ".037*20 ~= .7",
+      "recomputed": 0.865224630726237,
+      "verdict": "approximation",
+      "phi": "none",
+      "method": "80-digit exact-law finite sum; inclusive count is 21 integers",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L03-typos",
+      "lecture": "L03",
+      "title": "At least one of 100 typos on a selected page of 1000",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "page": 10,
+        "lines": "l057-l076"
+      },
+      "lecture_value": 0.0952,
+      "recomputed": {
+        "exact": 0.09520785288629095,
+        "poisson": 0.09516258196404048
+      },
+      "verdict": "approximation",
+      "phi": "none",
+      "method": "1-(999/1000)^100 and Poisson approximation",
+      "note": "Assumes independent uniform page assignment of the 100 typos; the n=100,p=.001 model is consistent with the statement.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L03-coin-size",
+      "lecture": "L03",
+      "title": "Coin frequency accuracy .01 at approximate .98 confidence",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "page": 12,
+        "lines": "l001-l014",
+        "related": [
+          {
+            "page": 11,
+            "lines": "l036-l038"
+          }
+        ]
+      },
+      "lecture_value": 13225,
+      "recomputed": {
+        "z_0_99": 2.3263478740408408,
+        "continuous_normal_n": 13529.73607763585,
+        "rounded_up_normal_n": 13530
+      },
+      "verdict": "corrected",
+      "phi": "normal_cdf",
+      "method": "Invert standard normal without tables",
+      "note": "Normal-approximation design only; this is not an exact finite-binomial minimum.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L05-indicator-jumps",
+      "lecture": "L05",
+      "title": "Strict CDF of Bernoulli indicator",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L05.pdf",
+        "page": 3,
+        "lines": "l020-l035"
+      },
+      "lecture_value": "F(x)=P(X<x), left continuous",
+      "recomputed": {
+        "diagnostic_p": 0.3,
+        "strict_at_0": 0,
+        "strict_at_1": 0.7,
+        "non_strict_at_0": 0.7,
+        "non_strict_at_1": 1
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Enumerate atoms 0 and 1; diagnostic p=.3",
+      "note": "The strict convention itself is valid; label differences at jumps explicitly.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-sigma-1",
+      "lecture": "L06",
+      "title": "1-sigma central probability and outside percent",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 14,
+        "lines": "l004-l008"
+      },
+      "lecture_value": {
+        "inside": 0.6826,
+        "outside_percent": 32
+      },
+      "recomputed": {
+        "inside": 0.6826894921370857,
+        "outside_percent": 31.731050786291426
+      },
+      "verdict": "approximation",
+      "phi": "normal_cdf",
+      "method": "erf(k/sqrt(2)); both tails included",
+      "note": "At 3 sigma the final .9973 is correct rounded; intermediate 1-.00135 and outside .7% are incorrect.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-sigma-2",
+      "lecture": "L06",
+      "title": "2-sigma central probability and outside percent",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 14,
+        "lines": "l004-l008"
+      },
+      "lecture_value": {
+        "inside": 0.9544,
+        "outside_percent": 5
+      },
+      "recomputed": {
+        "inside": 0.9544997361036417,
+        "outside_percent": 4.55002638963583
+      },
+      "verdict": "approximation",
+      "phi": "normal_cdf",
+      "method": "erf(k/sqrt(2)); both tails included",
+      "note": "At 3 sigma the final .9973 is correct rounded; intermediate 1-.00135 and outside .7% are incorrect.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-sigma-3",
+      "lecture": "L06",
+      "title": "3-sigma central probability and outside percent",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 14,
+        "lines": "l004-l008"
+      },
+      "lecture_value": {
+        "inside": 0.9973,
+        "outside_percent": 0.7
+      },
+      "recomputed": {
+        "inside": 0.9973002039367398,
+        "outside_percent": 0.2699796063260207
+      },
+      "verdict": "corrected",
+      "phi": "normal_cdf",
+      "method": "erf(k/sqrt(2)); both tails included",
+      "note": "At 3 sigma the final .9973 is correct rounded; intermediate 1-.00135 and outside .7% are incorrect.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-sigma-4",
+      "lecture": "L06",
+      "title": "4-sigma central probability and outside percent",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 14,
+        "lines": "l004-l008"
+      },
+      "lecture_value": {
+        "inside": 0.9997,
+        "outside_percent": 0.07
+      },
+      "recomputed": {
+        "inside": 0.9999366575163338,
+        "outside_percent": 0.006334248366623996
+      },
+      "verdict": "corrected",
+      "phi": "normal_cdf",
+      "method": "erf(k/sqrt(2)); both tails included",
+      "note": "At 3 sigma the final .9973 is correct rounded; intermediate 1-.00135 and outside .7% are incorrect.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-square-law",
+      "lecture": "L06",
+      "title": "Square of uniform {-1,0,1}",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 15,
+        "lines": "l001-l036"
+      },
+      "lecture_value": {
+        "P_0": "2/3",
+        "P_1": "1/3"
+      },
+      "recomputed": {
+        "P_0": 0.3333333333333333,
+        "P_1": 0.6666666666666666
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Enumerate three equally likely atoms; printed probabilities are interchanged",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-independent-product",
+      "lecture": "L06",
+      "title": "Product law needs independent copies",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 15,
+        "lines": "l028-l063"
+      },
+      "lecture_value": [
+        "2/9",
+        "5/9",
+        "2/9"
+      ],
+      "recomputed": {
+        "-1": 0.2222222222222222,
+        "0": 0.5555555555555556,
+        "1": 0.2222222222222222
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Enumerate nine pairs of independent copies",
+      "note": "xi*xi equals xi^2; the source distinction is false without two independent copies.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-independence",
+      "lecture": "L06",
+      "title": "Two-by-two independence table",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 24,
+        "lines": "l011-l040"
+      },
+      "lecture_value": {
+        "joint": [
+          [
+            "1/3",
+            "1/3"
+          ],
+          [
+            "1/6",
+            "1/6"
+          ]
+        ],
+        "independent": true
+      },
+      "recomputed": {
+        "xi_marginal": [
+          0.5,
+          0.5
+        ],
+        "eta_marginal": [
+          0.6666666666666666,
+          0.3333333333333333
+        ],
+        "joint_at_half": 0.3333333333333333,
+        "product_at_half": 0.3333333333333333
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Exact rational row/column sums and products",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-bad-matrix",
+      "lecture": "L06",
+      "title": "Intermediate p25 matrix is not a joint law",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 25,
+        "lines": "l001-l050"
+      },
+      "lecture_value": [
+        [
+          "1/2",
+          "1/2"
+        ],
+        [
+          "2/3",
+          "1/3"
+        ]
+      ],
+      "recomputed": {
+        "printed_matrix_sum": 2.0,
+        "valid_joint": [
+          [
+            0.3333333333333333,
+            0.3333333333333333
+          ],
+          [
+            0.16666666666666666,
+            0.16666666666666666
+          ]
+        ]
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Rational normalization; valid joint copied from p24, not inferred from bad matrix",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-two-failures-0_5",
+      "lecture": "L06",
+      "title": "Two uniform lifetimes: P(sum<t)",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 33,
+        "lines": "l057-l059"
+      },
+      "lecture_value": "1/8",
+      "recomputed": 0.125,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Exact truncated-power volume formula",
+      "note": "",
+      "inputs": {
+        "n": 2,
+        "t": "0.5"
+      },
+      "reusable": true
+    },
+    {
+      "id": "L06-two-failures-1",
+      "lecture": "L06",
+      "title": "Two uniform lifetimes: P(sum<t)",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 33,
+        "lines": "l057-l059"
+      },
+      "lecture_value": "1/2",
+      "recomputed": 0.5,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Exact truncated-power volume formula",
+      "note": "",
+      "inputs": {
+        "n": 2,
+        "t": "1"
+      },
+      "reusable": true
+    },
+    {
+      "id": "L06-two-failures-1_5",
+      "lecture": "L06",
+      "title": "Two uniform lifetimes: P(sum<t)",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 33,
+        "lines": "l057-l059"
+      },
+      "lecture_value": "7/8",
+      "recomputed": 0.875,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Exact truncated-power volume formula",
+      "note": "",
+      "inputs": {
+        "n": 2,
+        "t": "1.5"
+      },
+      "reusable": true
+    },
+    {
+      "id": "L06-uniform-density-2",
+      "lecture": "L06",
+      "title": "Piecewise density of sum of 2 uniforms",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 29,
+        "lines": "l001-l028",
+        "related": [
+          {
+            "page": 30,
+            "lines": "l003-l011"
+          }
+        ]
+      },
+      "lecture_value": "Piecewise polynomial density; no fixed-point numeric table",
+      "recomputed": {
+        "x": [
+          0.0,
+          0.5,
+          1.0,
+          1.5,
+          2.0
+        ],
+        "density": [
+          0.0,
+          0.5,
+          1.0,
+          0.5,
+          0.0
+        ]
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Differentiate exact simplex-volume inclusion/exclusion formula",
+      "note": "Diagnostic half-integer grid is independently supplied, not printed as a numeric table. For n=4, source middle polynomials are wrong (PDF p32); corrected branches follow exact volume differentiation.",
+      "inputs": {
+        "n": 2
+      },
+      "reusable": true
+    },
+    {
+      "id": "L06-uniform-density-3",
+      "lecture": "L06",
+      "title": "Piecewise density of sum of 3 uniforms",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 30,
+        "lines": "l012-l072"
+      },
+      "lecture_value": "Piecewise polynomial density; no fixed-point numeric table",
+      "recomputed": {
+        "x": [
+          0.0,
+          0.5,
+          1.0,
+          1.5,
+          2.0,
+          2.5,
+          3.0
+        ],
+        "density": [
+          0.0,
+          0.125,
+          0.5,
+          0.75,
+          0.5,
+          0.125,
+          0.0
+        ]
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Differentiate exact simplex-volume inclusion/exclusion formula",
+      "note": "Diagnostic half-integer grid is independently supplied, not printed as a numeric table. For n=4, source middle polynomials are wrong (PDF p32); corrected branches follow exact volume differentiation.",
+      "inputs": {
+        "n": 3
+      },
+      "reusable": true
+    },
+    {
+      "id": "L06-uniform-density-4",
+      "lecture": "L06",
+      "title": "Piecewise density of sum of 4 uniforms",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 32,
+        "lines": "l001-l046",
+        "related": [
+          {
+            "page": 31,
+            "lines": "l037-l060"
+          }
+        ]
+      },
+      "lecture_value": {
+        "on_1_to_2": "x-1-(x-3)^3/3+(2-x)^3/6",
+        "on_2_to_3": "3-x+(x-2)^3/6-(3-x)^3/6"
+      },
+      "recomputed": {
+        "x": [
+          0.0,
+          0.5,
+          1.0,
+          1.5,
+          2.0,
+          2.5,
+          3.0,
+          3.5,
+          4.0
+        ],
+        "density": [
+          0.0,
+          0.020833333333333332,
+          0.16666666666666666,
+          0.4791666666666667,
+          0.6666666666666666,
+          0.4791666666666667,
+          0.16666666666666666,
+          0.020833333333333332,
+          0.0
+        ],
+        "printed_at_1_5": 1.6458333333333333,
+        "printed_at_2_5": 0.5,
+        "correct_on_1_to_2": "x-1-(x-1)^3/3+(2-x)^3/6",
+        "correct_on_2_to_3": "3-x+(x-2)^3/6-(3-x)^3/3"
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Differentiate exact simplex-volume inclusion/exclusion formula",
+      "note": "Diagnostic half-integer grid is independently supplied, not printed as a numeric table. For n=4, source middle polynomials are wrong (PDF p32); corrected branches follow exact volume differentiation.",
+      "inputs": {
+        "n": 4
+      },
+      "reusable": true
+    },
+    {
+      "id": "L06-sum-cdf-outside",
+      "lecture": "L06",
+      "title": "Uniform-sum CDF above its support",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 33,
+        "lines": "l030-l048"
+      },
+      "lecture_value": "0 outside [0,2]",
+      "recomputed": {
+        "at_minus_1": 0.0,
+        "at_3": 1.0
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "CDF must be 1 above upper support; source piecewise case is wrong",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-lottery",
+      "lecture": "L06",
+      "title": "Lottery fixed-point mean and variance",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 37,
+        "lines": "l001-l024"
+      },
+      "lecture_value": "M=D=1, independent of player count; M+sqrt(D)=2",
+      "recomputed": [
+        {
+          "n": 1,
+          "mean": 1.0,
+          "variance": 0.0
+        },
+        {
+          "n": 2,
+          "mean": 1.0,
+          "variance": 1.0
+        },
+        {
+          "n": 3,
+          "mean": 1.0,
+          "variance": 1.0
+        },
+        {
+          "n": 4,
+          "mean": 1.0,
+          "variance": 1.0
+        },
+        {
+          "n": 5,
+          "mean": 1.0,
+          "variance": 1.0
+        },
+        {
+          "n": 6,
+          "mean": 1.0,
+          "variance": 1.0
+        },
+        {
+          "n": 7,
+          "mean": 1.0,
+          "variance": 1.0
+        }
+      ],
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Enumerate every permutation for n=1..7",
+      "note": "Mean=1 always; variance=1 only for n>=2. For n=1 variance=0. Two prizes is not a guaranteed-sufficiency statement.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L06-disc",
+      "lecture": "L06",
+      "title": "Uniform disc: covariance zero, dependent",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "page": 37,
+        "lines": "l025-l072"
+      },
+      "lecture_value": {
+        "covariance": 0,
+        "marginal_density": "2/(pi*R)"
+      },
+      "recomputed": {
+        "covariance": 0,
+        "marginal_density": "2*sqrt(R^2-x^2)/(pi*R^2), |x|<R"
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Integrate vertical chord length; xy integral zero by symmetry",
+      "note": "Independence conclusion (dependent) is correct; source marginal is incorrectly constant.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L07-chebyshev",
+      "lecture": "L07",
+      "title": "Universal three-sigma bound",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L07.pdf",
+        "page": 3,
+        "lines": "l005-l018"
+      },
+      "lecture_value": "1/9",
+      "recomputed": 0.1111111111111111,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "variance/(3*sigma)^2",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L07-normal-tail",
+      "lecture": "L07",
+      "title": "Two-sided standard normal three-sigma tail",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L07.pdf",
+        "page": 3,
+        "lines": "l019-l021"
+      },
+      "lecture_value": "<=.00135",
+      "recomputed": 0.002699796063260207,
+      "verdict": "corrected",
+      "phi": "normal_cdf",
+      "method": "Sum equal lower and upper tails",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L07-poisson-bound",
+      "lecture": "L07",
+      "title": "Poisson Chebyshev statement",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L07.pdf",
+        "page": 3,
+        "lines": "l022-l033"
+      },
+      "lecture_value": "<=1/9",
+      "recomputed": {
+        "universal_bound": 0.1111111111111111,
+        "diagnostic_lambda_1_tail": 0.01898815687615385
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Source inequality visually confirmed; independent illustrative lambda=1 chosen separately",
+      "note": "Source does not specify lambda and says <=, not >=. Module-map pin is disputed; .019 is not the tail for every Poisson law.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L08-poisson-limit",
+      "lecture": "L08",
+      "title": "Poisson sum limit and endpoint diagnostics",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L08.pdf",
+        "page": 5,
+        "lines": "l030-l044"
+      },
+      "lecture_value": "limit 1/2",
+      "recomputed": {
+        "asymptotic_limit": 0.5,
+        "finite_n_10_strict": 0.45792971447185227,
+        "finite_n_10_inclusive": 0.5830397501929855
+      },
+      "verdict": "confirmed",
+      "phi": "normal_cdf",
+      "method": "CLT: standardized Poisson(n) tends to N(0,1); direct finite sums distinguish strict and inclusive endpoints",
+      "note": "The source limit is correct. The finite-n strict/inclusive diagnostics are independently supplied; strict events sum through n-1. No fixed numerical worked answer in L8; never use .5 as exact finite-n probability.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L09-frequency-bound",
+      "lecture": "L09",
+      "title": "Bernoulli frequency, n=10000 p=.3 eps=.01",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "page": 4,
+        "lines": "l001-l020"
+      },
+      "lecture_value": 0.79,
+      "recomputed": 0.79,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Chebyshev variance of sample mean",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L09-good-parts-size",
+      "lecture": "L09",
+      "title": "Good-part proportion p=.98 eps=.02 confidence .96",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "page": 4,
+        "lines": "l023-l045"
+      },
+      "lecture_value": 1225,
+      "recomputed": 1225,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Exact rational .98*.02/(.04*.02^2); bound only",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L09-electricity",
+      "lecture": "L09",
+      "title": "Mean3000 variance2500 within500",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "page": 5,
+        "lines": "l007-l027"
+      },
+      "lecture_value": 0.99,
+      "recomputed": 0.99,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Chebyshev",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L09-average",
+      "lecture": "L09",
+      "title": "2500 independent variables, sd<=3, eps=.3",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "page": 6,
+        "lines": "l001-l045"
+      },
+      "lecture_value": 0.96,
+      "recomputed": 0.96,
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Chebyshev variance of average",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L09-length-size",
+      "lecture": "L09",
+      "title": "sd<=.04, eps=.001, confidence>.9",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "page": 6,
+        "lines": "l049-l060"
+      },
+      "lecture_value": "n>16000",
+      "recomputed": {
+        "continuous_threshold": 16000,
+        "minimum_integer": 16001
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Chebyshev strict inequality; exact rational arithmetic",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L09-defects",
+      "lecture": "L09",
+      "title": "Binomial worked probability defects",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "page": 7,
+        "lines": "l005-l030"
+      },
+      "lecture_value": 0.92135,
+      "recomputed": {
+        "exact": 0.9519727806292665,
+        "plain_normal": 0.9213503964748574,
+        "continuity_corrected": 0.9441941158508539
+      },
+      "verdict": "approximation",
+      "phi": "erf",
+      "method": "80-digit finite binomial sum, plus independently named normal approximations",
+      "note": "L9 uses erf-scaled arguments in its interval expressions; the last example also switches to the zero-origin normal integral.",
+      "inputs": {
+        "n": 50,
+        "p": ".2",
+        "lo": 6,
+        "hi": 50
+      },
+      "reusable": true
+    },
+    {
+      "id": "L09-first-grade",
+      "lecture": "L09",
+      "title": "Binomial worked probability first-grade",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "page": 7,
+        "lines": "l031-l042"
+      },
+      "lecture_value": 0.5,
+      "recomputed": {
+        "exact": 0.530659296918529,
+        "plain_normal": 0.49999254883210376,
+        "continuity_corrected": 0.5287608507235722
+      },
+      "verdict": "approximation",
+      "phi": "erf",
+      "method": "80-digit finite binomial sum, plus independently named normal approximations",
+      "note": "L9 uses erf-scaled arguments in its interval expressions; the last example also switches to the zero-origin normal integral.",
+      "inputs": {
+        "n": 200,
+        "p": ".6",
+        "lo": 120,
+        "hi": 150
+      },
+      "reusable": true
+    },
+    {
+      "id": "L09-guarantee",
+      "lecture": "L09",
+      "title": "Binomial worked probability guarantee",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "page": 8,
+        "lines": "l001-l011",
+        "related": [
+          {
+            "page": 7,
+            "lines": "l043-l049"
+          }
+        ]
+      },
+      "lecture_value": 0.7888,
+      "recomputed": {
+        "exact": 0.7962661895266309,
+        "plain_normal": 0.7887004526662893,
+        "continuity_corrected": 0.7962120525255276
+      },
+      "verdict": "approximation",
+      "phi": "mixed",
+      "method": "80-digit finite binomial sum, plus independently named normal approximations",
+      "note": "L9 uses erf-scaled arguments in its interval expressions; the last example also switches to the zero-origin normal integral.",
+      "inputs": {
+        "n": 15000,
+        "p": ".04",
+        "lo": 570,
+        "hi": 630
+      },
+      "reusable": true
+    },
+    {
+      "id": "L10-linear-program",
+      "lecture": "L10",
+      "title": "Linear program introduction",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "page": 2,
+        "lines": "l015-l039"
+      },
+      "lecture_value": {
+        "y1": 1,
+        "y2": 0.5
+      },
+      "recomputed": {
+        "y1": 1.0,
+        "y2": 0.5,
+        "objective": 9.0
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Enumerate all feasible exact-rational boundary intersections",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L10-rain-ratios",
+      "lecture": "L10",
+      "title": "Monthly rainy-day ratios",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "page": 2,
+        "lines": "l040-l053"
+      },
+      "lecture_value": [
+        "8/31",
+        "13/30",
+        "21/61"
+      ],
+      "recomputed": {
+        "august": 0.25806451612903225,
+        "september": 0.43333333333333335,
+        "pooled": 0.3442622950819672
+      },
+      "verdict": "confirmed",
+      "phi": "none",
+      "method": "Count ratios",
+      "note": "Whether pooling estimates the desired target depends on sampling weights and target; heterogeneous months do not by themselves make the pooled-day ratio arithmetically invalid.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L10-ecdf-jumps",
+      "lecture": "L10",
+      "title": "ECDF count <=x versus left-continuity claim",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "page": 7,
+        "lines": "l006-l052"
+      },
+      "lecture_value": "count <=x; left-continuous",
+      "recomputed": {
+        "diagnostic_sample": [
+          1,
+          1,
+          2
+        ],
+        "at_1_strict": 0,
+        "at_1_non_strict": 0.6666666666666666,
+        "non_strict_continuity": "right"
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Count atoms on a diagnostic tied sample",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L10-exponential-table",
+      "lecture": "L10",
+      "title": "F(t)=1-exp(-.03t), table12",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "page": 9,
+        "lines": "l001-l025"
+      },
+      "lecture_value": [
+        139,
+        259,
+        362,
+        451,
+        528,
+        593,
+        650,
+        700,
+        741,
+        777,
+        808,
+        835,
+        858,
+        878,
+        895,
+        909
+      ],
+      "recomputed": {
+        "times": [
+          5,
+          10,
+          15,
+          20,
+          25,
+          30,
+          35,
+          40,
+          45,
+          50,
+          55,
+          60,
+          65,
+          70,
+          75,
+          80
+        ],
+        "cdf": [
+          0.1392920235749422,
+          0.2591817793182821,
+          0.36237184837822667,
+          0.4511883639059735,
+          0.5276334472589853,
+          0.5934303402594008,
+          0.6500622508888447,
+          0.6988057880877978,
+          0.7407597393541084,
+          0.7768698398515702,
+          0.8079500913792459,
+          0.8347011117784134,
+          0.8577259284134864,
+          0.8775435717470181,
+          0.8946007754381357,
+          0.9092820467105875
+        ],
+        "rounded_1000_cdf": [
+          139,
+          259,
+          362,
+          451,
+          528,
+          593,
+          650,
+          699,
+          741,
+          777,
+          808,
+          835,
+          858,
+          878,
+          895,
+          909
+        ]
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Direct exponential evaluation",
+      "note": "Source header 10^-3 F is also scaled backwards; intended numbers are 1000 F. Some entries differ from correct rounding.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L10-kolmogorov-data",
+      "lecture": "L10",
+      "title": "Kolmogorov example with invalid empirical CDF",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "page": 10,
+        "lines": "l001-l008",
+        "related": [
+          {
+            "page": 9,
+            "lines": "l001-l025"
+          }
+        ]
+      },
+      "lecture_value": {
+        "D": 0.088,
+        "z": 0.352,
+        "p_value": 0.999
+      },
+      "recomputed": {
+        "grid_max_absolute_difference": 0.08795009137924592,
+        "at_time": 55,
+        "sqrt_16_times_grid_max": 0.3518003655169837,
+        "decreases": [
+          55
+        ],
+        "compatible_with_n16_empirical_steps": false
+      },
+      "verdict": "ambiguous",
+      "phi": "none",
+      "method": "Recompute every grid difference; validate monotonicity and step multiples",
+      "note": "Grid maximum is not a valid continuous sup statistic; table is not an ECDF of 16 raw observations. No valid KS p-value or accept decision can be recovered.",
+      "inputs": {},
+      "reusable": false
+    },
+    {
+      "id": "L10-pearson-data",
+      "lecture": "L10",
+      "title": "Pearson tables and invalid frequency input",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "page": 12,
+        "lines": "l001-l032",
+        "related": [
+          {
+            "page": 11,
+            "lines": "l035-l045"
+          },
+          {
+            "page": 13,
+            "lines": "l001-l016"
+          }
+        ]
+      },
+      "lecture_value": {
+        "mean": 23.3,
+        "sum_contributions": 0.0829,
+        "chi_square": 1.326
+      },
+      "recomputed": {
+        "sum_printed_weights": 0.91,
+        "weighted_midpoint_sum": 23.285,
+        "sum_printed_contributions": 0.06321,
+        "16_times_printed_contributions": 1.01136,
+        "16_times_0829": 1.3264,
+        "diagnostic_max_expected_count_for_width5_bins_given_mean_23_3": 3.0900743264887804,
+        "weights_times_16_all_integer": false
+      },
+      "verdict": "ambiguous",
+      "phi": "none",
+      "method": "Exact weight/midpoint sums; separately add the 15 printed contributions",
+      "note": "Weights sum below 1, tail omitted, one theory column missing, theory entries resemble CDFs instead of bin masses. Do not silently normalize or invent the missing observations.",
+      "inputs": {},
+      "reusable": false
+    },
+    {
+      "id": "L10-pearson-df",
+      "lecture": "L10",
+      "title": "Worked exponential df and 95% critical value",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "page": 13,
+        "lines": "l001-l016",
+        "related": [
+          {
+            "page": 11,
+            "lines": "l019-l038"
+          }
+        ]
+      },
+      "lecture_value": {
+        "df": 14,
+        "critical": 23.7
+      },
+      "recomputed": {
+        "df": 14,
+        "critical": 23.684791304840566
+      },
+      "verdict": "approximation",
+      "phi": "none",
+      "method": "k-1-r, k=16 r=1; invert integer gamma CDF",
+      "note": "The source already gives df14. The module-map pin incorrectly presents L10 as omitting parameter fitting.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L11-sample22",
+      "lecture": "L11",
+      "title": "22 listed measurements",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 5,
+        "lines": "l019-l038"
+      },
+      "lecture_value": {
+        "mean": 3.0318,
+        "variance_n_minus_1": 0.0303
+      },
+      "recomputed": {
+        "n": 22.0,
+        "sum": 66.7,
+        "sum_squares": 202.81,
+        "mean": 3.0318181818181817,
+        "variance_n": 0.02671487603305785,
+        "variance_n_minus_1": 0.027987012987012987
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Exact rational sums before conversion",
+      "note": "",
+      "inputs": {
+        "sample": [
+          "3.1",
+          "3.3",
+          "2.9",
+          "3.0",
+          "3.1",
+          "3.2",
+          "2.8",
+          "2.7",
+          "3.1",
+          "3.2",
+          "2.9",
+          "3.0",
+          "2.9",
+          "3.1",
+          "2.8",
+          "2.9",
+          "3.2",
+          "3.3",
+          "2.9",
+          "3.1",
+          "3.2",
+          "3.0"
+        ]
+      },
+      "reusable": true
+    },
+    {
+      "id": "L11-approximate-mean",
+      "lecture": "L11",
+      "title": "Approximate mean interval from listed observations",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 6,
+        "lines": "l001-l016",
+        "related": [
+          {
+            "page": 5,
+            "lines": "l019-l038"
+          }
+        ]
+      },
+      "lecture_value": [
+        2.9593,
+        3.1043
+      ],
+      "recomputed": {
+        "z": 1.9599639845400536,
+        "se": 0.035667028947686905,
+        "interval": [
+          2.961912089645168,
+          3.1017242739911954
+        ]
+      },
+      "verdict": "corrected",
+      "phi": "normal_cdf",
+      "method": "Rational sample variance then normal quantile",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L11-approximate-variance",
+      "lecture": "L11",
+      "title": "Approximate variance interval from listed observations",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 6,
+        "lines": "l001-l016",
+        "related": [
+          {
+            "page": 5,
+            "lines": "l019-l038"
+          }
+        ]
+      },
+      "lecture_value": [
+        0.0119,
+        0.0487
+      ],
+      "recomputed": {
+        "se_variance": 0.008636979718657352,
+        "interval": [
+          0.011058843803241694,
+          0.04491518217078428
+        ]
+      },
+      "verdict": "corrected",
+      "phi": "normal_cdf",
+      "method": "Normal approximation s^2 +/- z*s^2*sqrt(2/(n-1)); model conditional",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L11-student-data",
+      "lecture": "L11",
+      "title": "Student interval from listed observations",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 10,
+        "lines": "l013-l029",
+        "related": [
+          {
+            "page": 5,
+            "lines": "l019-l038"
+          }
+        ]
+      },
+      "lecture_value": [
+        2.9528,
+        3.1108
+      ],
+      "recomputed": {
+        "t_975_21": 2.079613844727689,
+        "interval": [
+          2.957644534618269,
+          3.1059918290180946
+        ]
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Integrate Student density and invert; standard error s/sqrt(22)",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L11-chi-data",
+      "lecture": "L11",
+      "title": "Variance interval from listed observations",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 10,
+        "lines": "l030-l037",
+        "related": [
+          {
+            "page": 5,
+            "lines": "l019-l038"
+          }
+        ]
+      },
+      "lecture_value": [
+        0.017,
+        0.064
+      ],
+      "recomputed": {
+        "chi2_025_21": 10.282897782522891,
+        "chi2_975_21": 35.478875905727236,
+        "interval": [
+          0.016565555072515642,
+          0.057155802299833317
+        ]
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Half-integer gamma recurrence and bisection; divide sum of squares by reversed quantiles",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L11-student-given",
+      "lecture": "L11",
+      "title": "Student interval if p10 stated s^2=.0303 is taken as separate input",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 10,
+        "lines": "l013-l029"
+      },
+      "lecture_value": [
+        2.9528,
+        3.1108
+      ],
+      "recomputed": {
+        "interval": [
+          2.9546221503696444,
+          3.1089778496303557
+        ],
+        "printed_uses_sqrt_00303_over_21": true
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Use exactly the p10 given summary, not the earlier sample; correct denominator is n=22",
+      "note": "Separates wrong variance/data from the additional n versus n-1 standard-error substitution.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L11-chi-given",
+      "lecture": "L11",
+      "title": "Variance interval if p10 stated s^2=.0303 is separate input",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 10,
+        "lines": "l030-l037"
+      },
+      "lecture_value": [
+        0.017,
+        0.064
+      ],
+      "recomputed": [
+        0.017934615563659505,
+        0.06187944424396338
+      ],
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Use given variance but independently recompute df21 quantiles",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L11-normal-tail-196",
+      "lecture": "L11",
+      "title": "Each normal tail beyond +/-1.96",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 12,
+        "lines": "l023-l025"
+      },
+      "lecture_value": 0.025,
+      "recomputed": 0.024997895148220373,
+      "verdict": "approximation",
+      "phi": "normal_cdf",
+      "method": "erf-based lower normal tail",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L11-homogeneity",
+      "lecture": "L11",
+      "title": "Two coin samples, n=1000 inferred from denominator",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 14,
+        "lines": "l001-l015"
+      },
+      "lecture_value": -0.447,
+      "recomputed": {
+        "pooled": 0.485,
+        "z": -0.4474149775610241
+      },
+      "verdict": "approximation",
+      "phi": "none",
+      "method": "Pooled two-proportion z statistic",
+      "note": "Prose leaves n symbolic; the displayed .001+.001 reciprocals imply n1=n2=1000.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L11-coin-null",
+      "lecture": "L11",
+      "title": "First coin sample versus p0=.5",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "page": 14,
+        "lines": "l016-l021"
+      },
+      "lecture_value": -1.26,
+      "recomputed": {
+        "correct_z": -1.2649110640673529,
+        "printed_numerator_z": -0.6324555320336764
+      },
+      "verdict": "corrected",
+      "phi": "none",
+      "method": "Compute both the printed numerator and the intended p-hat minus p0",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L12-proportion-test",
+      "lecture": "L12",
+      "title": "Right-tailed proportion test",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L12.pdf",
+        "page": 4,
+        "lines": "l013-l025",
+        "related": [
+          {
+            "page": 3,
+            "lines": "l033-l046"
+          }
+        ]
+      },
+      "lecture_value": {
+        "U": 0.471,
+        "critical": 2.33,
+        "Phi0_at_critical": 0.49,
+        "decision": "accept"
+      },
+      "recomputed": {
+        "U": 0.4714045207910314,
+        "normal_critical": 2.3263478740408408,
+        "Phi0_at_critical": 0.49,
+        "decision": "do not reject at alpha .01",
+        "exact_binomial_upper_p": 0.3838769922757231
+      },
+      "verdict": "approximation",
+      "phi": "zero_integral",
+      "method": "Direct z statistic; invert normal CDF; optional exact upper-tail diagnostic",
+      "note": "Normal approximation, not an exact Normal null. Do not interpret non-rejection as probability .99 that H0 is true.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L12-phi-origins",
+      "lecture": "L12",
+      "title": "Zero-origin integral versus normal CDF",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L12.pdf",
+        "page": 3,
+        "lines": "l033-l046"
+      },
+      "lecture_value": {
+        "Phi0_at_0": 0,
+        "normal_CDF_at_0": 0.5
+      },
+      "recomputed": {
+        "Phi0_at_0": 0.0,
+        "normal_CDF_at_0": 0.5
+      },
+      "verdict": "confirmed",
+      "phi": "mixed",
+      "method": "Symmetry and erf(0)=0",
+      "note": "",
+      "inputs": {},
+      "reusable": true
+    }
+  ]
+}

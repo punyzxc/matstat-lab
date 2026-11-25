@@ -1,0 +1,95 @@
+{
+  "source": "docs/research/lecture-module-map.md at 1f4187f2db7e66c8397cc8f5d9a192a59dc84cda, Correctness pins",
+  "pins": [
+    {
+      "pin": "Bertrand paradox",
+      "verdict": "confirmed",
+      "fixture_ids": "L01-bertrand, L04-bertrand",
+      "evidence": "No unqualified unique answer; three specified schemes give 1/2, 1/3, 1/4."
+    },
+    {
+      "pin": "L1 combinations with repetition",
+      "verdict": "confirmed",
+      "fixture_ids": "L01-repetition",
+      "evidence": "Choosing k from n types gives C(n+k-1,k); source argument instead counts allocation of n objects among k boxes."
+    },
+    {
+      "pin": "L3 five days / seven trials",
+      "verdict": "confirmed",
+      "fixture_ids": "L03-five-days",
+      "evidence": "Wording and solved event differ; retain both answers and mark the event ambiguous."
+    },
+    {
+      "pin": "L3 at most 50 defects",
+      "verdict": "confirmed",
+      "fixture_ids": "L03-binomial-cdf",
+      "evidence": "Exact .537517164966; printed .5033 is incorrect. Plain normal .5 is a separate approximation."
+    },
+    {
+      "pin": "L3 coin sample size",
+      "verdict": "confirmed with scope",
+      "fixture_ids": "L03-coin-size",
+      "evidence": "Normal design gives continuous 13529.7361, ceiling 13530. This does not prove an exact finite-binomial minimum."
+    },
+    {
+      "pin": "Phi conventions",
+      "verdict": "confirmed with detail",
+      "fixture_ids": "L03-plain-normal-cdf, L06-sigma-3, L09-defects, L09-guarantee, L12-proportion-test",
+      "evidence": "CDF from -infinity, integral from zero, and erf all appear. L9 last example switches conventions within the calculation."
+    },
+    {
+      "pin": "L6 three-sigma arithmetic",
+      "verdict": "confirmed",
+      "fixture_ids": "L06-sigma-3, L06-sigma-4",
+      "evidence": "Both tails total .002699796. Also correct the percent row and four-sigma probability."
+    },
+    {
+      "pin": "L7 Chebyshev comparison",
+      "verdict": "partly disputed",
+      "fixture_ids": "L07-normal-tail, L07-poisson-bound",
+      "evidence": "Normal .00135 is wrong for a two-sided tail. BUT original PDF says Poisson <=1/9, already correct. No Poisson parameter is specified; the map's >= sign and universal .019 implication are unsupported."
+    },
+    {
+      "pin": "L5 versus L10 ECDF",
+      "verdict": "confirmed",
+      "fixture_ids": "L05-indicator-jumps, L10-ecdf-jumps",
+      "evidence": "Strict left-continuous convention is valid; L10 counts <= yet calls its function left-continuous."
+    },
+    {
+      "pin": "L10 Pearson df",
+      "verdict": "partly disputed",
+      "fixture_ids": "L10-pearson-df, L10-pearson-data",
+      "evidence": "Source explicitly includes fitted-parameter adjustments and uses df=16-2=14 in its example. Actual problems are invalid/incomplete frequencies, omitted tail, wrong expected probabilities and sparse counts."
+    },
+    {
+      "pin": "L11 coin numerator",
+      "verdict": "confirmed",
+      "fixture_ids": "L11-coin-null",
+      "evidence": "Printed (.480-.490) does not produce -1.26; (.480-.5) does."
+    },
+    {
+      "pin": "L11 22-observation variance",
+      "verdict": "confirmed",
+      "fixture_ids": "L11-sample22",
+      "evidence": "Exact sums 66.7 and 202.81 give corrected variance .027987012987, not .0303."
+    },
+    {
+      "pin": "L11 t interval",
+      "verdict": "confirmed with extra error",
+      "fixture_ids": "L11-student-data, L11-student-given",
+      "evidence": "Data-derived interval [2.95764453,3.10599183]. Source p10 additionally substitutes sqrt(.0303/21) instead of sqrt(.0303/22)."
+    },
+    {
+      "pin": "L11 chi-square variance interval",
+      "verdict": "confirmed",
+      "fixture_ids": "L11-chi-data, L11-chi-given",
+      "evidence": "Recompute quantiles df21: 10.2828978 and 35.4788759. Distinguish raw-data and given-summary versions."
+    },
+    {
+      "pin": "L9 approximate answers",
+      "verdict": "confirmed as approximations",
+      "fixture_ids": "L09-defects, L09-first-grade, L09-guarantee",
+      "evidence": "Exact inclusive binomial probabilities differ from the printed normal approximations; both are published and named."
+    }
+  ]
+}
