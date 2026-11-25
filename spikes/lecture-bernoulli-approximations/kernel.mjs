@@ -123,6 +123,32 @@ export function drawCounts(law, R, seed, stream = 1) {
   return out;
 }
 
+// ---------------------------------------------------------------- trials machine (#115)
+export const MACHINE_ROWS = 18;
+export const MACHINE_CELLS = 120;
+/**
+ * The rows of the trials machine: the first MACHINE_ROWS series, each as its count k and its n trials. Given k, the
+ * places of the k successes are uniform among the n trials (stream 3, Floyd's sampling), which is exactly the law of a
+ * Bernoulli row conditioned on its count. Long rows are folded into at most MACHINE_CELLS cells holding the share of
+ * successes in each.
+ */
+export function machineRows(counts, n, seed, rows = MACHINE_ROWS) {
+  const cells = Math.min(n, MACHINE_CELLS);
+  const out = [];
+  for (let r = 0; r < Math.min(rows, counts.length); r++) {
+    const k = counts[r];
+    const chosen = new Set();
+    for (let j = n - k; j < n; j++) {
+      const t = Math.floor(uni(seed, 3 + 2 * r, j) * (j + 1));
+      chosen.add(chosen.has(t) ? j : t);
+    }
+    const share = new Array(cells).fill(0);
+    for (const pos of chosen) share[Math.floor((pos * cells) / n)] += cells / n;
+    out.push({ k, cells: share.map((v) => Number(v.toFixed(4))) });
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------- stations
 const VIEW = { key: 'view', label: 'Show (0 the law and its approximations, 1 how many trials pin the frequency)', min: 0, max: 1, step: 1, default: 0 };
 const params = [
@@ -218,6 +244,7 @@ function runLaw({ n, p, k, lo, hi, R }, seed) {
     axes: { x: 'number of successes $k$', y: 'probability' },
     formula,
     notes,
+    machine: { n, p, rows: machineRows(counts, n, seed), window: [a, b], exact: ks.map((j) => r6(law[j])) },
   };
 }
 
