@@ -5,7 +5,7 @@ test('replays a seed and provides keyboard-accessible ASCII data', async ({ page
   await page.goto('/#module/distribution');
   await expect(page.getByRole('heading', { name: 'Distribution Explorer', exact: true })).toBeVisible();
   const firstMean = await page.getByTestId('sample-mean').textContent();
-  await page.getByRole('button', { name: 'Run simulation' }).click();
+  await page.getByRole('button', { name: 'Start a fresh experiment' }).click();
   await expect(page.getByRole('status')).toHaveText('512 observations complete');
   await expect(page.getByTestId('sample-mean')).toHaveText(firstMean);
   await page.getByRole('tab', { name: 'Histogram' }).focus();
@@ -23,8 +23,7 @@ test('updates model settings, exports data and fits a narrow viewport', async ({
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#module/distribution');
   await page.getByLabel('Distribution', { exact: true }).selectOption('exponential');
-  await expect(page.getByText('Parameters changed')).toBeVisible();
-  await page.getByRole('button', { name: 'Run simulation' }).click();
+  // The change runs by itself.
   await expect(page.locator('.plot-model')).toContainText('Exponential distribution');
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export CSV' }).click();
@@ -34,19 +33,34 @@ test('updates model settings, exports data and fits a narrow viewport', async ({
   await expect(page.getByRole('button', { name: 'Projector' })).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('pause holds a partial sample and resume completes the same run', async ({ page }) => {
+test('the experiment plays by itself; Stop holds a partial sample and Play completes the same run', async ({ page }) => {
   await page.clock.install();
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/#module/distribution');
-  await page.getByRole('button', { name: 'Run simulation' }).click();
   await page.clock.runFor(215);
-  await page.getByRole('button', { name: 'Pause simulation' }).click();
+  await page.getByRole('button', { name: 'Stop the experiment' }).click();
   const progress = page.getByRole('progressbar', { name: 'Simulation progress' });
-  const partial = await progress.getAttribute('value');
+  const partial = await progress.getAttribute('aria-valuenow');
   expect(Number(partial)).toBeGreaterThan(0);
-  expect(Number(partial)).toBeLessThan(512);
+  expect(Number(partial)).toBeLessThan(100);
   await page.clock.runFor(1000);
-  await expect(progress).toHaveAttribute('value', partial);
-  await page.getByRole('button', { name: 'Resume simulation' }).click();
+  await expect(progress).toHaveAttribute('aria-valuenow', partial);
+  await expect(page.getByRole('status')).toHaveText('Simulation paused');
+  await page.getByRole('button', { name: 'Play the experiment' }).click();
   await page.clock.runFor(1000);
   await expect(page.getByRole('status')).toHaveText('512 observations complete');
+});
+
+test('typed values: a sample size typed from the keyboard is clamped, snapped and drawn at once', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#module/distribution');
+  const typed = page.getByLabel('Sample size, typed value');
+  await typed.fill('1 000');
+  await typed.press('Enter');
+  await expect(page.getByLabel('Sample size', { exact: true })).toHaveValue('1024');
+  await expect(page.getByRole('status')).toHaveText('1,024 observations complete');
+  await typed.fill('99999');
+  await typed.press('Enter');
+  await expect(page.getByText(/Kept within 64 … 2/)).toBeVisible();
+  await expect(page.getByLabel('Sample size', { exact: true })).toHaveValue('2048');
 });

@@ -8,7 +8,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { MotionConfig, motion } from 'motion/react';
 import {
   Activity, ArrowDownToLine, ChevronDown, CircleHelp,
-  Maximize, Minimize, Pause, Play, RotateCcw, SlidersHorizontal,
+  Maximize, Minimize, SlidersHorizontal,
 } from 'lucide-react';
 import { Observatory, SampleRecord } from './observatory';
 import { MethodPreview } from './method-preview';
@@ -37,6 +37,7 @@ export function legacySettings(base: RunSettings, seed: number | null, params: R
 }
 const pinned = (route: Route) => route.seed != null || ['n', 'scale', 'dist'].some((k) => k in route.params);
 import { Button, Panel, PanelHeading, Slider, Stat } from './ui.tsx';
+import { AutoplayBar, useAutoplayKeys, usePlayback, type Playback } from './stations/autoplay';
 
 type Phase = 'running' | 'paused' | 'complete';
 type Run = { settings: RunSettings; all: number[]; shown: number; phase: Phase; record: boolean };
@@ -55,17 +56,17 @@ const guide = {
 
 function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete: (value: RunSettings) => void }) {
   const reduced = useStationReducedMotion();
-  const [run, setRun] = useState(() => newRun(settings, true));
+  // The experiment plays by itself: the sample accumulates on open and again after every change.
+  const [run, setRun] = useState(() => newRun(settings, reduced === true));
   const [draft, setDraft] = useState(settings);
   const [seedText, setSeedText] = useState(String(settings.seed));
   const [projector, setProjector] = useState(false);
   const [theory, setTheory] = useState(true);
   const [mode, setMode] = useState<(typeof modes)[number]>('Histogram');
   const [exported, setExported] = useState(false);
+  const pace = usePlayback();
   const validSeed = /^\d{1,10}$/.test(seedText) && Number(seedText) <= 4294967295;
   const busy = run.phase === 'running';
-  const draftChanged = draft.distribution !== run.settings.distribution || draft.scale !== run.settings.scale ||
-    draft.count !== run.settings.count || Number(seedText) !== run.settings.seed;
   const sample = useMemo(() => run.all.slice(0, run.shown), [run.all, run.shown]);
   const model = sources[run.settings.distribution];
   const domain = model.domain(run.settings.scale);
@@ -87,9 +88,21 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
         const shown = Math.min(current.all.length, current.shown + Math.ceil(current.all.length / 19));
         return { ...current, shown, phase: shown === current.all.length ? 'complete' : 'running' };
       });
-    }, 43);
+    }, Math.round(43 / pace.speed));
     return () => clearInterval(timer);
-  }, [busy]);
+  }, [busy, pace.speed]);
+
+  // Every parameter change starts a new run at once; no Run button.
+  useEffect(() => {
+    if (!validSeed) return;
+    const next = { ...draft, seed: Number(seedText) };
+    const same = next.distribution === run.settings.distribution && next.scale === run.settings.scale &&
+      next.count === run.settings.count && next.seed === run.settings.seed;
+    if (same) return;
+    const t = window.setTimeout(() => setRun(newRun(next, reduced === true, true)), 160);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, seedText, validSeed]);
 
   useEffect(() => {
     if (!exported) return;
@@ -97,21 +110,24 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
     return () => clearTimeout(timer);
   }, [exported]);
 
-  function action() {
-    if (run.phase === 'running') {
-      setRun(current => ({ ...current, phase: 'paused' }));
-    } else if (run.phase === 'paused') {
-      setRun(current => ({ ...current, phase: 'running' }));
-    } else if (validSeed) {
-      setRun(newRun({ ...draft, seed: Number(seedText) }, reduced === true, true));
-    }
-  }
-
-  function reset() {
-    setDraft(initialSettings);
-    setSeedText(String(initialSettings.seed));
-    setRun(newRun(initialSettings, true, true));
-  }
+  /** A new sample from the next seed. */
+  const nextDraw = useCallback(() => {
+    const seed = (run.settings.seed + 1) >>> 0;
+    setSeedText(String(seed));
+    setRun(newRun({ ...run.settings, seed }, reduced === true, true));
+  }, [run.settings, reduced]);
+  const playback: Playback = {
+    ...pace,
+    playing: busy,
+    setPlaying: (v) => {
+      const next = typeof v === 'function' ? v(busy) : v;
+      if (next === busy) return;
+      if (!next) setRun(current => ({ ...current, phase: current.phase === 'running' ? 'paused' : current.phase }));
+      else if (run.phase === 'paused') setRun(current => ({ ...current, phase: 'running' }));
+      else nextDraw();
+    },
+  };
+  useAutoplayKeys(() => playback.setPlaying(p => !p), nextDraw);
 
   function download() {
     const { distribution, scale, seed } = run.settings;
@@ -126,8 +142,7 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
     setExported(true);
   }
 
-  const status = busy ? 'Running simulation' : run.phase === 'paused' ? 'Simulation paused' : `${number.format(run.shown)} observations complete`;
-  const actionText = busy ? 'Pause simulation' : run.phase === 'paused' ? 'Resume simulation' : 'Run simulation';
+  const status = busy ? `Drawing · ${number.format(run.shown)} of ${number.format(run.settings.count)}` : run.phase === 'paused' ? 'Simulation paused' : `${number.format(run.shown)} observations complete`;
 
   return <div id="workspace" className={projector ? 'station-legacy app--projector' : 'station-legacy'}>
     <div className="workspace-title">
@@ -143,13 +158,13 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
         <div className="parameter-body">
           <label htmlFor="distribution">Distribution</label>
           <div className="select-field">
-            <select id="distribution" name="distribution" value={draft.distribution} disabled={run.phase !== 'complete'}
+            <select id="distribution" name="distribution" value={draft.distribution}
               onChange={event => setDraft({ ...draft, distribution: event.currentTarget.value as Distribution })}>
               {Object.entries(sources).map(([key, source]) => <option key={key} value={key}>{source.label}</option>)}
             </select>
             <ChevronDown size={16} aria-hidden />
           </div>
-          <fieldset disabled={run.phase !== 'complete'} aria-label="Sample parameters">
+          <fieldset aria-label="Sample parameters">
             <Slider id="sample-size" label="Sample size" value={draft.count} display={number.format(draft.count)}
               min={64} max={2048} step={64} onChange={count => setDraft({ ...draft, count })} />
             <Slider id="distribution-scale" label={sources[draft.distribution].parameter} value={draft.scale}
@@ -163,21 +178,13 @@ function Workspace({ settings, onComplete }: { settings: RunSettings; onComplete
             </div>
           </fieldset>
         </div>
-        <div className="parameter-actions">
-          <Button variant="primary" disabled={run.phase === 'complete' && !validSeed} onClick={action}>
-            {busy ? <Pause size={16} aria-hidden /> : <Play size={16} aria-hidden />}{actionText}
-          </Button>
-          <Button aria-label="Reset parameters and run" title="Reset parameters and run" onClick={reset}><RotateCcw size={16} aria-hidden /></Button>
-        </div>
-        <div className="run-meta">
-          <span className={busy ? 'signal signal--active' : 'signal'} />
-          <span role="status">{status}</span>
-          {draftChanged && run.phase === 'complete' && <span className="pending">Parameters changed</span>}
-        </div>
-        {run.phase !== 'complete' && <progress aria-label="Simulation progress" max={run.settings.count} value={run.shown} />}
+        <p className="parameter-hint">Every change draws a new sample at once. Type exact values in the boxes.</p>
       </Panel>
 
       <Panel label="Experiment output" className="outputs">
+        <AutoplayBar playback={playback} onStep={nextDraw} stepLabel="New sample" announce status={status}
+          onRestart={() => setRun(newRun(run.settings, reduced === true, true))}
+          progress={run.phase !== 'complete' ? run.shown / run.settings.count : null} progressLabel="Simulation progress" />
         <Tabs.Root value={mode} onValueChange={value => setMode(value as (typeof modes)[number])}>
           <PanelHeading icon={<Activity size={17} aria-hidden />} title="Distribution output"
             trailing={<Tabs.List aria-label="Data view" className="tabs">{modes.map(item => <Tabs.Trigger key={item} value={item}>{item}</Tabs.Trigger>)}</Tabs.List>} />
@@ -316,7 +323,11 @@ function StationApp() {
       <SceneDock key={station.id} title={station.name} eyebrow={<><i /> STATION · ORBIT {orbits.find(o => o.id === station.orbit)!.numeral}</>} lead={lead} onClose={close} testId="station-dock">
         {station.kind === 'kernel' ? (
           <KernelStation station={station} seed={route.seed ?? DEFAULT_SEED} params={route.params}
-            onState={(seed, params) => { window.location.hash = stationHash(station.id, seed, params, back); }} />
+            onState={(seed, params) => {
+              // Replace, not push: autoplay draws must not flood the back button, and no hashchange re-mounts the station.
+              const hash = stationHash(station.id, seed, params, back);
+              if (window.location.hash !== hash) window.history.replaceState(window.history.state, '', hash);
+            }} />
         ) : station.module === 'distribution' ? (
           <Workspace settings={legacy} onComplete={completeDistribution} />
         ) : (

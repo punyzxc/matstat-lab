@@ -679,3 +679,242 @@ html:has(.orbital-lab) body {
 .surface-hint {
   color: var(--quiet);
 }
+
+/* Autoplay: experiments play by themselves; the bar only stops, steps or paces them. */
+.autoplay {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 10px;
+}
+.autoplay-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.autoplay button {
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: 500 12px var(--sans);
+  transition: border-color var(--quick) var(--ease), background var(--quick) var(--ease), color var(--quick) var(--ease);
+}
+.autoplay button:hover {
+  border-color: #777;
+}
+.autoplay button:focus-visible,
+.choice-chips button:focus-visible,
+.range-typed:focus-visible,
+.readout-track button:focus-visible,
+.ridge-toggle:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+}
+.autoplay-main {
+  min-width: 92px;
+  padding: 0 14px;
+}
+.autoplay[data-playing='false'] .autoplay-main {
+  color: #141414;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.autoplay-icon {
+  width: 34px;
+}
+.autoplay-speed {
+  display: inline-flex;
+  margin-left: auto;
+}
+.autoplay-speed button {
+  min-width: 38px;
+  font: 12px var(--mono);
+  color: var(--quiet);
+}
+.autoplay-speed button + button {
+  margin-left: -1px;
+}
+.autoplay-speed button[aria-checked='true'] {
+  color: var(--ink);
+  border-color: var(--ink);
+  position: relative;
+}
+.autoplay-status {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--quiet);
+  font: 11px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.autoplay-status kbd {
+  margin-left: auto;
+  font: 10px var(--mono);
+  color: #707070;
+  border: 1px solid var(--faint);
+  padding: 1px 5px;
+}
+.autoplay-progress {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1px;
+  width: calc(var(--p, 0) * 100%);
+  background: var(--signal);
+  transition: width 300ms var(--ease);
+}
+
+/* Typed values beside every slider. */
+.range-typed {
+  min-width: 0;
+  max-width: 11ch;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-bottom-color: #3a3a3a;
+  background: transparent;
+  color: var(--ink);
+  font: 12px var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  cursor: text;
+}
+.range-typed:hover {
+  border-bottom-color: #777;
+}
+.range-typed:focus {
+  border-color: #555;
+  background: #121212;
+}
+.range-typed[aria-invalid='true'] {
+  border-color: var(--signal);
+}
+.range-note {
+  display: block;
+  margin-top: 4px;
+  color: var(--signal);
+  font: 11px var(--mono);
+}
+.parameter-hint {
+  margin: 4px 0 0;
+  color: #777;
+  font: 11px/1.5 var(--mono);
+}
+
+/* Named choices as chips. */
+.choice-field {
+  display: grid;
+  gap: 6px;
+}
+.choice-title {
+  font-size: 13px;
+}
+.choice-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.choice-chips button {
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: #bdbdbd;
+  padding: 4px 9px;
+  min-height: 28px;
+  font: 12px var(--sans);
+  transition: border-color var(--quick) var(--ease), color var(--quick) var(--ease), background var(--quick) var(--ease);
+}
+.choice-chips button:hover {
+  border-color: #777;
+  color: var(--ink);
+}
+.choice-chips button[aria-checked='true'] {
+  color: #141414;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Following one readout across draws, and the stacked-draws 3D view. */
+.chart-stage {
+  position: relative;
+}
+.ridge-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--rule);
+  background: rgba(8, 8, 8, 0.7);
+  color: var(--quiet);
+  padding: 3px 8px;
+  font: 11px var(--mono);
+}
+.ridge-toggle:hover,
+.ridge-toggle[aria-pressed='true'] {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.readout-track {
+  width: 30px;
+}
+.readout-track button {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #5a5a5a;
+}
+.readout-track button:hover {
+  color: var(--ink);
+}
+.readout-track button[aria-pressed='true'] {
+  color: var(--signal);
+  border-color: #3a3a3a;
+}
+.readouts tr[data-tracked] th {
+  color: var(--ink);
+}
+.trace {
+  margin-top: 14px;
+  border-top: 1px solid var(--rule);
+  padding-top: 8px;
+}
+.trace-head {
+  margin: 0 0 4px;
+  color: var(--quiet);
+  font: 11px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.trace-head b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.trace-empty {
+  margin: 6px 0;
+  color: #777;
+  font: 11px var(--mono);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .autoplay-progress {
+    transition: none;
+  }
+}
