@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11),
-// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court, #125 the living population (L10), the corridor of running means (L7).
+// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court, #125 the living population (L10), the corridor of running means (L7), the centre of mass (L6).
 const fits = (page) => page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
 
 test.beforeEach(async ({ page }) => {
@@ -305,6 +305,36 @@ test('L7 corridor: Chebyshev against the real tails, then 200 running means whos
 
   await page.goto('/#lecture/7/5');
   await expect(page.getByTestId('lln-count')).toContainText('no Chebyshev bound');
+});
+
+test('L6 centre of mass: the beam balances at the mean, the sigma bands hold the 3 sigma rule, the box slides', async ({ page }) => {
+  await page.goto('/#lecture/6/1');
+  await expect(page.getByTestId('story-beat')).toHaveText('The beam balances at the mean');
+  const beam = page.locator('[data-step="1"]').getByTestId('live-formula');
+  await expect(beam.nth(0).locator('[data-v="Mx"][data-role="res"]')).toHaveText('0.1');
+  // reduced motion throws all 2000 at once: their mean is the Balance station's 0.066 (seed 606)
+  await expect(beam.nth(1).locator('[data-v="xbar"][data-role="res"]')).toHaveText('0.066');
+  await beam.nth(0).locator('[data-v="x4"][data-role="edit"]').click();
+  await page.locator('[data-step="1"]').getByRole('textbox').fill('5');
+  await page.locator('[data-step="1"]').getByRole('textbox').press('Enter');
+  await expect(beam.nth(0).locator('[data-v="Mx"][data-role="res"]')).toHaveText('0.2');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/balance\?seed=606&.*x4=5.*&lecture=6&step=1$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/6/3');
+  await expect(page.getByTestId('story-beat')).toHaveText('Bands of one, two and three sigma');
+  await expect(page.getByTestId('sigma-in3')).toHaveText('0.9970');
+  await expect(page.getByTestId('sigma-table')).toContainText('0.9973');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/moments\?seed=606&law=5&.*&lecture=6&step=3$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/6/4');
+  await expect(page.getByTestId('story-beat')).toHaveText('The box slides along the density');
+  // reduced motion parks the box at z = m/2, the top of the triangle
+  const slide = page.locator('[data-step="4"]').getByTestId('live-formula');
+  await expect(slide.nth(1).locator('[data-v="fz"][data-role="res"]')).toHaveText('1');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/convolution\?seed=606&m=2&R=5000&lecture=6&step=4$/);
+  expect(await fits(page)).toBe(true);
 });
 
 test('old step-by-step lectures keep their player', async ({ page }) => {

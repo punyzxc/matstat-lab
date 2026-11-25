@@ -15,6 +15,8 @@ import { describe as describeSample, population, POPULATION } from '../src/lectu
 import { run as runSampling } from '../../lecture-sampling-goodness-of-fit/kernel.mjs';
 import { corridor, exactTail, kBound, tailDraws, tailShare } from '../src/lectures/figures/lln-model.mjs';
 import { run as runLimits } from '../../lecture-limit-theorems/kernel.mjs';
+import { beamThrows, irwinHallPdf, lawDraws, overlap, sumsOf, throwStats, within } from '../src/lectures/figures/moment-model.mjs';
+import { run as runMoments } from '../../lecture-random-vectors/kernel.mjs';
 import { courtCases, errorsOf, powerCurve, regionOf, rejects } from '../src/lectures/figures/test-model.mjs';
 import { validateLecture } from '../src/lectures/script.ts';
 import { ksBand, LAWS, standardizedSums } from '../../lecture-limit-theorems/kernel.mjs';
@@ -72,7 +74,7 @@ test('typed values snap to the parameter range and step; text that is not a numb
 // ---------------------------------------------------------------- story scripts
 test('the flagship lectures are stories; every story script checks against the figure specs', () => {
   const ids = stories.map((s) => s.lecture);
-  for (const n of [7, 8, 10, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
+  for (const n of [6, 7, 8, 10, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
   const lectureSteps = Object.fromEntries(scripts.map((s) => [s.lecture, s.steps.length]));
   for (const s of scripts) assert.deepEqual(validateLecture(s, { stations, scientists: slugs, figures: FIGURES, liveKeys: liveTexKeys, lectureSteps }), [], `L${s.lecture}`);
 });
@@ -330,6 +332,36 @@ test('corridor: Chebyshev bounds hold and fall; Cauchy has no bound and its shar
   assert.deepEqual(corridor({ law: 2, N: 2000, M: 20, eps: 0.2, seed: 707 }), corridor({ law: 2, N: 2000, M: 20, eps: 0.2, seed: 707 }));
   assert.deepEqual(FIGURES['lln-corridor'].station({ law: 0, k: 2, N: 2000, M: 200, eps: 0.2 }, 'tail'), { station: 'lln', params: { law: 0, N: 2000, k: 2, view: 1 } });
   assert.deepEqual(FIGURES['lln-corridor'].station({ law: 2, k: 2, N: 2000, M: 200, eps: 0.2 }, 'paths'), { station: 'lln', params: { law: 2, N: 2000, view: 2, M: 200, eps: 0.2 } });
+});
+
+// ---------------------------------------------------------------- L6 the centre of mass
+test('centre of mass: the beam, the sigma bands and the sums are the stations\' own', () => {
+  const ob = (rs, key) => rs.find((r) => r.key === key).observed;
+  const r6 = (v) => Math.round(v * 1e6) / 1e6;
+  for (const beam of [{ x1: -3, x2: -1, x3: 1.5, x4: 4, p1: 0.2, p2: 0.3, p3: 0.4, p4: 0.1 }, { x1: -5, x2: 0, x3: 2, x4: 5, p1: 0.6, p2: 0.1, p3: 0.2, p4: 0.3 }]) {
+    const { law, hits } = beamThrows(beam, 606, 2000), st = throwStats(law, hits, 2000);
+    const station = runMoments({ ...beam, n: 2000 }, { seed: 606, station: 'balance' }).readouts;
+    assert.ok(Math.abs(st.mean - ob(station, 'mean')) < 1e-5, 'the sample mean of the throws');
+    assert.ok(Math.abs(st.s2 - ob(station, 'variance')) < 1e-4, 'the sample variance of the throws');
+    assert.ok(Math.abs(law.p.reduce((a, v) => a + v, 0) - 1) < 1e-12, 'weights are renormalised');
+  }
+  for (const law of [3, 4, 5]) {
+    const { L, xs } = lawDraws(law, { lambda: 1, sigma: 1 }, 606, 2000);
+    const station = runMoments({ law, p: 0.3, m: 10, lambda: 1, sigma: 1, a: 2, b: 2, n: 2000 }, { seed: 606, station: 'moments' }).readouts;
+    for (const k of [1, 2, 3]) assert.equal(r6(within(L, xs, k).observed), ob(station, `rule${k}`), `law ${law}, ${k} sigma`);
+  }
+  const normal = lawDraws(5, { lambda: 1, sigma: 1 }, 606, 10);
+  assert.ok(Math.abs(within(normal.L, normal.xs, 3).exact - 0.9973) < 1e-4, 'the 3 sigma rule');
+  for (const m of [2, 3, 6]) {
+    const sums = sumsOf(m, 5000, 606);
+    const mean = sums.reduce((a, v) => a + v, 0) / sums.length;
+    assert.ok(Math.abs(mean - ob(runLimits({ m, R: 5000 }, { seed: 606, station: 'convolution' }).readouts, 'mean')) < 1e-5, `m ${m}`);
+    for (const z of [0.3, m / 2, m - 0.4]) assert.ok(Math.abs(overlap(m, z) - irwinHallPdf(z, m)) < 1e-4, `the overlap is the density, m ${m}, z ${z}`);
+  }
+  const spec = FIGURES['centre-mass'], d = figureParams('centre-mass');
+  assert.deepEqual(spec.station(d, 'beam'), { station: 'balance', params: { x1: -3, x2: -1, x3: 1.5, x4: 4, p1: 0.2, p2: 0.3, p3: 0.4, p4: 0.1, n: 2000 } });
+  assert.deepEqual(spec.station(d, 'sigma'), { station: 'moments', params: { law: 5, p: 0.3, m: 10, lambda: 1, sigma: 1, a: 2, b: 2, n: 2000 } });
+  assert.deepEqual(spec.station({ ...d, m: 3 }, 'sums'), { station: 'convolution', params: { m: 3, R: 5000 } });
 });
 
 // ---------------------------------------------------------------- #138 math portals

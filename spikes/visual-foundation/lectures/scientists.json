@@ -20,6 +20,16 @@
       "contribution": "Pascal's correspondent; counted outcomes of interrupted games."
     },
     {
+      "slug": "huygens",
+      "name": "Christiaan Huygens",
+      "years": "1629–1695",
+      "lectures": [
+        6
+      ],
+      "contribution": "The first book on probability and the value of a chance: the expectation.",
+      "more": "In 1657 he published On reasoning in games of chance, the first printed book on probability. He defined the value of a chance as what a fair player would pay to play, $\\sum_i x_i p_i$ in today's notation, and solved Pascal's and Fermat's problems with it."
+    },
+    {
       "slug": "newton",
       "name": "Isaac Newton",
       "years": "1643–1727",
@@ -62,11 +72,13 @@
       "lectures": [
         1,
         3,
+        6,
         8,
         9,
         12
       ],
-      "contribution": "Classical probability and the integral limit theorem."
+      "contribution": "Classical probability and the integral limit theorem.",
+      "more": "He proved that the sum of many small independent errors is nearly normal, the first central limit theorem, and with de Moivre the integral theorem for the binomial law. His Analytic theory of probabilities (1812) gathered the field into one book."
     },
     {
       "slug": "gauss",
@@ -74,9 +86,11 @@
       "years": "1777–1855",
       "lectures": [
         1,
-        3
+        3,
+        6
       ],
-      "contribution": "The normal law and its bell curve."
+      "contribution": "The normal law and its bell curve.",
+      "more": "He derived the normal law in 1809 from the rule that the arithmetic mean is the most probable value of a measured quantity, and used it in the method of least squares. The bell curve $\\frac{1}{\\sigma\\sqrt{2\\pi}} e^{-(x-a)^2/(2\\sigma^2)}$ carries his name."
     },
     {
       "slug": "poisson",
