@@ -232,6 +232,52 @@ function fittedCdf(x, law) {
   return LAWS[law].family.cdf(law === 0 ? [mean, sd] : law === 1 ? [Math.min(...x), Math.max(...x)] : [1 / mean]);
 }
 
+// ---------------------------------------------------------------- #127: the statistics drawn
+/** The two ends of the largest gap at x₀: F(x₀) and the side of the jump of Fₙ* that is farther from it. */
+export function gapEnds(sample, F, at) {
+  let le = 0, lt = 0;
+  for (const v of sample) { if (v <= at) le++; if (v < at) lt++; }
+  const n = sample.length, f = F(at), upper = le / n, lower = lt / n;
+  return Math.abs(upper - f) >= Math.abs(f - lower) ? [f, upper] : [f, lower];
+}
+/** Pearson cell by cell: each cell's term (mᵢ − npᵢ)²/npᵢ as a bar; the bars add up to χ². */
+export function pearsonTerms(pearson) {
+  return pearson.groups.map((g) => (g.expected > 0 ? (g.observed - g.expected) ** 2 / g.expected : g.observed > 0 ? Infinity : 0));
+}
+const cellTex = (g) => `(${Number.isFinite(g.from) ? fmt(g.from, 2) : '-\\infty'}, ${Number.isFinite(g.to) ? `${fmt(g.to, 2)}]` : '\\infty)'}`;
+const texNum = (v, d) => (Number.isFinite(v) ? fmt(v, d) : '\\infty');
+function pearsonView(pearson, n, alpha) {
+  const terms = pearsonTerms(pearson), idx = terms.map((_, i) => i + 1);
+  const shown = terms.length <= 7 ? terms.map((v) => texNum(v, 3)) : [...terms.slice(0, 4).map((v) => texNum(v, 3)), '\\dots', texNum(terms[terms.length - 1], 3)];
+  // A cell with no expected count but an observation has an infinite term: drawn as the tallest bar, written as ∞.
+  const finiteTop = Math.max(1, ...terms.filter(Number.isFinite));
+  const heights = terms.map((v) => (Number.isFinite(v) ? v : 1.5 * finiteTop));
+  let worst = 0;
+  terms.forEach((v, i) => { if (v > terms[worst]) worst = i; });
+  return {
+    axes: { x: 'cell $i$', y: 'term $(m_i - np_i)^2 / np_i$' },
+    domain: { x: [0.5, terms.length + 0.5] },
+    series: [
+      { id: 'terms', kind: 'hist', tone: 'default', label: `$\\dfrac{(m_i - np_i)^2}{np_i}$, sum $\\chi^2 = ${texNum(pearson.chi2, 3)}$`, x: idx.map((i) => i - 0.5), y: heights },
+      { id: 'worst', kind: 'hist', tone: 'accent', label: `largest term: cell ${worst + 1}, $${cellTex(pearson.groups[worst])}$`, x: [worst + 0.5, worst + 1.5], y: [heights[worst], 0] },
+    ],
+    linked: {
+      series: [
+        { id: 'observed', kind: 'pmf', tone: 'default', label: 'observed $m_i$', x: idx.map((i) => i - 0.12), y: pearson.groups.map((g) => g.observed) },
+        { id: 'expected', kind: 'pmf', tone: 'signal', label: 'expected $np_i$', x: idx.map((i) => i + 0.12), y: pearson.groups.map((g) => g.expected) },
+      ],
+      axes: { x: 'cell $i$', y: 'count' },
+      domain: { x: [0.5, terms.length + 0.5] },
+    },
+    formula: [
+      `\\chi^2 = \\sum_{i=1}^{${pearson.s}} \\dfrac{(m_i - np_i)^2}{np_i} = ${shown.join(' + ')} = ${texNum(pearson.chi2, 3)}`,
+      pearson.valid
+        ? `k = s - 1 - r = ${pearson.df}, \\quad \\chi^2_{1-\\alpha}(k) = ${fmt(pearson.critical, 3)}, \\quad p = ${fmt(pearson.p, 4)} \\;\\Rightarrow\\; \\text{${pearson.reject ? 'reject' : 'do not reject'} } H_0`
+        : `k = s - 1 - r = ${pearson.df} < 1 \\;\\Rightarrow\\; \\text{the test cannot run}`,
+    ],
+  };
+}
+
 // ---------------------------------------------------------------- contract
 const P = {
   law: { key: 'law', label: `True law (${lawLabel})`, min: 0, max: 2, step: 1, default: 0 },
@@ -248,6 +294,7 @@ export const stations = {
   },
   fit: {
     params: [
+      { key: 'view', label: 'Show (0 Kolmogorov: the largest gap, 1 Pearson: cell by cell)', min: 0, max: 1, step: 1, default: 0 },
       P.law,
       { key: 'h0', label: `Hypothesis $H_0$ (${lawLabel})`, min: 0, max: 2, step: 1, default: 0 },
       { ...P.n, default: 200 },
@@ -321,7 +368,7 @@ function runSample({ law = 0, n = 100, bins = 0, digits = 0, view = 0 }, seed) {
   };
 }
 
-function runFit({ law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, estimate = 0, merge = 1, reps = 300 }, seed) {
+function runFit({ view = 0, law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, estimate = 0, merge = 1, reps = 300 }, seed) {
   const L = LAWS[law], H = LAWS[h0];
   const sample = drawSample(law, n, seed);
   const opts = { cells, alpha, estimate: estimate === 1, merge: merge === 1 };
@@ -367,12 +414,19 @@ function runFit({ law = 0, h0 = 0, n = 200, alpha = 0.05, cells = 10, estimate =
       { key: 'mcchi', label: `Pearson false-rejection rate under $H_0$ (${mc.pearsonRuns} runs)`, observed: mc.pearsonRate, theory: alpha, convention: `${bandText}${inBand(mc.pearsonRate)}` },
       { key: 'mcks', label: `Kolmogorov false-rejection rate under $H_0$ (${mc.R} runs)`, observed: mc.kolmogorovRate, theory: alpha, convention: `${bandText}${inBand(mc.kolmogorovRate)}${opts.estimate ? '; parameters re-estimated in every run' : ''}` },
     ],
-    series: [
-      band,
-      { id: 'f0', kind: 'cdf', tone: 'signal', label: `$H_0$: $F(x)$, ${hLabel}`, x: xs, y: xs.map(F0) },
-      { id: 'ecdf', kind: 'ecdf', tone: 'default', label: `$F_n(x)$, sample from ${L.label}`, x: E.x, y: E.y },
-      { id: 'dmax', kind: 'rule', tone: 'accent', label: `$D_n$ attained at $x = ${fmt(kol.at, 3)}$`, x: [kol.at], y: [] },
-    ],
+    ...(view === 1 ? pearsonView(pearson, n, alpha) : {
+      series: [
+        band,
+        { id: 'f0', kind: 'cdf', tone: 'signal', label: `$H_0$: $F(x)$, ${hLabel}`, x: xs, y: xs.map(F0) },
+        { id: 'ecdf', kind: 'ecdf', tone: 'default', label: `$F_n(x)$, sample from ${L.label}`, x: E.x, y: E.y },
+        { id: 'gap', kind: 'line', tone: 'accent', label: `$D_n = ${fmt(kol.d)}$ at $x_0 = ${fmt(kol.at, 3)}$`, x: [kol.at, kol.at], y: gapEnds(sample, F0, kol.at) },
+        { id: 'gapEnds', kind: 'points', tone: 'accent', x: [kol.at, kol.at], y: gapEnds(sample, F0, kol.at) },
+      ],
+      formula: [
+        `D_n = \\sup_x \\bigl|F_n^*(x) - F(x)\\bigr| = \\bigl|F_n^*(${fmt(kol.at, 3)}) - F(${fmt(kol.at, 3)})\\bigr| = ${fmt(kol.d)}`,
+        `\\lambda_n(\\alpha) = ${fmt(kol.critical)}, \\quad D_n ${kol.d >= kol.critical ? '\\ge' : '<'} \\lambda_n(\\alpha) \\;\\Rightarrow\\; \\text{${kol.d >= kol.critical ? 'reject' : 'do not reject'} } H_0`,
+      ],
+    }),
     notes: [
       `Kolmogorov (L10, L12): $D_n = ${fmt(kol.d)} = \\max(D^+ = ${fmt(kol.dPlus)},\\ D^- = ${fmt(kol.dMinus)})$. $H_0$ is rejected when $D_n \\ge \\lambda_n(\\alpha)$, that is when the graph of $F$ leaves the band $F_n \\pm \\lambda_n(\\alpha)$.`,
       ksValid

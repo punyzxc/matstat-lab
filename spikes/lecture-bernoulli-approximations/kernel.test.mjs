@@ -93,3 +93,24 @@ test('contract: seeded runs repeat byte for byte, defaults and extremes run, ser
   assert.equal(k.meta.id, 'lecture-bernoulli-approximations');
   assert.throws(() => k.run({ p: 0 }), /strictly between/);
 });
+
+test('#115 each machine row of n trials collapses into its own count k, and the rows repeat for a seed', () => {
+  for (const [n, p] of [[7, 0.5], [40, 0.3], [100, 0.02], [5000, 0.01]]) {
+    const r = k.run({ n, p, R: 500 }, { seed: 11 });
+    const { rows } = r.machine;
+    assert.equal(rows.length, k.MACHINE_ROWS);
+    const cells = Math.min(n, k.MACHINE_CELLS);
+    for (const row of rows) {
+      assert.equal(row.cells.length, cells);
+      close(row.cells.reduce((a, b) => a + b, 0) * (n / cells), row.k, 1e-6, `n ${n}`);
+      for (const c of row.cells) assert.ok(c >= 0 && c <= 1 + 1e-9);
+      if (n <= k.MACHINE_CELLS) for (const c of row.cells) assert.ok(c === 0 || c === 1);
+    }
+    assert.deepEqual(rows, k.run({ n, p, R: 500 }, { seed: 11 }).machine.rows);
+  }
+  // Positions given k are uniform: over many rows each place of 5 is a success about k/n of the time.
+  const hits = new Array(5).fill(0);
+  const rows = k.machineRows(new Int32Array(4000).fill(2), 5, 3, 4000);
+  for (const row of rows) row.cells.forEach((c, j) => (hits[j] += c));
+  for (const h of hits) close(h / 4000, 2 / 5, 4 * Math.sqrt(0.24 / 4000));
+});
