@@ -1158,22 +1158,22 @@
     {
       "id": "L08-poisson-limit",
       "lecture": "L08",
-      "title": "Poisson sum limit and strict endpoint",
+      "title": "Poisson sum limit and endpoint diagnostics",
       "source": {
         "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L08.pdf",
         "page": 5,
         "lines": "l030-l044"
       },
-      "lecture_value": "P(sum<n) written as sum j=0..n; limit 1/2",
+      "lecture_value": "limit 1/2",
       "recomputed": {
         "asymptotic_limit": 0.5,
         "finite_n_10_strict": 0.45792971447185227,
         "finite_n_10_inclusive": 0.5830397501929855
       },
-      "verdict": "corrected",
+      "verdict": "confirmed",
       "phi": "normal_cdf",
       "method": "CLT: standardized Poisson(n) tends to N(0,1); direct finite sums distinguish strict and inclusive endpoints",
-      "note": "Limit is correct, but strict event sums through n-1. No fixed numerical worked answer in L8; never use .5 as exact finite-n probability.",
+      "note": "The source limit is correct. The finite-n strict/inclusive diagnostics are independently supplied; strict events sum through n-1. No fixed numerical worked answer in L8; never use .5 as exact finite-n probability.",
       "inputs": {},
       "reusable": true
     },
@@ -1890,7 +1890,7 @@
     {
       "id": "L11-homogeneity",
       "lecture": "L11",
-      "title": "Two coin samples n1=n2=1000",
+      "title": "Two coin samples, n=1000 inferred from denominator",
       "source": {
         "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 14,
@@ -1904,7 +1904,7 @@
       "verdict": "approximation",
       "phi": "none",
       "method": "Pooled two-proportion z statistic",
-      "note": "",
+      "note": "Prose leaves n symbolic; the displayed .001+.001 reciprocals imply n1=n2=1000.",
       "inputs": {},
       "reusable": true
     },
@@ -1961,6 +1961,30 @@
       "phi": "zero_integral",
       "method": "Direct z statistic; invert normal CDF; optional exact upper-tail diagnostic",
       "note": "Normal approximation, not an exact Normal null. Do not interpret non-rejection as probability .99 that H0 is true.",
+      "inputs": {},
+      "reusable": true
+    },
+    {
+      "id": "L12-phi-origins",
+      "lecture": "L12",
+      "title": "Zero-origin integral versus normal CDF",
+      "source": {
+        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L12.pdf",
+        "page": 3,
+        "lines": "l033-l046"
+      },
+      "lecture_value": {
+        "Phi0_at_0": 0,
+        "normal_CDF_at_0": 0.5
+      },
+      "recomputed": {
+        "Phi0_at_0": 0.0,
+        "normal_CDF_at_0": 0.5
+      },
+      "verdict": "confirmed",
+      "phi": "mixed",
+      "method": "Symmetry and erf(0)=0",
+      "note": "",
       "inputs": {},
       "reusable": true
     }

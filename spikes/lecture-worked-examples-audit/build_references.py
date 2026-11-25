@@ -119,10 +119,10 @@ add(7, 'normal-tail', 'Two-sided standard normal three-sigma tail', 3, 'l019-l02
 add(7, 'poisson-bound', 'Poisson Chebyshev statement', 3, 'l022-l033', '<=1/9',
     {'universal_bound':1/9, 'diagnostic_lambda_1_tail':a.poisson_tail(1,4)}, method='Source inequality visually confirmed; independent illustrative lambda=1 chosen separately',
     note='Source does not specify lambda and says <=, not >=. Module-map pin is disputed; .019 is not the tail for every Poisson law.')
-add(8, 'poisson-limit', 'Poisson sum limit and strict endpoint', 5, 'l030-l044', 'P(sum<n) written as sum j=0..n; limit 1/2',
+add(8, 'poisson-limit', 'Poisson sum limit and endpoint diagnostics', 5, 'l030-l044', 'limit 1/2',
     {'asymptotic_limit':.5, 'finite_n_10_strict':exp(-10)*fsum(10**j/factorial(j) for j in range(10)),
-     'finite_n_10_inclusive':exp(-10)*fsum(10**j/factorial(j) for j in range(11))}, 'corrected', 'normal_cdf',
-    method='CLT: standardized Poisson(n) tends to N(0,1); direct finite sums distinguish strict and inclusive endpoints', note='Limit is correct, but strict event sums through n-1. No fixed numerical worked answer in L8; never use .5 as exact finite-n probability.')
+     'finite_n_10_inclusive':exp(-10)*fsum(10**j/factorial(j) for j in range(11))}, 'confirmed', 'normal_cdf',
+    method='CLT: standardized Poisson(n) tends to N(0,1); direct finite sums distinguish strict and inclusive endpoints', note='The source limit is correct. The finite-n strict/inclusive diagnostics are independently supplied; strict events sum through n-1. No fixed numerical worked answer in L8; never use .5 as exact finite-n probability.')
 
 # L9 bounds are bounds, not estimates of actual event probabilities.
 for key, title, page, lines, printed, result, method in [
@@ -198,14 +198,17 @@ add(11,'student-given','Student interval if p10 stated s^2=.0303 is taken as sep
 add(11,'chi-given','Variance interval if p10 stated s^2=.0303 is separate input',10,'l030-l037',[.017,.064],
     [21*.0303/qhi,21*.0303/qlo],'corrected',method='Use given variance but independently recompute df21 quantiles')
 add(11,'normal-tail-196','Each normal tail beyond +/-1.96',12,'l023-l025',.025, a.normal_cdf(-1.96),'approximation','normal_cdf',method='erf-based lower normal tail')
-add(11,'homogeneity','Two coin samples n1=n2=1000',14,'l001-l015',-.447,
-    {'pooled':.485,'z':(.48-.49)/sqrt(.485*.515*(1/1000+1/1000))},'approximation',method='Pooled two-proportion z statistic')
+add(11,'homogeneity','Two coin samples, n=1000 inferred from denominator',14,'l001-l015',-.447,
+    {'pooled':.485,'z':(.48-.49)/sqrt(.485*.515*(1/1000+1/1000))},'approximation',method='Pooled two-proportion z statistic',
+    note='Prose leaves n symbolic; the displayed .001+.001 reciprocals imply n1=n2=1000.')
 add(11,'coin-null','First coin sample versus p0=.5',14,'l016-l021',-1.26,
     {'correct_z':(.48-.5)/sqrt(.5*.5/1000),'printed_numerator_z':(.48-.49)/sqrt(.5*.5/1000)},'corrected',method='Compute both the printed numerator and the intended p-hat minus p0')
 add(12,'proportion-test','Right-tailed proportion test',4,'l013-l025',{'U':.471,'critical':2.33,'Phi0_at_critical':.49,'decision':'accept'},
     {'U':(.12-.1)/sqrt(.1*.9/50),'normal_critical':a.normal_quantile(.99),'Phi0_at_critical':a.phi_zero(a.normal_quantile(.99)),
      'decision':'do not reject at alpha .01','exact_binomial_upper_p':float(a.binomial(50,'.1',6,50))},'approximation','zero_integral',
     method='Direct z statistic; invert normal CDF; optional exact upper-tail diagnostic',note='Normal approximation, not an exact Normal null. Do not interpret non-rejection as probability .99 that H0 is true.')
+add(12,'phi-origins','Zero-origin integral versus normal CDF',3,'l033-l046',{'Phi0_at_0':0,'normal_CDF_at_0':.5},
+    {'Phi0_at_0':a.phi_zero(0),'normal_CDF_at_0':a.normal_cdf(0)},phi='mixed',method='Symmetry and erf(0)=0')
 
 # Cross-page inputs/definitions, in addition to the primary printed-output anchor.
 supplements = {
