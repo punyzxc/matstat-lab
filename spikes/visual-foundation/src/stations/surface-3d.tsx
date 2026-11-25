@@ -95,9 +95,9 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
     const zTop = Math.max(finiteMax(z.flat()), zSample ? finiteMax(zSample.flat()) : 0, overlay ? finiteMax(overlay.flat()) : 0, wall ? finiteMax(wall.z) : 0);
     return {
       x0: finiteMin(xs), x1: finiteMax(xs), y0: finiteMin(ys), y1: finiteMax(ys),
-      zmax: (Number.isFinite(zTop) && zTop > 0 ? zTop : 1) * 1.05,
+      zmax: Math.min(Number.isFinite(zTop) && zTop > 0 ? zTop : 1, shown.zCeil ?? Infinity) * 1.05,
     };
-  }, [xs, ys, z, zSample, overlay, wall]);
+  }, [xs, ys, z, zSample, overlay, wall, shown.zCeil]);
   const wx = (v: number) => unit(v, x0, x1), wy = (v: number) => unit(v, y0, y1), wz = (v: number) => ZLO + clamp(v / zmax, 0, 1.2);
 
   const items = useMemo(() => {
@@ -293,7 +293,7 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
             const o = out(P(xEdge, wy(v), ZLO), 11);
             return <text key={'y' + v} x={o.x} y={o.y + 3} textAnchor={anchor(o.ux)}>{fmt(v, stepOf(yt))}</text>;
           })}
-          {zt.map((v) => {
+          {zt.filter((v) => v !== 0).map((v) => {
             const p = P(zCorner[0], zCorner[1], wz(v));
             return <text key={'z' + v} x={p.x + (zLeft ? -7 : 7)} y={p.y + 3} textAnchor={zLeft ? 'end' : 'start'}>{fmt(v, stepOf(zt))}</text>;
           })}
@@ -303,13 +303,13 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
         </g>
       </svg>
       <figcaption>
-        <span className="chart-key chart-key--line tone-signal"><i /><MathText text={keyLabel ?? t(`Theory ${labels.z}`, `Теория ${labels.z}`)} /></span>
+        <span className="chart-key chart-key--line tone-signal"><i /><MathText text={keyLabel ?? shown.keyLabel ?? t(`Theory ${labels.z}`, `Теория ${labels.z}`)} /></span>
         {zSample && <span className="surface-key-sample"><i /><MathText text={shown.sampleLabel ?? t('Sample density (2D histogram)', 'Выборочная плотность (двумерная гистограмма)')} /></span>}
         {overlay && <span className="surface-key-overlay"><i /><MathText text={shown.overlayLabel ?? t('Approximation', 'Приближение')} /></span>}
         {wall && <span className="surface-key-wall"><i /><MathText text={wall.label} /></span>}
         <span className="surface-readout" aria-live="polite">
           {cursor && cursor[0] < xs.length && cursor[1] < ys.length
-            ? <MathText text={`$${labels.x.replace(/\$/g, '')} = ${sig4(xs[cursor[0]])}$, $${labels.y.replace(/\$/g, '')} = ${sig4(ys[cursor[1]])}$, ${labels.z.includes('$') ? labels.z : `$${labels.z}$`} $= ${sig4(z[cursor[1]][cursor[0]])}$`} />
+            ? <MathText text={`$${labels.x.replace(/\$/g, '')} = ${sig4(xs[cursor[0]])}$, $${labels.y.replace(/\$/g, '')} = ${sig4(ys[cursor[1]])}$, ${labels.z.includes('$') ? labels.z : `$${labels.z}$`} $= ${sig4(z[cursor[1]][cursor[0]])}$${shown.rowNotes?.[cursor[1]] ? `; ${shown.rowNotes[cursor[1]]}` : ''}`} />
             : null}
         </span>
         <span id={hintId} className="surface-hint">{t('Drag or arrow keys turn it; Shift + arrows or the pointer read a point.', 'Поворачивайте перетаскиванием или стрелками; Shift + стрелки или указатель показывают значения в точке.')}</span>

@@ -137,7 +137,7 @@ test('AC4: Σₖ≤ₙ nᵏe⁻ⁿ/k! is exact and approaches 1/2', () => {
 test('contract: every station runs at its defaults and its extremes, seeded runs repeat, and series are finite', () => {
   for (const [id, { params }] of Object.entries(k.stations)) {
     const cases = [defaults(id), Object.fromEntries(params.map((p) => [p.key, p.min])), Object.fromEntries(params.map((p) => [p.key, p.max]))];
-    const views = params.some((p) => p.key === 'view') ? [0, 1, 2].filter((v) => v <= params.find((p) => p.key === 'view').max) : [undefined];
+    const views = params.some((p) => p.key === 'view') ? [0, 1, 2, 3].filter((v) => v <= params.find((p) => p.key === 'view').max) : [undefined];
     for (const base of cases) for (const view of views) {
       const p = view == null ? base : { ...base, view };
       if (id === 'clt' && view === 1 && p.R > 4000) p.R = 4000; // keep the suite quick
@@ -290,4 +290,54 @@ test('#128 the simulated share approaches the exact one as R grows', () => {
     return s / 12;
   };
   assert.ok(gap(10000) < gap(1000) / 2, `${gap(1000)} → ${gap(10000)}`);
+});
+
+// ---------------------------------------------------------------- #86: the CLT ridge
+test('#86: the ridge has one histogram slice per n, phi on the wall, and D per slice', () => {
+  const out = k.run({ view: 3, source: 0, nmax: 12, R: 4000 }, { seed: 5, station: 'clt' });
+  const s = out.surface;
+  assert.equal(s.y.length, 12);
+  assert.equal(s.z.length, 12);
+  assert.equal(s.rowNotes.length, 12);
+  for (const row of s.z) {
+    const mass = row.reduce((a, v) => a + v, 0) * (8 / row.length);
+    close(mass, 1, 0.01, 'each slice is a density over [-4, 4]');
+  }
+  close(Math.max(...s.wall.z), 1 / Math.sqrt(2 * Math.PI), 2e-3, 'phi(0) on the wall');
+  const ks = out.series.find((x) => x.id === 'ks').y;
+  assert.equal(ks.length, 12);
+  assert.ok(ks[0] > ks.at(-1), 'uniform sums approach the normal law');
+});
+
+test('#86: slice n + 1 adds one term to slice n along the same paths', () => {
+  const law = k.ridgeLaw('exponential');
+  const rows = k.ridgeSums(law, 3, 50, 9);
+  for (let r = 0; r < 50; r++) {
+    const s2 = rows[1][r] * Math.sqrt(2) + 2, s3 = rows[2][r] * Math.sqrt(3) + 3;
+    assert.ok(s3 - s2 > 0, 'an exponential term is positive');
+  }
+  assert.deepEqual(k.ridgeSums(law, 3, 50, 9), rows, 'same seed, same ridge');
+});
+
+test('#86: finite-variance sources settle; Cauchy does not and says why', () => {
+  const uni = k.run({ view: 3, source: 0, nmax: 30, R: 8000 }, { seed: 11, station: 'clt' });
+  assert.ok(uni.readouts.find((r) => r.key === 'settled').observed <= 6);
+  const cau = k.run({ view: 3, source: 4, nmax: 30, R: 8000 }, { seed: 11, station: 'clt' });
+  const ks = cau.series.find((x) => x.id === 'ks').y;
+  assert.ok(ks.at(-1) > 0.3 && ks.at(-1) > ks[0], 'the Cauchy ridge drifts away from Phi');
+  assert.equal(cau.readouts.find((r) => r.key === 'settled').observed, null);
+  assert.match(cau.notes.join(' '), /CLT does not apply/);
+});
+
+test('#86: lattice slices (share over the step) tend to phi: the local limit theorem', () => {
+  const out = k.run({ view: 3, source: 2, p: 0.3, nmax: 30, R: 8000 }, { seed: 2, station: 'clt' });
+  const { x, z } = out.surface;
+  const phi = (v) => Math.exp(-v * v / 2) / Math.sqrt(2 * Math.PI);
+  const gap = (row) => Math.max(...row.map((v, i) => Math.abs(v - phi(x[i]))));
+  assert.ok(gap(z[29]) < 0.04, `n = 30 is close to phi (${gap(z[29])})`);
+  assert.ok(gap(z[0]) > gap(z[29]), 'n = 1 is further away');
+  // One Bernoulli term takes two values, at -p/sigma and (1 - p)/sigma: nothing beyond one lattice step outside them.
+  const sd = Math.sqrt(0.3 * 0.7);
+  z[0].forEach((v, i) => { if (x[i] < -1.3 / sd - 1e-9 || x[i] > 1.7 / sd + 1e-9) assert.equal(v, 0); });
+  assert.match(out.notes.join(' '), /local limit theorem/);
 });
