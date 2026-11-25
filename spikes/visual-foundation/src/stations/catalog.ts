@@ -36,7 +36,7 @@ export const stations: readonly Station[] = [
   { kind: 'kernel', id: 'transform', name: 'Transform', orbit: 'variables', lectures: 'L6', kernel: 'lecture-random-vectors', issue: 44,
     summary: 'Push a sample through $y = \\varphi(x)$ and compare it with the transformed density.' },
   { kind: 'kernel', id: 'scatter', name: 'Scatter', orbit: 'variables', lectures: 'L6', kernel: 'lecture-random-vectors', issue: 44,
-    summary: 'Sample a random vector; read covariance, correlation and both regression lines.' },
+    summary: 'Type $\\rho$ and watch the cloud morph, with $r$ beside it; a parabola and a ring have $r \\approx 0$ yet plain dependence.' },
 
   { kind: 'kernel', id: 'convolution', name: 'Convolution', orbit: 'limits', lectures: 'L6', kernel: 'lecture-limit-theorems', issue: 41,
     summary: 'Add uniforms and compare the exact piecewise density with the simulated sum.' },
@@ -76,7 +76,7 @@ const ru: Record<string, { name: string; summary: string }> = {
   distribution: { name: 'Исследование распределения', summary: 'Разыграйте выборку и сравните её форму с теоретической моделью.' },
   moments: { name: 'Моменты', summary: 'Сравните среднее, медиану, моду, асимметрию и эксцесс с теорией; проверьте правило $3\\sigma$.' },
   transform: { name: 'Преобразование', summary: 'Пропустите выборку через $y = \\varphi(x)$ и сравните её с плотностью преобразованной величины.' },
-  scatter: { name: 'Рассеяние', summary: 'Разыграйте случайный вектор: ковариация, коэффициент корреляции и обе прямые регрессии.' },
+  scatter: { name: 'Рассеяние', summary: 'Задайте $\\rho$ и смотрите, как меняется облако и $r$ рядом с ним; у параболы и кольца $r \\approx 0$, хотя зависимость видна.' },
   convolution: { name: 'Композиция', summary: 'Сложите равномерные величины и сравните точную кусочную плотность с моделью суммы.' },
   convergence: { name: 'Сходимость', summary: 'Следите за скользящим выборочным средним по мере роста числа наблюдений.' },
   lln: { name: 'Чебышёв и ЗБЧ', summary: 'Граница Чебышёва $1/k^2$ против настоящих хвостов; средние стабилизируются — кроме закона Коши.' },
