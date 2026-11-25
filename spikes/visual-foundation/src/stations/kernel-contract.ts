@@ -74,7 +74,9 @@ export type Constructions = { n: number; size: number; ordered: boolean; repetit
  */
 export type Board =
   | { kind: 'needles'; d: number; l: number; strips: number; width: number; needles: number[][]; hits: boolean[] }
-  | { kind: 'region'; runs: number[][]; darts: number[][]; hits: boolean[] };
+  | { kind: 'region'; runs: number[][]; darts: number[][]; hits: boolean[] }
+  /** #124: Bertrand's three circles; `chords[i]` = [x1, y1, x2, y2] on the unit circle, `long[i]` longer than √3. */
+  | { kind: 'chords'; circles: { id: string; label: string; exact: number; share: number; chords: number[][]; long: boolean[] }[] };
 /**
  * Two events in the unit square (#117): A = `A` and B = `B` as [x0, x1, y0, y1], their exact probabilities, whether
  * |P(AB) − P(A)P(B)| is within the kernel's tolerance, the first `points` of the draw with their class `cls`
