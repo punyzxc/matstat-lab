@@ -53,6 +53,11 @@ export type LinkedChart = { series: Series[]; axes?: { x?: string; y?: string };
  * outcomes hit by the first trials of this draw; the event holds `m` of the `n` outcomes.
  */
 export type Space = { kind: 'dice' | 'coins' | 'cards'; cols: number; parts: number[][]; inA: boolean[]; inB: boolean[]; inE: boolean[]; flashes: number[]; event: string; m: number; n: number };
+/**
+ * Combinatorial constructions (#130): `items` are constructions of `size` object indices out of `n` (every one when
+ * `all`, else a sample); `count` is the exact number as a decimal string (it can exceed 2^53).
+ */
+export type Constructions = { n: number; size: number; ordered: boolean; repetition: boolean; items: number[][]; all: boolean; count: string };
 export type KernelResult = {
   readouts: Readout[];
   series: Series[];
@@ -68,6 +73,7 @@ export type KernelResult = {
   linked?: LinkedChart;
   outcomes?: Outcomes;
   space?: Space;
+  constructions?: Constructions;
 };
 export type Kernel = {
   meta: KernelMeta;

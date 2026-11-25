@@ -25,5 +25,9 @@
   "\\text{random midpoint in the disc:}\\quad p = \\tfrac{1}{4}": "\\text{случайная середина в круге:}\\quad p = \\tfrac{1}{4}",
   "Pairwise is not mutual independence": "Попарная независимость — не независимость в совокупности",
   "Three events can be independent in pairs and still depend on each other as a triple.": "Три события могут быть попарно независимыми и всё же зависеть друг от друга как тройка.",
-  "\\text{but}\\quad P(ABC) \\ne P(A)\\,P(B)\\,P(C)": "\\text{но}\\quad P(ABC) \\ne P(A)\\,P(B)\\,P(C)"
+  "\\text{but}\\quad P(ABC) \\ne P(A)\\,P(B)\\,P(C)": "\\text{но}\\quad P(ABC) \\ne P(A)\\,P(B)\\,P(C)",
+  "Every construction, counted": "Каждая конструкция на счету",
+  "Type $n$ and $k$. While there are at most 120 constructions, every one is laid out; above that only the exact count is shown, with a few sampled constructions.": "Введите $n$ и $k$. Пока конструкций не больше 120, выкладывается каждая; дальше показывается только точное число и несколько случайно выбранных конструкций.",
+  "$n = 4,\\ k = 2$: 12 arrangements, 6 combinations; each combination gives $2! = 2$ orders.": "При $n = 4,\\ k = 2$: 12 размещений и 6 сочетаний; каждое сочетание даёт $2! = 2$ порядка.",
+  "Open the Combinatorics station": "Откройте станцию «Комбинаторика»"
 }
