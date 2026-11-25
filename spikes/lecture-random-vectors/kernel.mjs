@@ -355,6 +355,165 @@ function runMoments({ law: li, p, m, lambda, sigma, a = 2, b = 2, n }, seed) {
   return { axes: { x: 'value $x$', y: law.discrete ? 'probability' : 'density $f(x)$' }, readouts, series, notes, formula };
 }
 
+// ---------------------------------------------------------------- Random variable and its CDF (L5, #131)
+
+const cdfParams = [
+  { key: 'source', label: 'Source (0 two dice, $X(\\omega)$ below · 1 uniform on $[0, 1]$ · 2 exponential, $\\lambda = 1$ · 3 normal $N(0, 1)$)', min: 0, max: 3, step: 1, default: 0 },
+  { key: 'map', label: 'Mapping $X$ (0 the sum $\\omega_1 + \\omega_2$ · 1 the maximum · 2 the difference $|\\omega_1 - \\omega_2|$ · 3 the number of sixes · 4 linear $a\\,\\omega_1 + b\\,\\omega_2$)', min: 0, max: 4, step: 1, default: 0 },
+  { key: 'a', label: 'Coefficient $a$ (mapping 4)', min: -3, max: 3, step: 1, default: 2 },
+  { key: 'b', label: 'Coefficient $b$ (mapping 4)', min: -3, max: 3, step: 1, default: -1 },
+  { key: 'x', label: 'Bound $x$ in $F(x) = P(X \\le x)$', min: -20, max: 20, step: 0.05, default: 7 },
+  { key: 'n', label: 'Experiments $n$', min: 10, max: 5000, step: 10, default: 600 },
+];
+/** Experiments of each draw that fly from Ω to the number line. */
+export const FLIGHTS = 36;
+
+/** X(ω) on the 36 outcomes ω = (ω₁, ω₂) of two dice, in row-major order (ω₁ is the row). */
+export function diceMapping(map, a = 1, b = 1) {
+  const f = [
+    (u, v) => u + v,
+    (u, v) => Math.max(u, v),
+    (u, v) => Math.abs(u - v),
+    (u, v) => (u === 6) + (v === 6),
+    (u, v) => a * u + b * v,
+  ][map] ?? ((u, v) => u + v);
+  const values = [];
+  for (let u = 1; u <= 6; u++) for (let v = 1; v <= 6; v++) values.push(f(u, v));
+  return values;
+}
+
+const CONTINUOUS = {
+  1: { name: 'uniform on $[0, 1]$', domain: [-0.5, 1.5], pdf: (x) => (x >= 0 && x <= 1 ? 1 : 0), cdf: (x) => Math.min(1, Math.max(0, x)), mean: 0.5, sample: (seed, i) => uni(seed, 110, i), tex: 'F(x) = x,\\ 0 \\le x \\le 1', from: 0, to: 1 },
+  2: { name: 'exponential, $\\lambda = 1$', domain: [-0.5, 6], pdf: (x) => (x < 0 ? 0 : Math.exp(-x)), cdf: (x) => (x < 0 ? 0 : 1 - Math.exp(-x)), mean: 1, sample: (seed, i) => -Math.log(uni(seed, 112, i)), tex: 'F(x) = 1 - e^{-x},\\ x \\ge 0', from: 0, to: Infinity },
+  3: { name: 'normal $N(0, 1)$', domain: [-4, 4], pdf: (x) => normPdf(x), cdf: (x) => Phi(x), mean: 0, sample: (seed, i) => gauss(seed, 114, i), tex: 'F(x) = \\Phi(x)', from: -30, to: Infinity },
+};
+/** Trapezoid quadrature of f on [lo, hi] with `steps` panels. */
+export function trapezoid(f, lo, hi, steps = 2000) {
+  if (!(hi > lo)) return 0;
+  const h = (hi - lo) / steps;
+  let s = (f(lo) + f(hi)) / 2;
+  for (let i = 1; i < steps; i++) s += f(lo + i * h);
+  return s * h;
+}
+const AREA_POINTS = 121;
+
+function ecdfSeries(xs, lo, hi) {
+  const sorted = [...xs].sort((p, q) => p - q), n = sorted.length;
+  // One point per distinct value (the step height after it); the chart draws the steps.
+  const x = [], y = [];
+  for (let i = 0; i < n; i++) if (i === n - 1 || sorted[i + 1] !== sorted[i]) { x.push(r6(sorted[i])); y.push(r6((i + 1) / n)); }
+  return { x: x.filter((v) => v >= lo && v <= hi), y: y.filter((_, i) => x[i] >= lo && x[i] <= hi) };
+}
+
+/** a·ω₁ + b·ω₂ in textbook form: no 1 or 0 coefficients, signs folded. */
+function linear(a, b) {
+  const term = (c, v, first) => {
+    if (c === 0) return '';
+    const mag = Math.abs(c) === 1 ? '' : `${Math.abs(c)}\\,`;
+    return first ? `${c < 0 ? '-' : ''}${mag}${v}` : ` ${c < 0 ? '-' : '+'} ${mag}${v}`;
+  };
+  const out = term(a, '\\omega_1', true) + term(b, '\\omega_2', a === 0);
+  return out || '0';
+}
+
+function runCdf({ source, map, a, b, x, n }, seed) {
+  const share = (xs) => xs.reduce((k, v) => (v <= x ? k + 1 : k), 0) / xs.length;
+  if (source === 0) {
+    const values = diceMapping(map, a, b);
+    const support = [...new Set(values)].sort((p, q) => p - q);
+    const ways = support.map((v) => values.filter((w) => w === v).length);
+    const pmf = ways.map((w) => w / 36);
+    const picks = Array.from({ length: n }, (_, i) => Math.floor(uni(seed, 116, i) * 36));
+    const xs = picks.map((k) => values[k]);
+    const counts = support.map((v) => xs.filter((w) => w === v).length);
+    const below = ways.reduce((acc, w, i) => (support[i] <= x ? acc + w : acc), 0);
+    const F = below / 36;
+    const lo = support[0] - 1, hi = support.at(-1) + 1;
+    const Fs = support.map((_, i) => ways.slice(0, i + 1).reduce((p, q) => p + q, 0) / 36);
+    const series = [
+      { id: 'freq', kind: 'hist', tone: 'muted', label: 'Share of the $n$ experiments, $n_k/n$', x: support.map((v) => v - 0.5), y: counts.map((c) => r6(c / n)) },
+      { id: 'pmf', kind: 'pmf', label: '$P(X = x_k)$', x: support, y: pmf.map(r6) },
+      { id: 'pmf-left', kind: 'pmf', tone: 'accent', label: 'the terms of $F(x)$: $x_k \\le x$', x: support, y: pmf.map((q, i) => (support[i] <= x ? r6(q) : 0)) },
+      { id: 'bound', kind: 'rule', tone: 'accent', label: 'bound $x$', x: [x], y: [] },
+    ];
+    const linked = [
+      { id: 'ecdf', kind: 'ecdf', label: 'Empirical $F_n(x)$', ...ecdfSeries(xs, lo, hi) },
+      { id: 'cdf', kind: 'ecdf', tone: 'signal', label: '$F(x)$: right-continuous steps, jumps $p_k$', x: support, y: Fs.map(r6) },
+      { id: 'cdf-closed', kind: 'points', tone: 'signal', marker: 'dot', label: '$F(x_k)$ includes the jump', x: support, y: Fs.map(r6) },
+      { id: 'cdf-open', kind: 'points', tone: 'signal', marker: 'open', label: 'the value just left of $x_k$', x: support, y: Fs.map((v, i) => r6(v - pmf[i])) },
+      { id: 'level', kind: 'line', tone: 'accent', label: '$F(x)$ at the bound', x: [lo, x], y: [r6(F), r6(F)] },
+      { id: 'bound', kind: 'rule', tone: 'accent', label: 'bound $x$', x: [x], y: [] },
+    ];
+    const names = ['\\omega_1 + \\omega_2', '\\max(\\omega_1, \\omega_2)', '|\\omega_1 - \\omega_2|', '\\#\\{\\, i \\colon \\omega_i = 6 \\,\\}', linear(a, b)];
+    const mean = values.reduce((p, q) => p + q, 0) / 36;
+    return {
+      axes: { x: 'value $x$', y: 'probability' },
+      domain: { x: [lo, hi] },
+      readouts: [
+        { key: 'F', label: '$F(x) = P(X \\le x)$', observed: r6(share(xs)), theory: r6(F), convention: 'observed: the share of experiments with $X \\le x$' },
+        { key: 'jump', label: 'Jump of $F$ at $x$: $P(X = x)$', observed: r6(xs.filter((v) => v === x).length / n), theory: r6((values.filter((v) => v === x).length) / 36), convention: 'zero between the values $x_k$' },
+        { key: 'mean', label: 'Expectation $MX$', observed: r6(xs.reduce((p, q) => p + q, 0) / n), theory: r6(mean) },
+        { key: 'values', label: 'Values of $X$', observed: support.length, theory: support.length, convention: `from ${support[0]} to ${support.at(-1)}` },
+      ],
+      formula: [
+        `X(\\omega) = ${names[map]} \\qquad F(${r6(x)}) = P(X \\le ${r6(x)}) = \\sum_{x_k \\le ${r6(x)}} p_k = \\dfrac{${below}}{36} = ${r6(F)}`,
+      ],
+      notes: [
+        'L5: a random variable is a function $X(\\omega)$ on the outcome space. Each of the 36 equally likely outcomes of two dice carries its value; outcomes with the same value pool their probability $\\tfrac{1}{36}$.',
+        'The distribution function $F(x) = P(X \\le x)$ of a discrete variable is a staircase: it jumps by $p_k$ at each value $x_k$ and is continuous from the right, so $F(x_k)$ already includes the jump (filled dot), the open dot is the limit from the left.',
+        'Type or slide $x$: the highlighted stems are exactly the terms summed into $F(x)$. Between two values nothing changes.',
+      ],
+      series,
+      linked: { series: linked, axes: { x: 'value $x$', y: '$F(x)$' }, domain: { x: [lo, hi], y: [0, 1.04] } },
+      outcomes: { values, picks: picks.slice(0, FLIGHTS), support, pmf: pmf.map(r6), counts, n, x },
+    };
+  }
+  const law = CONTINUOUS[source];
+  const [lo, hi] = law.domain;
+  const xs = Array.from({ length: n }, (_, i) => law.sample(seed, i));
+  const F = law.cdf(x);
+  const left = Math.max(lo, Math.min(hi, x));
+  const ax = grid(lo, left, AREA_POINTS);
+  // The filled area is a quadrature of the drawn density from the left end of the axis (F(lo) = 0 for these laws).
+  const area = trapezoid(law.pdf, law.from, Math.min(x, law.to), 4000);
+  const bins = 40, w = (hi - lo) / bins;
+  const counts = new Array(bins).fill(0);
+  for (const v of xs) { const k = Math.floor((v - lo) / w); if (k >= 0 && k < bins) counts[k]++; }
+  const gx = grid(lo, hi, 241);
+  const series = [
+    { id: 'hist', kind: 'hist', tone: 'muted', label: 'Histogram of the $n$ experiments', x: counts.map((_, k) => r6(lo + k * w)), y: counts.map((c) => r6(c / (n * w))) },
+    { id: 'area', kind: 'band', tone: 'accent', label: `Area to the left of $x$: $F(x) = ${r6(F)}$`, x: ax.map(r6), y: ax.map(() => 0), y2: ax.map((t) => r6(law.pdf(t))) },
+    { id: 'pdf', kind: 'pdf', tone: 'signal', label: 'Density $f(t)$', x: gx.map(r6), y: gx.map((t) => r6(law.pdf(t))) },
+    { id: 'bound', kind: 'rule', tone: 'accent', label: 'bound $x$', x: [x], y: [] },
+  ];
+  const cx = grid(lo, hi, 241);
+  const linked = [
+    { id: 'ecdf', kind: 'ecdf', label: 'Empirical $F_n(x)$', ...ecdfSeries(xs, lo, hi) },
+    { id: 'cdf', kind: 'cdf', tone: 'signal', label: '$F(x) = \\int_{-\\infty}^{x} f(t)\\,dt$', x: cx.map(r6), y: cx.map((t) => r6(law.cdf(t))) },
+    { id: 'level', kind: 'line', tone: 'accent', label: '$F(x)$ at the bound', x: [lo, x], y: [r6(F), r6(F)] },
+    { id: 'cdf-closed', kind: 'points', tone: 'accent', marker: 'dot', label: 'the point $(x, F(x))$', x: [x], y: [r6(F)] },
+    { id: 'bound', kind: 'rule', tone: 'accent', label: 'bound $x$', x: [x], y: [] },
+  ];
+  return {
+    axes: { x: 'value $t$', y: 'density $f(t)$' },
+    domain: { x: [lo, hi] },
+    readouts: [
+      { key: 'F', label: '$F(x) = P(X \\le x)$', observed: r6(share(xs)), theory: r6(F), convention: 'observed: the share of experiments with $X \\le x$' },
+      { key: 'area', label: 'Shaded area $\\int_{-\\infty}^{x} f(t)\\,dt$', observed: r6(area), theory: r6(F), convention: 'observed: trapezoid quadrature of the drawn density' },
+      { key: 'jump', label: 'Jump of $F$ at $x$: $P(X = x)$', observed: r6(xs.filter((v) => v === x).length / n), theory: 0, convention: 'a continuous law gives every single point probability 0' },
+      { key: 'mean', label: 'Expectation $MX$', observed: r6(xs.reduce((p, q) => p + q, 0) / n), theory: law.mean },
+    ],
+    formula: [`F(${r6(x)}) = \\int_{-\\infty}^{${r6(x)}} f(t)\\,dt = ${r6(F)} \\qquad ${law.tex}`],
+    notes: [
+      `The law is ${law.name}. The shaded area under the density to the left of $x$ is $F(x)$, and the lower chart marks the same number at the height of $F$.`,
+      'Move $x$: the area grows exactly as fast as the density is high, $F\'(x) = f(x)$; where $f = 0$ the distribution function is flat.',
+      'The empirical $F_n(x)$ of the $n$ experiments is a staircase with steps $\\tfrac{1}{n}$; it hugs $F(x)$ more closely as $n$ grows.',
+    ],
+    series,
+    linked: { series: linked, axes: { x: 'value $x$', y: '$F(x)$' }, domain: { x: [lo, hi], y: [0, 1.04] } },
+  };
+}
+
 // ---------------------------------------------------------------- Balance (L6: the expectation as a centre of mass, #132)
 
 export const BEAM = { lo: -5, hi: 5, weights: 4 };
@@ -835,12 +994,14 @@ export const stations = {
   transform: { params: transformParams, live: true },
   scatter: { params: scatterParams, live: true },
   balance: { params: balanceParams, live: true },
+  cdf: { params: cdfParams, live: true },
 };
 
 export function run(params, { seed, station = 'moments' } = {}) {
   const s = seed >>> 0;
   if (station === 'transform') return runTransform(params, s);
   if (station === 'balance') return runBalance(params, s);
+  if (station === 'cdf') return runCdf(params, s);
   if (station === 'scatter') return params.mode === 2 ? runMatching(params, s) : params.mode >= 3 ? runNonlinear(params, s) : runVector(params, s);
   return runMoments(params, s);
 }

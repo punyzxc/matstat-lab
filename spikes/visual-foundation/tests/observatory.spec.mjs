@@ -78,7 +78,7 @@ test('narrow screens keep all connected windows and immediate static previews', 
   await page.waitForTimeout(210);
   expect(await globe.evaluate((node) => node.toDataURL())).toBe(before);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
-  await expect(page.locator('.orbit-link-trace')).toHaveCount(5); // one trace between neighbours: six stations on the second orbit since #132
+  await expect(page.locator('.orbit-link-trace')).toHaveCount(6); // one trace per station of the second orbit (six since #131, #132)
   await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(1);
   await page.getByRole('link', { name: /^Distribution Explorer/ }).click();
   await expect(page.getByRole('button', { name: /(Play|Stop) the experiment/ })).toBeVisible();

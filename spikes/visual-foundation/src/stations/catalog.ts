@@ -31,6 +31,8 @@ export const stations: readonly Station[] = [
 
   { kind: 'legacy', id: 'distribution', name: 'Distribution Explorer', orbit: 'variables', lectures: 'L5', module: 'distribution',
     summary: 'Sample a distribution and compare its shape with the theoretical model.' },
+  { kind: 'kernel', id: 'cdf', name: 'Distribution function', orbit: 'variables', lectures: 'L5', kernel: 'lecture-random-vectors', issue: 131,
+    summary: 'Outcomes of two dice fly to their values $X(\\omega)$; the area under $f$ left of a typed $x$ is $F(x)$ on the linked staircase or curve.' },
   { kind: 'kernel', id: 'moments', name: 'Moments', orbit: 'variables', lectures: 'L6', kernel: 'lecture-random-vectors', issue: 44,
     summary: 'Compare mean, median, mode, skewness and kurtosis with theory; check the $3\\sigma$ rule; gamma and beta laws change shape before your eyes.' },
   { kind: 'kernel', id: 'balance', name: 'Centre of mass', orbit: 'variables', lectures: 'L6', kernel: 'lecture-random-vectors', issue: 132,
@@ -76,6 +78,7 @@ const ru: Record<string, { name: string; summary: string }> = {
   bayes: { name: 'Байес', summary: 'Условная, полная и апостериорная вероятности как подсчёт смоделированных исходов.' },
   bernoulli: { name: 'Бернулли', summary: 'Сравните точный биномиальный закон с приближениями Муавра — Лапласа и Пуассона.' },
   distribution: { name: 'Исследование распределения', summary: 'Разыграйте выборку и сравните её форму с теоретической моделью.' },
+  cdf: { name: 'Функция распределения', summary: 'Исходы двух костей летят к своим значениям $X(\\omega)$; площадь под $f$ левее введённого $x$ равна $F(x)$ на связанном графике.' },
   moments: { name: 'Моменты', summary: 'Сравните среднее, медиану, моду, асимметрию и эксцесс с теорией; проверьте правило $3\\sigma$; гамма- и бета-законы меняют форму на глазах.' },
   transform: { name: 'Преобразование', summary: 'Пропустите выборку через $y = \\varphi(x)$ и сравните её с плотностью преобразованной величины.' },
   balance: { name: 'Центр масс', summary: 'Массы $p_i$ в точках $x_i$ на рычаге: перетащите или введите их, и опора сдвинется в $M\\xi = \\sum x_i p_i$.' },
