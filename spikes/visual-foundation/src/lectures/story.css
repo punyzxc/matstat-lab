@@ -1,0 +1,44 @@
+.lecture-story-host { height: 100%; min-height: 0; }
+.lecture-story { position: relative; display: grid; grid-template-columns: minmax(280px, .9fr) minmax(380px, 1.1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 14px 24px; height: 100%; min-height: 0; }
+.story-flow { overflow: auto; min-height: 0; overscroll-behavior: contain; scrollbar-width: thin; padding-right: 12px; }
+.story-flow[inert] { visibility: hidden; }
+.story-flow > section { min-height: 100%; box-sizing: border-box; padding: 6px 0 54px; border-bottom: 1px solid var(--rule); }
+.story-flow h3 { margin: 5px 0 16px; font: 450 clamp(23px, 2.3vw, 34px)/1.12 var(--sans); letter-spacing: -.025em; }
+.story-step-number { margin: 0 0 6px; color: var(--signal); font: 10px/1.5 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.story-layers { margin: 18px 0; border-top: 1px solid var(--rule); }
+.story-layers h4 { margin: 0; }
+.story-layers h4 button { display: flex; justify-content: space-between; gap: 14px; width: 100%; padding: 10px 0; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--rule); text-align: left; font: 13px var(--sans); }
+.story-layers [role='region'] { padding: 10px 0 16px; color: #c8c8c6; font-size: 14px; line-height: 1.65; white-space: pre-line; overflow-x: auto; }
+.story-what-if { margin: 18px 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.story-what-if p { width: 100%; margin: 0 0 3px; color: var(--grey); font: 11px var(--mono); }
+.story-what-if button, .story-modes button { border: 1px solid #45453d; color: var(--ink); background: transparent; padding: 7px 10px; font: 12px var(--sans); }
+.story-what-if button:hover, .story-what-if button:focus-visible { border-color: var(--signal); }
+.story-scientists { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; }
+.story-scientists .portrait { --cell: 4.8px; }
+.story-lab { min-width: 0; min-height: 0; display: flex; flex-direction: column; border: 1px solid #3c3c32; background: #090b0bdd; padding: 14px; }
+.story-lab[data-expanded='true'] { position: absolute; inset: 0; z-index: 5; background: #090b0b; }
+.story-lab-head { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.story-lab-head h4 { margin: 0; font: 450 16px/1.35 var(--sans); max-width: 35ch; }
+.story-modes { display: flex; gap: 3px; }
+.story-modes button[aria-pressed='true'] { color: #111; background: var(--signal); border-color: var(--signal); }
+.story-live { min-height: 0; flex: 1; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-top: 10px; }
+.story-lab .station-grid { display: block; }
+.story-lab[data-mode='demo'] .parameters { display: none; }
+.story-lab[data-mode='explore'] .station-grid { display: grid; grid-template-columns: minmax(240px, 300px) minmax(0, 1fr); }
+.story-lab .readouts { font-size: 11px; }
+.story-expand { display: flex; align-items: center; justify-content: center; gap: 7px; flex: none; width: 100%; margin-top: 10px; padding: 9px; color: var(--ink); background: transparent; border: 1px solid #45453d; font: 12px var(--sans); }
+.story-controls { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--rule); padding-top: 10px; }
+html[data-present] .lecture-story .lecture-idea { font-size: clamp(19px, 1.7vw, 27px); }
+@media (max-width: 900px) {
+  .lecture-story { grid-template-columns: minmax(220px, 1fr) minmax(270px, 1fr); gap: 10px; }
+  .story-lab { padding: 9px; }
+  .story-lab[data-mode='explore'] .station-grid { grid-template-columns: minmax(180px, .8fr) minmax(0, 1fr); }
+}
+@media (max-width: 620px) {
+  .lecture-story { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(180px, .8fr) auto; }
+  .story-lab { grid-row: 2; }
+  .story-controls { grid-row: 3; }
+  .story-lab[data-mode='explore'] .station-grid { display: block; }
+  .story-controls .lecture-keys { display: none; }
+  .story-flow h3 { font-size: 23px; }
+}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Activity, Box, CircleHelp, ExternalLink, SlidersHorizontal } from 'lucide-react';
 import { Panel, PanelHeading, Slider } from '../ui';
 import { isKernel, resolveParams, type Kernel, type KernelParam, type KernelResult, type Series } from './kernel-contract';
@@ -67,17 +67,23 @@ export function KernelStation({
   seed,
   params,
   onState,
+  typedChoices = false,
+  stateSync = 'debounced',
 }: {
   station: KernelStationInfo;
   seed: number;
   params: Record<string, number>;
   onState: (seed: number, params: Record<string, number>) => void;
+  /** Explore mode can expose a numeric editor for every declared parameter, including choices. */
+  typedChoices?: boolean;
+  /** Embedded controls need current edits before a following preset patch, without the URL debounce. */
+  stateSync?: 'debounced' | 'immediate';
 }) {
   const load = useKernel(station.kernel);
   if (load.state === 'missing') return <PendingStation station={station} />;
   if (load.state === 'loading') return <p className="station-status" role="status">{t(`Loading the ${station.name} kernel…`, `Загрузка ядра станции «${station.name}»…`)}</p>;
   if (load.state === 'error') return <p className="station-status" role="alert">{t('The kernel failed to load: ', 'Ядро не загрузилось: ')}{load.message}</p>;
-  return <ReadyStation station={station} kernel={load.kernel} seed={seed} params={params} onState={onState} />;
+  return <ReadyStation station={station} kernel={load.kernel} seed={seed} params={params} onState={onState} typedChoices={typedChoices} stateSync={stateSync} />;
 }
 
 /** Parameters as a stable string, to tell a new experiment from a new draw of the same one. */
@@ -87,9 +93,11 @@ const TRACE = 60, RIDGE = 18;
 
 type Draw = { draw: number; seed: number; result: KernelResult };
 
-function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onState }: {
+function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onState, typedChoices, stateSync }: {
   station: KernelStationInfo; kernel: Kernel; seed: number; params: Record<string, number>;
   onState: (seed: number, params: Record<string, number>) => void;
+  typedChoices?: boolean;
+  stateSync?: 'debounced' | 'immediate';
 }) {
   const lang = useLang();
   const declared = kernel.stations?.[station.id]?.params ?? kernel.meta.params;
@@ -129,10 +137,14 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
   // The URL always reproduces what is on screen (replaceState: no history entry per draw).
   const sync = useRef(onState);
   sync.current = onState;
+  useLayoutEffect(() => {
+    if (stateSync === 'immediate') sync.current(seed, params);
+  }, [seed, params, stateSync]);
   useEffect(() => {
+    if (stateSync === 'immediate') return;
     const t = window.setTimeout(() => sync.current(seed, params), playing ? 900 : 250);
     return () => clearTimeout(t);
-  }, [seed, params, playing]);
+  }, [seed, params, playing, stateSync]);
 
   const advance = useCallback(() => {
     if (growing) setGrow((k) => k + 1);
@@ -192,7 +204,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
         <PanelHeading icon={<SlidersHorizontal size={16} aria-hidden />} title={t('Parameters', 'Параметры')} />
         <div className="parameter-body">
           {labelled.map((p) => {
-            const choice = choicesOf(p);
+            const choice = typedChoices ? null : choicesOf(p);
             return choice ? (
               <Choice key={p.key} id={`p-${p.key}`} title={choice.title} options={choice.options} value={params[p.key]}
                 onChange={(v) => setParams({ ...params, [p.key]: v })} />

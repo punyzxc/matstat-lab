@@ -3,7 +3,8 @@ import { useStationReducedMotion } from '../motion-preference';
 import { ArrowLeft, ArrowRight, FlaskConical, Presentation } from 'lucide-react';
 import { findStation } from '../stations/catalog';
 import { lectureHash, stationHash } from '../stations/route';
-import { fitPortrait, PORTRAIT, portraitScale, revealFrames, revealPortrait, type Lecture, type Scientist, type Step } from './script';
+import { fitPortrait, PORTRAIT, portraitScale, revealFrames, revealPortrait, usesStory, type Lecture, type Scientist, type Step } from './script';
+import { LectureStory } from './story';
 import roster from '../../lectures/scientists.json';
 import { MathText, Tex, mathToPlain } from '../math';
 import { lectureFormula, lectureText, plural, scientistText, t } from '../i18n';
@@ -43,6 +44,11 @@ const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isConte
  * ← → (and PageUp/PageDown, which presentation clickers send) move between steps, Home/End jump, P toggles presenter mode.
  */
 export function LecturePlayer({ lecture, step, present }: { lecture: Lecture; step: number; present: boolean }) {
+  return usesStory(lecture) ? <div className="lecture-story-host" data-testid="lecture-player"><LectureStory key={lecture.lecture} lecture={lecture} step={step} present={present} renderPortrait={slug => <Portrait slug={slug} />} /></div>
+    : <StepPlayer lecture={lecture} step={step} present={present} />;
+}
+
+function StepPlayer({ lecture, step, present }: { lecture: Lecture; step: number; present: boolean }) {
   const total = lecture.steps.length;
   const index = Math.min(Math.max(step, 1), total);
   const current = lecture.steps[index - 1];
