@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Tex } from './math';
-import { ChevronDown, Grid2X2, Pause, Play, RotateCw } from 'lucide-react';
+import { ChevronDown, RotateCw } from 'lucide-react';
 import { FigureCaption, LabHeader } from './lab-shell';
 import { orbits, stationsOf, type OrbitId } from './stations/catalog';
 import { StationCard } from './stations/station-card';
@@ -17,6 +17,7 @@ import { OrbitPreview } from './orbit-preview';
 import './observatory.css';
 import './orbital.css';
 import './stations/scene.css';
+import './stage.css';
 
 function useVisibleField(field: React.RefObject<HTMLDivElement | null>) {
   const [visible, setVisible] = useState(true);
@@ -61,14 +62,18 @@ export function Observatory({
   overlay?: ReactNode;
 }) {
   const reduced = useStationReducedMotion();
-  const [paused, setPaused] = useState(false);
-  const [mesh, setMesh] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
   const [focus, setFocus] = useState<string | null>(null);
   const field = useRef<HTMLDivElement>(null);
   const visible = useVisibleField(field);
-  const playing = !paused && !reduced;
-  const animating = playing && visible;
+  // The Earth always turns. Only the system reduced-motion preference holds the scene still.
+  const animating = !reduced && visible;
+  // The first-light intro plays once per visit, not on every orbit switch.
+  const [intro, setIntro] = useState(true);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIntro(false), 1600);
+    return () => clearTimeout(timer);
+  }, []);
   const opened = useRef<string | null>(null);
   useEffect(() => {
     const previous = opened.current;
@@ -84,7 +89,7 @@ export function Observatory({
   const current = orbits.find((o) => o.id === orbit)!;
   const active = openStation ?? focus ?? hover ?? (orbitStations.some((s) => s.id === lastVisited) ? lastVisited! : orbitStations[0].id);
   return (
-    <div className="atlas orbital-lab" data-dock={overlay ? 'open' : 'closed'}>
+    <div className="atlas orbital-lab" data-dock={overlay ? 'open' : 'closed'} data-intro={intro}>
       <a className="skip" href="#stations" onClick={(e) => { e.preventDefault(); document.querySelector<HTMLElement>('.orbital-nodes a')?.focus(); }}>
         Skip to stations
       </a>
@@ -132,30 +137,12 @@ export function Observatory({
                   create={earthPlate}
                   label="Earth point cloud with simulated orbital links and ASCII satellites"
                   playing={animating}
-                  mesh={mesh}
+                  mesh={false}
                   cue={0}
                 />
               </div>
               <div className="orbital-legend">
                 <i /> EARTH <span>·</span> DATA CORE
-              </div>
-              <div className="orbital-controls" role="group" aria-label="Globe controls">
-                <button
-                  aria-pressed={mesh}
-                  aria-label="Wireframe"
-                  title="Toggle wireframe"
-                  onClick={() => setMesh((v) => !v)}
-                >
-                  <Grid2X2 size={14} aria-hidden="true" />
-                </button>
-                <button
-                  disabled={reduced}
-                  aria-label={reduced ? 'Reduced motion enabled' : playing ? 'Pause motion' : 'Resume motion'}
-                  title={reduced ? 'Reduced motion enabled' : playing ? 'Pause motion' : 'Resume motion'}
-                  onClick={() => setPaused((v) => !v)}
-                >
-                  {playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
-                </button>
               </div>
             </div>
             <OrbitLinks key={orbit} field={field} active={active} playing={animating && !overlay} />
@@ -190,7 +177,6 @@ export function Observatory({
                 );
               })}
             </nav>
-            {overlay}
           </div>
           <div className="orbit-console">
             <div className="orbit-source">
@@ -234,6 +220,7 @@ export function Observatory({
         </section>
         
       </main>
+      {overlay}
     </div>
   );
 }
