@@ -12,8 +12,15 @@
         "P(A \\mid B) = \\dfrac{P(AB)}{P(B)}"
       ],
       "experiment": {
-        "station": "bayes",
-        "seed": 202
+        "station": "conditional",
+        "seed": 202,
+        "params": {
+          "a": 0.5,
+          "s": 0.3,
+          "b": 0.5,
+          "h": 0.6
+        },
+        "label": "Condition on B in the Conditional probability station"
       }
     },
     {
