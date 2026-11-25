@@ -12,6 +12,7 @@ const views = [
   '#station/confidence',
   '#station/testing',
   '#station/randomness',
+  '#station/homogeneity',
   '#station/urn',
   '#station/frequency',
   '#station/darts',
