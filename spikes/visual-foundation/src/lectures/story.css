@@ -920,3 +920,25 @@ html[data-present] .story {
 .figure--court .figure-label--middle {
   transform: translateX(-50%);
 }
+
+/* ---------------------------------------------------------------- the living population (L10) */
+.sample-obs {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.sample-obs .figure-label {
+  color: var(--ink);
+  font-size: 12.5px;
+}
+.sample-hint {
+  color: var(--grey);
+  font-size: 12px;
+}
+.sample-gap {
+  font-size: 14px;
+}
+.figure--sample .figure-label--middle {
+  transform: translateX(-50%);
+}

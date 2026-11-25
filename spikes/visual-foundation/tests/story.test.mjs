@@ -11,6 +11,8 @@ import { FIGURES, figureParams } from '../src/lectures/figures/specs.mjs';
 import { ksToNormal, replicate, SOURCES, zHistogram, zSample } from '../src/lectures/figures/clt-model.mjs';
 import { intervalAt, wall } from '../src/lectures/figures/ci-model.mjs';
 import { estimatesAt, LADDER, race, theory } from '../src/lectures/figures/est-model.mjs';
+import { describe as describeSample, population, POPULATION } from '../src/lectures/figures/sample-model.mjs';
+import { run as runSampling } from '../../lecture-sampling-goodness-of-fit/kernel.mjs';
 import { courtCases, errorsOf, powerCurve, regionOf, rejects } from '../src/lectures/figures/test-model.mjs';
 import { validateLecture } from '../src/lectures/script.ts';
 import { ksBand, LAWS, standardizedSums } from '../../lecture-limit-theorems/kernel.mjs';
@@ -68,7 +70,7 @@ test('typed values snap to the parameter range and step; text that is not a numb
 // ---------------------------------------------------------------- story scripts
 test('the flagship lectures are stories; every story script checks against the figure specs', () => {
   const ids = stories.map((s) => s.lecture);
-  for (const n of [8, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
+  for (const n of [8, 10, 11, 12]) assert.ok(ids.includes(n), `L${n} is a story lecture`);
   const lectureSteps = Object.fromEntries(scripts.map((s) => [s.lecture, s.steps.length]));
   for (const s of scripts) assert.deepEqual(validateLecture(s, { stations, scientists: slugs, figures: FIGURES, liveKeys: liveTexKeys, lectureSteps }), [], `L${s.lecture}`);
 });
@@ -251,6 +253,49 @@ test('court: the power curve equals alpha at a0, grows with the effect and with 
   assert.ok(Math.abs(two.exact[grid.indexOf(-1)] - two.exact[grid.indexOf(1)]) < 1e-9, 'two-sided power is symmetric');
   const small = errorsOf({ n: 4, d: 0.5, alpha: 0.05, tail: 1 }).power, big = errorsOf({ n: 64, d: 0.5, alpha: 0.05, tail: 1 }).power;
   assert.ok(small < big);
+});
+
+// ---------------------------------------------------------------- #125 L10 the living population
+test('living population: the sample is the first n members of the population and the Sample station\'s own', () => {
+  for (const law of [0, 1, 2]) {
+    const pop = population({ law, seed: 1010 });
+    assert.equal(pop.x.length, POPULATION);
+    assert.ok(pop.lift.every((u) => u > 0 && u < 1));
+    for (const n of [10, 40, 1000]) {
+      const d = describeSample({ law, n, seed: 1010 });
+      assert.deepEqual(d.x, pop.x.slice(0, n), 'the sample flies out of the population');
+      const station = Object.fromEntries(runSampling({ law, n }, { seed: 1010, station: 'sample' }).readouts.map((r) => [r.key, r]));
+      assert.equal(station.mean.observed, d.mean);
+      assert.equal(station.s2.observed, d.s2);
+      assert.equal(station.k.observed, d.k);
+      assert.equal(station.n.observed, d.sum);
+      assert.ok(Math.abs(station.area.observed - d.table.area) < 1e-12);
+    }
+  }
+});
+
+test('living population: every portrait accounts for every observation; the same seed gives the same sample', () => {
+  for (const [law, n, bins] of [[0, 40, 0], [2, 400, 0], [1, 100, 20], [0, 1000, 4]]) {
+    const d = describeSample({ law, n, bins, seed: 1010 });
+    assert.equal(d.sum, n, 'table counts sum to n');
+    assert.deepEqual([...d.rank].sort((a, b) => a - b), Array.from({ length: n }, (_, i) => i), 'ranks are a permutation');
+    d.x.forEach((v, i) => {
+      assert.equal(d.sorted[d.rank[i]], v, 'x_i sits at its rank in the variation series');
+      const b = d.bin[i], e = d.table.edges;
+      assert.ok(v >= e[b] - 1e-12 && (b === d.k - 1 ? v <= e[b + 1] + 1e-12 : v < e[b + 1]), 'x_i lies in its interval');
+      assert.ok(d.slot[i] < d.table.counts[b]);
+      assert.equal(d.fnAt[i], d.x.filter((y) => y <= v).length / n, 'F_n at x_i counts the observations not above it');
+    });
+    for (let b = 0; b < d.k; b++) {
+      const slots = d.bin.map((x, i) => (x === b ? d.slot[i] : -1)).filter((j) => j >= 0).sort((p, q) => p - q);
+      assert.deepEqual(slots, Array.from({ length: d.table.counts[b] }, (_, j) => j), 'each stack is filled without gaps');
+    }
+    assert.deepEqual(d, describeSample({ law, n, bins, seed: 1010 }), 'reproducible');
+  }
+  assert.notDeepEqual(describeSample({ law: 0, n: 40, seed: 1010 }).x, describeSample({ law: 0, n: 40, seed: 1011 }).x);
+  // Glivenko: the largest gap shrinks as n grows
+  assert.ok(describeSample({ law: 0, n: 1000, seed: 1010 }).dn < describeSample({ law: 0, n: 10, seed: 1010 }).dn);
+  assert.deepEqual(FIGURES['sample-life'].station({ law: 2, n: 100, bins: 0 }), { station: 'sample', params: { law: 2, n: 100, bins: 0, digits: 0, view: 0 } });
 });
 
 // ---------------------------------------------------------------- #138 math portals

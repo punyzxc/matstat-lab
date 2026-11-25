@@ -92,7 +92,13 @@
       "layers": {
         "intuition": "The coral sliver is the price of the rule: in a world where $H_0$ is true, that share of samples still lands in $\\mathcal{K}$ and convicts an innocent hypothesis.",
         "details": "For a right-sided $H_1\\colon a > a_0$ the region is $U > u_{\\mathrm{cr}}$ with $\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - 2\\alpha}{2}$; for a two-sided $H_1$ it is $|U| > u_{\\mathrm{cr}}$ with $\\Phi_0(u_{\\mathrm{cr}}) = \\dfrac{1 - \\alpha}{2}$, where $\\Phi_0$ is the Laplace function."
-      }
+      },
+      "portals": [
+        {
+          "lecture": 10,
+          "step": 7
+        }
+      ]
     },
     {
       "title": "Errors of two kinds",
