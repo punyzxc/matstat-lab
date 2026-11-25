@@ -67,6 +67,71 @@ function runEvents(p, seed) {
   };
 }
 
+// ---------- Conditional probability as shrinking the world to B (#117) ----------
+/** |P(AB) − P(A)P(B)| at or below this counts as independent (the parameters move in steps of 0.01). */
+export const INDEP_TOL = 0.002;
+/** Points drawn on the square; the counts use all n. */
+export const SQUARE_POINTS = 600;
+const r6 = (v) => (v == null || !Number.isFinite(v) ? null : Number(v.toPrecision(6)));
+const dec = (v) => String(Number(v.toPrecision(4)));
+/** Log-spaced checkpoints 1 … n (distinct integers), for running frequencies. */
+const checkpoints = (n, count = 100) => [...new Set(Array.from({ length: count }, (_, i) => Math.round(Math.exp((Math.log(n) * i) / (count - 1)))))];
+
+export function runConditional(p, seed) {
+  const { P, rect } = eventGeometry({ ...p, c: 0 });
+  const n = p.n, ns = checkpoints(n);
+  let A = 0, B = 0, AB = 0, k = 0;
+  const points = [], cls = [], fA = [], fAgB = [], xAgB = [];
+  for (let i = 0; i < n; i++) {
+    const x = u01(seed, 0, i), y = u01(seed, 1, i);
+    const inA = inRect(rect.A, x, y), inB = inRect(rect.B, x, y);
+    A += inA; B += inB; AB += inA && inB;
+    if (i < SQUARE_POINTS) { points.push([r6(x), r6(y)]); cls.push((inA ? 1 : 0) + (inB ? 2 : 0)); }
+    if (i + 1 === ns[k]) {
+      fA.push(A / (i + 1));
+      if (B > 0) { xAgB.push(Math.log10(i + 1)); fAgB.push(AB / B); }
+      k++;
+    }
+  }
+  const gap = Math.round((P.AB - P.A * P.B) * 1e12) / 1e12 + 0;
+  const independent = P.B > 0 && P.A > 0 && Math.abs(gap) <= INDEP_TOL;
+  const lx = ns.map((v) => Math.log10(v)), ln = Math.log10(n);
+  const ro = (key, label, m, theory, denom) => ({ key, label, observed: denom > 0 ? r6(m / denom) : null, theory: r6(theory), band: theory == null ? null : band(theory, denom), count: m });
+  const series = [
+    { id: 'exactA', kind: 'line', tone: 'muted', label: `$P(A) = ${dec(P.A)}$`, x: [0, ln], y: [P.A, P.A] },
+    { id: 'freqA', kind: 'line', tone: 'default', label: 'frequency of $A$', x: lx, y: fA },
+  ];
+  if (P.AgB != null) series.push(
+    { id: 'exactAgB', kind: 'line', tone: 'signal', label: `$P(A \\mid B) = ${dec(P.AgB)}$`, x: [0, ln], y: [P.AgB, P.AgB] },
+    { id: 'freqAgB', kind: 'line', tone: 'accent', label: 'share of $A$ among the points of $B$', x: xAgB, y: fAgB },
+  );
+  const formula = [
+    `P(A) = ${dec(P.A)}, \\quad P(B) = ${dec(P.B)}, \\quad P(AB) = ${dec(P.AB)}`,
+    P.B > 0 ? `P(A \\mid B) = \\dfrac{P(AB)}{P(B)} = \\dfrac{${dec(P.AB)}}{${dec(P.B)}} = ${dec(P.AgB)}` : 'P(B) = 0 \\Rightarrow P(A \\mid B) \\text{ is not defined}',
+    `P(AB) - P(A)\\,P(B) = ${dec(P.AB)} - ${dec(P.A)} \\cdot ${dec(P.B)} = ${dec(gap + 0)}`,
+  ];
+  const notes = [
+    'Conditioning on $B$ (L2): we learn that $B$ happened, so only the outcomes of $B$ remain possible. $B$ becomes the whole world, and $A$ keeps only its part inside $B$: $P(A \\mid B) = \\dfrac{P(AB)}{P(B)}$.',
+    `$A$ and $B$ are independent when $P(AB) = P(A)\\,P(B)$, that is, when $P(A \\mid B) = P(A)$: knowing $B$ does not change the chances of $A$. Here it holds when the share of $B$ covered by $A$ equals the width of $A$; the marker shows it within ${INDEP_TOL}.`,
+  ];
+  if (P.B === 0) notes.unshift('$B$ has zero area: $P(B) = 0$, and conditioning on it is not defined.');
+  return {
+    axes: { x: '$\\lg n$, points thrown', y: 'frequency' },
+    domain: { x: [0, ln], y: [0, 1] },
+    readouts: [
+      ro('pA', '$P(A)$', A, P.A, n), ro('pB', '$P(B)$', B, P.B, n), ro('pAB', '$P(AB)$', AB, P.AB, n),
+      { ...ro('pAgB', '$P(A \\mid B) = \\dfrac{P(AB)}{P(B)}$', AB, P.AgB, B), band: P.AgB == null ? null : band(P.AgB, n * P.B) },
+      { key: 'indep', label: '$P(AB) - P(A)\\,P(B)$', observed: r6(AB / n - (A / n) * (B / n)), theory: r6(gap + 0),
+        convention: independent ? `equal within ${INDEP_TOL}: $A$ and $B$ are independent` : 'not zero: $A$ and $B$ are dependent' },
+    ],
+    series,
+    formula,
+    square: { A: rect.A, B: rect.B, P: { A: P.A, B: P.B, AB: P.AB, AgB: P.AgB }, independent, gap: gap + 0, points, cls,
+      keys: { a: p.a, s: p.s, b: p.b, h: p.h }, step: 0.01 },
+    notes,
+  };
+}
+
 // ---------- View 2: Bernstein's tetrahedron and the product-only counterexample ----------
 /** Equally likely outcomes, each a set of event labels. Exact integer arithmetic. */
 export const MODELS = {
@@ -202,6 +267,10 @@ const groups = {
   guessing: [P('skill', 'Student: probability $p$ of solving', 0, 1, 0.01, 0.6), P('m', 'Student: number of options $m$', 2, 10, 1, 5)],
 };
 const all = [...common, ...Object.values(groups).flat()];
+const conditionalParams = [
+  P('a', 'Width of $A$', 0, 1, 0.01, 0.5), P('s', 'Left edge of $B$', 0, 1, 0.01, 0.3), P('b', 'Width of $B$', 0, 1, 0.01, 0.5),
+  P('h', 'Height of $B$', 0, 1, 0.01, 0.6), P('n', 'Points thrown $n$', 100, 20000, 100, 4000),
+];
 
 export const meta = { id: 'lecture-conditional-bayes', lectures: ['L1', 'L2'], title: 'Events, conditional probability and Bayes as counts', params: all };
 /** Per-view stations for a host that registers them separately; `bayes` (catalog) gets every view. */
@@ -211,10 +280,16 @@ export const stations = {
   'bayes-independence': { params: [common[1], ...groups.independence] },
   'bayes-hypotheses': { params: [common[1], ...groups.bayes] },
   'bayes-guessing': { params: [common[1], ...groups.guessing] },
+  conditional: { params: conditionalParams, live: true },
 };
 const viewOf = { 'bayes-events': 1, 'bayes-independence': 2, 'bayes-hypotheses': 3, 'bayes-guessing': 4 };
 
 export function run(params, { seed = 1, station = 'bayes' } = {}) {
+  if (station === 'conditional') {
+    const q = Object.fromEntries(conditionalParams.map((d) => [d.key, Number.isFinite(params?.[d.key]) ? params[d.key] : d.default]));
+    if (!Number.isInteger(q.n) || q.n < 1) throw new Error('n must be a positive integer.');
+    return runConditional(q, seed);
+  }
   const p = Object.fromEntries(all.map((d) => [d.key, Number.isFinite(params?.[d.key]) ? params[d.key] : d.default]));
   if (!Number.isInteger(p.n) || p.n < 1) throw new Error('n must be a positive integer.');
   const view = viewOf[station] ?? p.view;

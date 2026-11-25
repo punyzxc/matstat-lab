@@ -75,6 +75,15 @@ export type Constructions = { n: number; size: number; ordered: boolean; repetit
 export type Board =
   | { kind: 'needles'; d: number; l: number; strips: number; width: number; needles: number[][]; hits: boolean[] }
   | { kind: 'region'; runs: number[][]; darts: number[][]; hits: boolean[] };
+/**
+ * Two events in the unit square (#117): A = `A` and B = `B` as [x0, x1, y0, y1], their exact probabilities, whether
+ * |P(AB) − P(A)P(B)| is within the kernel's tolerance, the first `points` of the draw with their class `cls`
+ * (bit 1: in A, bit 2: in B), and the parameters `keys` that set the edges (a, s, b, h) on a grid of `step`.
+ */
+export type EventSquare = {
+  A: number[]; B: number[]; P: { A: number; B: number; AB: number; AgB: number | null }; independent: boolean; gap: number;
+  points: number[][]; cls: number[]; keys: { a: number; s: number; b: number; h: number }; step: number;
+};
 export type KernelResult = {
   readouts: Readout[];
   series: Series[];
@@ -92,6 +101,7 @@ export type KernelResult = {
   space?: Space;
   constructions?: Constructions;
   board?: Board;
+  square?: EventSquare;
 };
 export type Kernel = {
   meta: KernelMeta;

@@ -15,6 +15,7 @@ import { OutcomeFlight } from './outcome-flight';
 import { OutcomeSpace } from './outcome-space';
 import { Constructions } from './constructions';
 import { Board } from './board';
+import { EventSquare } from './event-square';
 import { TextField } from './text-field';
 import { kernelText, locale, plural, t, texDec, useLang } from '../i18n';
 
@@ -50,6 +51,7 @@ function localizeResult(kernel: string, r: KernelResult): KernelResult {
     space: r.space,
     constructions: r.constructions,
     board: r.board,
+    square: r.square,
     linked: r.linked && { ...r.linked, series: r.linked.series.map((s) => (s.label ? { ...s, label: k(s.label) } : s)), axes: r.linked.axes && { x: k(r.linked.axes.x), y: k(r.linked.axes.y) } },
   };
 }
@@ -147,7 +149,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
     if (!out || !Array.isArray(out.readouts) || !Array.isArray(out.series)) return { error: t('The kernel returned no readouts or series.', 'Ядро не вернуло ни показаний, ни графиков.') };
     return { readouts: out.readouts, series: out.series, notes: Array.isArray(out.notes) ? out.notes : [], axes: out.axes, surface: out.surface,
       formula: Array.isArray(out.formula) ? out.formula.filter((l) => typeof l === 'string') : undefined, decisions: out.decisions, beam: out.beam,
-      domain: out.domain, linked: out.linked && Array.isArray(out.linked.series) ? out.linked : undefined, outcomes: out.outcomes, space: out.space, constructions: out.constructions, board: out.board };
+      domain: out.domain, linked: out.linked && Array.isArray(out.linked.series) ? out.linked : undefined, outcomes: out.outcomes, space: out.space, constructions: out.constructions, board: out.board, square: out.square };
   }, [outcome]);
   /** What is on screen: the same result with its texts in the current language. */
   const view = useMemo(() => (result && !('error' in result) ? localizeResult(station.kernel, result) : result), [result, station.kernel, lang]);
@@ -256,6 +258,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
             {view.space && outcome?.ok && <OutcomeSpace space={view.space} drawKey={outcome.job.seed} />}
             {view.constructions && outcome?.ok && <Constructions data={view.constructions} drawKey={outcome.job.seed} />}
             {view.board && outcome?.ok && <Board board={view.board} drawKey={outcome.job.seed} />}
+            {view.square && outcome?.ok && <EventSquare square={view.square} drawKey={outcome.job.seed} onParam={(key, v) => setParams((p) => ({ ...p, [key]: v }))} />}
             {view.surface && <Surface3D surface={view.surface} />}
             {view.series.length > 0 && (
               <div className="chart-stage">

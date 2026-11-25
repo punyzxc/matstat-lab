@@ -7,5 +7,6 @@
   "Bayes formula": "Формула Байеса",
   "After $A$ is observed, the weights of the hypotheses are updated.": "После наблюдения события $A$ вероятности гипотез пересчитываются.",
   "A student knows the answer with probability $p$ and otherwise guesses among 5 options. Given a correct answer, the chance that it was a guess is $\\dfrac{1 - p}{4p + 1}$.": "Студент знает ответ с вероятностью $p$, а иначе наугад выбирает один из 5 вариантов. Если ответ верен, вероятность того, что он был угадан, равна $\\dfrac{1 - p}{4p + 1}$.",
-  "Count the posterior": "Найдите апостериорную вероятность"
+  "Count the posterior": "Найдите апостериорную вероятность",
+  "Condition on B in the Conditional probability station": "Поставьте условие B на станции «Условная вероятность»"
 }

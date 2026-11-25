@@ -1550,3 +1550,127 @@ html:has(.orbital-lab) body {
   color: var(--ink);
   outline: none;
 }
+
+/* #117: conditional probability as shrinking the world to B. */
+.event-square {
+  margin: 4px 0 12px;
+}
+.es-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-bottom: 6px;
+  font: 11px var(--mono);
+  color: #a8a8a8;
+}
+.event-square button.es-given {
+  padding: 4px 10px;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  font: 12px var(--sans);
+  cursor: pointer;
+}
+.event-square button.es-given[aria-pressed='true'] {
+  border-color: var(--signal);
+  background: rgba(232, 228, 133, 0.12);
+}
+.event-square button.es-given:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+.event-square button.es-given:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.es-indep {
+  color: var(--signal);
+}
+.es-dep {
+  color: #8a8a8a;
+}
+.event-square svg {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  touch-action: none;
+}
+.es-omega {
+  fill: #0d0d0d;
+  stroke: #5a5a5a;
+}
+.es-a,
+.es-b,
+.es-ab,
+.es-pt {
+  transition: x 0.6s var(--ease), y 0.6s var(--ease), width 0.6s var(--ease), height 0.6s var(--ease), cx 0.6s var(--ease), cy 0.6s var(--ease), opacity 0.4s;
+}
+.event-square[data-reduced] .es-a,
+.event-square[data-reduced] .es-b,
+.event-square[data-reduced] .es-ab,
+.event-square[data-reduced] .es-pt {
+  transition: none;
+}
+.es-a {
+  fill: rgba(159, 211, 199, 0.13);
+  stroke: #9fd3c7;
+  stroke-width: 1.2;
+}
+.es-b {
+  fill: rgba(183, 178, 240, 0.13);
+  stroke: #b7b2f0;
+  stroke-width: 1.2;
+  stroke-dasharray: 5 3;
+}
+.es-ab {
+  fill: rgba(232, 228, 133, 0.22);
+}
+.es-pt {
+  fill: #5c5c5c;
+}
+.es-pt[data-c='1'] {
+  fill: #9fd3c7;
+}
+.es-pt[data-c='2'] {
+  fill: #b7b2f0;
+}
+.es-pt[data-c='3'] {
+  fill: var(--signal);
+}
+.event-square[data-given] .es-pt[data-c='0'],
+.event-square[data-given] .es-pt[data-c='1'] {
+  opacity: 0;
+}
+.es-label {
+  fill: var(--ink);
+  font: italic 15px var(--serif);
+}
+.es-handle {
+  stroke: transparent;
+  stroke-width: 12;
+  cursor: ew-resize;
+  outline: none;
+}
+.es-handle:hover,
+.es-handle:focus-visible {
+  stroke: rgba(232, 228, 133, 0.55);
+}
+.es-handles line:last-child {
+  cursor: ns-resize;
+}
+.es-body {
+  fill: transparent;
+  stroke-width: 0;
+  cursor: grab;
+}
+.es-body:focus-visible,
+.es-body:hover {
+  fill: rgba(232, 228, 133, 0.06);
+}
+.es-tick,
+.es-omega-label {
+  fill: #8a8a8a;
+  font: 10px var(--mono);
+}
