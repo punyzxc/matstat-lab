@@ -165,7 +165,64 @@ export function runningMeans(law, N, seed, paths = CONV_PATHS) {
   return { ns, paths: out };
 }
 
-function runConvergence({ law: li, k, N, view }, seed) {
+// #116: many paths and the Chebyshev corridor a ± ε.
+/** Predeclared Monte Carlo band for a share of M paths: 4 standard errors, using SE ≤ 1/(2√M). */
+export const corridorBand = (M) => 2 / Math.sqrt(M);
+export const chebyshevBound = (sd, n, eps) => Math.min(1, (sd * sd) / (n * eps * eps));
+const num4 = (v) => String(Number(v.toPrecision(4)));
+
+function runCorridor({ law: li, N, M, eps }, seed) {
+  const law = LAWS[li];
+  const cauchy = law.mean == null, a = cauchy ? 0 : law.mean;
+  const { ns, paths } = runningMeans(law, N, seed, M);
+  const lx = ns.map((n) => Math.log10(n)), lN = Math.log10(N);
+  const outside = ns.map((_, j) => paths.reduce((m, y) => m + (Math.abs(y[j] - a) >= eps ? 1 : 0), 0) / M);
+  const share = outside.at(-1), bound = cauchy ? null : chebyshevBound(law.sd, N, eps);
+  const span = cauchy ? 4 : Math.max(3 * eps, 2.5 * law.sd);
+  const clipY = (v) => Math.max(a - span, Math.min(a + span, v));
+  // The bundle as hairlines, then the corridor over it, then one path picked out.
+  const series = [
+    ...paths.map((y, p) => ({ id: 'path' + p, kind: 'line', tone: 'default', thin: true, label: p === 0 ? `running means $\\bar X_n$ of ${M} paths` : undefined, x: lx, y: y.map(clipY) })),
+    { id: 'corridor', kind: 'band', tone: 'signal', label: `corridor $${cauchy ? '0' : 'a'} \\pm \\varepsilon$`, x: [0, lN], y: [a - eps, a - eps], y2: [a + eps, a + eps] },
+    { id: 'a', kind: 'line', tone: 'signal', label: cauchy ? 'centre 0 (not a mean)' : `$a = MX = ${a}$`, x: [0, lN], y: [a, a] },
+    { id: 'first', kind: 'line', tone: 'accent', label: 'one path', x: lx, y: paths[0].map(clipY) },
+  ];
+  const linked = {
+    series: [
+      ...(cauchy ? [] : [{ id: 'bound', kind: 'line', tone: 'signal', label: 'Chebyshev bound $\\sigma^2/(n\\varepsilon^2)$, capped at 1', x: lx, y: ns.map((n) => chebyshevBound(law.sd, n, eps)) }]),
+      { id: 'outside', kind: 'line', tone: 'accent', label: 'share of paths outside the corridor', x: lx, y: outside },
+    ],
+    axes: { x: '$\\lg n$', y: 'share outside' },
+    domain: { x: [0, lN], y: [0, 1] },
+  };
+  const m = Math.round(share * M);
+  const notes = cauchy
+    ? ['The Cauchy law has no mean and no variance: there is no $a$ to converge to and no Chebyshev bound. The share of paths outside the corridor does not fall, however large $n$ gets.']
+    : ["Chebyshev's inequality (L7) for the mean of $n$ terms: $P(|\\bar X_n - a| \\ge \\varepsilon) \\le \\dfrac{D\\bar X_n}{\\varepsilon^2} = \\dfrac{\\sigma^2}{n\\varepsilon^2}$. As $n$ grows the bound falls to 0: that is the law of large numbers.",
+      'The bound must hold for every law with this variance, so it is crude: the real share of paths outside is usually far below it.',
+      `The share is counted over $M = ${M}$ paths; it may exceed the bound only by Monte Carlo error, at most $4 \\cdot \\tfrac{1}{2\\sqrt{M}} = ${fmt(corridorBand(M), 3)}$.`];
+  const spread = Math.max(...paths.map((y) => y.at(-1))) - Math.min(...paths.map((y) => y.at(-1)));
+  return {
+    readouts: [
+      { key: 'outside', label: `Share of paths outside $a \\pm \\varepsilon$ at $n = ${N}$`, observed: r6(share), theory: bound == null ? 'no bound' : r6(bound),
+        convention: bound == null ? `${m} of ${M} paths` : `${m} of ${M} paths; theory: the Chebyshev bound` },
+      { key: 'spread', label: `Spread of the ${M} running means at $n = ${N}$`, observed: r6(spread),
+        theory: cauchy ? 'does not shrink' : r6(law.sd / Math.sqrt(N)), convention: cauchy ? undefined : 'theory: $\\sigma/\\sqrt{n}$ for one path' },
+    ],
+    series,
+    linked,
+    axes: { x: '$\\lg n$', y: 'running mean $\\bar X_n$' },
+    domain: { x: [0, lN], y: [a - span, a + span] },
+    formula: cauchy
+      ? [`\\dfrac{m}{M} = \\dfrac{${m}}{${M}} = ${num4(share)}`]
+      : [`P(|\\bar X_n - a| \\ge \\varepsilon) \\le \\dfrac{\\sigma^2}{n\\varepsilon^2} = \\dfrac{${num4(law.sd * law.sd)}}{${N} \\cdot ${eps}^2} = ${num4((law.sd * law.sd) / (N * eps * eps))}`,
+        `\\dfrac{m}{M} = \\dfrac{${m}}{${M}} = ${num4(share)} ${share <= bound ? '\\le' : '>'} ${num4(bound)}`],
+    notes,
+  };
+}
+
+function runConvergence({ law: li, k, N, view, M, eps }, seed) {
+  if (view === 2) return runCorridor({ law: li, N, M: M ?? 200, eps: eps ?? 0.2 }, seed);
   const law = LAWS[li];
   const cauchy = law.mean == null;
   if (view === 1) {
@@ -323,8 +380,10 @@ const stationParams = {
   lln: [
     { key: 'law', label: 'Law (0 normal, 1 uniform, 2 exponential, 3 Poisson, 4 Cauchy)', min: 0, max: 4, step: 1, default: 4 },
     { key: 'N', label: 'Terms $N$', min: 100, max: 10000, step: 100, default: 2000 },
-    { key: 'k', label: 'Deviation $k$ (view 1)', min: 0.5, max: 4, step: 0.1, default: 3 },
-    { key: 'view', label: 'View (0 running means, 1 Chebyshev vs real tail)', min: 0, max: 1, step: 1, default: 0 },
+    { key: 'k', label: 'Deviation $k$ (view 1)', min: 0.5, max: 4, step: 0.1, default: 3, when: { view: [1] } },
+    { key: 'view', label: 'View (0 running means, 1 Chebyshev vs real tail, 2 corridor of many paths)', min: 0, max: 2, step: 1, default: 0 },
+    { key: 'M', label: 'Paths $M$', min: 1, max: 500, step: 1, default: 200, when: { view: [2] } },
+    { key: 'eps', label: 'Corridor half-width $\\varepsilon$', min: 0.01, max: 2, step: 0.01, default: 0.2, when: { view: [2] } },
   ],
   clt: [
     { key: 'law', label: 'Law of one term (0 uniform, 1 exponential, 2 Poisson, 3 normal)', min: 0, max: 3, step: 1, default: 1 },

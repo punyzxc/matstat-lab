@@ -159,3 +159,41 @@ test('contract: different seeds give different sums, and the convolution display
   const xs = [1, 6].map((m) => k.run({ m, R: 1000 }, { seed: 1, station: 'convolution' }).series.find((s) => s.id === 'hist').x);
   assert.deepEqual(xs[0], xs[1]);
 });
+
+// #116: many paths and the Chebyshev corridor.
+const corridor = (q, seed = 1) => k.run({ ...defaults('lln'), view: 2, ...q }, { seed, station: 'lln' });
+
+test('#116 the share of paths outside a ± ε never exceeds the Chebyshev bound by more than the predeclared band', () => {
+  for (const law of [0, 1, 2, 3]) for (const eps of [0.05, 0.1, 0.3]) for (const seed of [1, 2, 3]) {
+    const res = corridor({ law, N: 2000, M: 300, eps }, seed);
+    const outside = res.linked.series.find((s) => s.id === 'outside'), bound = res.linked.series.find((s) => s.id === 'bound');
+    assert.equal(outside.x.length, bound.x.length);
+    outside.y.forEach((share, j) => {
+      const n = Math.round(10 ** outside.x[j]);
+      assert.ok(Math.abs(bound.y[j] - k.chebyshevBound(k.LAWS[law].sd, n, eps)) < 1e-12);
+      assert.ok(bound.y[j] <= 1);
+      assert.ok(share <= bound.y[j] + k.corridorBand(300), `law ${law} eps ${eps} seed ${seed} n ${n}: ${share} > ${bound.y[j]}`);
+    });
+  }
+});
+
+test('#116 M typed paths are drawn, the bundle narrows, and the same seed gives the same paths', () => {
+  const res = corridor({ law: 2, N: 4000, M: 120, eps: 0.1 }, 5);
+  const paths = res.series.filter((s) => /^path\d/.test(s.id));
+  assert.equal(paths.length, 120);
+  const spreadAt = (j) => { const v = paths.map((p) => p.y[j]); return Math.max(...v) - Math.min(...v); };
+  assert.ok(spreadAt(paths[0].y.length - 1) < spreadAt(20) / 3, 'the bundle narrows');
+  // Independent recomputation of path 7 from the shared draws.
+  const law = k.LAWS[2];
+  let s = 0;
+  for (let n = 1; n <= 4000; n++) s += law.draw(5, 300 + 2 * 7 * 7919, n);
+  assert.ok(Math.abs(paths[7].y.at(-1) - s / 4000) < 1e-12);
+  assert.equal(JSON.stringify(res), JSON.stringify(corridor({ law: 2, N: 4000, M: 120, eps: 0.1 }, 5)));
+  assert.notEqual(JSON.stringify(res.series[0].y), JSON.stringify(corridor({ law: 2, N: 4000, M: 120, eps: 0.1 }, 6).series[0].y));
+  assert.equal(corridor({ M: 1 }).series.filter((s) => /^path\d/.test(s.id)).length, 1);
+  // Cauchy: no bound, and the share outside does not fall.
+  const c = corridor({ law: 4, N: 4000, M: 200, eps: 0.5 }, 2);
+  assert.equal(c.linked.series.find((s) => s.id === 'bound'), undefined);
+  assert.equal(c.readouts[0].theory, 'no bound');
+  assert.ok(c.readouts[0].observed > 0.5);
+});

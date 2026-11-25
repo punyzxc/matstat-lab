@@ -117,7 +117,7 @@ export function Chart({
         </g>
         <g clipPath={`url(#${clip})`}>
           {series.map((s, si) => {
-            const cls = `chart-series chart-series--${s.kind} tone-${s.tone ?? 'default'}`;
+            const cls = `chart-series chart-series--${s.kind} tone-${s.tone ?? 'default'}${s.thin ? ' chart-series--thin' : ''}`;
             if (s.kind === 'band' && s.y2) {
               const up = pts(s, s.y2), lo = pts(s);
               if (!up.length) return null;
