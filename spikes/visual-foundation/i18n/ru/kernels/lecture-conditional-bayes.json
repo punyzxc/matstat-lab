@@ -69,5 +69,19 @@
  "$\\lg n$, points thrown": "$\\lg n$, брошено точек",
  "frequency": "частота",
  "$B$ has zero area: $P(B) = 0$, and conditioning on it is not defined.": "У $B$ нулевая площадь: $P(B) = 0$, и условие $B$ не определено.",
- "P(B) = 0 \\Rightarrow P(A \\mid B) \\text{ is not defined}": "P(B) = 0 \\Rightarrow P(A \\mid B) \\text{ не определена}"
+ "P(B) = 0 \\Rightarrow P(A \\mid B) \\text{ is not defined}": "P(B) = 0 \\Rightarrow P(A \\mid B) \\text{ не определена}",
+ "Prior $P(H_[[1]])$": "Априорная $P(H_[[1]])$",
+ "Likelihood $P(A \\mid H_[[1]])$": "Правдоподобие $P(A \\mid H_[[1]])$",
+ "Particles $n$": "Частиц $n$",
+ "$P(H_[[1]])$, share of particles": "$P(H_[[1]])$, доля частиц",
+ "$P(H_[[1]] \\mid A)$, Bayes": "$P(H_[[1]] \\mid A)$, по Байесу",
+ "prior $P(H_i)$": "априорная $P(H_i)$",
+ "posterior $P(H_i \\mid A)$": "апостериорная $P(H_i \\mid A)$",
+ "share of the $A$-particles from $H_i$": "доля $A$-частиц, пришедших из $H_i$",
+ "Forward: each particle first picks a hypothesis $H_i$ with probability $P(H_i)$, then $A$ happens with probability $P(A \\mid H_i)$. The width of a branch is the probability of passing along it, so the $A$-ends add up to the total probability $P(A)$.": "Прямое дерево: каждая частица сначала выбирает гипотезу $H_i$ с вероятностью $P(H_i)$, затем $A$ происходит с вероятностью $P(A \\mid H_i)$. Ширина ветви — вероятность пройти по ней, поэтому концы $A$ в сумме дают полную вероятность $P(A)$.",
+ "Inverse: regroup the same particles by the outcome. Among the particles that reached $A$, the share that came through $H_k$ is the posterior $P(H_k \\mid A) = \\dfrac{P(H_k)\\,P(A \\mid H_k)}{P(A)}$: the Bayes formula.": "Обратное дерево: те же частицы сгруппированы по исходу. Среди частиц, дошедших до $A$, доля пришедших через $H_k$ — это апостериорная вероятность $P(H_k \\mid A) = \\dfrac{P(H_k)\\,P(A \\mid H_k)}{P(A)}$: формула Байеса.",
+ "hypothesis $H_i$": "гипотеза $H_i$",
+ "The typed priors add up to [[1]], not 1, so they are scaled to a complete group: $P(H_i) = q_i / [[2]]$.": "Введённые априорные вероятности в сумме дают [[1]], а не 1, поэтому они нормированы до полной группы: $P(H_i) = q_i / [[2]]$.",
+ "$P(A) = 0$: no particle can reach $A$, and the posteriors are not defined.": "$P(A) = 0$: ни одна частица не дойдёт до $A$, и апостериорные вероятности не определены.",
+ "P(A) = 0 \\Rightarrow P(H_k \\mid A) \\text{ is not defined}": "P(A) = 0 \\Rightarrow P(H_k \\mid A) \\text{ не определена}"
 }
