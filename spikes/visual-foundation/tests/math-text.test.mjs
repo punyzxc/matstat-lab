@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mathToPlain, splitMath, texToPlain } from '../src/math-text.mjs';
+import './live-formula.test.mjs';
 
 test('splitMath separates $…$ formulas from text', () => {
   assert.deepEqual(splitMath('plain'), [{ math: false, value: 'plain' }]);

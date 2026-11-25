@@ -11,6 +11,8 @@ import { Surface3D } from './surface-3d';
 import { MathText, Tex, mathToPlain } from '../math';
 import { DecisionZones } from './decision-zones';
 import { kernelText, locale, plural, t, useLang } from '../i18n';
+import { LiveFormula, LiveFormulaScope, useLiveVariable } from '../live-formula';
+import { STANDARD_DEVIATION_FORMULA } from '../live-formula-model.mjs';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
 const sources = import.meta.glob('../../../*/kernel.mjs');
@@ -78,7 +80,7 @@ export function KernelStation({
   if (load.state === 'missing') return <PendingStation station={station} />;
   if (load.state === 'loading') return <p className="station-status" role="status">{t(`Loading the ${station.name} kernel…`, `Загрузка ядра станции «${station.name}»…`)}</p>;
   if (load.state === 'error') return <p className="station-status" role="alert">{t('The kernel failed to load: ', 'Ядро не загрузилось: ')}{load.message}</p>;
-  return <ReadyStation station={station} kernel={load.kernel} seed={seed} params={params} onState={onState} />;
+  return <LiveFormulaScope><ReadyStation station={station} kernel={load.kernel} seed={seed} params={params} onState={onState} /></LiveFormulaScope>;
 }
 
 /** Parameters as a stable string, to tell a new experiment from a new draw of the same one. */
@@ -99,6 +101,9 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
   const size = useMemo(() => sizeParamOf(declared), [declared]);
   const resolved = useMemo(() => resolveParams(declared, paramsProp), [declared, paramsProp]);
   const [params, setParams] = useState(resolved);
+  const sigmaLink = useLiveVariable('sigma');
+  const sigma = declared.find(p => p.key === 'sigma');
+  const liveMoments = station.id === 'moments' && sigma && [3, 5].includes(params.law);
   const [seed, setSeed] = useState(seedProp);
   // A link opened from outside (a lecture step, the address bar) replaces the experiment.
   useEffect(() => setParams(resolved), [resolved]);
@@ -216,14 +221,21 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, onS
           <p className="station-status" role="alert">{t('The kernel rejected these parameters: ', 'Ядро отклонило эти параметры: ')}{view.error}</p>
         ) : (
           <>
-            {view.formula && view.formula.length > 0 && (
-              <div className="live-formula" aria-label={t('Live formula', 'Живая формула')} role="group">
+            {liveMoments && <LiveFormula label={t('Variance from standard deviation', 'Дисперсия через стандартное отклонение')}
+              source={STANDARD_DEVIATION_FORMULA}
+              variables={{ sigma: { ...sigma, value: params.sigma, symbol: '\\sigma',
+                label: t('Standard deviation σ', 'Стандартное отклонение σ'),
+                hint: t('σ controls the spread of the distribution. Its square is the variance.', 'σ задаёт разброс распределения. Квадрат σ равен дисперсии.'),
+                onChange: value => setParams(previous => ({ ...previous, sigma: value })) } }}
+              results={{ variance: { value: params.sigma ** 2, label: t('Variance', 'Дисперсия'), format } }} />}
+            {!liveMoments && view.formula && view.formula.length > 0 && (
+              <div className="decision-formulas" aria-label={t('Live formula', 'Живая формула')} role="group">
                 {view.formula.map((line, i) => <Tex key={i} tex={line} display />)}
               </div>
             )}
             {view.surface && <Surface3D surface={view.surface} />}
             {view.series.length > 0 && (
-              <div className="chart-stage">
+              <div className="chart-stage" {...(liveMoments ? { ...sigmaLink, 'data-live-figure': 'sigma' } : {})}>
                 <Chart series={view.series} xLabel={view.axes?.x} yLabel={view.axes?.y} />
                 <RidgeToggle draws={past} on={ridgeOn} onToggle={() => setRidgeOn((v) => !v)} />
               </div>
