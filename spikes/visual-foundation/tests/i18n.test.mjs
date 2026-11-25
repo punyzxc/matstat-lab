@@ -148,6 +148,9 @@ test('every scientist has a Russian name and contribution', () => {
     if (/[A-Za-z]{2,}/.test(t.name)) bad.push(`${s.slug}: name not in Russian`);
     bad.push(...problems(t.contribution, s.slug));
     if (t.years) bad.push(...problems(t.years, s.slug + ' years'));
+    // the longer text of a scientist card (#134)
+    if (s.more && !t.more) bad.push(`${s.slug}: no Russian for "more"`);
+    if (t.more) bad.push(...problems(t.more, s.slug + ' more'));
   }
   for (const slug of Object.keys(ru)) if (!slug.startsWith('//') && !roster.some((s) => s.slug === slug)) bad.push(`${slug}: not in the roster`);
   assert.deepEqual(bad, []);

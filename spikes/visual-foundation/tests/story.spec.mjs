@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11),
-// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals.
+// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards.
 const fits = (page) => page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
 
 test.beforeEach(async ({ page }) => {
@@ -182,6 +182,25 @@ test('a math portal previews another lecture live over the figure; Esc comes bac
   await expect(page.getByTestId('story-beat')).toHaveText('The normal law appears');
   await expect(page.getByTestId('step-counter')).toHaveText('Step 6 / 8');
   await expect(page.locator('[data-step="6"]').getByTestId('story-portal')).toHaveAccessibleName(/Lecture 11, A wall of intervals/);
+  expect(await fits(page)).toBe(true);
+});
+
+test('scientist cards sit in the figure while their step is read, open in place and fade on the next step', async ({ page }) => {
+  await page.goto('/#lecture/8/6');
+  const cards = page.getByTestId('scientist-cards');
+  await expect(cards.locator('.scientist-card')).toHaveCount(2);
+  const lindeberg = cards.locator('.scientist-card[data-slug="lindeberg"]');
+  await expect(lindeberg).toContainText('Jarl Waldemar Lindeberg');
+  await expect(lindeberg).toContainText('1876–1932');
+  await expect(lindeberg.locator('.portrait')).toBeVisible();
+  const more = lindeberg.locator('.scientist-card-toggle');
+  await expect(more).toHaveText(/More/);
+  await more.click();
+  await expect(more).toHaveAttribute('aria-expanded', 'true');
+  await expect(lindeberg).toContainText('In 1922 he proved');
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByTestId('step-counter')).toHaveText('Step 7 / 8');
+  await expect(cards).toHaveCount(0);
   expect(await fits(page)).toBe(true);
 });
 

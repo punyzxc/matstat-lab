@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { ArrowDown, ArrowUp, Compass, Expand, Pause, Play, Presentation, RotateCcw, Sparkles } from 'lucide-react';
 import { MathText, Tex, mathToPlain } from '../math';
-import { lectureFormula, lectureText, scientistText } from '../i18n';
+import { lectureFormula, lectureText } from '../i18n';
 import { Slider } from '../ui';
 import { useStationReducedMotion } from '../motion-preference';
 import { findStation } from '../stations/catalog';
@@ -9,13 +9,12 @@ import { lectureHash, stationHash } from '../stations/route';
 import { findFigure, figureParams } from './figures';
 import { LiveFormula } from './live-formula';
 import { STORY_TEXT as T } from './story-text';
-import type { Lecture, Portal, Scientist, Step } from './script';
+import type { Lecture, Portal, Step } from './script';
 import { resolveFigures } from './catalog';
 import { PortalButton, PortalView } from './portal';
-import roster from '../../lectures/scientists.json';
+import { ScientistCards } from './scientist-card';
 import './story.css';
 
-const scientists = (roster as { scientists: Scientist[] }).scientists;
 const typing = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
 type Mode = 'demo' | 'explore';
 
@@ -231,6 +230,7 @@ export function StoryPlayer({ lecture, step, present }: { lecture: Lecture; step
               reduced={reduced} runKey={runKey} onResults={setResults} />
           )}
         </div>
+        <ScientistCards slugs={lecture.steps[active - 1].scientists ?? []} step={active} />
         {portal && <PortalView key={`${portal.lecture}/${portal.step}`} portal={portal} reduced={reduced} present={present} onClose={closePortal} />}
         {mode === 'explore' && spec && (
           <div className="story-explore" data-testid="story-explore">
@@ -335,18 +335,6 @@ function StorySection({ step: s, index, active, present, lecture, figureId, para
           <p><MathText text={tx(s.example)} /></p>
         </section>
       )}
-      {s.scientists?.length ? (
-        <div className="story-people" aria-label={T.scientists}>
-          {s.scientists.map((slug) => {
-            const p = scientists.find((x) => x.slug === slug);
-            return p ? (
-              <p key={slug} className="story-person" data-slug={slug}>
-                <b>{scientistText(slug, 'name', p.name)}</b> <span>{p.years}</span> <MathText text={scientistText(slug, 'contribution', p.contribution)} />
-              </p>
-            ) : null;
-          })}
-        </div>
-      ) : null}
       {s.portals?.length ? (
         <div className="story-portals" role="group" aria-label={T.portals}>
           <span>{T.portals}</span>
