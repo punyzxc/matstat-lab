@@ -8,8 +8,8 @@ import type { TextCheck } from './kernel-contract';
  * runs after a short pause, an invalid one is explained inline while the last valid text keeps playing.
  * Presets fill the field in one click.
  */
-export function TextField({ id, label, value, presets, check, translate, onChange }: {
-  id: string; label: string; value: string; presets?: string[];
+export function TextField({ id, label, value, presets, hint, check, translate, onChange }: {
+  id: string; label: string; value: string; presets?: string[]; hint?: string;
   check: (text: string) => TextCheck; translate: (english: string) => string; onChange: (text: string) => void;
 }) {
   const [draft, setDraft] = useState(value);
@@ -35,7 +35,7 @@ export function TextField({ id, label, value, presets, check, translate, onChang
       <label htmlFor={id}><MathText text={label} /></label>
       <input id={id} className="text-param-input" type="text" autoComplete="off" spellCheck={false} value={draft}
         aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined}
-        title={t('Type inequalities in x and y; join them with and, or. Enter applies.', 'Введите неравенства с x и y; соединяйте их словами и, или. Enter — применить.')}
+        title={hint ?? t('Type inequalities in x and y; join them with and, or. Enter applies.', 'Введите неравенства с x и y; соединяйте их словами и, или. Enter — применить.')}
         onChange={(e) => {
           setDraft(e.currentTarget.value);
           apply(e.currentTarget.value, false);

@@ -20,7 +20,6 @@
  "Each convolution smooths the curve: $m = 2$ has a corner, $m = 3$ is already smooth and close to the bell. This is the CLT seen before it is proved.": "Каждая композиция сглаживает кривую: при $m = 2$ есть излом, при $m = 3$ кривая уже гладкая и близка к колоколу. Это ЦПТ, увиденная до того, как она доказана.",
  "sum of $m = [[1]]$ uniforms": "сумма $m = [[1]]$ равномерных величин",
  "density": "плотность",
- "Law (0 normal, 1 uniform, 2 exponential, 3 Poisson, 4 Cauchy)": "Закон (0 нормальный, 1 равномерный, 2 показательный, 3 Пуассона, 4 Коши)",
  "Terms $N$": "Число слагаемых $N$",
  "Deviation $k$ (view 1)": "Отклонение $k$ (вид 1)",
  "Running mean at $n = [[1]]$, first sequence": "Текущее среднее при $n = [[1]]$, первая серия",
@@ -57,7 +56,6 @@
  "Normal $N(0, 1)$": "Нормальный $N(0, 1)$",
  "Poisson, $\\lambda = 1$": "Закон Пуассона, $\\lambda = 1$",
  "Uniform $U(0, 1)$": "Равномерный $U(0, 1)$",
- "Law of one term (0 uniform, 1 exponential, 2 Poisson, 3 normal)": "Закон одного слагаемого (0 равномерный, 1 показательный, 2 Пуассона, 3 нормальный)",
  "Terms in the sum $n$": "Число слагаемых в сумме $n$",
  "Replicates $R$": "Число повторений $R$",
  "View (0 histogram, 1 distance vs $n$, 2 Poisson lemma)": "Вид (0 гистограмма, 1 расстояние в зависимости от $n$, 2 лемма Пуассона)",
@@ -157,7 +155,6 @@
  "CLT limit $2\\Phi(1) - 1$": "предел по ЦПТ $2\\Phi(1) - 1$",
  "share of $R = [[1]]$ sums": "доля из $R = [[1]]$ сумм",
  "View (0 histogram, 1 distance vs $n$, 2 Poisson lemma, 3 ridge over $n$)": "Вид (0 гистограмма, 1 расстояние от $n$, 2 лемма о Пуассоне, 3 гребень по $n$)",
- "Law of one term (0 uniform, 1 exponential, 2 Bernoulli, 3 Poisson, 4 Cauchy)": "Закон одного слагаемого (0 равномерный, 1 показательный, 2 Бернулли, 3 Пуассона, 4 Коши)",
  "Bernoulli probability $p$": "Вероятность Бернулли $p$",
  "Largest $n$ on the ridge": "Наибольшее $n$ на гребне",
  "Kolmogorov distance to $\\Phi$ at $n = [[1]]$": "Расстояние Колмогорова до $\\Phi$ при $n = [[1]]$",
@@ -177,5 +174,11 @@
  "histogram of the standardized sums, one slice per $n$": "гистограмма нормированных сумм, по срезу на каждое $n$",
  "Cauchy terms: $S_n/\\sqrt{n}$ flattens instead of settling": "Слагаемые Коши: $S_n/\\sqrt{n}$ расплывается вместо того, чтобы устояться",
  "A lattice law (Bernoulli, Poisson) gives $S_n^*$ isolated values $1/(\\sigma\\sqrt{n})$ apart: each slice shows the share of every value divided by that step, which tends to $\\varphi$ (the local limit theorem). The CDF still jumps, so the Kolmogorov distance falls only like $1/\\sqrt{n}$ (Berry–Esseen).": "Для решётчатого закона (Бернулли, Пуассон) $S_n^*$ принимает изолированные значения с шагом $1/(\\sigma\\sqrt{n})$: каждый срез показывает долю каждого значения, делённую на этот шаг, и она стремится к $\\varphi$ (локальная предельная теорема). Функция распределения по-прежнему скачет, поэтому расстояние Колмогорова убывает лишь как $1/\\sqrt{n}$ (Берри — Эссеен).",
- "share of each value of $S_n^*$ over the lattice step, one slice per $n$": "доля каждого значения $S_n^*$, делённая на шаг решётки, по срезу на каждое $n$"
+ "share of each value of $S_n^*$ over the lattice step, one slice per $n$": "доля каждого значения $S_n^*$, делённая на шаг решётки, по срезу на каждое $n$",
+ "Law (0 normal, 1 uniform, 2 exponential, 3 Poisson, 4 Cauchy, 5 typed)": "Закон (0 нормальный, 1 равномерный, 2 показательный, 3 Пуассона, 4 Коши, 5 свой)",
+ "Law of one term (0 uniform, 1 exponential, 2 Poisson, 3 normal, 4 typed)": "Закон одного слагаемого (0 равномерный, 1 показательный, 2 Пуассона, 3 нормальный, 4 свой)",
+ "Law of one term (0 uniform, 1 exponential, 2 Bernoulli, 3 Poisson, 4 Cauchy, 5 typed)": "Закон одного слагаемого (0 равномерный, 1 показательный, 2 Бернулли, 3 Пуассона, 4 Коши, 5 свой)",
+ "For the typed law the bound holds at every $k$, as it must.": "Для введённого закона оценка выполняется при всех $k$, как и должно быть.",
+ "Typed law: $S_n^* = \\dfrac{S_n - n\\,MX}{\\sigma\\sqrt{n}}$": "Введённый закон: $S_n^* = \\dfrac{S_n - n\\,MX}{\\sigma\\sqrt{n}}$",
+ "Your typed law has a finite variance, so the CLT applies to it as to any other: a skewed or lumpy law only takes longer.": "У введённого закона конечная дисперсия, поэтому ЦПТ применима к нему, как к любому другому: скошенный или неровный закон просто сходится дольше."
 }
