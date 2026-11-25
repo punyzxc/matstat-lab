@@ -6,6 +6,7 @@
 import { fixtureUint32 } from '../simulation-engine/engine.mjs';
 import { normalCdf, kolmogorovQuantile } from '../lecture-special-functions/special.mjs';
 import { CF_LAWS, empiricalPhi, tRange } from './charfn.mjs';
+import { lawOf, checkLaw, lawPreview, DEFAULT_LAW, LAW_PRESETS, LAW_HINT } from '../custom-distributions/law.mjs';
 
 /** Uniform on (0, 1), never 0 or 1, from one counter-based draw. */
 const uni = (seed, stream, i) => (fixtureUint32(seed, stream, i) + 0.5) / 2 ** 32;
@@ -69,7 +70,7 @@ export const LAWS = Object.freeze([
   { id: 'exponential', label: 'Exponential, $\\lambda = 1$', mean: 1, sd: 1,
     draw: (seed, s, i) => -Math.log(uni(seed, s, i)),
     tail: (k) => Math.exp(-(1 + k)) + (k < 1 ? 1 - Math.exp(-(1 - k)) : 0) },
-  { id: 'poisson', label: 'Poisson, $\\lambda = 1$', mean: 1, sd: 1, discrete: true,
+  { id: 'poisson', label: 'Poisson, $\\lambda = 1$', mean: 1, sd: 1, discrete: true, lattice: { origin: 0, span: 1 },
     draw: (seed, s, i) => {
       let u = uni(seed, s, i), j = 0;
       while (j < POISSON1.length - 1 && u > POISSON1[j]) { u -= POISSON1[j]; j++; }
@@ -81,6 +82,35 @@ export const LAWS = Object.freeze([
     tail: (k) => 1 - (2 / Math.PI) * Math.atan(k) },
 ]);
 const CLT_LAWS = [1, 2, 3, 0]; // uniform, exponential, Poisson(1), normal: all with finite variance
+/** #88: the index of the typed law in each station's law list. */
+export const CUSTOM = Object.freeze({ lln: 5, clt: 4, ridge: 5 });
+const adapted = new WeakMap();
+/**
+ * A typed law (#88) in the shape of LAWS: draws by its seeded inverse CDF, the exact tail P(|X − MX| ≥ kσ), and a
+ * lattice (origin, span) when every value is an integer, so the ridge can show it by the local limit theorem.
+ */
+export function customLaw(text) {
+  const t = lawOf(text ?? DEFAULT_LAW);
+  let law = adapted.get(t);
+  if (law) return law;
+  const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
+  // Values on a common grid (whole numbers, or decimals to 6 places) make a lattice with span = gcd of the gaps.
+  const S = 1e6, ints = t.kind === 'discrete' ? t.values.map((v) => Math.round(v * S)) : [];
+  const onGrid = ints.length > 0 && t.values.every((v, j) => Math.abs(v * S - ints[j]) < 1e-6 * Math.max(1, Math.abs(v * S)));
+  const lattice = onGrid ? { origin: t.values[0], span: ints.reduce((g, v) => gcd(g, v - ints[0]), 0) / S || 1 } : null;
+  law = {
+    id: 'custom', label: 'typed law', mean: t.mean, sd: t.sd, discrete: t.kind === 'discrete', lattice, typed: t,
+    draw: (seed, s, i) => t.quantile(uni(seed, s, i)),
+    tail: (k) => {
+      const lo = t.mean - k * t.sd, hi = t.mean + k * t.sd;
+      if (t.kind === 'continuous') return Math.max(0, 1 - (t.cdf(hi) - t.cdf(lo)));
+      return t.values.reduce((acc, v, j) => (Math.abs(v - t.mean) >= k * t.sd - 1e-12 ? acc + t.probs[j] : acc), 0);
+    },
+  };
+  adapted.set(t, law);
+  return law;
+}
+const lawAt = (li, index, custom) => (li === index ? customLaw(custom) : null);
 
 /** Kolmogorov distance sup |Fₙ(x) − F(x)| of a sample against a continuous CDF. */
 export function kolmogorovDistance(values, cdf) {
@@ -172,8 +202,8 @@ export const corridorBand = (M) => 2 / Math.sqrt(M);
 export const chebyshevBound = (sd, n, eps) => Math.min(1, (sd * sd) / (n * eps * eps));
 const num4 = (v) => String(Number(v.toPrecision(4)));
 
-function runCorridor({ law: li, N, M, eps }, seed) {
-  const law = LAWS[li];
+function runCorridor({ law: li, N, M, eps, custom }, seed) {
+  const law = lawAt(li, CUSTOM.lln, custom) ?? LAWS[li];
   const cauchy = law.mean == null, a = cauchy ? 0 : law.mean;
   const { ns, paths } = runningMeans(law, N, seed, M);
   const lx = ns.map((n) => Math.log10(n)), lN = Math.log10(N);
@@ -222,9 +252,9 @@ function runCorridor({ law: li, N, M, eps }, seed) {
   };
 }
 
-function runConvergence({ law: li, k, N, view, M, eps }, seed) {
-  if (view === 2) return runCorridor({ law: li, N, M: M ?? 200, eps: eps ?? 0.2 }, seed);
-  const law = LAWS[li];
+function runConvergence({ law: li, k, N, view, M, eps, custom }, seed) {
+  if (view === 2) return runCorridor({ law: li, N, M: M ?? 200, eps: eps ?? 0.2, custom }, seed);
+  const law = lawAt(li, CUSTOM.lln, custom) ?? LAWS[li];
   const cauchy = law.mean == null;
   if (view === 1) {
     const ks = grid(0.5, 4, 36);
@@ -253,7 +283,7 @@ function runConvergence({ law: li, k, N, view, M, eps }, seed) {
       notes: [
         'Chebyshev (L7): $P(|X - MX| \\ge \\varepsilon) \\le DX/\\varepsilon^2$. With $\\varepsilon = k\\sigma$ the bound is $1/k^2$ for every law with a variance.',
         'It is crude because it must hold for every such law: for the normal law at $k = 3$ the real tail is 0.0027 against the bound 0.111.',
-        cauchy ? 'Cauchy has no variance (not even a mean), so the inequality says nothing; its tail falls only like $2/(\\pi k)$.' : `For the ${law.label} law the bound holds at every $k$, as it must.`,
+        cauchy ? 'Cauchy has no variance (not even a mean), so the inequality says nothing; its tail falls only like $2/(\\pi k)$.' : law.id === 'custom' ? 'For the typed law the bound holds at every $k$, as it must.' : `For the ${law.label} law the bound holds at every $k$, as it must.`,
       ],
     };
   }
@@ -308,13 +338,14 @@ export function standardizedSums(law, n, R, seed) {
 
 // ---------------------------------------------------------------- CLT ridge (#86)
 /** Sources of the ridge: the finite-variance laws, Bernoulli(p) and Cauchy (centre 0, scale 1: no mean, no variance). */
-export const RIDGE_SOURCES = Object.freeze(['uniform', 'exponential', 'bernoulli', 'poisson', 'cauchy']);
+export const RIDGE_SOURCES = Object.freeze(['uniform', 'exponential', 'bernoulli', 'poisson', 'cauchy', 'custom']);
 const RIDGE_BINS = 32;
 /** A display ceiling for the ridge: a lattice law at small n puts its mass in a few spikes far above φ(0) ≈ 0.399. */
 export const RIDGE_CEIL = 1.2;
-export function ridgeLaw(source, p = 0.3) {
+export function ridgeLaw(source, p = 0.3, custom = DEFAULT_LAW) {
+  if (source === 'custom') return customLaw(custom);
   if (source === 'bernoulli') {
-    return { id: 'bernoulli', label: `Bernoulli, $p = ${p}$`, mean: p, sd: Math.sqrt(p * (1 - p)), discrete: true,
+    return { id: 'bernoulli', label: `Bernoulli, $p = ${p}$`, mean: p, sd: Math.sqrt(p * (1 - p)), discrete: true, lattice: { origin: 0, span: 1 },
       draw: (seed, s, i) => (uni(seed, s, i) < p ? 1 : 0) };
   }
   return LAWS.find((l) => l.id === source);
@@ -343,29 +374,31 @@ export function ridgeSums(law, nMax, R, seed) {
  * linearly between neighbouring values and read at the grid points xs.
  */
 export function latticeSlice(row, n, law, R, xs) {
-  const scale = law.sd * Math.sqrt(n), h = 1 / scale, centre = n * law.mean;
+  // S_n = n·origin + span·k: the standardized values sit h = span/(σ√n) apart.
+  const { origin, span } = law.lattice ?? { origin: 0, span: 1 };
+  const scale = law.sd * Math.sqrt(n), h = span / scale, shift = n * (law.mean - origin);
   const counts = new Map();
   for (const v of row) {
-    const k = Math.round(v * scale + centre);
+    const k = Math.round((v * scale + shift) / span);
     counts.set(k, (counts.get(k) ?? 0) + 1);
   }
   const H = (k) => (counts.get(k) ?? 0) / R / h;
   return xs.map((x) => {
-    const u = x * scale + centre, k0 = Math.floor(u), f = u - k0;
+    const u = (x * scale + shift) / span, k0 = Math.floor(u), f = u - k0;
     return r6(H(k0) * (1 - f) + H(k0 + 1) * f);
   });
 }
 
-function runRidge({ source: si, p, nmax, R }, seed) {
+function runRidge({ source: si, p, nmax, R, custom }, seed) {
   const id = RIDGE_SOURCES[si] ?? 'uniform';
-  const law = ridgeLaw(id, p);
+  const law = ridgeLaw(id, p, custom);
   const cauchy = id === 'cauchy';
   const rows = ridgeSums(law, nmax, R, seed);
   const w = (Z_HI - Z_LO) / RIDGE_BINS;
   const xs = Array.from({ length: RIDGE_BINS }, (_, i) => r6(Z_LO + (i + 0.5) * w));
   const ns = Array.from({ length: nmax }, (_, i) => i + 1);
   const z = rows.map((row, j) => {
-    if (law.discrete) return latticeSlice(row, j + 1, law, R, xs);
+    if (law.discrete && (law.lattice || law.id === 'poisson')) return latticeSlice(row, j + 1, law, R, xs);
     const counts = new Array(RIDGE_BINS).fill(0);
     for (const v of row) {
       const k = Math.floor((v - Z_LO) / w);
@@ -376,12 +409,12 @@ function runRidge({ source: si, p, nmax, R }, seed) {
   const ds = rows.map((row) => r6(kolmogorovDistance(row, normalCdf)));
   const band = ksBand(R);
   const settled = ds.findIndex((d) => d <= band);
-  const head = cauchy ? 'Cauchy terms: $S_n/\\sqrt{n}$ flattens instead of settling' : `${law.label}: $S_n^* = \\dfrac{S_n - n\\,MX}{\\sigma\\sqrt{n}}$`;
+  const head = cauchy ? 'Cauchy terms: $S_n/\\sqrt{n}$ flattens instead of settling' : id === 'custom' ? 'Typed law: $S_n^* = \\dfrac{S_n - n\\,MX}{\\sigma\\sqrt{n}}$' : `${law.label}: $S_n^* = \\dfrac{S_n - n\\,MX}{\\sigma\\sqrt{n}}$`;
   const tall = law.discrete && z.some((row) => row.some((v) => v > RIDGE_CEIL));
   const notes = cauchy
     ? ['The Cauchy law has no mean and no variance, so the CLT does not apply: $S_n/n$ is again Cauchy, and $S_n/\\sqrt{n}$ is Cauchy with scale $\\sqrt{n}$. The ridge flattens and leaks out of the window instead of settling onto $\\varphi$, and the distance to $\\Phi$ grows towards $\\tfrac12$.']
     : ['Lindeberg–Lévy (L8): for i.i.d. terms with finite variance the law of $S_n^*$ tends to $N(0, 1)$. Each slice of the ridge is the histogram of $S_n^*$ over the same $R$ paths, one more term per slice; the far wall carries the exact $\\varphi(x) = \\dfrac{1}{\\sqrt{2\\pi}}\\,e^{-x^2/2}$.',
-      law.discrete
+      law.discrete && (law.lattice || law.id === 'poisson')
         ? 'A lattice law (Bernoulli, Poisson) gives $S_n^*$ isolated values $1/(\\sigma\\sqrt{n})$ apart: each slice shows the share of every value divided by that step, which tends to $\\varphi$ (the local limit theorem). The CDF still jumps, so the Kolmogorov distance falls only like $1/\\sqrt{n}$ (Berry–Esseen).'
         : id === 'exponential' ? 'A skewed term (exponential) leans to the left for small $n$ and straightens slowly: the Berry–Esseen error is of order $1/\\sqrt{n}$.'
           : 'A symmetric term (uniform) settles fast: by $n = 3$ the slice is hard to tell from $\\varphi$.'];
@@ -404,7 +437,7 @@ function runRidge({ source: si, p, nmax, R }, seed) {
       x: xs, y: ns, z,
       labels: { x: '$x$', y: '$n$', z: 'density' },
       title: head,
-      keyLabel: law.discrete ? 'share of each value of $S_n^*$ over the lattice step, one slice per $n$' : 'histogram of the standardized sums, one slice per $n$',
+      keyLabel: law.discrete && (law.lattice || law.id === 'poisson') ? 'share of each value of $S_n^*$ over the lattice step, one slice per $n$' : 'histogram of the standardized sums, one slice per $n$',
       zCeil: RIDGE_CEIL,
       wall: { x: grid(Z_LO, Z_HI, 81).map(r6), z: grid(Z_LO, Z_HI, 81).map((x) => r6(normPdf(x))), label: 'exact $\\varphi(x)$ on the far wall' },
       rowNotes: ds.map((d, j) => `$D_{${j + 1}} = ${d}$`),
@@ -413,16 +446,18 @@ function runRidge({ source: si, p, nmax, R }, seed) {
   };
 }
 
-function runClt({ law: li, n, R, view, source, p, nmax }, seed) {
-  if (view === 3) return runRidge({ source: source ?? 0, p: p ?? 0.3, nmax: nmax ?? 30, R }, seed);
-  const law = LAWS[CLT_LAWS[li]];
+function runClt({ law: li, n, R, view, source, p, nmax, custom }, seed) {
+  if (view === 3) return runRidge({ source: source ?? 0, p: p ?? 0.3, nmax: nmax ?? 30, R, custom }, seed);
+  const law = lawAt(li, CUSTOM.clt, custom) ?? LAWS[CLT_LAWS[li]];
   const band = ksBand(R);
   const notes = [
     'Lindeberg–Lévy (L8): for i.i.d. terms with finite variance, $\\dfrac{S_n - n\\,MX}{\\sigma\\sqrt{n}}$ tends in law to $N(0, 1)$, whatever the shape of one term.',
     law.discrete
       ? 'For a lattice law (Poisson) the standardized sum takes isolated values, so the Kolmogorov distance falls only like $1/\\sqrt{n}$: the CDF keeps jumps of that size.'
       : law.id === 'exponential' ? 'A skewed term (exponential) converges more slowly than a symmetric one (uniform): Berry–Esseen puts the error at order $1/\\sqrt{n}$.'
-        : law.id === 'normal' ? 'A normal term gives an exactly normal sum for every $n$: the distance is pure Monte Carlo noise.' : 'A symmetric term converges fast: already $n = 3$ uniforms look normal.',
+        : law.id === 'normal' ? 'A normal term gives an exactly normal sum for every $n$: the distance is pure Monte Carlo noise.'
+          : law.id === 'custom' ? 'Your typed law has a finite variance, so the CLT applies to it as to any other: a skewed or lumpy law only takes longer.'
+            : 'A symmetric term converges fast: already $n = 3$ uniforms look normal.',
   ];
   if (view === 2) {
     const ns = Array.from({ length: 200 }, (_, i) => i + 1);
@@ -657,7 +692,7 @@ const stationParams = {
     { key: 'R', label: 'Simulated sums $R$', min: 1000, max: 20000, step: 1000, default: 5000 },
   ],
   lln: [
-    { key: 'law', label: 'Law (0 normal, 1 uniform, 2 exponential, 3 Poisson, 4 Cauchy)', min: 0, max: 4, step: 1, default: 4 },
+    { key: 'law', label: 'Law (0 normal, 1 uniform, 2 exponential, 3 Poisson, 4 Cauchy, 5 typed)', min: 0, max: 5, step: 1, default: 4 },
     { key: 'N', label: 'Terms $N$', min: 100, max: 10000, step: 100, default: 2000 },
     { key: 'k', label: 'Deviation $k$ (view 1)', min: 0.5, max: 4, step: 0.1, default: 3, when: { view: [1] } },
     { key: 'view', label: 'View (0 running means, 1 Chebyshev vs real tail, 2 corridor of many paths)', min: 0, max: 2, step: 1, default: 0 },
@@ -665,11 +700,11 @@ const stationParams = {
     { key: 'eps', label: 'Corridor half-width $\\varepsilon$', min: 0.01, max: 2, step: 0.01, default: 0.2, when: { view: [2] } },
   ],
   clt: [
-    { key: 'law', label: 'Law of one term (0 uniform, 1 exponential, 2 Poisson, 3 normal)', min: 0, max: 3, step: 1, default: 1, when: { view: [0, 1, 2] } },
+    { key: 'law', label: 'Law of one term (0 uniform, 1 exponential, 2 Poisson, 3 normal, 4 typed)', min: 0, max: 4, step: 1, default: 1, when: { view: [0, 1, 2] } },
     { key: 'n', label: 'Terms in the sum $n$', min: 1, max: 100, step: 1, default: 5, when: { view: [0, 1, 2] } },
     { key: 'R', label: 'Replicates $R$', min: 1000, max: 10000, step: 1000, default: 4000 },
     { key: 'view', label: 'View (0 histogram, 1 distance vs $n$, 2 Poisson lemma, 3 ridge over $n$)', min: 0, max: 3, step: 1, default: 0 },
-    { key: 'source', label: 'Law of one term (0 uniform, 1 exponential, 2 Bernoulli, 3 Poisson, 4 Cauchy)', min: 0, max: 4, step: 1, default: 1, when: { view: [3] } },
+    { key: 'source', label: 'Law of one term (0 uniform, 1 exponential, 2 Bernoulli, 3 Poisson, 4 Cauchy, 5 typed)', min: 0, max: 5, step: 1, default: 1, when: { view: [3] } },
     { key: 'p', label: 'Bernoulli probability $p$', min: 0.01, max: 0.99, step: 0.01, default: 0.3, when: { view: [3], source: [2] } },
     { key: 'nmax', label: 'Largest $n$ on the ridge', min: 2, max: 40, step: 1, default: 30, when: { view: [3] } },
   ],
@@ -692,10 +727,11 @@ stationParams.charfn = [
   { key: 'a2', label: 'Centre $a$ of $Y$', min: -3, max: 3, step: 0.1, default: 0, when: { view: [1], law2: [3, 4] } },
   { key: 's2', label: 'Spread $s$ of $Y$', min: 0.1, max: 3, step: 0.1, default: 1, when: { view: [1], law2: [3, 4] } },
 ];
+const customText = (when) => ({ key: 'custom', label: 'Your law: values | probabilities, or a density on $[a, b]$', default: DEFAULT_LAW, presets: [...LAW_PRESETS], hint: LAW_HINT, when });
 export const stations = Object.freeze({
   convolution: { params: stationParams.convolution, live: true },
-  lln: { params: stationParams.lln },
-  clt: { params: stationParams.clt },
+  lln: { params: stationParams.lln, texts: [customText({ law: [CUSTOM.lln] })] },
+  clt: { params: stationParams.clt, texts: [customText([{ view: [0, 1], law: [CUSTOM.clt] }, { view: [3], source: [CUSTOM.ridge] }])] },
   charfn: { params: stationParams.charfn, live: true },
 });
 export const meta = {
@@ -705,7 +741,28 @@ export const meta = {
   params: stationParams.clt,
 };
 
+/** #88: checks the typed law before the host runs it. */
+export function checkText(station, key, value) {
+  if (key !== 'custom' || (station !== 'lln' && station !== 'clt')) return null;
+  return checkLaw(value);
+}
+/** Whether this run draws from the typed law. */
+const usesCustom = (station, q) => (station === 'lln' ? q.law === CUSTOM.lln : station === 'clt' && (q.view === 3 ? q.source === CUSTOM.ridge : q.view !== 2 && q.law === CUSTOM.clt));
+/** #88: the typed law's formula on top, and its pmf or pdf with the CDF as a linked chart where the view has none. */
+function withPreview(out, text) {
+  const t = lawOf(text ?? DEFAULT_LAW), pv = lawPreview(t);
+  return {
+    ...out,
+    formula: [t.tex, ...(out.formula ?? [])],
+    ...(out.linked ? {} : { linked: { series: pv.series, axes: { x: '$x$', y: t.kind === 'discrete' ? '$p_i$, $F(x)$' : '$f(x)$, $F(x)$' }, ...(pv.domain ? { domain: pv.domain } : {}) } }),
+  };
+}
+
 export function run(params, { seed, station = 'clt' } = {}) {
+  const out = runStation(params, { seed, station });
+  return usesCustom(station, params ?? {}) ? withPreview(out, params.custom) : out;
+}
+function runStation(params, { seed, station }) {
   if (station === 'convolution') return runConvolution(params, seed);
   if (station === 'lln') return runConvergence(params, seed);
   if (station === 'charfn') {

@@ -341,3 +341,33 @@ test('#86: lattice slices (share over the step) tend to phi: the local limit the
   z[0].forEach((v, i) => { if (x[i] < -1.3 / sd - 1e-9 || x[i] > 1.7 / sd + 1e-9) assert.equal(v, 0); });
   assert.match(out.notes.join(' '), /local limit theorem/);
 });
+
+// ---------------------------------------------------------------- #88: a typed law as the source
+test('#88: a typed law is a source of the LLN, the CLT and the ridge, with its formula and pdf/CDF preview', () => {
+  const lln = k.run({ law: k.CUSTOM.lln, N: 5000, view: 0, custom: '3x^2 on [0, 1]' }, { seed: 4, station: 'lln' });
+  close(lln.readouts.find((r) => r.key === 'final').theory, 0.75, 1e-5, 'MX of 3x^2');
+  close(lln.readouts.find((r) => r.key === 'final').observed, 0.75, 0.02, 'the running mean settles at MX');
+  assert.match(lln.formula[0], /3x\^\{2\}/);
+  assert.deepEqual(lln.linked.series.map((s) => s.kind), ['pdf', 'cdf']);
+
+  const clt = k.run({ law: k.CUSTOM.clt, n: 30, R: 4000, view: 0, custom: '0 1 2 | 0.2 0.5 0.3' }, { seed: 4, station: 'clt' });
+  assert.match(clt.formula[0], /begin\{array\}/);
+  assert.deepEqual(clt.linked.series.map((s) => s.kind), ['pmf', 'ecdf']);
+  assert.ok(clt.readouts.find((r) => r.key === 'ks').observed < 0.08, 'n = 30 sums of the typed law are near normal');
+
+  const ridge = k.run({ view: 3, source: k.CUSTOM.ridge, nmax: 12, R: 4000, custom: '0 0.5 | 0.5 0.5' }, { seed: 4, station: 'clt' });
+  assert.equal(ridge.surface.y.length, 12);
+  close(ridge.surface.z[11].reduce((a, v) => a + v, 0) * 0.25, 1, 0.01, 'a lattice of span 1/2 integrates to 1');
+  // Built-in laws carry no preview.
+  assert.equal(k.run({ law: 0, n: 5, R: 1000, view: 0 }, { seed: 4, station: 'clt' }).linked, undefined);
+});
+
+test('#88: the typed law is checked before it runs, and a lattice is found on any decimal grid', () => {
+  assert.equal(k.checkText('clt', 'custom', '2x on [0, 1]'), null);
+  assert.match(k.checkText('lln', 'custom', '0 1 | 0.5 0.4').message, /add up to 0\.9/);
+  assert.equal(k.checkText('convolution', 'custom', 'nonsense'), null, 'other stations have no typed law');
+  assert.deepEqual(k.customLaw('0 2 4 | 0.2 0.3 0.5').lattice, { origin: 0, span: 2 });
+  assert.deepEqual(k.customLaw('-1 0.5 | 0.5 0.5').lattice, { origin: -1, span: 1.5 });
+  assert.equal(k.customLaw('2x on [0, 1]').lattice, null);
+  close(k.customLaw('-1 0 10 | 0.5 0.45 0.05').tail(2), 0.05, 1e-12, 'P(|X − MX| ≥ 2σ): only the value 10');
+});

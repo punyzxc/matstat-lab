@@ -344,7 +344,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
             );
           })}
           {declaredTexts.filter((p) => applies(p.when, params)).map((p) => (
-            <TextField key={p.key} id={`p-${p.key}`} label={kernelText(station.kernel, p.label)} value={texts[p.key]} presets={p.presets}
+            <TextField key={p.key} id={`p-${p.key}`} label={kernelText(station.kernel, p.label)} value={texts[p.key]} presets={p.presets} hint={p.hint && kernelText(station.kernel, p.hint)}
               check={(v) => kernel.checkText?.(station.id, p.key, v) ?? null} translate={(s) => kernelText(station.kernel, s)}
               onChange={(v) => setTexts((x) => ({ ...x, [p.key]: v }))} />
           ))}

@@ -2,14 +2,18 @@
  * The shared lecture-kernel contract (docs/research/lecture-module-map.md).
  * A kernel is a plain ES module `spikes/<id>/kernel.mjs`; it never touches the DOM.
  */
-/** `when`: show the parameter only while other parameters take one of the listed values, e.g. `{ view: [3] }`. */
+/**
+ * `when`: show the parameter only while other parameters take one of the listed values, e.g. `{ view: [3] }`.
+ * A list of conditions shows it when any one of them holds (#88: a custom law used by two views).
+ */
 export type ParamCondition = Record<string, number[]>;
-export type KernelParam = { key: string; label: string; min: number; max: number; step: number; default: number; when?: ParamCondition };
+export type When = ParamCondition | ParamCondition[];
+export type KernelParam = { key: string; label: string; min: number; max: number; step: number; default: number; when?: When };
 /**
  * A typed text parameter (#90), such as a region `y < x^2`. The host validates it with the kernel's `checkText`
  * before every run, so the kernel only ever receives a valid text; `presets` are offered as chips.
  */
-export type TextParam = { key: string; label: string; default: string; presets?: string[]; when?: ParamCondition };
+export type TextParam = { key: string; label: string; default: string; presets?: string[]; when?: When; hint?: string };
 /** A text the kernel rejected: the English `message`, and its `template` with `[[n]]` holes for `values` (for translation). */
 export type TextCheck = { message: string; template: string; values: string[] } | null;
 export type KernelMeta = { id: string; lectures: string[]; title: string; params: KernelParam[] };
@@ -167,8 +171,8 @@ export type Kernel = {
 };
 
 /** Whether a parameter applies under the current numeric parameters (no `when`: always). */
-export const applies = (when: ParamCondition | undefined, params: Record<string, number>) =>
-  !when || Object.entries(when).every(([k, vs]) => vs.includes(params[k]));
+export const applies = (when: When | undefined, params: Record<string, number>): boolean =>
+  !when || (Array.isArray(when) ? when.some((w) => applies(w, params)) : Object.entries(when).every(([k, vs]) => vs.includes(params[k])));
 
 /** Text parameters: defaults, then each override the kernel accepts. */
 export function resolveTexts(kernel: Pick<Kernel, 'checkText'>, station: string, texts: TextParam[], overrides: Record<string, string> = {}) {

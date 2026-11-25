@@ -53,6 +53,14 @@ export async function kernelTexts(dir) {
       }
       sets.push(s);
     }
+    // Typed text parameters (#90, #88): their labels and hints, and a run with each preset wherever the text applies.
+    const holds = (when, q) => !when || (Array.isArray(when) ? when.some((w) => holds(w, q)) : Object.entries(when).every(([k, vs]) => vs.includes(q[k])));
+    for (const tp of kernel.stations?.[station]?.texts ?? []) {
+      texts.add(tp.label);
+      if (tp.hint) texts.add(tp.hint);
+      const where = sets.filter((q) => holds(tp.when, q));
+      for (const preset of tp.presets ?? []) for (const q of where) sets.push({ ...q, [tp.key]: preset });
+    }
     sets.forEach((s, i) => {
       for (const seed of [7, 1000 + i]) {
         let result;
