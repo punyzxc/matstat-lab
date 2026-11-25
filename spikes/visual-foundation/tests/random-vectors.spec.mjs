@@ -56,3 +56,23 @@ test('Scatter takes typed rho and both sigmas, shows r beside rho and the regres
   await sx.press('Enter');
   await expect(page).toHaveURL(/sigma1=1\.5/);
 });
+
+// #133: nonlinear presets: r ≈ 0 beside ρ = 0, while the curve and the dependence readout show the link.
+test('Scatter presets: the parabola and the ring are uncorrelated yet visibly dependent', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#station/scatter?seed=7&mode=3&n=2000');
+  const dock = page.getByTestId('station-dock');
+  const readouts = dock.getByRole('table', { name: 'Readouts' });
+  const r = readouts.getByRole('row', { name: /sample r against ρ/ });
+  await expect(r).toBeVisible();
+  const observed = Number((await r.locator('td').first().innerText()).replace('−', '-').replace(',', '.'));
+  expect(Math.abs(observed)).toBeLessThan(0.08);
+  await expect(readouts.getByRole('row', { name: /Correlation of ξ² and η across/ })).toContainText('0.98');
+  await expect(dock.locator('.station-notes')).toContainText('does not mean independent');
+  await expect(dock.locator('svg.surface-svg')).toHaveAttribute('aria-label', /ridge along/);
+
+  await dock.getByRole('radio', { name: /ring/ }).click();
+  await expect(page).toHaveURL(/mode=4/);
+  await expect(readouts.getByRole('row', { name: /Correlation of ξ² and η² across/ })).toContainText(/[-−]0\.9/);
+  await expect(dock.locator('svg.surface-svg')).toHaveAttribute('aria-label', /a ring around/);
+});

@@ -227,7 +227,7 @@ test('every station is deterministic and emits only finite numbers', () => {
     ...[0, 1, 2, 3, 4, 5].map((law) => ['moments', { law }]),
     ...[0, 1, 2, 3].map((phi) => ['transform', { phi }]),
     ['transform', { phi: 2, lambda: 0.2, beta: 4 }],
-    ...[0, 1, 2].map((mode) => ['scatter', { mode }]),
+    ...[0, 1, 2, 3, 4].map((mode) => ['scatter', { mode }]),
     ['scatter', { mode: 0, rho: -0.95, sigma2: 0.5 }], ['scatter', { mode: 0, rho: 0 }],
   ];
   for (const [station, over] of runs) {
@@ -300,4 +300,39 @@ test('#96 scatter: the same parameters and seed give the same histogram', () => 
   const p = { ...defaults('scatter'), mode: 0, rho: 0.3, sigma1: 1.4, sigma2: 0.8, n: 1500 };
   assert.equal(JSON.stringify(K.run(p, { seed: 44, station: 'scatter' }).surface), JSON.stringify(K.run(p, { seed: 44, station: 'scatter' }).surface));
   assert.notEqual(JSON.stringify(K.run(p, { seed: 45, station: 'scatter' }).surface.zSample), JSON.stringify(K.run(p, { seed: 44, station: 'scatter' }).surface.zSample));
+});
+
+// #133: correlation space. Predeclared band: 99.9 % in Fisher z, |z(r) − z(ρ)| < 3.29/√(n − 3) at n = 2000.
+test('#133 scatter: r follows a typed rho within the Fisher band at n = 2000', () => {
+  const n = 2000, half = 3.29 / Math.sqrt(n - 3);
+  for (const [rho, seed] of [[-0.9, 11], [-0.35, 12], [0, 13], [0.25, 14], [0.75, 15], [0.95, 16]]) {
+    const res = K.run({ ...defaults('scatter'), mode: 0, rho, n }, { seed, station: 'scatter' });
+    const r = readout(res, 'r');
+    assert.equal(r.theory, rho, 'r is shown beside rho');
+    assert.ok(Math.abs(Math.atanh(r.observed) - Math.atanh(rho)) < half, `rho ${rho}: r = ${r.observed}`);
+  }
+});
+
+test('#133 scatter: nonlinear presets have r near 0 while the dependence is strong', () => {
+  const n = 2000, half = 3.29 / Math.sqrt(n - 3);
+  close(K.nonlinearDependence(3), Math.sqrt(((4 * 16) / 45) / ((4 * 16) / 45 + 0.04)), 1e-12, 'parabola: corr(ξ², η)');
+  for (const [mode, sign] of [[3, 1], [4, -1]]) {
+    for (const seed of [21, 22, 23]) {
+      const res = K.run({ ...defaults('scatter'), mode, n }, { seed, station: 'scatter' });
+      const r = readout(res, 'r'), dep = readout(res, 'dep');
+      assert.equal(r.theory, 0);
+      assert.ok(Math.abs(Math.atanh(r.observed)) < half, `mode ${mode} seed ${seed}: r = ${r.observed}`);
+      assert.ok(sign * dep.observed > 0.85, `mode ${mode}: dependence ${dep.observed} is visible`);
+      assert.ok(Math.abs(Math.atanh(dep.observed) - Math.atanh(dep.theory)) < 2 * half, `mode ${mode}: dependence near theory`);
+      assert.ok(res.series.some((s) => s.id === 'curve'), 'the curve of the dependence is drawn');
+      assert.ok(res.notes.some((t) => /does not mean independent/.test(t)));
+    }
+  }
+  // The theory density integrates to about 1 on the grid.
+  for (const mode of [3, 4]) {
+    const { surface: s } = K.run({ ...defaults('scatter'), mode, n: 2000 }, { seed: 5, station: 'scatter' });
+    const dx = s.x[1] - s.x[0], dy = s.y[1] - s.y[0];
+    const mass = s.z.flat().reduce((a, b) => a + b, 0) * dx * dy;
+    assert.ok(Math.abs(mass - 1) < 0.08, `mode ${mode}: mass ${mass}`);
+  }
 });

@@ -326,11 +326,11 @@ function runTransform(params, seed) {
 // ---------------------------------------------------------------- Scatter (L6 §Random vectors, correlation, regression, lottery)
 
 const scatterParams = [
-  { key: 'mode', label: 'Experiment (0 bivariate normal · 1 uniform disc · 2 matching problem)', min: 0, max: 2, step: 1, default: 0 },
+  { key: 'mode', label: 'Experiment (0 bivariate normal · 1 uniform disc · 2 matching problem · 3 parabola $\\eta = \\xi^2$ · 4 ring)', min: 0, max: 4, step: 1, default: 0 },
   { key: 'rho', label: 'Correlation $\\rho$ (experiment 0)', min: -1, max: 1, step: 0.05, default: 0.6 },
   { key: 'sigma1', label: '$\\sigma_X$ of $\\xi$ (experiment 0)', min: 0.5, max: 2, step: 0.1, default: 1 },
   { key: 'sigma2', label: '$\\sigma_Y$ of $\\eta$ (experiment 0)', min: 0.5, max: 2, step: 0.1, default: 1 },
-  { key: 'n', label: 'Points $n$ (experiments 0, 1)', min: 200, max: 20000, step: 100, default: 2000 },
+  { key: 'n', label: 'Points $n$ (experiments 0, 1, 3, 4)', min: 200, max: 20000, step: 100, default: 2000 },
   { key: 'players', label: 'Players $n$ (experiment 2)', min: 2, max: 40, step: 1, default: 6 },
   { key: 'reps', label: 'Lottery draws (experiment 2)', min: 200, max: 10000, step: 100, default: 4000 },
 ];
@@ -479,6 +479,82 @@ function runVector({ mode, rho, sigma1 = 1, sigma2, n }, seed) {
   return { axes: { x: '$x$ (value of $\\xi$)', y: '$y$ (value of $\\eta$)' }, readouts, series, notes, surface };
 }
 
+// #133: nonlinear dependence that the correlation coefficient does not see.
+/** Parabola: ξ uniform on [−A, A], η = ξ² + Sε. Cov(ξ, ξ²) = Mξ³ = 0, so ρ = 0 while η is almost a function of ξ. */
+export const PARABOLA = { A: 2, S: 0.2 };
+/** Ring: angle uniform, radius 1 + Sε. Symmetric under x ↦ −x, so ρ = 0, yet ξ² + η² ≈ 1. */
+export const RING = { S: 0.08 };
+/** Exact correlation of ξ² and η (parabola) or of ξ² and η² (ring): the dependence that r(ξ, η) misses. */
+export function nonlinearDependence(mode) {
+  if (mode === 3) {
+    const { A, S } = PARABOLA, v = (4 * A ** 4) / 45; // Var ξ² for ξ ~ U(−A, A): A⁴/5 − A⁴/9
+    return Math.sqrt(v / (v + S * S));
+  }
+  // ξ² = R²cos²θ, η² = R²sin²θ with Var cos²θ = 1/8: corr = (m₄ − 2m₂²)/(3m₄ − 2m₂²), mₖ = MRᵏ.
+  const s2 = RING.S ** 2, m2 = 1 + s2, m4 = 1 + 6 * s2 + 3 * s2 * s2;
+  return (m4 - 2 * m2 * m2) / (3 * m4 - 2 * m2 * m2);
+}
+
+function runNonlinear({ mode, n }, seed) {
+  const xs = new Array(n), ys = new Array(n), parabola = mode === 3;
+  for (let i = 0; i < n; i++) {
+    if (parabola) {
+      const x = PARABOLA.A * (2 * uni(seed, 94, i) - 1);
+      xs[i] = x; ys[i] = x * x + PARABOLA.S * gauss(seed, 95, i);
+    } else {
+      const r = 1 + RING.S * gauss(seed, 96, i), th = 2 * Math.PI * uni(seed, 97, i);
+      xs[i] = r * Math.cos(th); ys[i] = r * Math.sin(th);
+    }
+  }
+  const st = vectorStats(xs, ys);
+  const sq = parabola ? vectorStats(xs.map((x) => x * x), ys) : vectorStats(xs.map((x) => x * x), ys.map((y) => y * y));
+  const half = Z99 / Math.sqrt(n - 3), band = [Math.tanh(-half), Math.tanh(half)];
+  const { A, S } = PARABOLA;
+  const [x0, x1] = parabola ? [-1.1 * A, 1.1 * A] : [-1.4, 1.4];
+  const [y0, y1] = parabola ? [-0.8, A * A + 0.8] : [-1.4, 1.4];
+  const my = parabola ? (A * A) / 3 : 0; // Mη: Mξ² = A²/3 for the parabola, 0 for the ring
+  const xl = grid(x0, x1, 2), yl = grid(y0, y1, 2);
+  const t = grid(0, 1, 121);
+  const series = [
+    { id: 'points', kind: 'points', label: `Sample (first ${Math.min(n, SHOWN_POINTS)} of ${n})`, x: xs.slice(0, SHOWN_POINTS).map(r6), y: ys.slice(0, SHOWN_POINTS).map(r6) },
+    parabola
+      ? { id: 'curve', kind: 'line', tone: 'muted', label: 'The dependence: $y = x^2$', x: t.map((u) => r6(-A + 2 * A * u)), y: t.map((u) => r6((-A + 2 * A * u) ** 2)) }
+      : { id: 'curve', kind: 'line', tone: 'muted', label: 'The dependence: $x^2 + y^2 = 1$', x: t.map((u) => r6(Math.cos(2 * Math.PI * u))), y: t.map((u) => r6(Math.sin(2 * Math.PI * u))) },
+    { id: 'reg-yx-theory', kind: 'line', tone: 'signal', label: 'Line (63), theory: $y = M\\eta$ (flat, $\\rho = 0$)', x: xl, y: xl.map(() => r6(my)) },
+    { id: 'reg-xy-theory-rule', kind: 'rule', tone: 'signal', label: 'Line (64), theory: $x = M\\xi$ (vertical, $r = 0$)', x: [0], y: [] },
+    { id: 'reg-yx', kind: 'line', tone: 'accent', label: 'Line (63) from the sample', x: xl, y: xl.map((x) => r6(st.my + st.slopeYonX * (x - st.mx))) },
+    { id: 'reg-xy', kind: 'line', tone: 'accent', label: 'Line (64) from the sample', x: yl.map((y) => r6(st.mx + st.slopeXonY * (y - st.my))), y: yl },
+  ];
+  const npdf = (z) => normPdf(z);
+  const density = parabola
+    ? (x, y) => (Math.abs(x) <= A ? (npdf((y - x * x) / S) / S) / (2 * A) : 0)
+    : (x, y) => { const r = Math.hypot(x, y); return r === 0 ? 0 : npdf((r - 1) / RING.S) / RING.S / (2 * Math.PI * r); };
+  const surface = surfaceGrid(xs, ys, [x0, x1], [y0, y1], 31, density, { x: '$\\xi$', y: '$\\eta$', z: 'density $f(x, y)$' });
+  surface.title = parabola ? 'Joint density of $(\\xi, \\eta)$: a ridge along $y = x^2$' : 'Joint density of $(\\xi, \\eta)$: a ring around $x^2 + y^2 = 1$';
+  surface.sampleLabel = 'Sample 2D histogram (the points so far)';
+  const dep = nonlinearDependence(mode);
+  const readouts = [
+    { key: 'r', label: 'Correlation: sample $r$ against $\\rho$', observed: r6(st.r), theory: 0, convention: `99 % band ${r6(band[0])} … ${r6(band[1])} (Fisher $z$)` },
+    { key: 'cov', label: '$\\operatorname{Cov}(\\xi, \\eta)$', observed: r6(st.cov), theory: 0, convention: parabola ? '$M\\xi^3 = 0$ for a symmetric $\\xi$' : 'symmetric under $x \\mapsto -x$' },
+    parabola
+      ? { key: 'dep', label: 'Correlation of $\\xi^2$ and $\\eta$', observed: r6(sq.r), theory: r6(dep), convention: 'close to 1: $\\eta$ is almost a function of $\\xi$' }
+      : { key: 'dep', label: 'Correlation of $\\xi^2$ and $\\eta^2$', observed: r6(sq.r), theory: r6(dep), convention: 'close to $-1$: $\\xi^2 + \\eta^2 \\approx 1$' },
+    { key: 'slope63', label: 'Slope of (63): $r\\,\\sigma_Y/\\sigma_X$', observed: r6(st.slopeYonX), theory: 0 },
+  ];
+  const notes = parabola
+    ? [
+      `$\\eta = \\xi^2 + ${S}\\,\\varepsilon$ with $\\xi$ uniform on $[-${A}, ${A}]$: knowing $\\xi$ fixes $\\eta$ almost exactly, yet $\\rho = 0$ because $\\operatorname{Cov}(\\xi, \\xi^2) = M\\xi^3 = 0$.`,
+      'The correlation coefficient measures only linear dependence: the best line through the parabola is flat, so $r \\approx 0$ while the points lie on a curve.',
+      'Uncorrelated does not mean independent (L6); the correlation of $\\xi^2$ with $\\eta$ is close to 1 and shows the dependence.',
+    ]
+    : [
+      `A ring of radius $1 + ${RING.S}\\,\\varepsilon$ at a uniform angle: the cloud is symmetric, so $\\rho = 0$ and both regression lines are flat or vertical.`,
+      'Yet $\\xi$ and $\\eta$ are strongly dependent: $|\\xi|$ close to 1 forces $\\eta$ close to 0, and $\\xi^2 + \\eta^2 \\approx 1$.',
+      'Uncorrelated does not mean independent (L6); the correlation of $\\xi^2$ and $\\eta^2$ is close to $-1$.',
+    ];
+  return { axes: { x: '$x$ (value of $\\xi$)', y: '$y$ (value of $\\eta$)' }, readouts, series, notes, surface };
+}
+
 /** Exact P(M = k) for the number of fixed points of a random permutation of n: (1/k!) Σⱼ₌₀ⁿ⁻ᵏ (−1)ʲ/j!. */
 export function matchPmf(n) {
   const fact = [1];
@@ -560,7 +636,7 @@ export const stations = {
 export function run(params, { seed, station = 'moments' } = {}) {
   const s = seed >>> 0;
   if (station === 'transform') return runTransform(params, s);
-  if (station === 'scatter') return params.mode === 2 ? runMatching(params, s) : runVector(params, s);
+  if (station === 'scatter') return params.mode === 2 ? runMatching(params, s) : params.mode >= 3 ? runNonlinear(params, s) : runVector(params, s);
   return runMoments(params, s);
 }
 
