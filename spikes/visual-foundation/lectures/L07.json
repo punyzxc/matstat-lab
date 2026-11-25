@@ -18,7 +18,17 @@
       ],
       "scientists": [
         "chebyshev"
-      ]
+      ],
+      "experiment": {
+        "station": "lln",
+        "seed": 1853,
+        "params": {
+          "law": 0,
+          "k": 3,
+          "view": 1
+        },
+        "label": "Compare 1/k² with the real tail"
+      }
     },
     {
       "title": "Running means settle",
@@ -46,7 +56,17 @@
       "idea": "The Cauchy law has no mean, and its running means never settle.",
       "scientists": [
         "cauchy"
-      ]
+      ],
+      "experiment": {
+        "station": "lln",
+        "seed": 707,
+        "params": {
+          "law": 4,
+          "N": 10000,
+          "view": 0
+        },
+        "label": "Watch Cauchy running means"
+      }
     }
   ],
   "status": "draft"

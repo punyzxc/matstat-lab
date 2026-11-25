@@ -41,6 +41,8 @@ export const stations: readonly Station[] = [
     summary: 'Add uniforms and compare the exact piecewise density with the simulated sum.' },
   { kind: 'legacy', id: 'convergence', name: 'Convergence', orbit: 'limits', lectures: 'L7', module: 'convergence',
     summary: 'Track the running sample mean as the number of observations grows.' },
+  { kind: 'kernel', id: 'lln', name: 'Chebyshev & LLN', orbit: 'limits', lectures: 'L7', kernel: 'lecture-limit-theorems', issue: 41,
+    summary: 'Set the Chebyshev bound 1/k² against real tails, and watch running means settle, except for Cauchy.' },
   { kind: 'kernel', id: 'clt', name: 'CLT', orbit: 'limits', lectures: 'L8 · L9', kernel: 'lecture-limit-theorems', issue: 41,
     summary: 'Standardise sums of independent draws and compare them with the normal law.' },
 

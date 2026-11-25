@@ -14,6 +14,8 @@ const views = [
   '#station/randomness',
   '#station/urn',
   '#station/bayes',
+  '#station/convolution',
+  '#station/lln',
   '#station/clt',
   '#station/fit',
   '#notes',
