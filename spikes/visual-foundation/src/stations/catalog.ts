@@ -58,6 +58,8 @@ export const stations: readonly Station[] = [
     summary: 'Set the Chebyshev bound $1/k^2$ against real tails, and watch running means settle, except for Cauchy.' },
   { kind: 'kernel', id: 'clt', name: 'CLT', orbit: 'limits', lectures: 'L8 · L9', kernel: 'lecture-limit-theorems', issue: 41,
     summary: 'Standardise sums of independent draws and compare them with the normal law.' },
+  { kind: 'kernel', id: 'charfn', name: 'Characteristic function', orbit: 'limits', lectures: 'L9', kernel: 'lecture-limit-theorems', issue: 121,
+    summary: 'Every value $x_j$ turns into a unit vector $e^{itx_j}$; their mean is $\\hat\\varphi(t)$, and it settles on $\\varphi(t) = M e^{itX}$.' },
 
   { kind: 'kernel', id: 'sample', name: 'Sample', orbit: 'statistics', lectures: 'L10', kernel: 'lecture-sampling-goodness-of-fit', issue: 45,
     summary: 'Build the variation series, frequency table, histogram and empirical CDF.' },
@@ -98,6 +100,7 @@ const ru: Record<string, { name: string; summary: string }> = {
   convolution: { name: 'Композиция', summary: 'Сложите равномерные величины и сравните точную кусочную плотность с моделью суммы.' },
   convergence: { name: 'Сходимость', summary: 'Следите за скользящим выборочным средним по мере роста числа наблюдений.' },
   lln: { name: 'Чебышёв и ЗБЧ', summary: 'Граница Чебышёва $1/k^2$ против настоящих хвостов; средние стабилизируются — кроме закона Коши.' },
+  charfn: { name: 'Характеристическая функция', summary: 'Каждое значение $x_j$ превращается в единичный вектор $e^{itx_j}$; их среднее — $\\hat\\varphi(t)$, и оно садится на $\\varphi(t) = M e^{itX}$.' },
   clt: { name: 'ЦПТ', summary: 'Стандартизуйте суммы независимых величин и сравните их с нормальным законом.' },
   sample: { name: 'Выборка', summary: 'Постройте вариационный ряд, таблицу частот, гистограмму и эмпирическую функцию распределения.' },
   fit: { name: 'Согласие', summary: 'Проверьте гипотезу о законе распределения по критериям Колмогорова и $\\chi^2$ Пирсона.' },

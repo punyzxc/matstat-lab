@@ -197,3 +197,48 @@ test('#116 M typed paths are drawn, the bundle narrows, and the same seed gives 
   assert.equal(c.readouts[0].theory, 'no bound');
   assert.ok(c.readouts[0].observed > 0.5);
 });
+
+// #121: the characteristic function as the mean of unit vectors.
+import { CF_LAWS, empiricalPhi } from './charfn.mjs';
+const charfn = (q, seed = 1) => k.run({ ...defaults('charfn'), motion: 1, ...q }, { seed, station: 'charfn' });
+
+test('#121 the empirical φ(t) lands within 4/√n of the exact φ(t) for every law, and φ(0) = 1, |φ| ≤ 1', () => {
+  for (let law = 0; law < CF_LAWS.length; law++) for (const t of [-3.3, -0.7, 0.4, 1, 2.5]) for (const seed of [1, 2, 3]) {
+    const r = charfn({ law, t, n: 2000 }, seed);
+    const re = r.readouts.find((x) => x.key === 're'), im = r.readouts.find((x) => x.key === 'im');
+    const band = 4 / Math.sqrt(2000);
+    close(re.observed, re.theory, band, `Re law ${law} t ${t}`);
+    close(im.observed, im.theory, band, `Im law ${law} t ${t}`);
+    assert.equal(r.readouts.find((x) => x.key === 'zero').observed, 1);
+    for (const [a, b] of r.phasor.exact) assert.ok(Math.hypot(a, b) <= 1 + 1e-9);
+    assert.ok(r.readouts.find((x) => x.key === 'abs').observed <= 1 + 1e-12);
+  }
+});
+
+test('#121 exact φ agrees with a direct numeric M e^{itX}, and symmetric laws have Im φ ≡ 0', () => {
+  const q = { p: 0.3, m: 4, lambda: 1.5, a: 0, s: 1.2 };
+  const pmf = (law) => law.id === 'bernoulli' ? [[0, 0.7], [1, 0.3]]
+    : law.id === 'binomial' ? [0, 1, 2, 3, 4].map((j) => [j, [1, 4, 6, 4, 1][j] * 0.3 ** j * 0.7 ** (4 - j)])
+    : law.id === 'poisson' ? Array.from({ length: 60 }, (_, j) => { let f = 1; for (let i = 2; i <= j; i++) f *= i; return [j, Math.exp(-1.5) * 1.5 ** j / f]; }) : null;
+  const dens = { uniform: [(x) => (Math.abs(x) <= 1.2 ? 1 / 2.4 : 0), -1.2, 1.2], normal: [(x) => Math.exp(-x * x / 2.88) / (1.2 * Math.sqrt(2 * Math.PI)), -12, 12], exponential: [(x) => 1.5 * Math.exp(-1.5 * x), 0, 40] };
+  for (const law of CF_LAWS) for (const t of [-2, 0.5, 1.7]) {
+    const pm = pmf(law);
+    let want;
+    if (pm) want = pm.reduce(([a, b], [x, w]) => [a + w * Math.cos(t * x), b + w * Math.sin(t * x)], [0, 0]);
+    else { const [f, lo, hi] = dens[law.id]; want = [simpson((x) => f(x) * Math.cos(t * x), lo, hi), simpson((x) => f(x) * Math.sin(t * x), lo, hi)]; }
+    const got = law.phi(t, q);
+    close(got[0], want[0], 1e-6, `${law.id} Re`); close(got[1], want[1], 1e-6, `${law.id} Im`);
+    if (law.symmetric(q)) assert.ok(got[1] === 0, `${law.id} Im = 0`);
+  }
+  assert.deepEqual(empiricalPhi([0, 0], 3), [1, 0]);
+});
+
+test('#121 the phasor field carries the whole sample, the shown cap and the motion switch', () => {
+  const r = charfn({ n: 3000, motion: 0 });
+  assert.equal(r.phasor.xs.length, 3000);
+  assert.equal(r.phasor.shown, k.PHASOR_SHOWN);
+  assert.equal(r.phasor.motion, true);
+  assert.equal(r.phasor.ts.length, r.phasor.exact.length);
+  assert.equal(charfn({ n: 50 }).phasor.shown, 50);
+  assert.notDeepEqual(charfn({}, 1).phasor.xs, charfn({}, 2).phasor.xs);
+});
