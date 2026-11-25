@@ -65,9 +65,9 @@ const typing = (el: EventTarget | null) =>
  * Space plays or stops, N draws once more; ← and → move one draw back or forward (#113) when `onArrow` is given.
  * Ignored while typing or when a control has focus.
  */
-export function useAutoplayKeys(onToggle: () => void, onStep: () => void, onArrow?: (d: -1 | 1) => void) {
-  const ref = useRef({ onToggle, onStep, onArrow });
-  ref.current = { onToggle, onStep, onArrow };
+export function useAutoplayKeys(onToggle: () => void, onStep: () => void, onArrow?: (d: -1 | 1) => void, onSnap?: () => void) {
+  const ref = useRef({ onToggle, onStep, onArrow, onSnap });
+  ref.current = { onToggle, onStep, onArrow, onSnap };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || typing(e.target)) return;
@@ -80,6 +80,9 @@ export function useAutoplayKeys(onToggle: () => void, onStep: () => void, onArro
       } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && ref.current.onArrow) {
         e.preventDefault();
         ref.current.onArrow(e.key === 'ArrowLeft' ? -1 : 1);
+      } else if ((e.key === 's' || e.key === 'S' || e.key === 'ы' || e.key === 'Ы') && ref.current.onSnap) {
+        e.preventDefault();
+        ref.current.onSnap();
       }
     };
     window.addEventListener('keydown', onKey);

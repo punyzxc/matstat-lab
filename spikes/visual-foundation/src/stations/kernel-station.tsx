@@ -21,6 +21,8 @@ import { BayesTree } from './bayes-tree';
 import { Phasor } from './phasor';
 import { TrialsMachine } from './trials-machine';
 import { TextField } from './text-field';
+import { SnapshotStrip, type SnapView } from './snapshots';
+import { decodeSnaps, encodeSnap, freeSlot, ghostSeries, sameAxes, sameSnap, SNAP_SLOTS, type Snap } from './snapshot-math.mjs';
 import { kernelText, locale, plural, t, texDec, useLang } from '../i18n';
 
 /** Every kernel spike that exists in the repository, loaded lazily: `spikes/<id>/kernel.mjs`. */
@@ -92,23 +94,28 @@ export function KernelStation({
   seed,
   params,
   texts = NO_TEXTS,
+  snaps = NO_SNAPS,
   onState,
 }: {
   station: KernelStationInfo;
   seed: number;
   params: Record<string, number>;
   texts?: Record<string, string>;
-  onState: (seed: number, params: Record<string, number>, texts: Record<string, string>) => void;
+  snaps?: string[];
+  onState: (seed: number, params: Record<string, number>, texts: Record<string, string>, snaps: string[]) => void;
 }) {
   const load = useKernel(station.kernel);
   if (load.state === 'missing') return <PendingStation station={station} />;
   if (load.state === 'loading') return <p className="station-status" role="status">{t(`Loading the ${station.name} kernel…`, `Загрузка ядра станции «${station.name}»…`)}</p>;
   if (load.state === 'error') return <p className="station-status" role="alert">{t('The kernel failed to load: ', 'Ядро не загрузилось: ')}{load.message}</p>;
-  return <ReadyStation station={station} kernel={load.kernel} seed={seed} params={params} texts={texts} onState={onState} />;
+  return <ReadyStation station={station} kernel={load.kernel} seed={seed} params={params} texts={texts} snaps={snaps} onState={onState} />;
 }
 
 /** Parameters as a stable string, to tell a new experiment from a new draw of the same one. */
 const NO_TEXTS: Record<string, string> = {};
+const NO_SNAPS: string[] = [];
+/** The run a snapshot stands for (slot and visibility aside): its parameters, texts and seed. */
+const runKey = (s: Snap) => encodeSnap({ ...s, slot: 'A', hidden: false });
 const keyOf = (declared: KernelParam[], p: Record<string, number>, texts: Record<string, string> = NO_TEXTS) =>
   [...declared.map((d) => `${d.key}=${p[d.key]}`), ...Object.entries(texts).map(([k, v]) => `${k}=${v}`)].join('&');
 const numeric = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
@@ -116,9 +123,9 @@ const TRACE = 60, RIDGE = 18;
 
 type Draw = { draw: number; seed: number; result: KernelResult };
 
-function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, texts: textsProp, onState }: {
-  station: KernelStationInfo; kernel: Kernel; seed: number; params: Record<string, number>; texts: Record<string, string>;
-  onState: (seed: number, params: Record<string, number>, texts: Record<string, string>) => void;
+function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, texts: textsProp, snaps: snapsProp, onState }: {
+  station: KernelStationInfo; kernel: Kernel; seed: number; params: Record<string, number>; texts: Record<string, string>; snaps: string[];
+  onState: (seed: number, params: Record<string, number>, texts: Record<string, string>, snaps: string[]) => void;
 }) {
   const lang = useLang();
   const declared = kernel.stations?.[station.id]?.params ?? kernel.meta.params;
@@ -136,6 +143,30 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
   const resolvedTexts = useMemo(() => resolveTexts(kernel, station.id, declaredTexts, textsProp), [kernel, station.id, declaredTexts, textsProp]);
   const [texts, setTexts] = useState(resolvedTexts);
   useEffect(() => setTexts(resolvedTexts), [resolvedTexts]);
+  // Snapshots (#114): parameters and seed only; their results are replayed, so the address holds them all.
+  const resolvedSnaps = useMemo(() => decodeSnaps(snapsProp).map((s) => ({
+    ...s, params: resolveParams(declared, s.params), texts: resolveTexts(kernel, station.id, declaredTexts, s.texts),
+  })), [snapsProp, declared, kernel, station.id, declaredTexts]);
+  const [snaps, setSnaps] = useState<Snap[]>(resolvedSnaps);
+  useEffect(() => setSnaps(resolvedSnaps), [resolvedSnaps]);
+  const [ghostRuns, setGhostRuns] = useState<Record<string, KernelResult | { error: string }>>({});
+  useEffect(() => {
+    const missing = snaps.filter((s) => !(runKey(s) in ghostRuns));
+    if (!missing.length) return;
+    const timer = window.setTimeout(() => {
+      const add: Record<string, KernelResult | { error: string }> = {};
+      for (const s of missing) {
+        try {
+          const r = kernel.run({ ...s.params, ...s.texts }, { seed: s.seed, station: station.id }) as KernelResult;
+          add[runKey(s)] = r && Array.isArray(r.series) ? r : { error: 'no series' };
+        } catch (e) {
+          add[runKey(s)] = { error: String(e) };
+        }
+      }
+      setGhostRuns((g) => ({ ...g, ...add }));
+    }, 80);
+    return () => clearTimeout(timer);
+  }, [snaps, ghostRuns, kernel, station.id]);
   const playback = usePlayback();
   const { playing, setPlaying, speed } = playback;
   // Growth: a fresh experiment starts small and grows to the chosen size, frame by frame.
@@ -170,9 +201,9 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
   const sync = useRef(onState);
   sync.current = onState;
   useEffect(() => {
-    const t = window.setTimeout(() => sync.current(seed, params, texts), playing ? 900 : 250);
+    const t = window.setTimeout(() => sync.current(seed, params, texts, snaps.map(encodeSnap)), playing ? 900 : 250);
     return () => clearTimeout(t);
-  }, [seed, params, texts, playing]);
+  }, [seed, params, texts, snaps, playing]);
 
   const advance = useCallback(() => {
     if (growing) setGrow((k) => k + 1);
@@ -201,7 +232,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
     setSeed(seedAtDraw(origin, target));
     setDraws(target - 1);
   }, [origin, setPlaying]);
-  useAutoplayKeys(() => setPlaying((p) => !p), step, (d) => { if (!playing) goTo(draws + 1 + d); });
+  useAutoplayKeys(() => setPlaying((p) => !p), step, (d) => { if (!playing) goTo(draws + 1 + d); }, () => takeSnap.current());
   useTicker(playing && done && !failed, tickDelay(speed, outcome?.ms ?? 0, growing), job, advance);
 
   // History of draws of this exact experiment: the trace of one readout and the 3D ridge.
@@ -236,6 +267,54 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
   const trackKey = tracked && trackable.some((r) => r.key === tracked) ? tracked
     : (trackable.find((r) => numeric(r.theory)) ?? trackable[0])?.key ?? null;
 
+  // ---- snapshots (#114)
+  const canTake = Boolean(outcome?.ok && result && !('error' in result));
+  const takeSnap = useRef(() => {});
+  takeSnap.current = () => {
+    if (!outcome?.ok || !result || 'error' in result) return;
+    const slot = freeSlot(snaps);
+    if (!slot) return;
+    const snap: Snap = { slot, seed: outcome.job.seed, params: { ...outcome.job.params }, texts: { ...(outcome.job.texts ?? {}) }, hidden: false };
+    if (snaps.some((x) => sameSnap(x, snap))) return;
+    setGhostRuns((g) => ({ ...g, [runKey(snap)]: result }));
+    setSnaps([...snaps, snap].sort((a, b) => SNAP_SLOTS.indexOf(a.slot) - SNAP_SLOTS.indexOf(b.slot)));
+  };
+  const restoreSnap = (slot: string) => {
+    const s = snaps.find((x) => x.slot === slot);
+    if (!s) return;
+    setPlaying(false);
+    setGrow(GROWTH.length);
+    setParams(s.params);
+    setTexts(s.texts);
+    setSeed(s.seed);
+    setDraws(0);
+  };
+  /** What a snapshot differs in from the live experiment, in the legend's words: `$n$ = 10 · seed 7`. */
+  const describe = (s: Snap) => {
+    const parts = labelled.filter((p) => applies(p.when, s.params) && s.params[p.key] !== params[p.key]).map((p) => {
+      const choice = choicesOf(p);
+      if (choice) return `${choice.title}: ${choice.options.find((o) => o.value === s.params[p.key])?.label ?? show(s.params[p.key])}`;
+      const sym = /\$([^$]+)\$[^$]*$/.exec(p.label);
+      return `${sym ? `$${sym[1]}$` : mathToPlain(p.label).replace(/\s*\(.*\)$/, '')} = ${show(s.params[p.key])}`;
+    });
+    for (const [k, v] of Object.entries(s.texts)) if (v !== texts[k]) parts.push(v);
+    return [...parts, t(`seed ${s.seed}`, `зерно ${s.seed}`)].join(' · ');
+  };
+  const snapViews: SnapView[] = snaps.map((s) => {
+    const r = ghostRuns[runKey(s)];
+    const failed = Boolean(r && 'error' in r);
+    return { ...s, desc: describe(s), failed, elsewhere: Boolean(r && !('error' in r) && result && !('error' in result) && !sameAxes(r.axes, result.axes)) };
+  });
+  const ghostKey = snapViews.map((s) => `${s.slot}${s.hidden ? 0 : 1}${s.elsewhere ? 0 : 1}|${s.desc}|${runKey(s) in ghostRuns}`).join('/');
+  const ghosts = useMemo(() => snapViews.flatMap((s) => {
+    const r = ghostRuns[runKey(s)];
+    if (s.hidden || s.elsewhere || !r || 'error' in r) return [];
+    return ghostSeries(r, s.slot, `${s.slot} · ${s.desc}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [ghostKey]);
+  const liveSeries = view && !('error' in view) ? view.series : null;
+  const chartSeries = useMemo(() => (liveSeries && ghosts.length ? [...ghosts, ...liveSeries] : liveSeries ?? []), [liveSeries, ghosts]);
+
   const sizeName = size ? mathToPlain(kernelText(station.kernel, size.label)).replace(/\s*\(.*\)$/, '') : '';
   const status = failed ? t('Stopped: the kernel rejected these parameters', 'Остановлено: ядро отклонило эти параметры')
     : growing && size ? t(`Growing the sample · ${sizeName} ${fmtInt(job.params[size.key])} of ${fmtInt(params[size.key])}`, `Выборка растёт · ${sizeName} ${fmtInt(job.params[size.key])} из ${fmtInt(params[size.key])}`)
@@ -268,6 +347,9 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
       <Panel label={t('Station output', 'Результаты станции')} className="outputs">
         <AutoplayBar playback={playback} onStep={step} onRestart={size ? restart : undefined} status={status}
           progress={growing ? (grow + 1) / GROWTH.length : null} timeline={{ draw: draws + 1, reach, onDraw: goTo }} />
+        <SnapshotStrip snaps={snapViews} canTake={canTake} full={!freeSlot(snaps)} onTake={() => takeSnap.current()}
+          onToggle={(slot) => setSnaps((list) => list.map((x) => (x.slot === slot ? { ...x, hidden: !x.hidden } : x)))}
+          onRestore={restoreSnap} onRemove={(slot) => setSnaps((list) => list.filter((x) => x.slot !== slot))} />
         {!view ? (
           <p className="station-status" role="status">{t('Running the first experiment…', 'Идёт первый эксперимент…')}</p>
         ) : 'error' in view ? (
@@ -291,7 +373,7 @@ function ReadyStation({ station, kernel, seed: seedProp, params: paramsProp, tex
             {view.surface && <Surface3D surface={view.surface} />}
             {view.series.length > 0 && (
               <div className="chart-stage">
-                <Chart series={view.series} xLabel={view.axes?.x} yLabel={view.axes?.y} domain={view.domain} />
+                <Chart series={chartSeries} xLabel={view.axes?.x} yLabel={view.axes?.y} domain={view.domain} />
                 {view.linked && <Chart series={view.linked.series} xLabel={view.linked.axes?.x} yLabel={view.linked.axes?.y} domain={view.linked.domain} height={200} />}
                 <RidgeToggle draws={past} on={ridgeOn} onToggle={() => setRidgeOn((v) => !v)} />
               </div>
