@@ -2,37 +2,135 @@
   "lecture": 5,
   "title": "Random variables and their distributions",
   "scientists": [],
+  "status": "draft",
+  "story": true,
   "steps": [
     {
-      "title": "Distribution function",
-      "idea": "The distribution function gives the probability that the variable falls to the left of $x$.",
-      "formula": [
-        "F(x) = P(\\xi < x) \\qquad \\text{(lecture convention)}",
-        "\\text{the lab plots } P(\\xi \\le x)\\text{; they differ only at the jumps}"
-      ]
-    },
-    {
-      "title": "Density",
-      "idea": "For a continuous variable the density is the derivative of F, and probabilities are areas under it.",
-      "formula": [
-        "f(x) = F'(x), \\qquad P(a < \\xi < b) = \\int_a^b f(x)\\,dx"
-      ],
-      "experiment": {
-        "station": "distribution",
-        "seed": 505,
+      "title": "A random variable is a function",
+      "idea": "Roll two dice. The outcome is a pair $\\omega = (\\omega_1, \\omega_2)$, one of 36 equally likely cells. A random variable attaches a number to every outcome, here the sum. Outcomes with the same value pool their probability $\\tfrac{1}{36}$, and the frequencies of the values settle on those pools.",
+      "figure": {
+        "id": "rv-function",
+        "beat": "mapping",
         "params": {
-          "dist": 0,
-          "n": 1024,
-          "scale": 1
+          "map": 0,
+          "n": 600
+        }
+      },
+      "live": [
+        "P(X = x_k) = \\dfrac{\\#\\{\\omega : X(\\omega) = x_k\\}}{36}, \\qquad \\lv{values}{k} = \\lres{values}",
+        "\\lv{xbar}{\\bar x} = \\lres{xbar} \\approx \\lv{MX}{MX} = \\lres{MX}, \\qquad n = \\lval{n}"
+      ],
+      "whatIf": [
+        {
+          "label": "the maximum",
+          "params": {
+            "map": 1
+          }
         },
-        "label": "Sample a normal law"
+        {
+          "label": "the difference $|\\omega_1 - \\omega_2|$",
+          "params": {
+            "map": 2
+          }
+        },
+        {
+          "label": "the number of sixes",
+          "params": {
+            "map": 3
+          }
+        },
+        {
+          "label": "$2\\omega_1 - \\omega_2$",
+          "params": {
+            "map": 4
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Each cell lights up when an experiment picks it, and a token falls into the bar of its value. The sum $7$ owns six cells, more than any other value, so its bar grows tallest.",
+        "definition": "A random variable is a function $X\\colon \\Omega \\to \\mathbb{R}$ such that $\\{\\omega : X(\\omega) < x\\}$ is an event for every $x$. A discrete one takes values $x_1, x_2, \\dots$ with probabilities $p_k = P(X = x_k)$, $\\sum_k p_k = 1$."
       }
     },
     {
-      "title": "Exponential law",
-      "idea": "Waiting times without memory follow the exponential law.",
-      "formula": [
-        "f(x) = \\lambda e^{-\\lambda x}, \\qquad x \\ge 0"
+      "title": "The distribution function",
+      "idea": "The distribution function collects the probability to the left of a bound: $F(x)$ adds up every $p_k$ with $x_k \\le x$. For a discrete variable it is a staircase that jumps by $p_k$ at each value and stays flat in between.",
+      "figure": {
+        "id": "rv-function",
+        "beat": "staircase",
+        "params": {
+          "map": 0,
+          "n": 600,
+          "x": 7
+        }
+      },
+      "live": [
+        "\\lv{F}{F(\\lval{x})} = \\sum_{x_k \\le x} p_k = \\lres{F}",
+        "\\lv{Fn}{F_n(x)} = \\lres{Fn}, \\qquad \\lv{jump}{P(X = x)} = \\lres{jump}"
+      ],
+      "whatIf": [
+        {
+          "label": "$x = 6.5$",
+          "params": {
+            "x": 6.5
+          }
+        },
+        {
+          "label": "$x = 12$",
+          "params": {
+            "x": 12
+          }
+        },
+        {
+          "label": "the maximum, $x = 4$",
+          "params": {
+            "map": 1,
+            "x": 4
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Type $x = 6.5$: no value lies between $6$ and $7$, so nothing changes from $x = 6$. Only crossing a value moves $F$.",
+        "definition": "$F(x) = P(X \\le x)$ is non-decreasing, $F(-\\infty) = 0$, $F(+\\infty) = 1$, and $P(a < X \\le b) = F(b) - F(a)$. With $\\le$ it is continuous from the right: the filled dot is $F(x_k)$, the open dot the limit from the left.",
+        "details": "The lectures define $F(x) = P(X < x)$, which is continuous from the left. The two definitions differ only at the jumps, by $P(X = x_k)$."
+      }
+    },
+    {
+      "title": "Density: probability as area",
+      "idea": "A continuous variable has no jumps. Its probability is spread with a density $f$, and $F(x)$ is the area under $f$ to the left of $x$. Here the exponential law, the waiting time without memory: the histogram of the draws follows its density, and the shaded area equals the height of $F$.",
+      "figure": {
+        "id": "rv-function",
+        "beat": "area",
+        "params": {
+          "source": 2,
+          "n": 600,
+          "x": 1
+        }
+      },
+      "live": [
+        "\\lv{F}{F(\\lval{x})} = \\lres{F}, \\qquad \\lv{area}{\\int_{-\\infty}^{x} f(t)\\,dt} = \\lres{area}",
+        "\\lv{Fn}{F_n(x)} = \\lres{Fn}, \\qquad f(x) = F'(x)"
+      ],
+      "whatIf": [
+        {
+          "label": "$x = 3$",
+          "params": {
+            "x": 3
+          }
+        },
+        {
+          "label": "uniform law",
+          "params": {
+            "source": 1,
+            "x": 0.5
+          }
+        },
+        {
+          "label": "normal law",
+          "params": {
+            "source": 3,
+            "x": 1
+          }
+        }
       ],
       "experiment": {
         "station": "distribution",
@@ -42,8 +140,51 @@
           "n": 1024,
           "scale": 1
         }
+      },
+      "layers": {
+        "definition": "$X$ is continuous with density $f \\ge 0$ if $F(x) = \\int_{-\\infty}^{x} f(t)\\,dt$ for every $x$. Then $f(x) = F'(x)$ wherever $f$ is continuous, and $\\int_{-\\infty}^{\\infty} f(t)\\,dt = 1$.",
+        "details": "The exponential law: $f(x) = \\lambda e^{-\\lambda x}$ and $F(x) = 1 - e^{-\\lambda x}$ for $x \\ge 0$. It has no memory: $P(X > s + t \\mid X > s) = P(X > t)$."
       }
+    },
+    {
+      "title": "A single point weighs nothing",
+      "idea": "For a continuous law the area over a single point is zero, so $P(X = x) = 0$ for every $x$, and $<$ or $\\le$ no longer matters. Probability lives on intervals: $P(a < X < b) = F(b) - F(a)$.",
+      "figure": {
+        "id": "rv-function",
+        "beat": "area",
+        "params": {
+          "source": 3,
+          "n": 600,
+          "x": 0
+        }
+      },
+      "live": [
+        "\\lv{jump}{P(X = x)} = \\lres{jump}, \\qquad \\lv{jumpn}{\\dfrac{\\#\\{X_i = x\\}}{n}} = \\lres{jumpn}, \\qquad x = \\lval{x}",
+        "P(a < X < b) = F(b) - F(a) = \\int_a^b f(t)\\,dt"
+      ],
+      "whatIf": [
+        {
+          "label": "$x = 1.96$",
+          "params": {
+            "x": 1.96
+          }
+        },
+        {
+          "label": "$n = 5000$",
+          "params": {
+            "n": 5000
+          }
+        }
+      ],
+      "layers": {
+        "intuition": "Not one of the draws hits the bound exactly, however many there are: the empirical share of $X = x$ stays $0$."
+      },
+      "portals": [
+        {
+          "lecture": 6,
+          "step": 3
+        }
+      ]
     }
-  ],
-  "status": "draft"
+  ]
 }

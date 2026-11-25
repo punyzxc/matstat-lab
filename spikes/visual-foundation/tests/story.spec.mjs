@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // #109 live formulas, #110 story lectures, #111 the normal factory (L8), #112 the confidence interval wall (L11),
-// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court, #125 the living population (L10), the corridor of running means (L7), the centre of mass (L6), darts on a board (L4).
+// #135 clouds of estimates and the n vs n - 1 race (L11), #138 math portals, #134 scientist cards, L12 the hypothesis court, #125 the living population (L10), the corridor of running means (L7), the centre of mass (L6), darts on a board (L4), a random variable as a function (L5).
 const fits = (page) => page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
 
 test.beforeEach(async ({ page }) => {
@@ -362,6 +362,38 @@ test('L4 darts: disjoint strips add up, overlapping ones count the overlap twice
   await page.goto('/#lecture/4/5');
   await expect(page.getByTestId('story-beat')).toHaveText("Bertrand's three chords");
   await expect(page.locator('[data-step="5"]').getByTestId('live-formula').nth(0).locator('[data-v="radius"][data-role="res"]')).toHaveText('0.501');
+  expect(await fits(page)).toBe(true);
+});
+
+test('L5 random variable: outcomes carry values, the staircase sums the stems left of x, the area equals F', async ({ page }) => {
+  await page.goto('/#lecture/5/1');
+  await expect(page.getByTestId('story-beat')).toHaveText('Outcomes carry values');
+  const one = page.locator('[data-step="1"]').getByTestId('live-formula');
+  await expect(one.nth(0).locator('[data-v="values"][data-role="res"]')).toHaveText('11');
+  await expect(one.nth(1).locator('[data-v="MX"][data-role="res"]')).toHaveText('7');
+  await page.locator('[data-step="1"]').getByRole('button', { name: /the maximum/ }).click();
+  await expect(one.nth(0).locator('[data-v="values"][data-role="res"]')).toHaveText('6');
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/5/2');
+  await expect(page.getByTestId('story-beat')).toHaveText('The staircase of a discrete law');
+  const two = page.locator('[data-step="2"]').getByTestId('live-formula');
+  // seed 505: 355 of the 600 sums are at most 7, as on the Distribution function station
+  await expect(two.nth(0).locator('[data-v="F"][data-role="res"]')).toHaveText('0.5833');
+  await expect(two.nth(1).locator('[data-v="Fn"][data-role="res"]')).toHaveText('0.5917');
+  await two.nth(0).locator('[data-v="x"][data-role="edit"]').click();
+  await page.locator('[data-step="2"]').getByRole('textbox').fill('6.5');
+  await page.locator('[data-step="2"]').getByRole('textbox').press('Enter');
+  await expect(two.nth(0).locator('[data-v="F"][data-role="res"]')).toHaveText('0.4167');
+  await expect(two.nth(1).locator('[data-v="jump"][data-role="res"]')).toHaveText('0');
+  await expect(page.getByTestId('story-open-station')).toHaveAttribute('href', /#station\/cdf\?seed=505&source=0&map=0&a=2&b=-1&x=6\.5&n=600&lecture=5&step=2$/);
+  expect(await fits(page)).toBe(true);
+
+  await page.goto('/#lecture/5/3');
+  await expect(page.getByTestId('story-beat')).toHaveText('Probability as area under the density');
+  const three = page.locator('[data-step="3"]').getByTestId('live-formula');
+  await expect(three.nth(0).locator('[data-v="F"][data-role="res"]')).toHaveText('0.6321');
+  await expect(three.nth(0).locator('[data-v="area"][data-role="res"]')).toHaveText('0.6321');
   expect(await fits(page)).toBe(true);
 });
 

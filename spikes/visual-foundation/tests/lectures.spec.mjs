@@ -70,7 +70,7 @@ test('"Open experiment" opens the station with the step\'s seed and parameters; 
   await expect(dock.locator('#sample-size')).toHaveValue('1024');
   await dock.getByRole('link', { name: 'Back to lecture 5, step 3' }).click();
   await expect(page).toHaveURL(/#lecture\/5\/3$/);
-  await expect(page.getByTestId('step-counter')).toHaveText('Step 3 / 3');
+  await expect(page.getByTestId('step-counter')).toHaveText('Step 3 / 4');
 
   // Escape from a station opened by a lecture also goes back to that step.
   await page.goto('/#lecture/7/2');

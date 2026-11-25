@@ -10,6 +10,7 @@ import { SampleLife } from './sample-life';
 import { LlnCorridor } from './lln-corridor';
 import { CentreMass } from './centre-mass';
 import { GeoDarts } from './geo-darts';
+import { RvFunction } from './rv-function';
 
 /** Live lecture figures by id. The spec (specs.mjs) says what they share; the component draws them. */
 const components: Record<string, ComponentType<FigureProps>> = {
@@ -21,6 +22,7 @@ const components: Record<string, ComponentType<FigureProps>> = {
   'lln-corridor': LlnCorridor,
   'centre-mass': CentreMass,
   'geo-darts': GeoDarts,
+  'rv-function': RvFunction,
 };
 
 const russian = new Map<string, FigureSpec>();

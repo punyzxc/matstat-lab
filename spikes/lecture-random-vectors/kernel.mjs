@@ -1007,3 +1007,5 @@ export function run(params, { seed, station = 'moments' } = {}) {
 }
 
 export { LAW_NAMES };
+/** The continuous laws of the Distribution function station, for figures that replay its draws. */
+export { CONTINUOUS as CDF_LAWS };
