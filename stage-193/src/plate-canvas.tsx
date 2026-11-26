@@ -74,7 +74,8 @@ export function PlateCanvas({
       engine.draw(frame);
       // Frames drawn, read by the e2e specs (a plain property, no DOM write).
       (canvas as HTMLCanvasElement & { __frames?: number }).__frames = ((canvas as HTMLCanvasElement & { __frames?: number }).__frames ?? 0) + 1;
-      if (performance.now() - start > 24 && ++slowFrames > 4) interval = 64;
+      // #193: a capped (covered) globe is not a slow device; slow frames count only at the scene's own rate.
+      if (!state.current.maxFps && performance.now() - start > 24 && ++slowFrames > 4) interval = 64;
     }
     function loop(now: number) {
       const cap = state.current.maxFps ? 1000 / state.current.maxFps : 0;
@@ -89,7 +90,7 @@ export function PlateCanvas({
             spin *= Math.exp(-step * 2.6);
             if (Math.abs(spin) < 0.01) spin = 0;
           }
-          if (delta > 80 && ++slowFrames > 6) interval = 64;
+          if (!cap && delta > 80 && ++slowFrames > 6) interval = 64;
         }
         last = now;
         draw();
