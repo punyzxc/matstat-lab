@@ -1,9 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { PALETTE } from './specs.mjs';
 import { MathText } from '../../math';
 import { dec, int, t, texDec } from '../../i18n-core';
 import { BEAM, beamThrows, irwinHallPdf, lawDraws, overlap, sumsOf, throwStats, within, type MomentLaw } from './moment-model.mjs';
-import { clamp01, Label, lerp, rgba, useCanvasLoop, useThrottledReport, type FigureProps, type Frame } from './kit';
+import { clamp01, Label, lerp, rgba, useCanvasLoop, useSteadyState, useThrottledReport, type FigureProps, type Frame } from './kit';
 
 /**
  * Centre of mass (L6). Every number is a station's own (Balance, Moments, Convolution; same seed and streams).
@@ -43,7 +43,7 @@ export function CentreMass({ beat, params, seed, hot, playing, reduced, runKey, 
   if (!sim.current || sim.current.key !== key) sim.current = { key, clock: 0, count: 0, acc: 0, z: 0, pause: 0 };
   const live = useRef<Live>({ beat, hot, reduced, opts, beam, draws, sums });
   live.current = { beat, hot, reduced, opts, beam, draws, sums };
-  const [shown, setShown] = useState({ count: 0, z: 0 });
+  const [shown, setShown] = useSteadyState({ count: 0, z: 0 });
 
   useThrottledReport(() => {
     const s = sim.current!;
@@ -62,7 +62,7 @@ export function CentreMass({ beat, params, seed, hot, playing, reduced, runKey, 
       lawMean: L.mean, lawVar: L.variance,
       z: s.z, fz: overlap(ms, s.z), m, summean: mean, sumvar: cs > 1 ? sv / cs : null, sumMth: m / 2, sumDth: m / 12, count: s.count,
     };
-  }, onResults, 120);
+  }, onResults, 120, playing);
 
   const canvas = useCanvasLoop((f) => step(sim.current!, live.current, f, total), playing);
   const L = draws.L;

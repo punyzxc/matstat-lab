@@ -53,7 +53,7 @@ export function GeoDarts({ beat, params, seed, hot, playing, reduced, runKey, on
       l: nd.l, d, cross: cr.share, P: (2 * nd.l) / (Math.PI * d), m: cr.m,
       radius: longShare(ch[0], c), endpoints: longShare(ch[1], c), midpoint: longShare(ch[2], c),
     };
-  }, onResults, 120);
+  }, onResults, 120, playing);
 
   const canvas = useCanvasLoop((f) => step(sim.current!, live.current, f), playing);
   const ad = additive(d1, a, b, count);

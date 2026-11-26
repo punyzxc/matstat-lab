@@ -60,7 +60,7 @@ export function SampleLife({ beat, params, seed, hot, onHot, playing, reduced, r
       xmin: d.min, xmax: d.max, range: d.max - d.min, med: d.median, area: d.table.area, dn: d.dn, lambda: d.lambda, crit: d.critical,
       landed: s.landed,
     };
-  }, onResults, 120);
+  }, onResults, 120, playing);
 
   const canvas = useCanvasLoop((f) => step(sim.current!, live.current, f), playing);
   const linked = beat === 'linked';

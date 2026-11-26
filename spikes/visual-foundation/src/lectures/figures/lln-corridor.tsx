@@ -1,9 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { PALETTE } from './specs.mjs';
 import { MathText } from '../../math';
 import { dec, int, t, texDec } from '../../i18n-core';
 import { centreOf, corridor, exactTail, kBound, LAWS, TAIL_R, tailDraws, tailShare, type Corridor } from './lln-model.mjs';
-import { clamp01, ease, Label, lerp, rgba, useCanvasLoop, useThrottledReport, type FigureProps, type Frame } from './kit';
+import { clamp01, ease, Label, lerp, rgba, useCanvasLoop, useSteadyState, useThrottledReport, type FigureProps, type Frame } from './kit';
 
 /**
  * The corridor of running means (L7). Draws and paths are the LLN station's own (same seed and streams).
@@ -33,7 +33,7 @@ export function LlnCorridor({ beat, params, seed, hot, onHot, playing, reduced, 
   const live = useRef<Live>({ beat, hot, reduced, opts, c, draws });
   live.current = { beat, hot, reduced, opts, c, draws };
   const { a, sd, cauchy } = centreOf(law);
-  const [shown, setShown] = useState({ j: 0, drawn: 0 });
+  const [shown, setShown] = useSteadyState({ j: 0, drawn: 0 });
 
   const at = (j: number) => {
     const i = Math.min(c.ns.length - 1, Math.max(0, j));
@@ -50,7 +50,7 @@ export function LlnCorridor({ beat, params, seed, hot, onHot, playing, reduced, 
       tailsim: s.drawn ? tailShare(draws, law, k, s.drawn) : null, tail: exactTail(law, k), kbound: kBound(law, k), drawn: s.drawn,
       boundN: c.bound.at(-1) ?? null, shareN: c.outside.at(-1)! / M,
     };
-  }, onResults, 120);
+  }, onResults, 120, playing);
 
   const canvas = useCanvasLoop((f) => step(sim.current!, live.current, f), playing);
   const p = at(shown.j);
