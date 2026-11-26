@@ -1,0 +1,11 @@
+export type LlnLaw = { id: string; label: string; mean: number | null; sd: number | null; draw: (seed: number, s: number, i: number) => number; tail: (k: number) => number };
+export const LAWS: readonly LlnLaw[];
+export const TAIL_R: number;
+export function chebyshevBound(sd: number, n: number, eps: number): number;
+export function centreOf(law: number): { a: number; sd: number; cauchy: boolean };
+export function tailDraws(o: { law: number; seed: number; R?: number }): Float64Array;
+export function tailShare(draws: Float64Array, law: number, k: number, count?: number): number | null;
+export function exactTail(law: number, k: number): number;
+export function kBound(law: number, k: number): number | null;
+export type Corridor = { ns: number[]; paths: number[][]; outside: number[]; bound: (number | null)[]; a: number; sd: number; cauchy: boolean; M: number };
+export function corridor(o: { law: number; N: number; M: number; eps: number; seed: number }): Corridor;

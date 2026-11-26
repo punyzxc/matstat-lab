@@ -1,0 +1,12 @@
+export type Source = { id: 'uniform' | 'exponential' | 'bernoulli'; label: string; tex(p?: number): string; station: number | null; discrete: boolean;
+  mean(p?: number): number; sd(p?: number): number; draw(seed: number, t: number, r: number, p?: number): number;
+  domain(): [number, number]; density?: (x: number) => number; atoms?: (p: number) => [number, number][] };
+export const SOURCES: readonly Source[];
+export function sourceOf(i: number): Source;
+export function termStream(t: number): number;
+export function replicate(src: Source, n: number, seed: number, r: number, p?: number, keep?: number): { terms: number[]; sum: number; z: number };
+export function zSample(src: Source, n: number, R: number, seed: number, p?: number): Float64Array;
+export function Phi(z: number): number;
+export function phi(z: number): number;
+export function ksToNormal(values: Float64Array, count?: number): number | null;
+export function zHistogram(values: Float64Array, count: number, bins?: number, lo?: number, hi?: number): { counts: number[]; width: number; density: number[] };
