@@ -186,14 +186,19 @@
   }
 }
 
-/* A station or drawer opens over the live scene; the scene recedes behind frosted glass. */
+/*
+ * A station or drawer opens over the live scene; the scene recedes behind frosted glass. #193: the glass is a static
+ * treatment (a dimmed, slightly lit pane), not a live backdrop-filter: re-blurring the turning globe under the whole
+ * dock on every frame was the most expensive pairing on the page. The globe behind it drops to 10 frames a second.
+ */
 .orbital-lab > .scene-dock {
   z-index: 6;
 }
 html:not([data-present]) .orbital-lab > .scene-dock {
   inset: calc(var(--hud-bar) + 6px) var(--hud-gutter) calc(var(--hud-console) + 6px);
-  background: rgb(9 9 9 / 0.8);
-  backdrop-filter: blur(18px) saturate(1.05);
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgb(255 255 255 / 0.035), transparent 60%),
+    linear-gradient(180deg, rgb(18 18 18 / 0.9), rgb(8 8 8 / 0.93));
   border-color: #3f3f3f;
   border-top-color: #707070;
   box-shadow:
