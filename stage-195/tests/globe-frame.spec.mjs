@@ -28,6 +28,7 @@ test('static layers make no gradients after the first frame', async ({ page }) =
 });
 
 test('paint() at 1920×1080, DPR 1.75 costs the main thread at most half of main', async ({ page }) => {
+  test.setTimeout(120_000); // 240 animation frames of a 6.4 MP canvas, slow on a software rasterizer
   await page.goto('/#about');
   const t = await page.evaluate(async (frame) => {
     const median = (a) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)];
