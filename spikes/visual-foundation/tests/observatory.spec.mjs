@@ -61,7 +61,8 @@ test('all six orbital windows are direct entry links and preserve the last opene
     await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(node).toBeFocused();
-    await expect(node).toHaveAccessibleName(/Last opened/);
+    // Only the legacy prototype windows keep a saved preview and a "Last opened" mark (the Explorer is a kernel station since #91).
+    if (name === 'Convergence') await expect(node).toHaveAccessibleName(/Last opened/);
   }
   await page.reload();
   await expect(page.locator('[data-module="convergence"]')).toHaveAccessibleName(/Last opened/);
@@ -79,26 +80,23 @@ test('narrow screens keep all connected windows and immediate static previews', 
   expect(await globe.evaluate((node) => node.toDataURL())).toBe(before);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
   await expect(page.locator('.orbit-link-trace')).toHaveCount(6); // one trace per station of the second orbit (six since #131, #132)
-  await expect(page.locator('.orbit-preview[data-motion="false"]')).toHaveCount(1);
+  // Orbit II has no legacy preview window since #91 (the Explorer is a kernel station); nothing there animates.
+  await expect(page.locator('.orbit-preview[data-motion="true"]')).toHaveCount(0);
   await page.getByRole('link', { name: /^Distribution Explorer/ }).click();
   await expect(page.getByRole('button', { name: /(Play|Stop) the experiment/ })).toBeVisible();
 });
 
-test('the active sample updates the distribution window and unvisited examples', async ({ page }) => {
+test('the active sample updates unvisited examples', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  const distribution = page.locator('[data-module="distribution"]');
-  await expect(distribution).toHaveAttribute('data-saved', 'false');
   await page.getByLabel('Model', { exact: true }).selectOption('uniform');
   await page.getByRole('button', { name: 'Resample' }).click();
-  await expect(distribution).toHaveAccessibleName(/Latest result.*Uniform, seed 2049/);
+  await expect(page.locator('.orbit-console .session-source')).toContainText('2049');
   await page.getByRole('link', { name: 'III Limit theorems' }).click();
-  await expect(page.locator('[data-module="convergence"]')).toHaveAccessibleName(
-    /Seeded preview.*Uniform, seed 2049/,
-  );
-  await page.getByRole('link', { name: 'II Random variables' }).click();
-  await distribution.click();
-  await expect(page.getByLabel('Random seed')).toHaveValue('2049');
+  const convergence = page.locator('[data-module="convergence"]');
+  await expect(convergence).toHaveAccessibleName(/Seeded preview.*Uniform, seed 2049/);
+  await convergence.click();
+  await expect(page.locator('.method-desk .session-source')).toContainText('seed 2049');
 });
 
 test('static preference changes live and the notes drawer restores focus', async ({ page }) => {

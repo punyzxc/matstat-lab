@@ -65,9 +65,10 @@ test('"Open experiment" opens the station with the step\'s seed and parameters; 
   await page.getByRole('link', { name: /Open experiment/ }).click();
   await expect(page).toHaveURL(/#station\/distribution\?seed=506&dist=2&n=1024&scale=1&lecture=5&step=3$/);
   const dock = page.getByTestId('station-dock');
-  await expect(dock.locator('#distribution')).toHaveValue('exponential');
-  await expect(dock.locator('#seed')).toHaveValue('506');
-  await expect(dock.locator('#sample-size')).toHaveValue('1024');
+  // The Explorer is a kernel station since #91: the step's old `dist` and `scale` read as its law and parameters.
+  await expect(dock.getByRole('radio', { name: 'exponential' })).toHaveAttribute('aria-checked', 'true');
+  await expect(dock.locator('#station-seed')).toHaveValue('506');
+  await expect(dock.locator('#p-n')).toHaveValue('1024');
   await dock.getByRole('link', { name: 'Back to lecture 5, step 3' }).click();
   await expect(page).toHaveURL(/#lecture\/5\/3$/);
   await expect(page.getByTestId('step-counter')).toHaveText('Step 3 / 4');

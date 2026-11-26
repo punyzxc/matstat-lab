@@ -71,8 +71,6 @@ test('a broken link or a failing station never blanks the program', async ({ pag
 
 test('legacy stations honour a seed in the URL', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/#station/distribution?seed=7');
-  await expect(page.getByLabel('Random seed')).toHaveValue('7');
   await page.goto('/#station/convergence?seed=9');
   await expect(page.locator('.method-desk .session-source')).toContainText('seed 9');
 });
