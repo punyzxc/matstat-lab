@@ -46,6 +46,8 @@ const landX = Float32Array.from(land, (p) => p.x);
 const landY = Float32Array.from(land, (p) => p.y);
 const landZ = Float32Array.from(land, (p) => p.z);
 const landTone = Float32Array.from(land, (p) => p.tone);
+/** Lit land squares, collected per tone level and filled with one path each (x, y, side per square). */
+const byLevel = Array.from({ length: 8 }, () => ({ n: 0, v: new Float32Array(LAND_N * 3) }));
 
 const graticule: Vector[][] = [];
 for (let lat = -75; lat < 90; lat += 15) {
@@ -82,81 +84,36 @@ const links = [
 ].map(([a, b]) => link(stations[a].p, stations[b].p));
 const tones = ['#505050', '#656565', '#7d7d7d', '#949494', '#a9a9a9', '#bfbfbf', '#d5d5d5', '#dddddd'];
 /**
- * #195: the static layers (the glow around the globe and the ocean disc) depend only on the globe's place, its radius
- * and the pixel ratio, so each is rendered once into an offscreen sprite at device resolution and blitted every frame;
- * no gradient is made after the first frame. The glow is drawn over its own square only, not the whole canvas.
+ * #195: the gradients of the static layers (the glow around the globe, the ocean disc and the station halo) depend
+ * only on the globe's place and radius, so they are made once per size and context and reused every frame. The glow
+ * is filled over its own square, not the whole canvas, and the halo gradient sits at the origin and is moved by a
+ * translate. Plain fills, no offscreen sprites: a sprite copied between an accelerated and an unaccelerated canvas
+ * costs a readback per frame.
  */
-type Sprite = { canvas: HTMLCanvasElement; x: number; y: number; size: number };
-type Cache = { key: string; glow: Sprite; ocean: Sprite };
+type Cache = { key: string; glow: CanvasGradient; ocean: CanvasGradient; halo: CanvasGradient };
 const caches = new WeakMap<CanvasRenderingContext2D, Cache>();
-function sprite(x: number, y: number, size: number, dpr: number, paintIt: (g: CanvasRenderingContext2D) => void): Sprite {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = Math.max(1, Math.ceil(size * dpr));
-  const g = canvas.getContext('2d');
-  if (g) {
-    g.setTransform(dpr, 0, 0, dpr, -x * dpr, -y * dpr);
-    paintIt(g);
-  }
-  return { canvas, x, y, size };
-}
-function statics(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number): Cache {
-  const dpr = ctx.getTransform().a || 1;
-  const key = `${cx}|${cy}|${r}|${dpr}`;
+const HALO = 10;
+function gradients(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number): Cache {
+  const key = `${cx}|${cy}|${r}`;
   const hit = caches.get(ctx);
   if (hit && hit.key === key) return hit;
-  const reach = r * 1.38 + r * 0.2 + 2;
-  const glow = sprite(cx - reach, cy - reach, 2 * reach, dpr, (g) => {
-    const grad = g.createRadialGradient(cx - r * 0.15, cy - r * 0.12, r * 0.7, cx, cy, r * 1.38);
-    grad.addColorStop(0, 'rgba(141,141,141,0)');
-    grad.addColorStop(0.57, 'rgba(128,128,128,.095)');
-    grad.addColorStop(1, 'rgba(128,128,128,0)');
-    g.fillStyle = grad;
-    g.fillRect(cx - reach, cy - reach, 2 * reach, 2 * reach);
-  });
-  const edge = r + 2;
-  const ocean = sprite(cx - edge, cy - edge, 2 * edge, dpr, (g) => {
-    const grad = g.createRadialGradient(cx - r * 0.37, cy - r * 0.47, r * 0.03, cx + r * 0.2, cy + r * 0.24, r * 1.24);
-    grad.addColorStop(0, '#141414');
-    grad.addColorStop(0.43, '#101010');
-    grad.addColorStop(0.82, '#080808');
-    grad.addColorStop(1, '#242424');
-    g.beginPath();
-    g.arc(cx, cy, r, 0, tau);
-    g.fillStyle = grad;
-    g.fill();
-  });
-  const made = { key, glow, ocean };
+  const glow = ctx.createRadialGradient(cx - r * 0.15, cy - r * 0.12, r * 0.7, cx, cy, r * 1.38);
+  glow.addColorStop(0, 'rgba(141,141,141,0)');
+  glow.addColorStop(0.57, 'rgba(128,128,128,.095)');
+  glow.addColorStop(1, 'rgba(128,128,128,0)');
+  const ocean = ctx.createRadialGradient(cx - r * 0.37, cy - r * 0.47, r * 0.03, cx + r * 0.2, cy + r * 0.24, r * 1.24);
+  ocean.addColorStop(0, '#141414');
+  ocean.addColorStop(0.43, '#101010');
+  ocean.addColorStop(0.82, '#080808');
+  ocean.addColorStop(1, '#242424');
+  const halo = hit?.halo ?? ctx.createRadialGradient(0, 0, 0, 0, 0, HALO);
+  if (!hit) {
+    halo.addColorStop(0, 'rgba(245,245,245,.32)');
+    halo.addColorStop(1, 'rgba(245,245,245,0)');
+  }
+  const made = { key, glow, ocean, halo };
   caches.set(ctx, made);
   return made;
-}
-/** Copies a sprite 1:1 onto whole device pixels: no resampling, which is the slow part of a scaled drawImage. */
-function blit(ctx: CanvasRenderingContext2D, s: Sprite) {
-  const m = ctx.getTransform();
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.drawImage(s.canvas, Math.round(m.e + s.x * m.a), Math.round(m.f + s.y * m.d));
-  ctx.restore();
-}
-let haloSprite: HTMLCanvasElement | null = null;
-const HALO = 10, HALO_SCALE = 4;
-/** A station halo, drawn once at 4x and scaled down; the only gradient it needs is made on the first frame. */
-function halo() {
-  if (haloSprite) return haloSprite;
-  const size = 2 * HALO * HALO_SCALE;
-  const sprite = Object.assign(document.createElement('canvas'), { width: size, height: size });
-  const g = sprite.getContext('2d');
-  if (g) {
-    const m = size / 2;
-    const grad = g.createRadialGradient(m, m, 0, m, m, m);
-    grad.addColorStop(0, 'rgba(245,245,245,.32)');
-    grad.addColorStop(1, 'rgba(245,245,245,0)');
-    g.fillStyle = grad;
-    g.beginPath();
-    g.arc(m, m, m, 0, tau);
-    g.fill();
-  }
-  haloSprite = sprite;
-  return sprite;
 }
 function paint(
   ctx: CanvasRenderingContext2D,
@@ -206,12 +163,18 @@ function paint(
     ctx.fillStyle = color;
     ctx.fill();
   }
-  const cached = statics(ctx, cx, cy, r);
-  blit(ctx, cached.glow);
+  const cached = gradients(ctx, cx, cy, r);
+  // Beyond r·1.38 from the centre the glow is fully transparent: fill only its square.
+  const reach = r * 1.38;
+  ctx.fillStyle = cached.glow;
+  ctx.fillRect(cx - reach, cy - reach, 2 * reach, 2 * reach);
   const scene = { x: cx, y: cy, radius: r, width: w, height: h, time: seconds };
   drawStars(ctx, scene);
   drawSatellites(ctx, scene, false);
-  blit(ctx, cached.ocean);
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, tau);
+  ctx.fillStyle = cached.ocean;
+  ctx.fill();
   for (const row of graticule) path(row, 'rgba(172,172,172,.33)', 0.58);
   const size = Math.max(0.69, r / 156);
   const breath = 0.1 * Math.sin(seconds * 0.65);
@@ -234,7 +197,9 @@ function paint(
   } else {
     // #195: back-facing points are dropped before the rest of the projection, from flat arrays.
     const k1 = -0.12 / r, k2 = -0.22 / r, base = 0.34 + (cx * 0.12 + cy * 0.22) / r + breath * 0.2;
-    let last = -1;
+    // #195: back-facing points are dropped before the rest of the projection, from flat arrays; the lit squares
+    // are collected per tone level and filled as one path per level (8 fills instead of ~7,000 fillRects).
+    for (const b of byLevel) b.n = 0;
     for (let i = 0; i < LAND_N; i++) {
       const px = landX[i], py = landY[i], pz = landZ[i];
       const depth = px * s + pz * c;
@@ -246,12 +211,21 @@ function paint(
         qy = cy - r * (x * st + y * ct);
       const light = base + qx * k1 + qy * k2 + qz * 0.42 + landTone[i] * 0.27;
       const level = Math.min(7, Math.max(0, Math.floor(light * 7)));
-      if (level !== last) {
-        ctx.fillStyle = tones[level];
-        last = level;
+      const b = byLevel[level];
+      b.v[b.n++] = qx;
+      b.v[b.n++] = qy;
+      b.v[b.n++] = size * (0.6 + 0.52 * qz);
+    }
+    for (let level = 0; level < 8; level++) {
+      const b = byLevel[level];
+      if (!b.n) continue;
+      ctx.beginPath();
+      for (let j = 0; j < b.n; j += 3) {
+        const side = b.v[j + 2];
+        ctx.rect(b.v[j] - side / 2, b.v[j + 1] - side / 2, side, side);
       }
-      const side = size * (0.6 + 0.52 * qz);
-      ctx.fillRect(qx - side / 2, qy - side / 2, side, side);
+      ctx.fillStyle = tones[level];
+      ctx.fill();
     }
   }
   ctx.beginPath();
@@ -271,7 +245,9 @@ function paint(
     const p = project(station.p);
     if (p.z < 0.09) return;
     const pulse = (seconds * 0.3 + i * 0.22) % 1;
-    ctx.drawImage(halo(), p.x - HALO, p.y - HALO, 2 * HALO, 2 * HALO);
+    ctx.translate(p.x, p.y);
+    circle(0, 0, HALO, cached.halo);
+    ctx.translate(-p.x, -p.y);
     ctx.beginPath();
     ctx.arc(p.x, p.y, 3.1 + 5 * pulse, 0, tau);
     ctx.lineWidth = 0.7;
