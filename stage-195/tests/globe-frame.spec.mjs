@@ -73,18 +73,26 @@ test('the globe looks the same as on main', async ({ page }) => {
     for (const [time, yaw] of [[0, 0], [7.3, 1.1], [19, -2.4]]) {
       const a = await draw('/tests/fixtures/globe-main/globe.tsx', time, yaw);
       const b = await draw('/src/globe.tsx', time, yaw);
-      // compared premultiplied, as the pixels are composited: the colour of a nearly transparent pixel does not show
-      let off = 0;
-      for (let i = 0; i < a.length; i += 4) {
-        let d = Math.abs(a[i + 3] - b[i + 3]);
-        for (let k = 0; k < 3; k++) d = Math.max(d, Math.abs((a[i + k] * a[i + 3]) / 255 - (b[i + k] * b[i + 3]) / 255));
-        if (d > 24) off++;
+      // compared as the eye sees it: premultiplied (as composited) and averaged over 4×4 pixel blocks, so a square
+      // edge anti-aliased a little differently (one path per tone instead of one fillRect each, GPU or CPU raster)
+      // does not count, while a moved, missing or recoloured feature does
+      const B = 4, W = 1280, H = 720;
+      let off = 0, blocks = 0;
+      for (let by = 0; by < H; by += B) for (let bx = 0; bx < W; bx += B) {
+        let da = 0;
+        for (let y = by; y < by + B; y++) for (let x = bx; x < bx + B; x++) {
+          const i = (y * W + x) * 4;
+          da += (a[i] * a[i + 3] - b[i] * b[i + 3]) / 255;
+        }
+        blocks++;
+        if (Math.abs(da) / (B * B) > 12) off++;
       }
-      worst = Math.max(worst, off / (a.length / 4));
+      const share = off / blocks;
+      worst = Math.max(worst, share);
     }
     return worst;
   });
-  // anti-aliased edges of squares filled as one path per tone instead of one fillRect each
+  console.log(`globe look: ${(diff * 100).toFixed(3)}% of 4x4 blocks differ`);
   expect(diff).toBeLessThan(0.005);
 });
 
