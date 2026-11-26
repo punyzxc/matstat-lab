@@ -31,28 +31,32 @@ test('paint() at 1920×1080, DPR 1.75 costs the main thread at most half of main
   await page.goto('/#about');
   const t = await page.evaluate(async (frame) => {
     const median = (a) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)];
-    // The time of the paint() call itself, on an on-page canvas: what the main thread pays per frame. The raster
-    // runs later (on the GPU where there is one), so no readback per frame, which would demote the canvas.
-    const bench = async (path) => {
-      const { earthPlate } = await import(path);
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(frame.width * frame.dpr);
-      canvas.height = Math.round(frame.height * frame.dpr);
-      canvas.style.cssText = 'position:fixed;left:0;top:0;width:1920px;height:1080px;opacity:0.01;pointer-events:none';
-      document.body.append(canvas);
-      const plate = earthPlate(canvas);
-      const times = [];
-      for (let i = 0; i < 65; i++) {
-        const t0 = performance.now();
-        plate.draw({ ...frame, time: i * 0.033 });
-        if (i >= 5) times.push(performance.now() - t0);
-      }
-      canvas.remove();
-      return median(times);
+    // The time of the paint() call itself, one call per animation frame on an on-page canvas, as in the app: what the
+    // main thread pays per frame. The raster runs later (on the GPU where there is one); no readback per frame.
+    // main and the new painter take turns, three rounds each, so a busy moment hits both alike.
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(frame.width * frame.dpr);
+    canvas.height = Math.round(frame.height * frame.dpr);
+    canvas.style.cssText = 'position:fixed;left:0;top:0;width:1920px;height:1080px;opacity:0.01;pointer-events:none';
+    document.body.append(canvas);
+    const painters = {
+      before: (await import('/tests/fixtures/globe-main/globe.tsx')).earthPlate(canvas),
+      after: (await import('/src/globe.tsx')).earthPlate(canvas),
     };
-    const before = await bench('/tests/fixtures/globe-main/globe.tsx');
-    const after = await bench('/src/globe.tsx');
-    return { before, after };
+    const times = { before: [], after: [] };
+    const round = (key) => new Promise((done) => {
+      let i = 0;
+      const tick = () => {
+        const t0 = performance.now();
+        painters[key].draw({ ...frame, time: i * 0.033 });
+        if (i >= 10) times[key].push(performance.now() - t0);
+        if (++i < 50) requestAnimationFrame(tick); else done();
+      };
+      requestAnimationFrame(tick);
+    });
+    for (let r = 0; r < 3; r++) { await round('before'); await round('after'); }
+    canvas.remove();
+    return { before: median(times.before), after: median(times.after) };
   }, FRAME);
   console.log(`globe paint() median at 1920x1080 DPR 1.75: main ${t.before.toFixed(2)} ms, now ${t.after.toFixed(2)} ms`);
   expect(t.after).toBeLessThanOrEqual(0.5 * t.before);
@@ -73,19 +77,22 @@ test('the globe looks the same as on main', async ({ page }) => {
     for (const [time, yaw] of [[0, 0], [7.3, 1.1], [19, -2.4]]) {
       const a = await draw('/tests/fixtures/globe-main/globe.tsx', time, yaw);
       const b = await draw('/src/globe.tsx', time, yaw);
-      // compared as the eye sees it: premultiplied (as composited) and averaged over 4×4 pixel blocks, so a square
-      // edge anti-aliased a little differently (one path per tone instead of one fillRect each, GPU or CPU raster)
-      // does not count, while a moved, missing or recoloured feature does
+      // compared as the eye sees it: each channel premultiplied (as composited) and averaged over 4×4 pixel blocks,
+      // then the largest difference of the four channel means. An edge anti-aliased a little differently (one path
+      // per tone instead of one fillRect each, GPU or CPU raster) does not count; a moved, missing or recoloured
+      // feature does.
       const B = 4, W = 1280, H = 720;
       let off = 0, blocks = 0;
       for (let by = 0; by < H; by += B) for (let bx = 0; bx < W; bx += B) {
-        let da = 0;
+        const sa = [0, 0, 0, 0], sb = [0, 0, 0, 0];
         for (let y = by; y < by + B; y++) for (let x = bx; x < bx + B; x++) {
           const i = (y * W + x) * 4;
-          da += (a[i] * a[i + 3] - b[i] * b[i + 3]) / 255;
+          for (let k = 0; k < 3; k++) { sa[k] += (a[i + k] * a[i + 3]) / 255; sb[k] += (b[i + k] * b[i + 3]) / 255; }
+          sa[3] += a[i + 3];
+          sb[3] += b[i + 3];
         }
         blocks++;
-        if (Math.abs(da) / (B * B) > 12) off++;
+        if (Math.max(...sa.map((v, k) => Math.abs(v - sb[k]))) / (B * B) > 12) off++;
       }
       const share = off / blocks;
       worst = Math.max(worst, share);

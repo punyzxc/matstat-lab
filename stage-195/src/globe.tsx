@@ -49,13 +49,22 @@ const landTone = Float32Array.from(land, (p) => p.tone);
 /** Lit land squares, collected per tone level and filled with one path each (x, y, side per square). */
 const byLevel = Array.from({ length: 8 }, () => ({ n: 0, v: new Float32Array(LAND_N * 3) }));
 
+/**
+ * The graticule as flat arrays, 4° between vertices (the chord of a 4° arc strays from the circle by r·(1 − cos 2°),
+ * a quarter of a pixel at r = 440), drawn as one path with one stroke.
+ */
 const graticule: Vector[][] = [];
 for (let lat = -75; lat < 90; lat += 15) {
-  graticule.push(Array.from({ length: 181 }, (_, i) => unit(lat, i * 2 - 180)));
+  graticule.push(Array.from({ length: 91 }, (_, i) => unit(lat, i * 4 - 180)));
 }
 for (let lon = -180; lon < 180; lon += 15) {
-  graticule.push(Array.from({ length: 91 }, (_, i) => unit(i * 2 - 90, lon)));
+  graticule.push(Array.from({ length: 46 }, (_, i) => unit(i * 4 - 90, lon)));
 }
+const gratX = Float32Array.from(graticule.flat(), (p) => p.x);
+const gratY = Float32Array.from(graticule.flat(), (p) => p.y);
+const gratZ = Float32Array.from(graticule.flat(), (p) => p.z);
+/** Index of the first vertex of each graticule line, plus the end. */
+const gratStart = graticule.reduce((a, row) => [...a, a[a.length - 1] + row.length], [0]);
 
 const stations = [
   { code: 'LON', p: unit(51.51, -0.13) },
@@ -175,7 +184,28 @@ function paint(
   ctx.arc(cx, cy, r, 0, tau);
   ctx.fillStyle = cached.ocean;
   ctx.fill();
-  for (const row of graticule) path(row, 'rgba(172,172,172,.33)', 0.58);
+  ctx.beginPath();
+  for (let line = 0; line + 1 < gratStart.length; line++) {
+    let down = false;
+    for (let i = gratStart[line]; i < gratStart[line + 1]; i++) {
+      const px = gratX[i], py = gratY[i], pz = gratZ[i];
+      const depth = px * s + pz * c;
+      if (py * sp + depth * cp < 0) {
+        down = false;
+        continue;
+      }
+      const x = px * c - pz * s,
+        y = py * cp - depth * sp;
+      const qx = cx + r * (x * ct - y * st),
+        qy = cy - r * (x * st + y * ct);
+      if (down) ctx.lineTo(qx, qy);
+      else ctx.moveTo(qx, qy);
+      down = true;
+    }
+  }
+  ctx.strokeStyle = 'rgba(172,172,172,.33)';
+  ctx.lineWidth = 0.58;
+  ctx.stroke();
   const size = Math.max(0.69, r / 156);
   const breath = 0.1 * Math.sin(seconds * 0.65);
   if (surface === 'mesh') {
@@ -210,7 +240,9 @@ function paint(
       const qx = cx + r * (x * ct - y * st),
         qy = cy - r * (x * st + y * ct);
       const light = base + qx * k1 + qy * k2 + qz * 0.42 + landTone[i] * 0.27;
-      const level = Math.min(7, Math.max(0, Math.floor(light * 7)));
+      let level = (light * 7) | 0; // floor for light ≥ 0; below 0 it is clamped anyway
+      if (level < 0) level = 0;
+      else if (level > 7) level = 7;
       const b = byLevel[level];
       b.v[b.n++] = qx;
       b.v[b.n++] = qy;
