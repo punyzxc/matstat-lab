@@ -9,6 +9,8 @@ test('Sandbox: the cube turns by itself, the keys turn it, and the ball fills π
   await expect(cube.locator('.cube-dot')).toHaveCount(1200, { timeout: 15000 });
   await expect(cube.locator('.cube-edge')).toHaveCount(12);
   const svg = cube.locator('svg');
+  // #196: the cube turns only while it is on screen; at 1280×720 it sits below the fold of the dock
+  await svg.scrollIntoViewIfNeeded();
   const yaw0 = Number(await svg.getAttribute('data-yaw'));
   await expect.poll(async () => Number(await svg.getAttribute('data-yaw'))).not.toBe(yaw0);
 

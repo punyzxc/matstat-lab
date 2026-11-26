@@ -25,6 +25,8 @@ export function Beam({ beam, onParam }: { beam: BeamData; onParam: (key: string,
   const [pose, setPose] = useState({ pivot: beam.mean, angle: 0 });
   const target = useRef({ pivot: beam.mean, angle: 0 });
   const timer = useRef<number | undefined>(undefined);
+  /** #196: starts the easing loop; it stops by itself once the pose reaches its target. */
+  const kick = useRef<() => void>(() => {});
   useEffect(() => {
     window.clearTimeout(timer.current);
     if (reduced) {
@@ -37,22 +39,30 @@ export function Beam({ beam, onParam }: { beam: BeamData; onParam: (key: string,
     if (Math.abs(torque) < 1e-9) return;
     // Positive torque: more moment to the right, the right end goes down (clockwise in screen coordinates).
     target.current = { pivot: old, angle: Math.max(-MAX_TILT, Math.min(MAX_TILT, torque * 9)) };
-    timer.current = window.setTimeout(() => { target.current = { pivot: beam.mean, angle: 0 }; }, 320);
+    kick.current();
+    timer.current = window.setTimeout(() => { target.current = { pivot: beam.mean, angle: 0 }; kick.current(); }, 320);
     return () => window.clearTimeout(timer.current);
   }, [beam.mean, reduced]);
+  const svg = useRef<SVGSVGElement & { __frames?: number }>(null);
   useEffect(() => {
     if (reduced) return;
     let raf = 0;
+    // The pose the loop last wrote: the loop ends on the frame it lands on the target.
+    let at = { pivot: beam.mean, angle: 0 };
     const tick = () => {
-      setPose((p) => {
-        const g = target.current, k = 0.16;
-        const next = { pivot: p.pivot + (g.pivot - p.pivot) * k, angle: p.angle + (g.angle - p.angle) * k };
-        return Math.abs(next.pivot - g.pivot) < 1e-4 && Math.abs(next.angle - g.angle) < 1e-3 ? (p.pivot === g.pivot && p.angle === g.angle ? p : g) : next;
-      });
-      raf = requestAnimationFrame(tick);
+      raf = 0;
+      const g = target.current, k = 0.16;
+      const next = { pivot: at.pivot + (g.pivot - at.pivot) * k, angle: at.angle + (g.angle - at.angle) * k };
+      const done = Math.abs(next.pivot - g.pivot) < 1e-4 && Math.abs(next.angle - g.angle) < 1e-3;
+      at = done ? g : next;
+      setPose(at);
+      const el = svg.current;
+      if (el) el.__frames = (el.__frames ?? 0) + 1;
+      if (!done) raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    kick.current = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    kick.current();
+    return () => { cancelAnimationFrame(raf); kick.current = () => {}; };
   }, [reduced]);
 
   const cx = px(pose.pivot), rad = (pose.angle * Math.PI) / 180;
@@ -60,7 +70,6 @@ export function Beam({ beam, onParam }: { beam: BeamData; onParam: (key: string,
   const onBeam = (x: number) => ({ x: cx + (px(x) - cx) * Math.cos(rad), y: BEAM_Y + (px(x) - cx) * Math.sin(rad) });
   const left = onBeam(lo), right = onBeam(hi);
 
-  const svg = useRef<SVGSVGElement>(null);
   const drag = useRef<number | null>(null);
   const snap = (v: number) => Math.min(hi, Math.max(lo, Math.round(v / beam.step) * beam.step));
   const toData = (e: PointerEvent) => {

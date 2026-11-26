@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { memo, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { useStationReducedMotion } from '../motion-preference';
 import { MathText, SvgMathText, mathToPlain } from '../math';
 import { RotateCcw } from 'lucide-react';
@@ -46,10 +46,44 @@ type Item = { points: number[][]; bias?: number; kind: 'quad' | 'stem' | 'bar' |
 const SPIN = 0.00016, HOLD_MS = 4000;
 const sig4 = (v: number) => (Number.isFinite(v) ? Number(v.toPrecision(4)).toLocaleString(locale(), { maximumSignificantDigits: 4, useGrouping: false }).replace('-', '−') : '—');
 
-/** A rotatable SVG joint-density surface: theory as shaded quads, sample density as stems. */
-export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: string }) {
+type View = { yaw: number; pitch: number };
+const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const n1 = (v: number) => v.toFixed(1);
+
+/** Place a React-rendered `SvgMathText` (a `<text>` or a `<foreignObject>`) without a React render. */
+function placeMath(g: SVGGElement | null, x: number, y: number, anchor: 'start' | 'middle' | 'end', width: number) {
+  const el = g?.firstElementChild;
+  if (!el) return;
+  if (el.tagName === 'text') {
+    el.setAttribute('x', n1(x));
+    el.setAttribute('y', n1(y));
+    el.setAttribute('text-anchor', anchor);
+    return;
+  }
+  el.setAttribute('x', n1(anchor === 'start' ? x : anchor === 'middle' ? x - width / 2 : x - width));
+  el.setAttribute('y', n1(y - 15));
+  const box = el.firstElementChild;
+  if (box) box.className = `svg-math-box svg-math-${anchor}`;
+}
+
+/** Everything the painter needs besides the view; rebuilt by React when params, the tween or the cursor change. */
+type Model = {
+  items: Item[]; xs: number[]; ys: number[]; z: number[][]; zmax: number; x0: number; x1: number; y0: number; y1: number;
+  wall: Surface['wall']; cursor: [number, number] | null;
+};
+
+/** Frames painted and React commits of each surface, read by the e2e specs (`svg.__paints`, `svg.__commits`). */
+type CountedSvg = SVGSVGElement & { __paints?: number; __commits?: number };
+
+/**
+ * A rotatable SVG joint-density surface: theory as shaded quads, sample density as stems.
+ * #196: React renders the frame of the chart and the typeset labels; the geometry that moves with the camera
+ * (box, wall, quads, bars, stems, cursor, axes and ticks) is written straight into the SVG by `paint`, so the
+ * idle turn costs no React render. React renders only when the surface, the cursor or the labels change.
+ */
+function Surface3DView({ surface, keyLabel }: { surface: Surface; keyLabel?: string }) {
   const shown = useTween(surface, mixSurface);
-  const [view, setView] = useState(DEFAULT_VIEW);
+  const view = useRef<View>(DEFAULT_VIEW);
   const drag = useRef<{ id: number; x: number; y: number } | null>(null);
   const hintId = useId();
   const { x: xs, y: ys, z, zSample, labels, overlay, wall } = shown;
@@ -58,38 +92,16 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
   const reduced = useStationReducedMotion();
   const heldUntil = useRef(0);
   const hold = () => { heldUntil.current = performance.now() + HOLD_MS; };
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const [onScreen, setOnScreen] = useState(true);
-  useEffect(() => {
-    const el = svgRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting));
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  useEffect(() => {
-    if (reduced) { setView(DEFAULT_VIEW); return; }
-    if (!onScreen) return;
-    let raf = 0, last = performance.now(), acc = 0;
-    const tick = (now: number) => {
-      const dt = now - last;
-      last = now;
-      if (!drag.current && now >= heldUntil.current) {
-        acc += dt;
-        // About 30 frames a second: smooth for a slow turn, half the work of 60.
-        if (acc >= 33) {
-          const step = Math.min(acc, 100);
-          acc = 0;
-          setView((v) => ({ ...v, yaw: v.yaw + step * SPIN }));
-        }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [reduced, onScreen]);
+  const svgRef = useRef<CountedSvg | null>(null);
+  const layer = { box: useRef<SVGGElement>(null), wall: useRef<SVGGElement>(null), items: useRef<SVGGElement>(null), cursor: useRef<SVGGElement>(null), axis: useRef<SVGGElement>(null) };
+  const title = { x: useRef<SVGGElement>(null), y: useRef<SVGGElement>(null), z: useRef<SVGGElement>(null) };
   /** The cell under the pointer or the keyboard cursor (Shift + arrows): its x, y and z are read out. */
-  const [cursor, setCursor] = useState<[number, number] | null>(null);
+  const [cursor, setCursorState] = useState<[number, number] | null>(null);
+  const setCursor = (c: [number, number] | null | ((c: [number, number] | null) => [number, number] | null)) =>
+    setCursorState((prev) => {
+      const next = typeof c === 'function' ? c(prev) : c;
+      return prev && next && prev[0] === next[0] && prev[1] === next[1] ? prev : next;
+    });
 
   const { x0, x1, y0, y1, zmax } = useMemo(() => {
     const zTop = Math.max(finiteMax(z.flat()), zSample ? finiteMax(zSample.flat()) : 0, overlay ? finiteMax(overlay.flat()) : 0, wall ? finiteMax(wall.z) : 0);
@@ -98,7 +110,6 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
       zmax: Math.min(Number.isFinite(zTop) && zTop > 0 ? zTop : 1, shown.zCeil ?? Infinity) * 1.05,
     };
   }, [xs, ys, z, zSample, overlay, wall, shown.zCeil]);
-  const wx = (v: number) => unit(v, x0, x1), wy = (v: number) => unit(v, y0, y1), wz = (v: number) => ZLO + clamp(v / zmax, 0, 1.2);
 
   const items = useMemo(() => {
     const out: Item[] = [];
@@ -142,32 +153,143 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
         }
     return out;
   }, [xs, ys, z, zSample, overlay, bars, x0, x1, y0, y1, zmax]);
-  const sorted = quadsByDepth(items, view, VIEWPORT);
 
-  // Bounding box, axes and ticks, placed on the edges nearest the viewer.
-  const P = (x: number, y: number, zz: number) => project([x, y, zz], view, VIEWPORT);
-  const centre = P(0, 0, 0);
-  const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
-  const floor = corners.map(([x, y]) => P(x, y, ZLO));
-  const yEdge = P(0, -1, ZLO).depth < P(0, 1, ZLO).depth ? -1 : 1;
-  const xEdge = P(-1, 0, ZLO).depth < P(1, 0, ZLO).depth ? -1 : 1;
-  const zCorner = corners.reduce((best, c) => (P(c[0], c[1], ZLO).x < P(best[0], best[1], ZLO).x ? c : best), corners[0]);
-  const zFoot = P(zCorner[0], zCorner[1], ZLO), zHead = P(zCorner[0], zCorner[1], ZLO + 1);
-  const zLeft = zFoot.x <= centre.x;
-  const out = (p: { x: number; y: number }, d: number) => {
-    const vx = p.x - centre.x, vy = p.y - centre.y, n = Math.hypot(vx, vy) || 1;
-    return { x: p.x + (vx / n) * d, y: p.y + (vy / n) * d, ux: vx / n };
-  };
-  const anchor = (ux: number) => (ux > 0.35 ? 'start' : ux < -0.35 ? 'end' : 'middle');
-  const xt = niceTicks(x0, x1, 4), yt = niceTicks(y0, y1, 4), zt = niceTicks(0, zmax, 3);
-  const axisTitle = (mid: number[], text: string) => {
-    const o = out(P(mid[0], mid[1], ZLO), 32);
-    return <SvgMathText className="surface-title" x={o.x} y={o.y + 3} anchor={anchor(o.ux)} text={text} width={200} />;
-  };
+  const model = useRef<Model | null>(null);
+  model.current = { items, xs, ys, z, zmax, x0, x1, y0, y1, wall, cursor };
 
+  /** Writes every view-dependent element for the current camera. Called after each React commit and by the turn. */
+  const paint = useRef(() => {
+    const m = model.current, svg = svgRef.current;
+    if (!m || !svg) return;
+    const v = view.current;
+    const P = (x: number, y: number, zz: number) => project([x, y, zz], v, VIEWPORT);
+    const wx = (q: number) => unit(q, m.x0, m.x1), wy = (q: number) => unit(q, m.y0, m.y1), wz = (q: number) => ZLO + clamp(q / m.zmax, 0, 1.2);
+    const on = (cell?: [number, number]) => (m.cursor && cell && m.cursor[0] === cell[0] && m.cursor[1] === cell[1] ? ' data-on="true"' : '');
+    const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+    const floor = corners.map(([x, y]) => P(x, y, ZLO));
+    const centre = P(0, 0, 0);
+    const yEdge = P(0, -1, ZLO).depth < P(0, 1, ZLO).depth ? -1 : 1;
+    const xEdge = P(-1, 0, ZLO).depth < P(1, 0, ZLO).depth ? -1 : 1;
+    const zCorner = corners.reduce((best, c) => (P(c[0], c[1], ZLO).x < P(best[0], best[1], ZLO).x ? c : best), corners[0]);
+    const zFoot = P(zCorner[0], zCorner[1], ZLO), zHead = P(zCorner[0], zCorner[1], ZLO + 1);
+    const zLeft = zFoot.x <= centre.x;
+    const out = (p: { x: number; y: number }, d: number) => {
+      const vx = p.x - centre.x, vy = p.y - centre.y, n = Math.hypot(vx, vy) || 1;
+      return { x: p.x + (vx / n) * d, y: p.y + (vy / n) * d, ux: vx / n };
+    };
+    const anchor = (ux: number) => (ux > 0.35 ? 'start' : ux < -0.35 ? 'end' : 'middle') as 'start' | 'middle' | 'end';
+
+    if (layer.box.current) layer.box.current.innerHTML = `<path d="${pathOf(floor)}Z"/>` + corners.map(([x, y], i) => {
+      const top = P(x, y, ZLO + 1);
+      return `<line x1="${floor[i].x}" y1="${floor[i].y}" x2="${top.x}" y2="${top.y}"/>`;
+    }).join('');
+
+    if (layer.wall.current) {
+      // #86: a reference curve on the far wall, the plane y = far edge.
+      let html = '';
+      if (m.wall) {
+        const yFar = -yEdge, w = m.wall;
+        const pts = w.x.map((x, k) => P(wx(x), yFar, wz(w.z[k]))).filter((q) => Number.isFinite(q.x) && Number.isFinite(q.y));
+        const frame = [P(-1, yFar, ZLO), P(1, yFar, ZLO), P(1, yFar, ZLO + 1), P(-1, yFar, ZLO + 1)];
+        html = `<g class="surface-wall"><path class="surface-wall-plane" d="${pathOf(frame)}Z"/><path class="surface-wall-curve" d="${pathOf(pts)}"/></g>`;
+      }
+      layer.wall.current.innerHTML = html;
+    }
+
+    if (layer.items.current) {
+      const parts: string[] = [];
+      for (const { item, points } of quadsByDepth(m.items, v, VIEWPORT)) {
+        const cell = item.cell ? ` data-i="${item.cell[0]}" data-j="${item.cell[1]}"` : '';
+        if (item.kind === 'quad') parts.push(`<path class="surface-quad"${cell}${on(item.cell)} style="--h: ${clamp(item.h, 0, 1)}" d="${pathOf(points)}Z"/>`);
+        else if (item.kind === 'overlay') parts.push(`<path class="surface-overlay" d="${pathOf(points)}Z"/>`);
+        else if (item.kind === 'bar') {
+          // Only the two sides that face the camera, then the top: a box needs no more.
+          const faces = item.faces!.map((f, k) => ({ k, pts: f.map((q) => P(q[0], q[1], q[2])) }))
+            .filter(({ k, pts }) => k === 4 || pts.reduce((sum, q) => sum + q.depth, 0) / 4 < points[0].depth)
+            .map(({ k, pts }) => `<path class="${k === 4 ? 'surface-bar-top' : 'surface-bar-side'}" d="${pathOf(pts)}Z"/>`).join('');
+          parts.push(`<g class="surface-bar3d"${cell}${on(item.cell)} style="--h: ${clamp(item.h, 0, 1)}">${faces}</g>`);
+        } else parts.push(`<g class="surface-stem"><line x1="${points[0].x}" y1="${points[0].y}" x2="${points[1].x}" y2="${points[1].y}"/><circle cx="${points[1].x}" cy="${points[1].y}" r="1.8"/></g>`);
+      }
+      layer.items.current.innerHTML = parts.join('');
+    }
+
+    if (layer.cursor.current) {
+      let html = '';
+      const c = m.cursor;
+      if (c && c[0] < m.xs.length && c[1] < m.ys.length) {
+        const val = m.z[c[1]]?.[c[0]] ?? NaN;
+        const q = P(wx(m.xs[c[0]]), wy(m.ys[c[1]]), Number.isFinite(val) ? wz(val) : ZLO);
+        const f = P(wx(m.xs[c[0]]), wy(m.ys[c[1]]), ZLO);
+        html = `<g class="surface-cursor"><line x1="${f.x}" y1="${f.y}" x2="${q.x}" y2="${q.y}"/><circle cx="${q.x}" cy="${q.y}" r="4"/></g>`;
+      }
+      layer.cursor.current.innerHTML = html;
+    }
+
+    if (layer.axis.current) {
+      const xt = niceTicks(m.x0, m.x1, 4), yt = niceTicks(m.y0, m.y1, 4), zt = niceTicks(0, m.zmax, 3);
+      const text = (x: number, y: number, a: string, s: string) => `<text x="${x}" y="${y}" text-anchor="${a}">${esc(s)}</text>`;
+      layer.axis.current.innerHTML =
+        `<path d="${pathOf([P(-1, yEdge, ZLO), P(1, yEdge, ZLO)])}"/>` +
+        `<path d="${pathOf([P(xEdge, -1, ZLO), P(xEdge, 1, ZLO)])}"/>` +
+        `<path d="${pathOf([zFoot, zHead])}"/>` +
+        xt.map((q) => { const o = out(P(wx(q), yEdge, ZLO), 11); return text(o.x, o.y + 3, anchor(o.ux), fmt(q, stepOf(xt))); }).join('') +
+        yt.map((q) => { const o = out(P(xEdge, wy(q), ZLO), 11); return text(o.x, o.y + 3, anchor(o.ux), fmt(q, stepOf(yt))); }).join('') +
+        zt.filter((q) => q !== 0).map((q) => { const p = P(zCorner[0], zCorner[1], wz(q)); return text(p.x + (zLeft ? -7 : 7), p.y + 3, zLeft ? 'end' : 'start', fmt(q, stepOf(zt))); }).join('');
+    }
+    const ox = out(P(0, yEdge, ZLO), 32), oy = out(P(xEdge, 0, ZLO), 32);
+    placeMath(title.x.current, ox.x, ox.y + 3, anchor(ox.ux), 200);
+    placeMath(title.y.current, oy.x, oy.y + 3, anchor(oy.ux), 200);
+    placeMath(title.z.current, zHead.x + (zLeft ? -7 : 7), zHead.y - 10, zLeft ? 'end' : 'start', 200);
+    svg.setAttribute('data-yaw', v.yaw.toFixed(3));
+    svg.__paints = (svg.__paints ?? 0) + 1;
+  });
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    if (svg) svg.__commits = (svg.__commits ?? 0) + 1;
+    paint.current();
+  });
+
+  /** The idle turn: a rAF loop only while on screen, in a visible tab, not reduced and not held; it paints without React. */
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    if (reduced) { view.current = DEFAULT_VIEW; paint.current(); return; }
+    let raf = 0, last = 0, acc = 0, inView = true;
+    const tick = (now: number) => {
+      raf = 0;
+      if (!inView || document.hidden) { last = 0; return; }
+      const dt = last ? now - last : 0;
+      last = now;
+      if (!drag.current && now >= heldUntil.current) {
+        acc += dt;
+        // About 30 frames a second: smooth for a slow turn, half the work of 60.
+        if (acc >= 33) {
+          const step = Math.min(acc, 100);
+          acc = 0;
+          view.current = { ...view.current, yaw: view.current.yaw + step * SPIN };
+          paint.current();
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    const wake = () => { if (!raf && inView && !document.hidden) raf = requestAnimationFrame(tick); };
+    const sleep = () => { cancelAnimationFrame(raf); raf = 0; last = 0; };
+    const io = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver((entries) => {
+      inView = entries.at(-1)!.isIntersecting;
+      if (inView) wake(); else sleep();
+    });
+    io?.observe(el);
+    const vis = () => (document.hidden ? sleep() : wake());
+    document.addEventListener('visibilitychange', vis);
+    wake();
+    return () => { sleep(); io?.disconnect(); document.removeEventListener('visibilitychange', vis); };
+  }, [reduced]);
+
+  const setView = (next: View) => { view.current = next; paint.current(); };
   const rotate = (dyaw: number, dpitch: number) => {
     hold();
-    setView((v) => ({ yaw: v.yaw + dyaw, pitch: clamp(v.pitch + dpitch, PITCH_RANGE[0], PITCH_RANGE[1]) }));
+    const v = view.current;
+    setView({ yaw: v.yaw + dyaw, pitch: clamp(v.pitch + dpitch, PITCH_RANGE[0], PITCH_RANGE[1]) });
   };
   const onPointerDown = (e: PointerEvent<SVGSVGElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -185,6 +307,12 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
       drag.current = null;
       hold();
     }
+  };
+  /** The hovered quad or bar sets the cursor (one listener for the whole layer). */
+  const onItemOver = (e: PointerEvent<SVGGElement>) => {
+    if (drag.current) return;
+    const el = (e.target as Element).closest?.('[data-i]');
+    if (el) setCursor([Number(el.getAttribute('data-i')), Number(el.getAttribute('data-j'))]);
   };
   const onKeyDown = (e: KeyboardEvent<SVGSVGElement>) => {
     if (e.key === 'Escape' && cursor) { setCursor(null); return; }
@@ -209,97 +337,33 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
     rotate(m[0], m[1]);
   };
 
-  const title = surface.title ?? t(`Joint density of ${labels.x} and ${labels.y}`, `Совместная плотность ${labels.x} и ${labels.y}`);
+  const heading = surface.title ?? t(`Joint density of ${labels.x} and ${labels.y}`, `Совместная плотность ${labels.x} и ${labels.y}`);
   const aria = t(
-    `${mathToPlain(title)}: 3D surface of the theoretical density ${mathToPlain(labels.z)} over ${mathToPlain(labels.x)} and ${mathToPlain(labels.y)}` +
+    `${mathToPlain(heading)}: 3D surface of the theoretical density ${mathToPlain(labels.z)} over ${mathToPlain(labels.x)} and ${mathToPlain(labels.y)}` +
     `${zSample ? ', with the sample density drawn as stems' : ''}.`,
-    `${mathToPlain(title)}: трёхмерная поверхность теоретической плотности ${mathToPlain(labels.z)} над ${mathToPlain(labels.x)} и ${mathToPlain(labels.y)}` +
+    `${mathToPlain(heading)}: трёхмерная поверхность теоретической плотности ${mathToPlain(labels.z)} над ${mathToPlain(labels.x)} и ${mathToPlain(labels.y)}` +
     `${zSample ? ', выборочная плотность показана столбиками' : ''}.`,
   );
 
   return (
     <figure className="surface">
       <div className="surface-bar">
-        <span className="surface-heading"><MathText text={title} /></span>
+        <span className="surface-heading"><MathText text={heading} /></span>
         <Button variant="ghost" onClick={() => setView(DEFAULT_VIEW)}><RotateCcw size={14} aria-hidden /> {t('Reset view', 'Сбросить вид')}</Button>
       </div>
       <svg
-        ref={svgRef} data-yaw={view.yaw.toFixed(3)} className="surface-svg" viewBox={`0 0 ${W} ${H}`} role="img" tabIndex={0} aria-label={aria} aria-describedby={hintId}
+        ref={svgRef} className="surface-svg" viewBox={`0 0 ${W} ${H}`} role="img" tabIndex={0} aria-label={aria} aria-describedby={hintId}
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onKeyDown={onKeyDown}
       >
-        <g className="surface-box" aria-hidden="true">
-          <path d={pathOf(floor) + 'Z'} />
-          {corners.map(([x, y], i) => {
-            const top = P(x, y, ZLO + 1);
-            return <line key={i} x1={floor[i].x} y1={floor[i].y} x2={top.x} y2={top.y} />;
-          })}
-        </g>
-        {wall && (() => {
-          // #86: a reference curve on the far wall, the plane y = far edge.
-          const yFar = -yEdge;
-          const pts = wall.x.map((x, k) => P(wx(x), yFar, wz(wall.z[k]))).filter((q) => Number.isFinite(q.x) && Number.isFinite(q.y));
-          const frame = [P(-1, yFar, ZLO), P(1, yFar, ZLO), P(1, yFar, ZLO + 1), P(-1, yFar, ZLO + 1)];
-          return (
-            <g className="surface-wall" aria-hidden="true">
-              <path className="surface-wall-plane" d={pathOf(frame) + 'Z'} />
-              <path className="surface-wall-curve" d={pathOf(pts)} />
-            </g>
-          );
-        })()}
-        <g aria-hidden="true" onPointerLeave={() => setCursor(null)}>
-          {sorted.map(({ item, points, index }) =>
-            item.kind === 'quad' ? (
-              <path key={index} className="surface-quad" data-on={cursor && item.cell && cursor[0] === item.cell[0] && cursor[1] === item.cell[1] || undefined}
-                style={{ ['--h' as string]: clamp(item.h, 0, 1) }} d={pathOf(points) + 'Z'} onPointerEnter={() => item.cell && setCursor(item.cell)} />
-            ) : item.kind === 'overlay' ? (
-              <path key={index} className="surface-overlay" d={pathOf(points) + 'Z'} />
-            ) : item.kind === 'bar' ? (
-              <g key={index} className="surface-bar3d" style={{ ['--h' as string]: clamp(item.h, 0, 1) }}
-                data-on={cursor && item.cell && cursor[0] === item.cell[0] && cursor[1] === item.cell[1] || undefined}
-                onPointerEnter={() => item.cell && setCursor(item.cell)}>
-                {item.faces!.map((f, k) => ({ f, k, pts: f.map((q) => P(q[0], q[1], q[2])) }))
-                  // Only the two sides that face the camera, then the top: a box needs no more.
-                  .filter(({ k, pts }) => k === 4 || pts.reduce((sum, q) => sum + q.depth, 0) / 4 < points[0].depth)
-                  .map(({ k, pts }) => <path key={k} className={k === 4 ? 'surface-bar-top' : 'surface-bar-side'} d={pathOf(pts) + 'Z'} />)}
-              </g>
-            ) : (
-              <g key={index} className="surface-stem">
-                <line x1={points[0].x} y1={points[0].y} x2={points[1].x} y2={points[1].y} />
-                <circle cx={points[1].x} cy={points[1].y} r={1.8} />
-              </g>
-            ),
-          )}
-        </g>
-        {cursor && cursor[0] < xs.length && cursor[1] < ys.length && (() => {
-          const v = z[cursor[1]]?.[cursor[0]] ?? NaN;
-          const q = P(wx(xs[cursor[0]]), wy(ys[cursor[1]]), Number.isFinite(v) ? wz(v) : ZLO);
-          const f = P(wx(xs[cursor[0]]), wy(ys[cursor[1]]), ZLO);
-          return (
-            <g className="surface-cursor" aria-hidden="true">
-              <line x1={f.x} y1={f.y} x2={q.x} y2={q.y} />
-              <circle cx={q.x} cy={q.y} r={4} />
-            </g>
-          );
-        })()}
+        <g ref={layer.box} className="surface-box" aria-hidden="true" />
+        <g ref={layer.wall} aria-hidden="true" />
+        <g ref={layer.items} aria-hidden="true" onPointerOver={onItemOver} onPointerLeave={() => setCursor(null)} />
+        <g ref={layer.cursor} aria-hidden="true" />
         <g className="surface-axis" aria-hidden="true">
-          <path d={pathOf([P(-1, yEdge, ZLO), P(1, yEdge, ZLO)])} />
-          <path d={pathOf([P(xEdge, -1, ZLO), P(xEdge, 1, ZLO)])} />
-          <path d={pathOf([zFoot, zHead])} />
-          {xt.map((v) => {
-            const o = out(P(wx(v), yEdge, ZLO), 11);
-            return <text key={'x' + v} x={o.x} y={o.y + 3} textAnchor={anchor(o.ux)}>{fmt(v, stepOf(xt))}</text>;
-          })}
-          {yt.map((v) => {
-            const o = out(P(xEdge, wy(v), ZLO), 11);
-            return <text key={'y' + v} x={o.x} y={o.y + 3} textAnchor={anchor(o.ux)}>{fmt(v, stepOf(yt))}</text>;
-          })}
-          {zt.filter((v) => v !== 0).map((v) => {
-            const p = P(zCorner[0], zCorner[1], wz(v));
-            return <text key={'z' + v} x={p.x + (zLeft ? -7 : 7)} y={p.y + 3} textAnchor={zLeft ? 'end' : 'start'}>{fmt(v, stepOf(zt))}</text>;
-          })}
-          {axisTitle([0, yEdge], labels.x)}
-          {axisTitle([xEdge, 0], labels.y)}
-          <SvgMathText className="surface-title" x={zHead.x + (zLeft ? -7 : 7)} y={zHead.y - 10} anchor={zLeft ? 'end' : 'start'} text={labels.z} width={200} />
+          <g ref={layer.axis} />
+          <g ref={title.x}><SvgMathText className="surface-title" x={0} y={0} text={labels.x} width={200} /></g>
+          <g ref={title.y}><SvgMathText className="surface-title" x={0} y={0} text={labels.y} width={200} /></g>
+          <g ref={title.z}><SvgMathText className="surface-title" x={0} y={0} text={labels.z} width={200} /></g>
         </g>
       </svg>
       <figcaption>
@@ -317,3 +381,24 @@ export function Surface3D({ surface, keyLabel }: { surface: Surface; keyLabel?: 
     </figure>
   );
 }
+
+/** Deep equality of plain JSON-like data (numbers, strings, arrays, objects). */
+function sameData(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return false;
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (!sameData(a[i], b[i])) return false;
+    return true;
+  }
+  const ka = Object.keys(a as object), kb = Object.keys(b as object);
+  if (ka.length !== kb.length) return false;
+  for (const k of ka) if (!sameData((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k])) return false;
+  return true;
+}
+
+/**
+ * #196: a station re-renders often (autoplay, readouts); the surface renders again only when its data or labels
+ * really changed, so an unchanged surface costs no React work at all.
+ */
+export const Surface3D = memo(Surface3DView, (a, b) => a.keyLabel === b.keyLabel && sameData(a.surface, b.surface));
