@@ -21,5 +21,17 @@
   },
   "enabledPlugins": {
     "ecc@ecc": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/crew-cloud-setup.mjs\""
+          }
+        ]
+      }
+    ]
   }
 }
