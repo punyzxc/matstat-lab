@@ -13,6 +13,9 @@ export type Frame = {
 export type Renderer = { draw: (frame: Frame) => void; dispose?: () => void };
 export type RendererFactory = (canvas: HTMLCanvasElement) => Renderer | null;
 
+/** #195: at most about 2.5 megapixels of backing store for one plate (1920×1080 at DPR 1.75 would be 6.4). */
+export const MAX_PIXELS = 2_500_000;
+
 export function PlateCanvas({
   create,
   fallback,
@@ -100,7 +103,9 @@ export function PlateCanvas({
       const rect = box.getBoundingClientRect();
       frame.width = rect.width;
       frame.height = rect.height;
-      frame.dpr = Math.min(devicePixelRatio || 1, small ? 1.25 : 1.75);
+      // #195: the backing store is capped at MAX_PIXELS whatever the viewport; the DPR gives way first.
+      const wanted = Math.min(devicePixelRatio || 1, small ? 1.25 : 1.75);
+      frame.dpr = Math.max(0.5, Math.min(wanted, Math.sqrt(MAX_PIXELS / Math.max(1, rect.width * rect.height)) * 0.999));
       canvas.width = Math.max(1, Math.round(rect.width * frame.dpr));
       canvas.height = Math.max(1, Math.round(rect.height * frame.dpr));
       refresh();

@@ -174,7 +174,7 @@ export const wovenPlate: RendererFactory = (canvas) => {
     antialias: true,
     depth: true,
     powerPreference: 'low-power',
-    preserveDrawingBuffer: true,
+    // #195: no preserveDrawingBuffer; nothing reads the trefoil back, and keeping the buffer costs a copy per frame.
   });
   if (!gl) return null;
   const program = gl.createProgram()!;
