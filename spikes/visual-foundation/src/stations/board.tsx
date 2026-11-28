@@ -168,22 +168,35 @@ function Cube({ board, drawKey, reduced }: { board: Extract<Data, { kind: 'cube'
   const [view, setView] = useState({ yaw: -0.7, pitch: 0.42 });
   const [held, setHeld] = useState(false);
   const drag = useRef<{ id: number; x: number; y: number } | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  /** #196: the idle turn runs only while the cube is on screen and the tab is visible; otherwise its loop is cancelled. */
   useEffect(() => {
-    if (reduced || held) return;
-    let raf = 0, last = performance.now(), acc = 0;
+    const el = svgRef.current;
+    if (reduced || held || !el) return;
+    let raf = 0, last = 0, acc = 0, inView = true;
     const tick = (now: number) => {
-      acc += now - last;
+      raf = 0;
+      acc += last ? now - last : 0;
       last = now;
       // About 30 frames a second is smooth for a slow turn and halves the work.
       if (acc > 32) {
-        const dt = acc;
+        const dt = Math.min(acc, 100);
         acc = 0;
         setView((v) => ({ ...v, yaw: v.yaw + dt * 0.00028 }));
       }
       raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    const wake = () => { if (!raf && inView && !document.hidden) raf = requestAnimationFrame(tick); };
+    const sleep = () => { cancelAnimationFrame(raf); raf = 0; last = 0; };
+    const io = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver((entries) => {
+      inView = entries.at(-1)!.isIntersecting;
+      if (inView) wake(); else sleep();
+    });
+    io?.observe(el);
+    const vis = () => (document.hidden ? sleep() : wake());
+    document.addEventListener('visibilitychange', vis);
+    wake();
+    return () => { sleep(); io?.disconnect(); document.removeEventListener('visibilitychange', vis); };
   }, [reduced, held]);
   const turn = (dyaw: number, dpitch: number) => setView((v) => ({ yaw: v.yaw + dyaw, pitch: Math.min(1.25, Math.max(-0.2, v.pitch + dpitch)) }));
   const onKeyDown = (e: KeyboardEvent<SVGSVGElement>) => {
@@ -225,7 +238,7 @@ function Cube({ board, drawKey, reduced }: { board: Extract<Data, { kind: 'cube'
         <b>{t('Points in the unit cube', 'Точки в единичном кубе')}</b>
         <span className="board-count" data-count={inside}>{t(`${inside} of the first ${darts.length} land in A`, `${inside} из первых ${darts.length} попали в A`)}</span>
       </figcaption>
-      <svg viewBox="0 0 340 330" role="img" tabIndex={0} data-yaw={view.yaw.toFixed(3)}
+      <svg ref={svgRef} viewBox="0 0 340 330" role="img" tabIndex={0} data-yaw={view.yaw.toFixed(3)}
         aria-label={t(`Points in the unit cube, ${inside} of ${darts.length} inside A and lit; drag or use the arrow keys to turn it`, `Точки в единичном кубе, ${inside} из ${darts.length} внутри A и подсвечены; поворачивайте перетаскиванием или стрелками`)}
         onKeyDown={onKeyDown} onBlur={() => setHeld(false)} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}>
         {CUBE_EDGES.map(([a, b], i) => (

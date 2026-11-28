@@ -33,21 +33,41 @@ export function Phasor({ phasor, onParam }: { phasor: Data; onParam: (key: strin
   const [tNow, setTNow] = useState(phasor.t);
   const start = useRef<number | null>(null);
 
+  const section = useRef<HTMLElement>(null);
+  /**
+   * #196: the sweep sets t at most about 30 times a second (one React render each), and only while the station is
+   * on screen and the tab is visible; otherwise its loop is cancelled and the wave resumes where it stood.
+   */
   useEffect(() => {
     if (!sweeping) { setTNow(phasor.t); return; }
-    let raf = 0;
+    const el = section.current;
+    let raf = 0, lastSet = -Infinity, inView = true, pausedAt: number | null = null;
     // Start the wave at the typed t, rising, so switching to the sweep does not jump.
     const t0 = Math.max(-T, Math.min(T, phasor.t));
     const offset = ((t0 + T) / (4 * T)) * PERIOD;
     start.current = null;
     const frame = (now: number) => {
+      raf = 0;
       if (start.current === null) start.current = now - offset;
-      const ph = ((now - start.current) % PERIOD) / PERIOD;
-      setTNow(-T + 4 * T * (ph < 0.5 ? ph : 1 - ph));
+      if (pausedAt !== null) { start.current += now - pausedAt; pausedAt = null; }
+      if (now - lastSet >= 33) {
+        lastSet = now;
+        const ph = ((now - start.current) % PERIOD) / PERIOD;
+        setTNow(-T + 4 * T * (ph < 0.5 ? ph : 1 - ph));
+      }
       raf = requestAnimationFrame(frame);
     };
-    raf = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(raf);
+    const wake = () => { if (!raf && inView && !document.hidden) raf = requestAnimationFrame(frame); };
+    const sleep = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; pausedAt = performance.now(); } };
+    const io = !el || typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver((entries) => {
+      inView = entries.at(-1)!.isIntersecting;
+      if (inView) wake(); else sleep();
+    });
+    if (el) io?.observe(el);
+    const vis = () => (document.hidden ? sleep() : wake());
+    document.addEventListener('visibilitychange', vis);
+    wake();
+    return () => { cancelAnimationFrame(raf); raf = 0; io?.disconnect(); document.removeEventListener('visibilitychange', vis); };
   }, [sweeping, phasor.t, T]);
 
   const { tips, mean } = useMemo(() => {
@@ -84,7 +104,7 @@ export function Phasor({ phasor, onParam }: { phasor: Data; onParam: (key: strin
   const drag = useRef(false);
 
   return (
-    <section className="phasor" aria-label={tr('Characteristic function on the complex plane', 'Характеристическая функция на комплексной плоскости')} data-sweep={sweeping || undefined}>
+    <section ref={section} className="phasor" aria-label={tr('Characteristic function on the complex plane', 'Характеристическая функция на комплексной плоскости')} data-sweep={sweeping || undefined}>
       <div className="ph-head">
         <span className="ph-t" data-t={tNow.toFixed(3)}>t = {fmt(tNow)}</span>
         <span className="ph-emp">{tr('sample', 'выборочная')} φ{product && <sub>X+Y</sub>}(t) = {fmt(mean[0])} {mean[1] < 0 ? '−' : '+'} {fmt(Math.abs(mean[1]))}i</span>
