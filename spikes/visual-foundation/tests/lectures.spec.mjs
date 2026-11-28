@@ -85,7 +85,10 @@ test('a kernel station opened from a lecture keeps the seed, and a rerun keeps t
   await page.goto('/#lecture/1/9');
   await page.getByRole('link', { name: /Open the Urn station/ }).click();
   await expect(page).toHaveURL(/#station\/urn\?seed=101&.*lecture=1&step=9$/);
-  await expect(page.getByTestId('station-dock').getByRole('link', { name: 'Back to lecture 1, step 9' })).toBeVisible();
+  const urn = page.getByTestId('station-dock');
+  await expect(urn.getByRole('link', { name: 'Back to lecture 1, step 9' })).toBeVisible();
+  const count = urn.getByRole('row', { name: /Number of samples/ });
+  await expect(count.getByRole('cell').nth(1)).toHaveText('6 samples');
 
   // A rerun with a new seed rewrites the hash and keeps the reference to the step.
   await page.goto('/#station/contract-fixture?seed=7&n=2000&lecture=2&step=1');

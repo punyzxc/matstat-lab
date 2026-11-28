@@ -65,7 +65,7 @@ test('every Russian view fits 1280×720 and shows no English words', async ({ pa
     await page.goto('/' + hash);
     await expect(page.getByRole('navigation', { name: 'Орбиты лекций' })).toBeVisible();
     // Kernel stations compute in a worker: wait for the first readouts.
-    if (hash.startsWith('#station/') && !/distribution|convergence|estimation$|confidence|testing|urn/.test(hash))
+    if (hash.startsWith('#station/') && !/distribution|convergence|estimation$|confidence|testing/.test(hash))
       await expect(page.getByRole('table', { name: 'Показания' })).toBeVisible({ timeout: 15000 });
     const fits = await page.evaluate(() => document.scrollingElement.scrollHeight <= window.innerHeight);
     expect(fits, hash).toBe(true);
