@@ -1,0 +1,32 @@
+{
+  "studyVersion": "convergence-teaching-v1",
+  "engineVersion": "simulation-fixture-v1",
+  "rngVersion": "fixture-mix32-v1",
+  "models": ["uniform", "exponential"],
+  "seeds": [0, 2048, 4294967295],
+  "prefixNs": [1, 4, 16, 64, 256, 1024, 4096, 16384, 65536],
+  "cltNs": [1, 4, 16, 32, 64],
+  "repetitions": 4096,
+  "retainedMeans": 256,
+  "zEdges": [-4, -3.5, -3, -2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4],
+  "replayBudgets": [1, 7, 2048],
+  "familyDelta": 0.001,
+  "familyEvents": 84,
+  "familyDefinition": "54 LLN prefix events plus 30 whole-CDF CLT events; one DKW event covers every predeclared grid point in a CLT case. No independence between checks is assumed for the union bound.",
+  "llnBands": {
+    "uniform": "Hoeffding two-sided bound for the mean of ideal U(0,1), clipped to its support",
+    "exponential": "Equal-tail Gamma(n, scale=1/n) model quantiles for the mean of n ideal rate-one Exponentials"
+  },
+  "cltBand": "Two-sided DKW-Massart epsilon=sqrt(log(2/deltaPerEvent)/(2*repetitions)); compare the complete histogram CDF on the declared edges with an independent ideal finite-n model CDF. Record distance to Phi separately; it need not pass the normal-null band at small n.",
+  "oracle": "SciPy normal, Gamma and Irwin-Hall CDFs/quantiles; no simulation-engine imports in the oracle generator",
+  "floatTolerance": {"absolute": 1e-12, "relative": 1e-12},
+  "defaultLesson": {"model": "exponential", "rate": 1, "seed": 2048, "cltSmallN": 1, "cltLargeN": 64},
+  "expectedPatterns": [
+    "LLN checkpoints are successive prefixes of one stream, not independent sample means.",
+    "A running-mean error can increase between checkpoints; no monotonic path-error assertion is allowed.",
+    "CLT replicates use distinct replicate-indexed streams. n=1 Exponential remains visibly nonnormal; the default n=64 case should have a smaller grid distance to Phi than n=1.",
+    "A histogram-CDF grid distance is not the full Kolmogorov supremum. Preserve underflow and overflow mass.",
+    "The fixture mixer is provisional. Probability bounds describe ideal iid models and are conditional diagnostics for these deterministic streams, not PRNG certification."
+  ],
+  "selectionRationale": "Seeds are the existing #14 benchmark and uint32 endpoints. The grids and thresholds are fixed before generating this study's outputs; n=32 retains the #14 CLT benchmark. Keep any failed diagnostic visible rather than changing a seed or tolerance."
+}
