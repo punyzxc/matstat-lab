@@ -39,7 +39,7 @@ export function RvFunction({ beat, params, seed, hot, playing, reduced, runKey, 
       Fn: e.F, F: cont ? c.law.cdf(x) : diceF(d, x), area: cont ? areaLeft(c.law, x) : null,
       jumpn: e.jump, jump: cont ? 0 : diceJump(d, x), xbar: e.mean, MX: cont ? c.law.mean : d.mean, values: d.support.length,
     };
-  }, onResults, 120);
+  }, onResults, 120, playing);
 
   const canvas = useCanvasLoop((f) => step(sim.current!, live.current, f), playing);
   const names = ['\\omega_1 + \\omega_2', '\\max(\\omega_1, \\omega_2)', '|\\omega_1 - \\omega_2|', '\\text{the number of sixes}', linear(a, b)];

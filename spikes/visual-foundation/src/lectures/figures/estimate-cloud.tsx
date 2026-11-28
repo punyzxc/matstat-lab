@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { PALETTE } from './specs.mjs';
 import { dec, int, t, texDec } from '../../i18n-core';
 import { estimatesAt, LADDER, MU, theory, type Estimates } from './est-model.mjs';
-import { clamp01, ease, easeInOut, Label, lerp, rgba, useCanvasLoop, useThrottledReport, type FigureProps, type Frame } from './kit';
+import { clamp01, ease, easeInOut, Label, lerp, rgba, useCanvasLoop, useSteadyState, useThrottledReport, type FigureProps, type Frame } from './kit';
 
 /**
  * Clouds of estimates and the n vs n − 1 race (#135, L11). Samples come from the estimation kernel with the
@@ -58,7 +58,7 @@ export function EstimateCloud({ beat, params, seed, hot, onHot, playing, reduced
   const live = useRef<Live>({ beat, hot, reduced, opts, vMax, ladder });
   live.current = { beat, hot, reduced, opts, vMax, ladder };
   const th = theory(n, sigma);
-  const [shown, setShown] = useState({ count: 0, last: null as Estimates | null, mn: null as number | null, mn1: null as number | null, sdx: null as number | null });
+  const [shown, setShown] = useSteadyState({ count: 0, last: null as Estimates | null, mn: null as number | null, mn1: null as number | null, sdx: null as number | null });
 
   useThrottledReport(() => {
     const s = sim.current!, c = s.made.length, last = s.flying?.e ?? s.made.at(-1) ?? null;
@@ -69,7 +69,7 @@ export function EstimateCloud({ beat, params, seed, hot, onHot, playing, reduced
       count: c, xbar: last?.mean ?? null, vn: last?.vn ?? null, vn1: last?.vn1 ?? null, sdx, sdth: th.sdX,
       mn, mn1, mnth: th.meanN, s2: sigma * sigma, bias: mn == null ? null : mn - sigma * sigma,
     };
-  }, onResults, 120);
+  }, onResults, 120, playing);
 
   const canvas = useCanvasLoop((f) => step(sim.current!, live.current, f), playing);
   const race = beat === 'race';

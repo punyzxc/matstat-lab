@@ -1,9 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { PALETTE } from './specs.mjs';
 import { dec, int, t, texDec } from '../../i18n-core';
 import { courtCases, errorsOf, phi, powerCurve, rejects, type Region } from './test-model.mjs';
 import { MathText } from '../../math';
-import { clamp01, ease, Label, lerp, rgba, useCanvasLoop, useThrottledReport, type FigureProps, type Frame } from './kit';
+import { clamp01, ease, Label, lerp, rgba, useCanvasLoop, useSteadyState, useThrottledReport, type FigureProps, type Frame } from './kit';
 
 /**
  * The hypothesis court (L12). One statistic U, two laws: N(0, 1) when H0 is true and N(δ, 1) when the true mean is a.
@@ -47,7 +47,7 @@ export function TestCourt({ beat, params, seed, hot, onHot, playing, reduced, ru
   }
   const live = useRef<Live>({ beat, hot, reduced, opts, cases, region: err.region, delta: err.delta, curve });
   live.current = { beat, hot, reduced, opts, cases, region: err.region, delta: err.delta, curve };
-  const [shown, setShown] = useState({ made: 0, hits: 0 });
+  const [shown, setShown] = useSteadyState({ made: 0, hits: 0 });
   const ucr = err.region.upper ?? -(err.region.lower ?? 0);
 
   useThrottledReport(() => {
@@ -57,7 +57,7 @@ export function TestCourt({ beat, params, seed, hot, onHot, playing, reduced, ru
     return {
       alpha, beta: err.beta, power: err.power, ucr, delta: err.delta, U: s.flying?.u ?? last, rej: s.made ? s.hits / s.made : null, count: s.made, a0: 0,
     };
-  }, onResults, 120);
+  }, onResults, 120, playing);
 
   const canvas = useCanvasLoop((f) => step(sim.current!, live.current, f), playing);
   const rate = shown.made ? shown.hits / shown.made : null;

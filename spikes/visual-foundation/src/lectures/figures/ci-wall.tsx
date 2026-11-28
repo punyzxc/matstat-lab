@@ -1,9 +1,9 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { MathText } from '../../math';
 import { PALETTE } from './specs.mjs';
 import { dec, int, t, texDec } from '../../i18n-core';
 import { intervalAt, type Interval } from './ci-model.mjs';
-import { clamp01, ease, easeInOut, Label, lerp, rgba, useCanvasLoop, useThrottledReport, type FigureProps, type Frame } from './kit';
+import { clamp01, ease, easeInOut, Label, lerp, rgba, useCanvasLoop, useSteadyState, useThrottledReport, type FigureProps, type Frame } from './kit';
 
 /**
  * The confidence interval wall (#112, L11). One sample falls onto the axis, collapses into its mean x̄, opens into
@@ -38,7 +38,7 @@ export function CiWall({ beat, params, seed, hot, onHot, playing, reduced, runKe
   const opts = { n, gamma, law, method, mu: MU, sigma: SIGMA, seed };
   const live = useRef({ beat, hot, reduced, opts });
   live.current = { beat, hot, reduced, opts };
-  const [shown, setShown] = useState({ count: 0, hits: 0, last: null as Interval | null });
+  const [shown, setShown] = useSteadyState({ count: 0, hits: 0, last: null as Interval | null });
 
   useThrottledReport(() => {
     const s = sim.current!, last = s.flying?.iv ?? s.made.at(-1) ?? null;
@@ -48,7 +48,7 @@ export function CiWall({ beat, params, seed, hot, onHot, playing, reduced, runKe
       cover: s.made.length ? s.hits / s.made.length : null, hits: s.hits, count: s.made.length,
       width: s.made.length ? s.width / s.made.length : null, xbar: last?.estimate ?? null, s: sd, t: last?.critical ?? null,
     };
-  }, onResults, 120);
+  }, onResults, 120, playing);
 
   const canvas = useCanvasLoop((f) => step(sim.current!, live.current, f), playing);
   const cover = shown.count ? shown.hits / shown.count : null;

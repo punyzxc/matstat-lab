@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { PALETTE } from './specs.mjs';
 import { int, plural, t, texDec } from '../../i18n-core';
 import { ksToNormal, phi, replicate, sourceOf, SOURCES, zSample, type Source } from './clt-model.mjs';
-import { clamp01, ease, easeInOut, Label, lerp, rgba, useCanvasLoop, useThrottledReport, type FigureProps, type Frame } from './kit';
+import { clamp01, ease, easeInOut, Label, lerp, rgba, useCanvasLoop, useSteadyState, useThrottledReport, type FigureProps, type Frame } from './kit';
 
 /**
  * The normal distribution factory (#111, L8). Terms fall from the source law into the machine, merge into a sum,
@@ -59,7 +59,7 @@ export function CltFactory({ beat, params, seed, hot, onHot, playing, reduced, r
       rug: [], rugAcc: 0, rugIndex: 0, beat, beatSince: 0, last: { sum: null, z: null },
     };
   }
-  const [shown, setShown] = useState<{ sum: number | null; z: number | null; ks: (number | null)[] }>({ sum: null, z: null, ks: [] });
+  const [shown, setShown] = useSteadyState<{ sum: number | null; z: number | null; ks: (number | null)[] }>({ sum: null, z: null, ks: [] });
   const props = { beat, hot, reduced, seed, src, n, p };
   const live = useRef(props);
   live.current = props;
@@ -76,7 +76,7 @@ export function CltFactory({ beat, params, seed, hot, onHot, playing, reduced, r
     }
     setShown({ sum: s.last.sum, z: s.last.z, ks: (s.race ?? []).map((l) => l.ks) });
     return { ks: m.ks, count: m.landed, sum: s.last.sum, zlast: s.last.z, mean: m.src.mean(p), sd: m.src.sd(p) };
-  }, onResults, 150);
+  }, onResults, 150, playing);
 
   const canvas = useCanvasLoop((f) => step(sim.current!, live.current, f), playing);
 
