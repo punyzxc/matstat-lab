@@ -76,6 +76,18 @@ function orbitPoint(s: Scene, node: (typeof craft)[number], angle: number): Poin
   };
 }
 
+/** #195: the width of an ASCII-art row depends only on the font; measured once per font, not every frame. */
+const widths = new Map<string, number>();
+function artWidthOf(ctx: CanvasRenderingContext2D, row: string, font: string) {
+  const key = font + '|' + row;
+  let w = widths.get(key);
+  if (w === undefined) {
+    w = ctx.measureText(row).width;
+    widths.set(key, w);
+  }
+  return w;
+}
+
 export function drawSatellites(ctx: CanvasRenderingContext2D, scene: Scene, front: boolean) {
   const { radius, width, height, time } = scene;
   ctx.save();
@@ -107,7 +119,7 @@ export function drawSatellites(ctx: CanvasRenderingContext2D, scene: Scene, fron
     const spacing = font * 0.99;
     ctx.font = '500 ' + font + 'px "IBM Plex Mono", monospace';
     ctx.textBaseline = 'top';
-    const artWidth = ctx.measureText(node.art[0]).width;
+    const artWidth = artWidthOf(ctx, node.art[0], ctx.font);
     const artHeight = node.art.length * spacing;
     const x = Math.max(3, Math.min(width - artWidth - 4, spacecraft.x - artWidth / 2));
     const y = Math.max(3, Math.min(height - artHeight - 14, spacecraft.y - artHeight / 2));

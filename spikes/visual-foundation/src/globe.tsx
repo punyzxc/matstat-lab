@@ -40,13 +40,31 @@ function buildLand() {
   return points;
 }
 const land = buildLand();
+/** #195: the land as flat arrays, so the per-frame loop reads numbers, not objects. */
+const LAND_N = land.length;
+const landX = Float32Array.from(land, (p) => p.x);
+const landY = Float32Array.from(land, (p) => p.y);
+const landZ = Float32Array.from(land, (p) => p.z);
+const landTone = Float32Array.from(land, (p) => p.tone);
+/** Lit land squares, collected per tone level and filled with one path each (x, y, side per square). */
+const byLevel = Array.from({ length: 8 }, () => ({ n: 0, v: new Float32Array(LAND_N * 3) }));
+
+/**
+ * The graticule as flat arrays, 4° between vertices (the chord of a 4° arc strays from the circle by r·(1 − cos 2°),
+ * a quarter of a pixel at r = 440), drawn as one path with one stroke.
+ */
 const graticule: Vector[][] = [];
 for (let lat = -75; lat < 90; lat += 15) {
-  graticule.push(Array.from({ length: 181 }, (_, i) => unit(lat, i * 2 - 180)));
+  graticule.push(Array.from({ length: 91 }, (_, i) => unit(lat, i * 4 - 180)));
 }
 for (let lon = -180; lon < 180; lon += 15) {
-  graticule.push(Array.from({ length: 91 }, (_, i) => unit(i * 2 - 90, lon)));
+  graticule.push(Array.from({ length: 46 }, (_, i) => unit(i * 4 - 90, lon)));
 }
+const gratX = Float32Array.from(graticule.flat(), (p) => p.x);
+const gratY = Float32Array.from(graticule.flat(), (p) => p.y);
+const gratZ = Float32Array.from(graticule.flat(), (p) => p.z);
+/** Index of the first vertex of each graticule line, plus the end. */
+const gratStart = graticule.reduce((a, row) => [...a, a[a.length - 1] + row.length], [0]);
 
 const stations = [
   { code: 'LON', p: unit(51.51, -0.13) },
@@ -74,6 +92,38 @@ const links = [
   [4, 5],
 ].map(([a, b]) => link(stations[a].p, stations[b].p));
 const tones = ['#505050', '#656565', '#7d7d7d', '#949494', '#a9a9a9', '#bfbfbf', '#d5d5d5', '#dddddd'];
+/**
+ * #195: the gradients of the static layers (the glow around the globe, the ocean disc and the station halo) depend
+ * only on the globe's place and radius, so they are made once per size and context and reused every frame. The glow
+ * is filled over its own square, not the whole canvas, and the halo gradient sits at the origin and is moved by a
+ * translate. Plain fills, no offscreen sprites: a sprite copied between an accelerated and an unaccelerated canvas
+ * costs a readback per frame.
+ */
+type Cache = { key: string; glow: CanvasGradient; ocean: CanvasGradient; halo: CanvasGradient };
+const caches = new WeakMap<CanvasRenderingContext2D, Cache>();
+const HALO = 10;
+function gradients(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number): Cache {
+  const key = `${cx}|${cy}|${r}`;
+  const hit = caches.get(ctx);
+  if (hit && hit.key === key) return hit;
+  const glow = ctx.createRadialGradient(cx - r * 0.15, cy - r * 0.12, r * 0.7, cx, cy, r * 1.38);
+  glow.addColorStop(0, 'rgba(141,141,141,0)');
+  glow.addColorStop(0.57, 'rgba(128,128,128,.095)');
+  glow.addColorStop(1, 'rgba(128,128,128,0)');
+  const ocean = ctx.createRadialGradient(cx - r * 0.37, cy - r * 0.47, r * 0.03, cx + r * 0.2, cy + r * 0.24, r * 1.24);
+  ocean.addColorStop(0, '#141414');
+  ocean.addColorStop(0.43, '#101010');
+  ocean.addColorStop(0.82, '#080808');
+  ocean.addColorStop(1, '#242424');
+  const halo = hit?.halo ?? ctx.createRadialGradient(0, 0, 0, 0, 0, HALO);
+  if (!hit) {
+    halo.addColorStop(0, 'rgba(245,245,245,.32)');
+    halo.addColorStop(1, 'rgba(245,245,245,0)');
+  }
+  const made = { key, glow, ocean, halo };
+  caches.set(ctx, made);
+  return made;
+}
 function paint(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -122,32 +172,40 @@ function paint(
     ctx.fillStyle = color;
     ctx.fill();
   }
-  const glow = ctx.createRadialGradient(cx - r * 0.15, cy - r * 0.12, r * 0.7, cx, cy, r * 1.38);
-  glow.addColorStop(0, 'rgba(141,141,141,0)');
-  glow.addColorStop(0.57, 'rgba(128,128,128,.095)');
-  glow.addColorStop(1, 'rgba(128,128,128,0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, w, h);
+  const cached = gradients(ctx, cx, cy, r);
+  // Beyond r·1.38 from the centre the glow is fully transparent: fill only its square.
+  const reach = r * 1.38;
+  ctx.fillStyle = cached.glow;
+  ctx.fillRect(cx - reach, cy - reach, 2 * reach, 2 * reach);
   const scene = { x: cx, y: cy, radius: r, width: w, height: h, time: seconds };
   drawStars(ctx, scene);
   drawSatellites(ctx, scene, false);
-  const ocean = ctx.createRadialGradient(
-    cx - r * 0.37,
-    cy - r * 0.47,
-    r * 0.03,
-    cx + r * 0.2,
-    cy + r * 0.24,
-    r * 1.24,
-  );
-  ocean.addColorStop(0, '#141414');
-  ocean.addColorStop(0.43, '#101010');
-  ocean.addColorStop(0.82, '#080808');
-  ocean.addColorStop(1, '#242424');
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, tau);
-  ctx.fillStyle = ocean;
+  ctx.fillStyle = cached.ocean;
   ctx.fill();
-  for (const row of graticule) path(row, 'rgba(172,172,172,.33)', 0.58);
+  ctx.beginPath();
+  for (let line = 0; line + 1 < gratStart.length; line++) {
+    let down = false;
+    for (let i = gratStart[line]; i < gratStart[line + 1]; i++) {
+      const px = gratX[i], py = gratY[i], pz = gratZ[i];
+      const depth = px * s + pz * c;
+      if (py * sp + depth * cp < 0) {
+        down = false;
+        continue;
+      }
+      const x = px * c - pz * s,
+        y = py * cp - depth * sp;
+      const qx = cx + r * (x * ct - y * st),
+        qy = cy - r * (x * st + y * ct);
+      if (down) ctx.lineTo(qx, qy);
+      else ctx.moveTo(qx, qy);
+      down = true;
+    }
+  }
+  ctx.strokeStyle = 'rgba(172,172,172,.33)';
+  ctx.lineWidth = 0.58;
+  ctx.stroke();
   const size = Math.max(0.69, r / 156);
   const breath = 0.1 * Math.sin(seconds * 0.65);
   if (surface === 'mesh') {
@@ -167,19 +225,39 @@ function paint(
     ctx.strokeStyle = 'rgba(195,195,195,.76)';
     ctx.stroke();
   } else {
-    let last = -1;
-    for (const p of land) {
-      const q = project(p);
-      if (q.z <= 0) continue;
-      const light =
-        0.34 + ((cx - q.x) / r) * 0.12 + ((cy - q.y) / r) * 0.22 + q.z * 0.42 + p.tone * 0.27 + breath * 0.2;
-      const level = Math.min(7, Math.max(0, Math.floor(light * 7)));
-      if (level !== last) {
-        ctx.fillStyle = tones[level];
-        last = level;
+    // #195: back-facing points are dropped before the rest of the projection, from flat arrays.
+    const k1 = -0.12 / r, k2 = -0.22 / r, base = 0.34 + (cx * 0.12 + cy * 0.22) / r + breath * 0.2;
+    // #195: back-facing points are dropped before the rest of the projection, from flat arrays; the lit squares
+    // are collected per tone level and filled as one path per level (8 fills instead of ~7,000 fillRects).
+    for (const b of byLevel) b.n = 0;
+    for (let i = 0; i < LAND_N; i++) {
+      const px = landX[i], py = landY[i], pz = landZ[i];
+      const depth = px * s + pz * c;
+      const qz = py * sp + depth * cp;
+      if (qz <= 0) continue;
+      const x = px * c - pz * s,
+        y = py * cp - depth * sp;
+      const qx = cx + r * (x * ct - y * st),
+        qy = cy - r * (x * st + y * ct);
+      const light = base + qx * k1 + qy * k2 + qz * 0.42 + landTone[i] * 0.27;
+      let level = (light * 7) | 0; // floor for light ≥ 0; below 0 it is clamped anyway
+      if (level < 0) level = 0;
+      else if (level > 7) level = 7;
+      const b = byLevel[level];
+      b.v[b.n++] = qx;
+      b.v[b.n++] = qy;
+      b.v[b.n++] = size * (0.6 + 0.52 * qz);
+    }
+    for (let level = 0; level < 8; level++) {
+      const b = byLevel[level];
+      if (!b.n) continue;
+      ctx.beginPath();
+      for (let j = 0; j < b.n; j += 3) {
+        const side = b.v[j + 2];
+        ctx.rect(b.v[j] - side / 2, b.v[j + 1] - side / 2, side, side);
       }
-      const side = size * (0.6 + 0.52 * q.z);
-      ctx.fillRect(q.x - side / 2, q.y - side / 2, side, side);
+      ctx.fillStyle = tones[level];
+      ctx.fill();
     }
   }
   ctx.beginPath();
@@ -199,10 +277,9 @@ function paint(
     const p = project(station.p);
     if (p.z < 0.09) return;
     const pulse = (seconds * 0.3 + i * 0.22) % 1;
-    const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 10);
-    halo.addColorStop(0, 'rgba(245,245,245,.32)');
-    halo.addColorStop(1, 'rgba(245,245,245,0)');
-    circle(p.x, p.y, 10, halo);
+    ctx.translate(p.x, p.y);
+    circle(0, 0, HALO, cached.halo);
+    ctx.translate(-p.x, -p.y);
     ctx.beginPath();
     ctx.arc(p.x, p.y, 3.1 + 5 * pulse, 0, tau);
     ctx.lineWidth = 0.7;
