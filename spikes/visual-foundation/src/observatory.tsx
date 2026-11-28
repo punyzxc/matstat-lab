@@ -138,6 +138,7 @@ export function Observatory({
                   create={earthPlate}
                   label={t('Earth point cloud with simulated orbital links and ASCII satellites', 'Облако точек Земли со смоделированными орбитальными связями и ASCII-спутниками')}
                   playing={animating}
+                  maxFps={overlay ? 10 : undefined}
                   mesh={false}
                   cue={0}
                 />

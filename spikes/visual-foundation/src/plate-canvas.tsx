@@ -20,6 +20,7 @@ export function PlateCanvas({
   playing,
   mesh,
   cue,
+  maxFps,
 }: {
   create: RendererFactory;
   fallback?: RendererFactory;
@@ -27,14 +28,16 @@ export function PlateCanvas({
   playing: boolean;
   mesh: boolean;
   cue: number;
+  /** #193: a cap on the frame rate, for a scene covered by a station or a lecture; the globe still turns. */
+  maxFps?: number;
 }) {
   const host = useRef<HTMLDivElement>(null);
-  const state = useRef({ playing, mesh, cue });
+  const state = useRef({ playing, mesh, cue, maxFps });
   const restart = useRef<() => void>(() => {});
   useEffect(() => {
-    state.current = { playing, mesh, cue };
+    state.current = { playing, mesh, cue, maxFps };
     restart.current();
-  }, [playing, mesh, cue]);
+  }, [playing, mesh, cue, maxFps]);
   useEffect(() => {
     const box = host.current!;
     let canvas = document.createElement('canvas');
@@ -69,20 +72,25 @@ export function PlateCanvas({
       frame.cue = state.current.cue;
       const start = performance.now();
       engine.draw(frame);
-      if (performance.now() - start > 24 && ++slowFrames > 4) interval = 64;
+      // Frames drawn, read by the e2e specs (a plain property, no DOM write).
+      (canvas as HTMLCanvasElement & { __frames?: number }).__frames = ((canvas as HTMLCanvasElement & { __frames?: number }).__frames ?? 0) + 1;
+      // #193: a capped (covered) globe is not a slow device; slow frames count only at the scene's own rate.
+      if (!state.current.maxFps && performance.now() - start > 24 && ++slowFrames > 4) interval = 64;
     }
     function loop(now: number) {
-      if (now - last >= interval || !last) {
+      const cap = state.current.maxFps ? 1000 / state.current.maxFps : 0;
+      // A few ms of slack: rAF ticks land on display frames, so a 100 ms cap must accept a 99.8 ms gap.
+      if (now - last >= Math.max(interval, cap - 4) || !last) {
         if (last) {
           const delta = now - last;
-          const step = Math.min(delta / 1000, 0.12);
+          const step = Math.min(delta / 1000, cap ? cap / 1000 + 0.02 : 0.12);
           frame.time += step;
           if (spin && !pointer) {
             frame.yaw += spin * step;
             spin *= Math.exp(-step * 2.6);
             if (Math.abs(spin) < 0.01) spin = 0;
           }
-          if (delta > 80 && ++slowFrames > 6) interval = 64;
+          if (!cap && delta > 80 && ++slowFrames > 6) interval = 64;
         }
         last = now;
         draw();
