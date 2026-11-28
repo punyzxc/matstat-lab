@@ -1,0 +1,4 @@
+/* Quality lowers the cost of existing translucent surfaces without altering their layout or backgrounds. */
+:root[data-quality-blur='off'] :is(.orbital-lab .orbital-legend, .orbital-lab .orbit-preview, .scene-dock--story, .story-portal-view, .scientist-card) {
+  backdrop-filter: none;
+}

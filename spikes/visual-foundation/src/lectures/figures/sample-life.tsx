@@ -227,7 +227,7 @@ const histPos = (g: Geo, i: number, st: ReturnType<typeof stacks>, linked: boole
 
 // ---------------------------------------------------------------- the frame
 function step(s: Sim, o: Live, f: Frame) {
-  const { ctx, w, h, dt } = f;
+  const { ctx, w, h, dt, particleStride } = f;
   s.clock += dt;
   if (o.beat !== s.beat) {
     s.beat = o.beat;
@@ -270,11 +270,11 @@ function step(s: Sim, o: Live, f: Frame) {
   };
   // backdrops
   if (linked) {
-    drawCloud(ctx, geo(o, QUAD.draw, w, h), true, fade);
+    drawCloud(ctx, geo(o, QUAD.draw, w, h), true, fade, particleStride);
     drawSeriesAxes(ctx, geo(o, QUAD.sort, w, h), fade);
     drawHist(ctx, geo(o, QUAD.hist, w, h), true, fade);
     drawEcdf(ctx, geo(o, QUAD.ecdf, w, h), false, fade);
-  } else if (o.beat === 'draw') drawCloud(ctx, main, false, 1);
+  } else if (o.beat === 'draw') drawCloud(ctx, main, false, 1, particleStride);
   else if (o.beat === 'sort') drawSeriesAxes(ctx, main, fade);
   else if (o.beat === 'table') drawTable(ctx, main, st, fade);
   else if (o.beat === 'hist') drawHist(ctx, main, false, fade);
@@ -372,14 +372,14 @@ function halo(ctx: Ctx, s: Sim, i: number) {
 }
 
 // ---------------------------------------------------------------- backdrops
-function drawCloud(ctx: Ctx, g: Geo, linked: boolean, alpha: number) {
+function drawCloud(ctx: Ctx, g: Geo, linked: boolean, alpha: number, particleStride: number) {
   const { o } = g, law = o.opts.law, pm = pdfMax(law, o.axis), base = cloudBase(g, linked), height = cloudHeight(g, linked);
   const [lo, hi] = o.axis, n = o.d.n;
   ctx.globalAlpha = alpha;
   if (!linked) {
     ctx.fillStyle = o.hot === 'N' ? 'rgba(244,244,242,0.5)' : 'rgba(244,244,242,0.26)';
     const { x, lift } = o.pop;
-    for (let j = n; j < x.length; j++) {
+    for (let j = n; j < x.length; j += particleStride) {
       if (x[j] < lo || x[j] > hi) continue;
       ctx.fillRect(g.vx(x[j]) - 0.8, base - lift[j] * (LAWS[law].pdf(x[j]) / pm) * height - 0.8, 1.6, 1.6);
     }

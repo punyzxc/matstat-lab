@@ -122,7 +122,7 @@ function step(s: Sim, o: Live, f: Frame) {
 
 type Box = { x0: number; x1: number; y0: number; y1: number };
 
-function drawPaths(s: Sim, o: Live, { ctx, w, h }: Frame, b: Box) {
+function drawPaths(s: Sim, o: Live, { ctx, w, h, particleStride }: Frame, b: Box) {
   const { c, opts, hot } = o, lN = Math.log10(opts.N);
   const span = c.cauchy ? 4 : Math.max(3 * opts.eps, 2.5 * c.sd);
   const X = (n: number) => w * lerp(b.x0, b.x1, Math.log10(n) / lN);
@@ -157,14 +157,14 @@ function drawPaths(s: Sim, o: Live, { ctx, w, h }: Frame, b: Box) {
     if (j + 1 < c.ns.length && frac > 0) ctx.lineTo(X(lerp(c.ns[j], c.ns[j + 1], frac)), Y(lerp(y[j], y[j + 1], frac)));
     ctx.stroke();
   };
-  for (let p = 1; p < M; p++) {
+  for (let p = particleStride; p < M; p += particleStride) {
     const out = Math.abs(c.paths[p][j] - c.a) >= opts.eps;
     path(c.paths[p], out ? `rgba(255,138,107,${alpha + 0.1})` : `rgba(244,244,242,${alpha})`, 1);
   }
   path(c.paths[0], hot === 'xbar' ? '#ffffff' : PALETTE.violet, 2);
-  // the front: dots for every path at the current n
+  // the front: dots for the visible paths at the current n
   const n = c.ns[j];
-  for (let p = 0; p < M; p++) {
+  for (let p = 0; p < M; p += particleStride) {
     const out = Math.abs(c.paths[p][j] - c.a) >= opts.eps;
     ctx.fillStyle = out ? PALETTE.coral : p === 0 ? PALETTE.violet : 'rgba(244,244,242,0.8)';
     ctx.beginPath();
@@ -222,7 +222,7 @@ function drawShare(s: Sim, o: Live, { ctx, w, h }: Frame, b: Box, big: boolean) 
   }
 }
 
-function drawTail(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
+function drawTail(s: Sim, o: Live, { ctx, w, h, dt, particleStride }: Frame) {
   const { draws, opts, hot } = o, law = opts.law, { a, sd, cauchy } = centreOf(law);
   // draws arrive slowly at first, then in a flood
   if (o.reduced) s.drawn = draws.length;
@@ -254,7 +254,7 @@ function drawTail(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
   }
   // the latest draws as falling sparks
   const shownNow = Math.min(s.drawn, 6);
-  for (let q = 0; q < shownNow; q++) {
+  for (let q = 0; q < shownNow; q += particleStride) {
     const v = draws[s.drawn - 1 - q];
     if (v < lo || v >= hi) continue;
     ctx.fillStyle = cut(v) ? PALETTE.coral : PALETTE.ink;

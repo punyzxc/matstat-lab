@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { MathText } from '../../math';
+import { renderStride, useQualityProfile } from '../../quality';
 
 /** What every live lecture figure receives from the story player. */
 export type FigureProps = {
@@ -17,7 +18,7 @@ export type FigureProps = {
   onResults: (r: Record<string, number | null>) => void;
 };
 
-export type Frame = { ctx: CanvasRenderingContext2D; w: number; h: number; dt: number; now: number };
+export type Frame = { ctx: CanvasRenderingContext2D; w: number; h: number; dt: number; now: number; particleStride: number };
 
 /** Frames drawn by one figure canvas, read by the e2e specs (`canvas.__frames`); a plain property, no DOM write. */
 type CountedCanvas = HTMLCanvasElement & { __frames?: number };
@@ -35,7 +36,10 @@ export function useCanvasLoop(frame: (f: Frame) => void, running: boolean) {
   draw.current = frame;
   const run = useRef(running);
   run.current = running;
-  const control = useRef<{ wake: () => void; still: () => void } | null>(null);
+  const quality = useQualityProfile();
+  const currentQuality = useRef(quality);
+  currentQuality.current = quality;
+  const control = useRef<{ wake: () => void; still: () => void; resize: () => void } | null>(null);
   useEffect(() => {
     const el = canvas.current! as CountedCanvas;
     const ctx = el.getContext('2d')!;
@@ -44,7 +48,7 @@ export function useCanvasLoop(frame: (f: Frame) => void, running: boolean) {
     const live = () => run.current && !document.hidden && inView;
     const size = () => {
       const r = el.getBoundingClientRect();
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const dpr = Math.min(currentQuality.current.dprCap, window.devicePixelRatio || 1);
       w = r.width;
       h = r.height;
       el.width = Math.max(1, Math.round(w * dpr));
@@ -54,10 +58,14 @@ export function useCanvasLoop(frame: (f: Frame) => void, running: boolean) {
     const tick = (now: number) => {
       raf = 0;
       const moving = live();
+      if (moving && last && now - last < currentQuality.current.frameMs - 0.5) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
       const dt = moving && last ? Math.min(0.1, (now - last) / 1000) : 0;
       last = moving ? now : 0;
       ctx.clearRect(0, 0, w, h);
-      if (w > 0 && h > 0) draw.current({ ctx, w, h, dt, now });
+      if (w > 0 && h > 0) draw.current({ ctx, w, h, dt, now, particleStride: renderStride(currentQuality.current.particleScale) });
       el.__frames = (el.__frames ?? 0) + 1;
       if (moving) raf = requestAnimationFrame(tick);
     };
@@ -66,9 +74,10 @@ export function useCanvasLoop(frame: (f: Frame) => void, running: boolean) {
     const still = () => {
       if (!live() && raf) { cancelAnimationFrame(raf); raf = 0; last = 0; }
     };
-    control.current = { wake, still };
+    const resize = () => { size(); wake(); };
+    control.current = { wake, still, resize };
     size();
-    const ro = new ResizeObserver(() => { size(); wake(); });
+    const ro = new ResizeObserver(resize);
     ro.observe(el);
     const io = new IntersectionObserver((entries) => {
       inView = entries.at(-1)!.isIntersecting;
@@ -86,6 +95,7 @@ export function useCanvasLoop(frame: (f: Frame) => void, running: boolean) {
       control.current = null;
     };
   }, []);
+  useEffect(() => { control.current?.resize(); }, [quality]);
   // Play starts the loop; Pause stops it after the frame in flight. While stopped, every re-render paints once.
   useEffect(() => {
     const c = control.current;

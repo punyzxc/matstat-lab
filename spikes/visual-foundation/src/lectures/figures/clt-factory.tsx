@@ -135,7 +135,7 @@ const srcFrac = (src: Source, x: number) => {
 type Live = { beat: string; hot: string | null; reduced: boolean; seed: number; src: Source; n: number; p: number };
 
 /** Advance the simulation by dt and draw it. */
-function step(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
+function step(s: Sim, o: Live, { ctx, w, h, dt, particleStride }: Frame) {
   if (s.beat !== o.beat) {
     s.beat = o.beat;
     s.beatSince = s.clock;
@@ -181,7 +181,7 @@ function step(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
   // ---- layout
   const L = layout(w, h, o.src);
   const dimMachine = o.beat === 'source', dimHist = o.beat === 'source' || slow;
-  drawSource(ctx, L, o, s);
+  drawSource(ctx, L, o, s, particleStride);
   drawMachine(ctx, L, o, s.n, dimMachine);
   drawHistogram(ctx, L, m, o, dimHist ? 0.32 : 1, o.beat === 'normal' ? clamp01(sinceBeat / (o.reduced ? 0.001 : 1.3)) : 0);
 
@@ -195,7 +195,9 @@ function step(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
       continue;
     }
     keep.push(f);
-    drawFlight(ctx, L, f, o.reduced && f.slow ? SLOW.merge + 0.05 : age, o);
+    if (f.slow || f.r % particleStride === 0) {
+      drawFlight(ctx, L, f, o.reduced && f.slow ? SLOW.merge + 0.05 : age, o);
+    }
   }
   s.flights = keep;
 }
@@ -225,7 +227,7 @@ function layout(w: number, h: number, src: Source) {
   };
 }
 
-function drawSource(ctx: CanvasRenderingContext2D, L: Layout, o: Live, s: Sim) {
+function drawSource(ctx: CanvasRenderingContext2D, L: Layout, o: Live, s: Sim, particleStride: number) {
   const { src, p } = o;
   const hotX = o.hot === 'X', hotA = o.hot === 'a' || o.hot === 'sigma';
   const H = L.srcBase - L.srcTop;
@@ -279,7 +281,8 @@ function drawSource(ctx: CanvasRenderingContext2D, L: Layout, o: Live, s: Sim) {
     ctx.stroke();
   }
   // single draws raining onto the axis
-  for (const d of s.rug) {
+  for (let i = s.rug.length - 1; i >= 0; i -= particleStride) {
+    const d = s.rug[i];
     const age = s.clock - d.born, f = ease(age / 0.6);
     const x = L.srcX(d.x) + (src.discrete ? ((d.born * 997) % 1 - 0.5) * 22 : 0);
     const y = lerp(L.srcTop - 10, L.srcBase - 3, f);

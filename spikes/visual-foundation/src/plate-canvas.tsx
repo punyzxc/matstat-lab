@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { t } from './i18n';
+import { renderStride, useQualityProfile } from './quality';
 
 export type Frame = {
   width: number;
@@ -9,6 +10,7 @@ export type Frame = {
   yaw: number;
   mesh: boolean;
   cue: number;
+  particleStride: number;
 };
 export type Renderer = { draw: (frame: Frame) => void; dispose?: () => void };
 export type RendererFactory = (canvas: HTMLCanvasElement) => Renderer | null;
@@ -35,12 +37,17 @@ export function PlateCanvas({
   maxFps?: number;
 }) {
   const host = useRef<HTMLDivElement>(null);
+  const quality = useQualityProfile();
+  const renderQuality = useRef(quality);
+  renderQuality.current = quality;
   const state = useRef({ playing, mesh, cue, maxFps });
   const restart = useRef<() => void>(() => {});
+  const resizePlate = useRef<() => void>(() => {});
   useEffect(() => {
     state.current = { playing, mesh, cue, maxFps };
     restart.current();
   }, [playing, mesh, cue, maxFps]);
+  useEffect(() => { resizePlate.current(); }, [quality]);
   useEffect(() => {
     const box = host.current!;
     let canvas = document.createElement('canvas');
@@ -59,13 +66,9 @@ export function PlateCanvas({
     canvas.setAttribute('role', 'img');
     canvas.setAttribute('aria-label', label);
     box.append(canvas);
-    const small = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4;
-    const frame: Frame = { width: 0, height: 0, dpr: 1, time: 0, yaw: 0, mesh: false, cue };
-    let raf = 0,
-      last = 0,
-      visible = true,
-      slowFrames = 0;
-    let interval = small ? 45 : 32;
+    const frame: Frame = { width: 0, height: 0, dpr: 1, time: 0, yaw: 0, mesh: false, cue, particleStride: 1 };
+    let raf = 0, last = 0, visible = true;
+    let fallbackInterval = 0;
     let pointer: { id: number; start: number; yaw: number; x: number; t: number } | null = null;
     // A released drag keeps a little spin that eases out, so a nudge feels physical.
     let spin = 0;
@@ -73,17 +76,19 @@ export function PlateCanvas({
       if (!frame.width || !frame.height) return;
       frame.mesh = state.current.mesh;
       frame.cue = state.current.cue;
-      const start = performance.now();
+      frame.particleStride = renderStride(renderQuality.current.particleScale);
       engine.draw(frame);
       // Frames drawn, read by the e2e specs (a plain property, no DOM write).
       (canvas as HTMLCanvasElement & { __frames?: number }).__frames = ((canvas as HTMLCanvasElement & { __frames?: number }).__frames ?? 0) + 1;
-      // #193: a capped (covered) globe is not a slow device; slow frames count only at the scene's own rate.
-      if (!state.current.maxFps && performance.now() - start > 24 && ++slowFrames > 4) interval = 64;
     }
     function loop(now: number) {
-      const cap = state.current.maxFps ? 1000 / state.current.maxFps : 0;
-      // A few ms of slack: rAF ticks land on display frames, so a 100 ms cap must accept a 99.8 ms gap.
-      if (now - last >= Math.max(interval, cap - 4) || !last) {
+      const profile = renderQuality.current;
+      const maxFps = state.current.maxFps;
+      // Behind an open dock the low profile still rotates the Earth, with fewer canvas paints.
+      const cap = maxFps ? 1000 / (profile.level === 'low' ? Math.min(5, maxFps) : maxFps) : 0;
+      const interval = Math.max(profile.frameMs, cap, fallbackInterval);
+      // Browser rAF timestamps are rounded, so a 100 ms cap needs to accept a 99.9 ms gap.
+      if (now - last >= interval - 0.5 || !last) {
         if (last) {
           const delta = now - last;
           const step = Math.min(delta / 1000, cap ? cap / 1000 + 0.02 : 0.12);
@@ -93,7 +98,6 @@ export function PlateCanvas({
             spin *= Math.exp(-step * 2.6);
             if (Math.abs(spin) < 0.01) spin = 0;
           }
-          if (!cap && delta > 80 && ++slowFrames > 6) interval = 64;
         }
         last = now;
         draw();
@@ -112,7 +116,7 @@ export function PlateCanvas({
       frame.width = rect.width;
       frame.height = rect.height;
       // #195: the backing store is capped at MAX_PIXELS whatever the viewport; the DPR gives way first.
-      const wanted = Math.min(devicePixelRatio || 1, small ? 1.25 : 1.75);
+      const wanted = Math.min(devicePixelRatio || 1, renderQuality.current.dprCap);
       frame.dpr = Math.max(0.5, Math.min(wanted, Math.sqrt(MAX_PIXELS / Math.max(1, rect.width * rect.height)) * 0.999));
       canvas.width = Math.max(1, Math.round(rect.width * frame.dpr));
       canvas.height = Math.max(1, Math.round(rect.height * frame.dpr));
@@ -157,7 +161,7 @@ export function PlateCanvas({
       engine.dispose?.();
       engine = cpu;
       canvas = replacement;
-      interval = 55;
+      fallbackInterval = 55;
       resize();
     }
     canvas.addEventListener('webglcontextlost', contextLost);
@@ -174,9 +178,11 @@ export function PlateCanvas({
     box.addEventListener('lostpointercapture', up);
     box.addEventListener('keydown', key);
     restart.current = refresh;
+    resizePlate.current = resize;
     resize();
     return () => {
       restart.current = () => {};
+      resizePlate.current = () => {};
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       viewObserver.disconnect();

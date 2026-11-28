@@ -3,6 +3,7 @@ import { MathText } from './math';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import './style.css';
+import './quality.css';
 import './i18n-tables';
 import { StrictMode, useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -19,6 +20,7 @@ import { findLecture, LectureList, LecturePlayer } from './lectures/player';
 import { SceneDock } from './stations/station-dock';
 import { lectureText, t, useLang } from './i18n';
 import { initialSettings, sources, type Distribution, type RunSettings } from './statistics.ts';
+import { useAdaptiveQuality } from './quality';
 
 /** Legacy stations take `n` (sample size), `scale` and `dist` (0 normal, 1 uniform, 2 exponential) from the hash, clamped to their sliders. */
 const distributions = Object.keys(sources) as Distribution[];
@@ -63,6 +65,7 @@ const readOrbit = (): OrbitId => {
 
 /** The program: one scene. The URL hash decides which orbit is shown and what is open inside the scene. */
 function StationApp() {
+  useAdaptiveQuality();
   const lang = useLang();
   const [route, setRoute] = useState<Route>(() => parseRoute(window.location.hash));
   const [orbit, setOrbit] = useState<OrbitId>(() => {

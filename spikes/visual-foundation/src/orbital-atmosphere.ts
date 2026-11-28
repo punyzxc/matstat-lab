@@ -45,13 +45,14 @@ function cross(ctx: CanvasRenderingContext2D, x: number, y: number, length: numb
   ctx.lineTo(x, y + length);
   ctx.stroke();
 }
-export function drawStars(ctx: CanvasRenderingContext2D, s: Scene) {
+export function drawStars(ctx: CanvasRenderingContext2D, s: Scene, particleStride = 1) {
   const { width, height, time } = s;
   ctx.save();
   ctx.fillStyle = '#eaeaea';
   ctx.strokeStyle = '#e1e1e1';
   ctx.lineWidth = 0.65;
-  for (const star of stars) {
+  for (let i = 0; i < stars.length; i += particleStride) {
+    const star = stars[i];
     const x = star.x * width,
       y = star.y * height;
     const shimmer = 0.5 + 0.5 * Math.sin(star.phase + time * 0.71);

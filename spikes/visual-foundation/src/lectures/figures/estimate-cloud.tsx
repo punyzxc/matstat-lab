@@ -141,7 +141,7 @@ function commit(s: Sim, o: Live, e: Estimates) {
 }
 const next = (s: Sim, o: Live) => estimatesAt({ ...o.opts, r: s.made.length + (s.flying ? 1 : 0) });
 
-function step(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
+function step(s: Sim, o: Live, { ctx, w, h, dt, particleStride }: Frame) {
   s.clock += dt;
   if (o.reduced) {
     while (s.made.length < R) commit(s, o, next(s, o));
@@ -170,7 +170,7 @@ function step(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
     const meanK = easeInOut((age - CYCLE.fall) / (CYCLE.mean - CYCLE.fall));
     const dropK = easeInOut((age - CYCLE.mean) / (CYCLE.drop - CYCLE.mean));
     const race = o.beat === 'race';
-    for (let i = 0; i < k; i++) {
+    for (let i = 0; i < k; i += particleStride) {
       const fall = ease((age - (i * 0.6) / k) / 0.4);
       if (fall <= 0) continue;
       const x = lerp(X(clampTo(e.sample[i], span)), X(clampTo(e.mean, span)), race ? 0 : meanK);
@@ -199,11 +199,11 @@ function step(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
   }
 
   if (o.beat === 'race') drawRace(s, o, ctx, w, h, dt);
-  else drawCloud(s, o, ctx, w, h, X);
+  else drawCloud(s, o, ctx, w, h, X, particleStride);
   ctx.restore();
 }
 
-function drawCloud(s: Sim, o: Live, ctx: CanvasRenderingContext2D, w: number, h: number, X: (x: number) => number) {
+function drawCloud(s: Sim, o: Live, ctx: CanvasRenderingContext2D, w: number, h: number, X: (x: number) => number, particleStride: number) {
   const { n, sigma } = o.opts, span = SPAN * sigma, sd = sigma / Math.sqrt(n);
   const base = h * 0.6, top = h * 0.3;
   const binW = (2 * span) / CLOUD_BINS, px = (X(span) - X(-span)) / CLOUD_BINS;
@@ -263,7 +263,7 @@ function drawCloud(s: Sim, o: Live, ctx: CanvasRenderingContext2D, w: number, h:
     // a ladder row shows as many sample means as the cloud has, up to its size
     const shown = Math.min(o.ladder[i].length, Math.max(cur ? 0 : 24, s.made.length));
     ctx.fillStyle = cur ? rgba(PALETTE.signal, 0.85) : rgba(PALETTE.violet, 0.5);
-    for (let r = 0; r < shown; r++) {
+    for (let r = 0; r < shown; r += particleStride) {
       const jit = ((r * 0.6180339887) % 1) - 0.5;
       ctx.fillRect(X(clampTo(o.ladder[i][r], span)) - 1, y + jit * rowH * 0.6 - 1, 2, 2);
     }

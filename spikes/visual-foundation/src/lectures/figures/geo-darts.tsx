@@ -125,7 +125,7 @@ function square(w: number, h: number) {
   return { x: w * SQ.x0, y: h * SQ.y0, side };
 }
 
-function drawAdditive(s: Sim, o: Live, { ctx, w, h }: Frame) {
+function drawAdditive(s: Sim, o: Live, { ctx, w, h, particleStride }: Frame) {
   const { a, b } = o.opts, { xs, ys } = o.data.d1, hot = o.hot;
   const S = square(w, h), X = (v: number) => S.x + v * S.side, Y = (v: number) => S.y + (1 - v) * S.side;
   ctx.fillStyle = rgba(PALETTE.coral, hot === 'pA' ? 0.22 : 0.1);
@@ -140,7 +140,7 @@ function drawAdditive(s: Sim, o: Live, { ctx, w, h }: Frame) {
   if (a > 0) small(ctx, 'A', X(a / 2), Y(0) + 20, 'center', PALETTE.coral, 15);
   if (b > 0) small(ctx, 'B', X(1 - b / 2), Y(0) + 20, 'center', PALETTE.violet, 15);
   const from = Math.max(0, s.count - SHOW_DARTS);
-  for (let k = from; k < s.count; k++) {
+  for (let k = from; k < s.count; k += particleStride) {
     const p = inA(xs[k], a), q = inB(xs[k], b);
     ctx.fillStyle = p && q ? PALETTE.signal : p ? PALETTE.coral : q ? PALETTE.violet : 'rgba(244,244,242,0.35)';
     ctx.fillRect(X(xs[k]) - 1, Y(ys[k]) - 1, 2.2, 2.2);
@@ -173,7 +173,7 @@ function drawAdditive(s: Sim, o: Live, { ctx, w, h }: Frame) {
   small(ctx, '0', x1 - 16, base + 4, 'right');
 }
 
-function drawSquare(s: Sim, o: Live, { ctx, w, h }: Frame) {
+function drawSquare(s: Sim, o: Live, { ctx, w, h, particleStride }: Frame) {
   const { xs, ys } = o.data.d0;
   const S = square(w, h), X = (v: number) => S.x + v * S.side, Y = (v: number) => S.y + (1 - v) * S.side;
   ctx.fillStyle = rgba(PALETTE.signal, 0.06);
@@ -189,7 +189,7 @@ function drawSquare(s: Sim, o: Live, { ctx, w, h }: Frame) {
   ctx.arc(X(0), Y(0), S.side, -Math.PI / 2, 0);
   ctx.stroke();
   const from = Math.max(0, s.count - SHOW_DARTS);
-  for (let k = from; k < s.count; k++) {
+  for (let k = from; k < s.count; k += particleStride) {
     const inside = xs[k] * xs[k] + ys[k] * ys[k] <= 1;
     ctx.fillStyle = inside ? rgba(PALETTE.signal, 0.85) : 'rgba(244,244,242,0.35)';
     ctx.fillRect(X(xs[k]) - 1, Y(ys[k]) - 1, 2.2, 2.2);
@@ -198,7 +198,7 @@ function drawSquare(s: Sim, o: Live, { ctx, w, h }: Frame) {
   trace(ctx, s, o.data.dartPi, q.pi, { x0: w * 0.66, x1: w * 0.95, top: h * 0.58, base: h * 0.9 }, o.opts.N, 0.6);
 }
 
-function drawNeedles(s: Sim, o: Live, { ctx, w, h }: Frame) {
+function drawNeedles(s: Sim, o: Live, { ctx, w, h, particleStride }: Frame) {
   const nd = o.data.nd, d = nd.d, half = nd.l / 2;
   const bw = w * 0.56, bh = h * 0.46, x0 = w * 0.05, y0 = h * 0.13;
   const sx = bw / (BOARD.width * d), sy = bh / (BOARD.strips * d), sc = Math.min(sx, sy);
@@ -207,7 +207,7 @@ function drawNeedles(s: Sim, o: Live, { ctx, w, h }: Frame) {
   ctx.lineWidth = 1;
   for (let j = 0; j <= BOARD.strips; j++) { ctx.beginPath(); ctx.moveTo(X(0), Y(j * d) + 0.5); ctx.lineTo(X(BOARD.width * d), Y(j * d) + 0.5); ctx.stroke(); }
   const from = Math.max(0, s.count - SHOW_NEEDLES);
-  for (let k = from; k < s.count; k++) {
+  for (let k = from; k < s.count; k += particleStride) {
     const age = (s.count - 1 - k) / SHOW_NEEDLES, c = Math.cos(nd.theta[k]) * half, sn = Math.sin(nd.theta[k]) * half;
     ctx.strokeStyle = nd.hit[k] ? rgba(PALETTE.coral, 1 - age * 0.7) : `rgba(244,244,242,${0.75 - age * 0.55})`;
     ctx.lineWidth = nd.hit[k] ? 1.8 : 1.2;
@@ -220,7 +220,7 @@ function drawNeedles(s: Sim, o: Live, { ctx, w, h }: Frame) {
   trace(ctx, s, o.data.needlePi, cr.pi, { x0: w * 0.05, x1: w * 0.95, top: h * 0.71, base: h * 0.93 }, o.opts.N, 1);
 }
 
-function drawChords(s: Sim, o: Live, { ctx, w, h }: Frame) {
+function drawChords(s: Sim, o: Live, { ctx, w, h, particleStride }: Frame) {
   const r = Math.min(w * 0.13, h * 0.24), cy = h * 0.47, hot = o.hot;
   const ids = ['radius', 'endpoints', 'midpoint'];
   o.data.ch.forEach((c, j) => {
@@ -236,7 +236,7 @@ function drawChords(s: Sim, o: Live, { ctx, w, h }: Frame) {
     for (let v = 0; v <= 3; v++) { const t = -Math.PI / 2 + (v * 2 * Math.PI) / 3; v ? ctx.lineTo(cx + r * Math.cos(t), cy + r * Math.sin(t)) : ctx.moveTo(cx + r * Math.cos(t), cy + r * Math.sin(t)); }
     ctx.stroke();
     const from = Math.max(0, s.count - SHOW_CHORDS);
-    for (let k = from; k < s.count; k++) {
+    for (let k = from; k < s.count; k += particleStride) {
       const age = (s.count - 1 - k) / SHOW_CHORDS, e = c.ends;
       ctx.strokeStyle = c.long[k] ? rgba(PALETTE.signal, (hot === ids[j] ? 1 : 0.85) - age * 0.6) : `rgba(244,244,242,${0.4 - age * 0.3})`;
       ctx.lineWidth = c.long[k] ? 1.4 : 1;

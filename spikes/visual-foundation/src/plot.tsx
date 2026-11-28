@@ -1,12 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { histogram, sources, type RunSettings } from './statistics.ts';
 import { dec, t, useLang } from './i18n';
+import { useQualityProfile } from './quality';
 
 type Mode = 'histogram' | 'ecdf';
 
 export function Plot({ sample, settings, mode, showTheory, densityPeak }: { sample: number[]; settings: RunSettings; mode: Mode; showTheory: boolean; densityPeak: number }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const lang = useLang();
+  const { dprCap } = useQualityProfile();
 
   useEffect(() => {
     const element = canvas.current;
@@ -17,7 +19,7 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
       const width = element.clientWidth;
       const height = element.clientHeight;
       if (width <= 0 || height <= 0) return;
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const ratio = Math.min(window.devicePixelRatio || 1, dprCap);
       element.width = Math.round(width * ratio);
       element.height = Math.round(height * ratio);
       ctx.scale(ratio, ratio);
@@ -120,7 +122,7 @@ export function Plot({ sample, settings, mode, showTheory, densityPeak }: { samp
     observer.observe(element);
     draw();
     return () => observer.disconnect();
-  }, [sample, settings, mode, showTheory, densityPeak, lang]);
+  }, [sample, settings, mode, showTheory, densityPeak, dprCap, lang]);
 
   return <canvas className="plot-canvas" ref={canvas} role="img"
     aria-label={mode === 'ecdf' ? t('Empirical cumulative distribution, P(X ≤ x)', 'Эмпирическая функция распределения, P(X ≤ x)') : t('Histogram of observations, normalized as density', 'Гистограмма наблюдений, нормированная как плотность')} />;
