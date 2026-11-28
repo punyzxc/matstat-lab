@@ -13,9 +13,9 @@ The production identifiers below are draft PRD task IDs. GitHub issues will be c
 
 ## Functional queue
 
-- GredesCerber can claim [#13](https://github.com/punyzxc/matstat-lab/issues/13) for distributions and independent numerical references.
-- Jumalinova can claim [#14](https://github.com/punyzxc/matstat-lab/issues/14) for worker execution and convergence after handing off #12.
-- The other three slots are [#15 inference](https://github.com/punyzxc/matstat-lab/issues/15), [#4 research data](https://github.com/punyzxc/matstat-lab/issues/4), and [#6 independent QA](https://github.com/punyzxc/matstat-lab/issues/6).
+- GredesCerber can claim [#13](https://github.com/GredesCerber/matstat-lab/issues/13) for distributions and independent numerical references.
+- Jumalinova can claim [#14](https://github.com/GredesCerber/matstat-lab/issues/14) for worker execution and convergence after handing off #12.
+- The other three slots are [#15 inference](https://github.com/GredesCerber/matstat-lab/issues/15), [#4 research data](https://github.com/GredesCerber/matstat-lab/issues/4), and [#6 independent QA](https://github.com/GredesCerber/matstat-lab/issues/6).
 - GitHub confirmed write access for GredesCerber and Jumalinova and admin access for punyzxc at planning time. Invites for pluxha and adekin06 are pending. The remaining login is unconfirmed. Assign each open stream to an eligible participant when the roster and capacity are confirmed.
 
 ## Production gate

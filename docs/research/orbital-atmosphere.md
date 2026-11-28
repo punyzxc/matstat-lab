@@ -1,6 +1,6 @@
 # Orbital atmosphere: transparent glyphs, separate motion, protected instruments
 
-**Fact — scope:** this answers [issue #12](https://github.com/punyzxc/matstat-lab/issues/12), a Discovery study assigned to @Jumalinova. The deliverable is this document, an isolated [compositing spike](../../spikes/orbital-atmosphere/), and desktop/mobile evidence. This is a proposal, not an agreed team decision or product implementation.
+**Fact — scope:** this answers [issue #12](https://github.com/GredesCerber/matstat-lab/issues/12), a Discovery study assigned to @Jumalinova. The deliverable is this document, an isolated [compositing spike](../../spikes/orbital-atmosphere/), and desktop/mobile evidence. This is a proposal, not an agreed team decision or product implementation.
 
 ## Findings from primary sources
 
@@ -22,7 +22,7 @@
 4. Draw visible front-depth craft and low-amplitude beacon pulses.
 5. Leave the DOM instruments and controls above all decorative painting.
 
-**Fact — transparent sprites:** the [glyph renderer](../../spikes/orbital-atmosphere/model.mjs) uses text rows, without a rectangle, highlight, shadow panel or backdrop behind a satellite. A recording-context test fails if sprite drawing invokes a fill/clear rectangle or filled path. This tests an alternative to the backed glyph treatment in the [reference prototype](https://github.com/punyzxc/matstat-lab/blob/9e2c19bfacdef4d303114dff7ca8258cbe5e1d1f/spikes/visual-foundation/src/orbital-atmosphere.ts).
+**Fact — transparent sprites:** the [glyph renderer](../../spikes/orbital-atmosphere/model.mjs) uses text rows, without a rectangle, highlight, shadow panel or backdrop behind a satellite. A recording-context test fails if sprite drawing invokes a fill/clear rectangle or filled path. This tests an alternative to the backed glyph treatment in the [reference prototype](https://github.com/GredesCerber/matstat-lab/blob/9e2c19bfacdef4d303114dff7ca8258cbe5e1d1f/spikes/visual-foundation/src/orbital-atmosphere.ts).
 
 **Fact — controls stay independent:** the canvas is decorative and cannot receive pointer events. All six instrument links, keyboard resampling, globe rotation and globe zoom remain operable while decorative time is stopped. The scientific sample generator uses a separate PRNG instance. [Browser checker](../../spikes/orbital-atmosphere/browser-check.mjs).
 
@@ -32,7 +32,7 @@
 
 ## Boundary with #11 and #5
 
-**Fact — ownership:** [#11](https://github.com/punyzxc/matstat-lab/issues/11) owns orbital projection and collision rules; [#5](https://github.com/punyzxc/matstat-lab/issues/5) owns the final art catalog. This spike uses invented screen-space keyframes and original sample glyphs. It does not calculate orbital elements, displace another owner's coordinates, create a shared contract, or edit the integrated prototype in [PR #9](https://github.com/punyzxc/matstat-lab/pull/9).
+**Fact — ownership:** [#11](https://github.com/GredesCerber/matstat-lab/issues/11) owns orbital projection and collision rules; [#5](https://github.com/GredesCerber/matstat-lab/issues/5) owns the final art catalog. This spike uses invented screen-space keyframes and original sample glyphs. It does not calculate orbital elements, displace another owner's coordinates, create a shared contract, or edit the integrated prototype in [PR #9](https://github.com/GredesCerber/matstat-lab/pull/9).
 
 **Assumption — suggested renderer input for later coordination, not an approved contract:**
 

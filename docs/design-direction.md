@@ -16,14 +16,14 @@ The visual Discovery iteration is paused. The product owner keeps the visual wor
 
 Kept for history only. These assignments are no longer active.
 
-[PR #9](https://github.com/punyzxc/matstat-lab/pull/9) carried the integrated prototype.
+[PR #9](https://github.com/GredesCerber/matstat-lab/pull/9) carried the integrated prototype.
 
 | Issue | Research output | Area |
 | --- | --- | --- |
-| [#11](https://github.com/punyzxc/matstat-lab/issues/11) | Earth composition, slot and orbital projection algorithms | web (paused) |
-| [#12](https://github.com/punyzxc/matstat-lab/issues/12) | Compositing glyphs, stars, beacons and satellite sprites | web (study delivered in PR #17) |
-| [#2](https://github.com/punyzxc/matstat-lab/issues/2) | Reusable module windows and entry states | design |
-| [#3](https://github.com/punyzxc/matstat-lab/issues/3) | Motion language and interruption rules | web |
-| [#5](https://github.com/punyzxc/matstat-lab/issues/5) | Scientific graphics, HUD and ASCII | design |
+| [#11](https://github.com/GredesCerber/matstat-lab/issues/11) | Earth composition, slot and orbital projection algorithms | web (paused) |
+| [#12](https://github.com/GredesCerber/matstat-lab/issues/12) | Compositing glyphs, stars, beacons and satellite sprites | web (study delivered in PR #17) |
+| [#2](https://github.com/GredesCerber/matstat-lab/issues/2) | Reusable module windows and entry states | design |
+| [#3](https://github.com/GredesCerber/matstat-lab/issues/3) | Motion language and interruption rules | web |
+| [#5](https://github.com/GredesCerber/matstat-lab/issues/5) | Scientific graphics, HUD and ASCII | design |
 
 [Design specification](design-spec.md) · [Reference set](references/README.md) · [Project brief](brief.md) · [Discovery plan](discovery.md) · [Initial PRD draft](prd.md)

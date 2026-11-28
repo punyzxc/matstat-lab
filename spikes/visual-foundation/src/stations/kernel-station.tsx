@@ -562,7 +562,7 @@ export function PendingStation({ station }: { station: KernelStationInfo }) {
       <p>
         {t('The station appears here as soon as ', 'Станция появится здесь, как только будет готово ')}<code translate="no">spikes/{station.kernel}/kernel.mjs</code>{t(' lands.', '.')}
       </p>
-      <a href={`https://github.com/punyzxc/matstat-lab/issues/${station.issue}`} target="_blank" rel="noreferrer">
+      <a href={`https://github.com/GredesCerber/matstat-lab/issues/${station.issue}`} target="_blank" rel="noreferrer">
         {t('Track issue', 'Задача')} #{station.issue} <ExternalLink size={13} aria-hidden />
       </a>
     </div>

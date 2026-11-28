@@ -4,7 +4,7 @@ STATUM LAB is an interactive Monte Carlo laboratory for students and instructors
 
 **Status:** the project is in the `discovery` phase. The plan ([PRD](docs/prd.md)) is a draft awaiting the captain's approval, and the working prototype lives in [`spikes/visual-foundation/`](spikes/visual-foundation/). No production code exists yet.
 
-> **New on the team?** Ask the captain to add you to this repo, then tell your coding agent (Claude Code or Codex), in any language: **"Join the development of punyzxc/matstat-lab"**. The agent reads [JOIN.md](JOIN.md) and does the rest; you only log in to GitHub when it asks.
+> **New on the team?** Ask the captain to add you to this repo, then tell your coding agent (Claude Code or Codex), in any language: **"Join the development of GredesCerber/matstat-lab"**. The agent reads [JOIN.md](JOIN.md) and does the rest; you only log in to GitHub when it asks.
 
 ## Run the prototype
 

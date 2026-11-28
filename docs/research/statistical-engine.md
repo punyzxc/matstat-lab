@@ -1,6 +1,6 @@
 # Distribution contracts: formulas, limits and reference fixtures
 
-**Fact — scope:** this answers [Discovery task #13](https://github.com/punyzxc/matstat-lab/issues/13) for the six models named in the [brief](../brief.md): Normal, Uniform, Exponential, Bernoulli, Binomial and Poisson. The evidence is a throwaway fixture in [`spikes/statistical-engine/`](../../spikes/statistical-engine/). It touches no product code, contract, protected configuration or visual work. It feeds the PRD tasks T6 (continuous models) and T8 (discrete models), the chart series in T11, and the classroom comparison in [#19](https://github.com/punyzxc/matstat-lab/issues/19).
+**Fact — scope:** this answers [Discovery task #13](https://github.com/GredesCerber/matstat-lab/issues/13) for the six models named in the [brief](../brief.md): Normal, Uniform, Exponential, Bernoulli, Binomial and Poisson. The evidence is a throwaway fixture in [`spikes/statistical-engine/`](../../spikes/statistical-engine/). It touches no product code, contract, protected configuration or visual work. It feeds the PRD tasks T6 (continuous models) and T8 (discrete models), the chart series in T11, and the classroom comparison in [#19](https://github.com/GredesCerber/matstat-lab/issues/19).
 
 **Fact — how the evidence was made:**
 

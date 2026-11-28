@@ -1,6 +1,6 @@
 # Independent one-scene acceptance audit
 
-**Fact — scope and provenance.** This is the independent research audit for [task #56](https://github.com/punyzxc/matstat-lab/issues/56), performed by `codex@desktop-8hl5nad` on 2026-11-25. The unchanged subject is `spikes/visual-foundation` at commit `1f4187f2db7e66c8397cc8f5d9a192a59dc84cda`. The new tests live entirely in [spikes/scene-acceptance-audit](../../spikes/scene-acceptance-audit/). They do not import the author's tests, route parser, station catalog or kernels. The host's earlier claim is in [scene-module-host.md](scene-module-host.md); the independent measurements are in [evidence.json](../../spikes/scene-acceptance-audit/evidence.json).
+**Fact — scope and provenance.** This is the independent research audit for [task #56](https://github.com/GredesCerber/matstat-lab/issues/56), performed by `codex@desktop-8hl5nad` on 2026-11-25. The unchanged subject is `spikes/visual-foundation` at commit `1f4187f2db7e66c8397cc8f5d9a192a59dc84cda`. The new tests live entirely in [spikes/scene-acceptance-audit](../../spikes/scene-acceptance-audit/). They do not import the author's tests, route parser, station catalog or kernels. The host's earlier claim is in [scene-module-host.md](scene-module-host.md); the independent measurements are in [evidence.json](../../spikes/scene-acceptance-audit/evidence.json).
 
 ## Result
 
@@ -37,7 +37,7 @@
 
 **Assumption — bounded claim.** These are default-parameter desktop observations in one installed Edge browser, one language and reduced motion. They do not exhaust all parameters, seeds, timings, normal-motion transitions, languages, browsers, display scaling, phones or assistive technologies. The three replay cases are explicit examples of the contract-fixture path, not proof of all stations' numerical determinism. Hidden routes lack opener cards by design. Nested content clipping and globe recognizability need visual judgement beyond the automated assertions.
 
-**Fact — harness status.** The task's full `crew check` is a separate check from this explicit Playwright invocation. At this discovery-stage subject commit, configured web/api/acceptance paths do not exist, so the harness reports all steps skipped and `verified:false`. The 14 browser passes above come from the independent invocation, not from claiming that skipped harness steps passed. The repository's owner-billing CI restriction is recorded in [captain guidance #27](https://github.com/punyzxc/matstat-lab/issues/27); this work does not bypass it or provide its own successful GitHub check status.
+**Fact — harness status.** The task's full `crew check` is a separate check from this explicit Playwright invocation. At this discovery-stage subject commit, configured web/api/acceptance paths do not exist, so the harness reports all steps skipped and `verified:false`. The 14 browser passes above come from the independent invocation, not from claiming that skipped harness steps passed. The repository's owner-billing CI restriction is recorded in [captain guidance #27](https://github.com/GredesCerber/matstat-lab/issues/27); this work does not bypass it or provide its own successful GitHub check status.
 
 ## Position
 

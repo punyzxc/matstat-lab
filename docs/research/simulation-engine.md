@@ -1,6 +1,6 @@
 # Deterministic Worker execution and convergence evidence
 
-**Fact — scope:** this answers [Discovery task #14](https://github.com/punyzxc/matstat-lab/issues/14), assigned to @Jumalinova after the visual handoff. The [standalone execution fixture](../../spikes/simulation-engine/) changes no product, shared contract, protected configuration or owner-managed visual component. The statistical engine and final stream/sampler selection remain with [#13](https://github.com/punyzxc/matstat-lab/issues/13).
+**Fact — scope:** this answers [Discovery task #14](https://github.com/GredesCerber/matstat-lab/issues/14), assigned to @Jumalinova after the visual handoff. The [standalone execution fixture](../../spikes/simulation-engine/) changes no product, shared contract, protected configuration or owner-managed visual component. The statistical engine and final stream/sampler selection remain with [#13](https://github.com/GredesCerber/matstat-lab/issues/13).
 
 ## Source-backed facts and implications
 

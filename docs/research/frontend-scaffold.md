@@ -1,8 +1,8 @@
 # Static frontend scaffold: Vite, React, TypeScript, Workers, IndexedDB, Vitest, Playwright
 
-**Fact — scope:** this answers [Discovery task #31](https://github.com/punyzxc/matstat-lab/issues/31). The executable evidence is the throwaway spike [`spikes/frontend-scaffold/`](../../spikes/frontend-scaffold/). It is laid out exactly as the future `web/`, so after kickoff the move is `git mv spikes/frontend-scaffold web` plus the maintainer changes below. No product code, `web/**`, `crew.config.json` or `.github/` is changed.
+**Fact — scope:** this answers [Discovery task #31](https://github.com/GredesCerber/matstat-lab/issues/31). The executable evidence is the throwaway spike [`spikes/frontend-scaffold/`](../../spikes/frontend-scaffold/). It is laid out exactly as the future `web/`, so after kickoff the move is `git mv spikes/frontend-scaffold web` plus the maintainer changes below. No product code, `web/**`, `crew.config.json` or `.github/` is changed.
 
-**Fact — product rule from the owner (2026-11-24):** STATUM LAB is one web program, not a site. The whole UI and navigation live on the single Orbital laboratory scene (prototype in `spikes/visual-foundation/`; scene host and kernel contract in [PR #49](https://github.com/punyzxc/matstat-lab/pull/49), lecture player in [PR #63](https://github.com/punyzxc/matstat-lab/pull/63), contract extensions `live`/`surface` in [PR #64](https://github.com/punyzxc/matstat-lab/pull/64)). The owner leads visuals. **So the scaffold adds no design:** its product entry mounts one empty slot, `src/app/scene-host.tsx`, where that scene moves in.
+**Fact — product rule from the owner (2026-11-24):** STATUM LAB is one web program, not a site. The whole UI and navigation live on the single Orbital laboratory scene (prototype in `spikes/visual-foundation/`; scene host and kernel contract in [PR #49](https://github.com/GredesCerber/matstat-lab/pull/49), lecture player in [PR #63](https://github.com/GredesCerber/matstat-lab/pull/63), contract extensions `live`/`surface` in [PR #64](https://github.com/GredesCerber/matstat-lab/pull/64)). The owner leads visuals. **So the scaffold adds no design:** its product entry mounts one empty slot, `src/app/scene-host.tsx`, where that scene moves in.
 
 ## Answer
 
@@ -35,7 +35,7 @@ Yes. A static Vite 7 + React 19 + TypeScript 5.9 app with no server process buil
 
 ### 3. Folder layout for the disjoint areas of #16, and which checks run
 
-Paths follow [functional-areas.md](../functional-areas.md) and [architecture.md](../architecture.md) (proposed in [#16](https://github.com/punyzxc/matstat-lab/issues/16)).
+Paths follow [functional-areas.md](../functional-areas.md) and [architecture.md](../architecture.md) (proposed in [#16](https://github.com/GredesCerber/matstat-lab/issues/16)).
 
 ```
 web/

@@ -1,6 +1,6 @@
 # Shared special functions for the lecture kernels
 
-**Fact — scope:** this answers [Discovery task #54](https://github.com/punyzxc/matstat-lab/issues/54). The question: which special functions should every lecture kernel import, and which fixtures should they be checked against? The kernels for #39, #41, #45, #46 and #47 need Φ, the normal, t, χ² and F quantiles, and the Kolmogorov distribution. The evidence is a throwaway module, [`spikes/lecture-special-functions/special.mjs`](../../spikes/lecture-special-functions/special.mjs). It is not product code.
+**Fact — scope:** this answers [Discovery task #54](https://github.com/GredesCerber/matstat-lab/issues/54). The question: which special functions should every lecture kernel import, and which fixtures should they be checked against? The kernels for #39, #41, #45, #46 and #47 need Φ, the normal, t, χ² and F quantiles, and the Kolmogorov distribution. The evidence is a throwaway module, [`spikes/lecture-special-functions/special.mjs`](../../spikes/lecture-special-functions/special.mjs). It is not product code.
 
 **Fact — how the evidence was made:**
 

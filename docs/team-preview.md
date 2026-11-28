@@ -26,4 +26,4 @@ node spikes/orbital-atmosphere/serve.mjs
 
 Open [Orbital atmosphere study](http://127.0.0.1:4178/). This is a Discovery experiment with synthetic scene data and an independent animation implementation. [Research report](research/orbital-atmosphere.md)
 
-For the current scientific plan and parallel tracks see [PR #8](https://github.com/punyzxc/matstat-lab/pull/8), [the PRD](prd.md) and [task dependencies](functional-iterations.md).
+For the current scientific plan and parallel tracks see [PR #8](https://github.com/GredesCerber/matstat-lab/pull/8), [the PRD](prd.md) and [task dependencies](functional-iterations.md).

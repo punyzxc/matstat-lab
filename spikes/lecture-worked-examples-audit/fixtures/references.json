@@ -23,7 +23,7 @@
       "lecture": "L01",
       "title": "Three-digit integers",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
         "page": 13,
         "lines": "l011-l014"
       },
@@ -41,7 +41,7 @@
       "lecture": "L01",
       "title": "Three-volume arrangements",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
         "page": 13,
         "lines": "l030-l032"
       },
@@ -59,7 +59,7 @@
       "lecture": "L01",
       "title": "Combinations with repetition pin",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
         "page": 16,
         "lines": "l001-l011"
       },
@@ -82,7 +82,7 @@
       "lecture": "L01",
       "title": "Five balls in five boxes: 0..4 empty boxes",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
         "page": 25,
         "lines": "l022-l050",
         "related": [
@@ -128,7 +128,7 @@
       "lecture": "L01",
       "title": "Existence of sqrt(1/2-sin^2(x))",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
         "page": 27,
         "lines": "l010-l014",
         "related": [
@@ -152,7 +152,7 @@
       "lecture": "L01",
       "title": "Bertrand: sampling scheme matters",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
         "page": 28,
         "lines": "l001-l029",
         "related": [
@@ -184,7 +184,7 @@
       "lecture": "L04",
       "title": "Existence of sqrt(1/2-sin^2(x))",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L04.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L04.pdf",
         "page": 2,
         "lines": "l010-l014",
         "related": [
@@ -208,7 +208,7 @@
       "lecture": "L04",
       "title": "Bertrand: sampling scheme matters",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L04.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L04.pdf",
         "page": 3,
         "lines": "l001-l029",
         "related": [
@@ -240,7 +240,7 @@
       "lecture": "L01",
       "title": "450 heads in 1000 tosses",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
         "page": 29,
         "lines": "l009-l016"
       },
@@ -265,7 +265,7 @@
       "lecture": "L01",
       "title": "Buffon and Pearson count ratios",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L01.pdf",
         "page": 31,
         "lines": "l006-l008"
       },
@@ -295,7 +295,7 @@
       "lecture": "L02",
       "title": "Fair die: even result",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L02.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L02.pdf",
         "page": 5,
         "lines": "l025-l048",
         "related": [
@@ -323,7 +323,7 @@
       "lecture": "L02",
       "title": "Five-option posterior",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L02.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L02.pdf",
         "page": 7,
         "lines": "l001-l019"
       },
@@ -348,7 +348,7 @@
       "lecture": "L03",
       "title": "Five days versus exactly five of seven",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
         "page": 4,
         "lines": "l002-l008"
       },
@@ -369,7 +369,7 @@
       "lecture": "L03",
       "title": "5000 trials, p=.01, exactly 50",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
         "page": 4,
         "lines": "l010-l020"
       },
@@ -392,7 +392,7 @@
       "lecture": "L03",
       "title": "5000 trials, p=.01, at most 50",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
         "page": 4,
         "lines": "l021-l031"
       },
@@ -415,7 +415,7 @@
       "lecture": "L03",
       "title": "Mode of Bin(5000,.01)",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
         "page": 4,
         "lines": "l036-l040"
       },
@@ -433,7 +433,7 @@
       "lecture": "L03",
       "title": "Local normal approximation to P(X=50)",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
         "page": 6,
         "lines": "l043-l061",
         "related": [
@@ -460,7 +460,7 @@
       "lecture": "L03",
       "title": "Uncorrected normal approximation at mean",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
         "page": 8,
         "lines": "l064-l081",
         "related": [
@@ -488,7 +488,7 @@
       "lecture": "L03",
       "title": "Rough P(40<=X<=60)",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
         "page": 9,
         "lines": "l003-l008"
       },
@@ -506,7 +506,7 @@
       "lecture": "L03",
       "title": "At least one of 100 typos on a selected page of 1000",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
         "page": 10,
         "lines": "l057-l076"
       },
@@ -527,7 +527,7 @@
       "lecture": "L03",
       "title": "Coin frequency accuracy .01 at approximate .98 confidence",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L03.pdf",
         "page": 12,
         "lines": "l001-l014",
         "related": [
@@ -555,7 +555,7 @@
       "lecture": "L05",
       "title": "Strict CDF of Bernoulli indicator",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L05.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L05.pdf",
         "page": 3,
         "lines": "l020-l035"
       },
@@ -579,7 +579,7 @@
       "lecture": "L06",
       "title": "1-sigma central probability and outside percent",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 14,
         "lines": "l004-l008"
       },
@@ -603,7 +603,7 @@
       "lecture": "L06",
       "title": "2-sigma central probability and outside percent",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 14,
         "lines": "l004-l008"
       },
@@ -627,7 +627,7 @@
       "lecture": "L06",
       "title": "3-sigma central probability and outside percent",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 14,
         "lines": "l004-l008"
       },
@@ -651,7 +651,7 @@
       "lecture": "L06",
       "title": "4-sigma central probability and outside percent",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 14,
         "lines": "l004-l008"
       },
@@ -675,7 +675,7 @@
       "lecture": "L06",
       "title": "Square of uniform {-1,0,1}",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 15,
         "lines": "l001-l036"
       },
@@ -699,7 +699,7 @@
       "lecture": "L06",
       "title": "Product law needs independent copies",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 15,
         "lines": "l028-l063"
       },
@@ -725,7 +725,7 @@
       "lecture": "L06",
       "title": "Two-by-two independence table",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 24,
         "lines": "l011-l040"
       },
@@ -766,7 +766,7 @@
       "lecture": "L06",
       "title": "Intermediate p25 matrix is not a joint law",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 25,
         "lines": "l001-l050"
       },
@@ -805,7 +805,7 @@
       "lecture": "L06",
       "title": "Two uniform lifetimes: P(sum<t)",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 33,
         "lines": "l057-l059"
       },
@@ -826,7 +826,7 @@
       "lecture": "L06",
       "title": "Two uniform lifetimes: P(sum<t)",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 33,
         "lines": "l057-l059"
       },
@@ -847,7 +847,7 @@
       "lecture": "L06",
       "title": "Two uniform lifetimes: P(sum<t)",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 33,
         "lines": "l057-l059"
       },
@@ -868,7 +868,7 @@
       "lecture": "L06",
       "title": "Piecewise density of sum of 2 uniforms",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 29,
         "lines": "l001-l028",
         "related": [
@@ -909,7 +909,7 @@
       "lecture": "L06",
       "title": "Piecewise density of sum of 3 uniforms",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 30,
         "lines": "l012-l072"
       },
@@ -948,7 +948,7 @@
       "lecture": "L06",
       "title": "Piecewise density of sum of 4 uniforms",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 32,
         "lines": "l001-l046",
         "related": [
@@ -1004,7 +1004,7 @@
       "lecture": "L06",
       "title": "Uniform-sum CDF above its support",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 33,
         "lines": "l030-l048"
       },
@@ -1025,7 +1025,7 @@
       "lecture": "L06",
       "title": "Lottery fixed-point mean and variance",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 37,
         "lines": "l001-l024"
       },
@@ -1079,7 +1079,7 @@
       "lecture": "L06",
       "title": "Uniform disc: covariance zero, dependent",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L06.pdf",
         "page": 37,
         "lines": "l025-l072"
       },
@@ -1103,7 +1103,7 @@
       "lecture": "L07",
       "title": "Universal three-sigma bound",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L07.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L07.pdf",
         "page": 3,
         "lines": "l005-l018"
       },
@@ -1121,7 +1121,7 @@
       "lecture": "L07",
       "title": "Two-sided standard normal three-sigma tail",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L07.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L07.pdf",
         "page": 3,
         "lines": "l019-l021"
       },
@@ -1139,7 +1139,7 @@
       "lecture": "L07",
       "title": "Poisson Chebyshev statement",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L07.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L07.pdf",
         "page": 3,
         "lines": "l022-l033"
       },
@@ -1160,7 +1160,7 @@
       "lecture": "L08",
       "title": "Poisson sum limit and endpoint diagnostics",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L08.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L08.pdf",
         "page": 5,
         "lines": "l030-l044"
       },
@@ -1182,7 +1182,7 @@
       "lecture": "L09",
       "title": "Bernoulli frequency, n=10000 p=.3 eps=.01",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
         "page": 4,
         "lines": "l001-l020"
       },
@@ -1200,7 +1200,7 @@
       "lecture": "L09",
       "title": "Good-part proportion p=.98 eps=.02 confidence .96",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
         "page": 4,
         "lines": "l023-l045"
       },
@@ -1218,7 +1218,7 @@
       "lecture": "L09",
       "title": "Mean3000 variance2500 within500",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
         "page": 5,
         "lines": "l007-l027"
       },
@@ -1236,7 +1236,7 @@
       "lecture": "L09",
       "title": "2500 independent variables, sd<=3, eps=.3",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
         "page": 6,
         "lines": "l001-l045"
       },
@@ -1254,7 +1254,7 @@
       "lecture": "L09",
       "title": "sd<=.04, eps=.001, confidence>.9",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
         "page": 6,
         "lines": "l049-l060"
       },
@@ -1275,7 +1275,7 @@
       "lecture": "L09",
       "title": "Binomial worked probability defects",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
         "page": 7,
         "lines": "l005-l030"
       },
@@ -1302,7 +1302,7 @@
       "lecture": "L09",
       "title": "Binomial worked probability first-grade",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
         "page": 7,
         "lines": "l031-l042"
       },
@@ -1329,7 +1329,7 @@
       "lecture": "L09",
       "title": "Binomial worked probability guarantee",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L09.pdf",
         "page": 8,
         "lines": "l001-l011",
         "related": [
@@ -1362,7 +1362,7 @@
       "lecture": "L10",
       "title": "Linear program introduction",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
         "page": 2,
         "lines": "l015-l039"
       },
@@ -1387,7 +1387,7 @@
       "lecture": "L10",
       "title": "Monthly rainy-day ratios",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
         "page": 2,
         "lines": "l040-l053"
       },
@@ -1413,7 +1413,7 @@
       "lecture": "L10",
       "title": "ECDF count <=x versus left-continuity claim",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
         "page": 7,
         "lines": "l006-l052"
       },
@@ -1440,7 +1440,7 @@
       "lecture": "L10",
       "title": "F(t)=1-exp(-.03t), table12",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
         "page": 9,
         "lines": "l001-l025"
       },
@@ -1530,7 +1530,7 @@
       "lecture": "L10",
       "title": "Kolmogorov example with invalid empirical CDF",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
         "page": 10,
         "lines": "l001-l008",
         "related": [
@@ -1566,7 +1566,7 @@
       "lecture": "L10",
       "title": "Pearson tables and invalid frequency input",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
         "page": 12,
         "lines": "l001-l032",
         "related": [
@@ -1606,7 +1606,7 @@
       "lecture": "L10",
       "title": "Worked exponential df and 95% critical value",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L10.pdf",
         "page": 13,
         "lines": "l001-l016",
         "related": [
@@ -1636,7 +1636,7 @@
       "lecture": "L11",
       "title": "22 listed measurements",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 5,
         "lines": "l019-l038"
       },
@@ -1689,7 +1689,7 @@
       "lecture": "L11",
       "title": "Approximate mean interval from listed observations",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 6,
         "lines": "l001-l016",
         "related": [
@@ -1723,7 +1723,7 @@
       "lecture": "L11",
       "title": "Approximate variance interval from listed observations",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 6,
         "lines": "l001-l016",
         "related": [
@@ -1756,7 +1756,7 @@
       "lecture": "L11",
       "title": "Student interval from listed observations",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 10,
         "lines": "l013-l029",
         "related": [
@@ -1789,7 +1789,7 @@
       "lecture": "L11",
       "title": "Variance interval from listed observations",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 10,
         "lines": "l030-l037",
         "related": [
@@ -1823,7 +1823,7 @@
       "lecture": "L11",
       "title": "Student interval if p10 stated s^2=.0303 is taken as separate input",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 10,
         "lines": "l013-l029"
       },
@@ -1850,7 +1850,7 @@
       "lecture": "L11",
       "title": "Variance interval if p10 stated s^2=.0303 is separate input",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 10,
         "lines": "l030-l037"
       },
@@ -1874,7 +1874,7 @@
       "lecture": "L11",
       "title": "Each normal tail beyond +/-1.96",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 12,
         "lines": "l023-l025"
       },
@@ -1892,7 +1892,7 @@
       "lecture": "L11",
       "title": "Two coin samples, n=1000 inferred from denominator",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 14,
         "lines": "l001-l015"
       },
@@ -1913,7 +1913,7 @@
       "lecture": "L11",
       "title": "First coin sample versus p0=.5",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L11.pdf",
         "page": 14,
         "lines": "l016-l021"
       },
@@ -1934,7 +1934,7 @@
       "lecture": "L12",
       "title": "Right-tailed proportion test",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L12.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L12.pdf",
         "page": 4,
         "lines": "l013-l025",
         "related": [
@@ -1969,7 +1969,7 @@
       "lecture": "L12",
       "title": "Zero-origin integral versus normal CDF",
       "source": {
-        "pdf": "https://github.com/punyzxc/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L12.pdf",
+        "pdf": "https://github.com/GredesCerber/matstat-lab/blob/8dfee73781e39d6946d76c07866f2a0534a3d988/lectures/L12.pdf",
         "page": 3,
         "lines": "l033-l046"
       },
