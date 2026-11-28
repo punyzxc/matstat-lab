@@ -29,31 +29,31 @@ test('a lecture shows one step at a time; arrows and buttons move between steps 
   await expect(player.getByRole('heading', { level: 3 })).toHaveText('Bernoulli formula');
   // Formulas are typeset (KaTeX), with the TeX source kept in MathML for screen readers.
   const formula = player.getByTestId('lecture-formula');
-  await expect(formula.locator('.katex-display')).toHaveCount(1);
+  await expect(formula.locator('.katex-display')).toHaveCount(2);
   await expect(formula.locator('.katex-html .mfrac, .katex-html .msupsub').first()).toBeVisible();
-  await expect(formula.locator('annotation')).toHaveText(/P_n\(k\) = C_n\^k/);
+  await expect(formula.locator('annotation').first()).toHaveText(/P_n\(k\) = C_n\^k/);
   const example = player.getByRole('region', { name: 'Worked example' });
-  await expect(example).toContainText('0.164');
-  await expect(example.locator('annotation').filter({ hasText: '\\frac{21}{128}' })).toHaveCount(1);
-  await expect(page.getByTestId('step-counter')).toHaveText('Step 1 / 4');
+  await expect(example).toContainText('0.2461');
+  await expect(example.locator('annotation').filter({ hasText: 'C_{10}^5' })).toHaveCount(1);
+  await expect(page.getByTestId('step-counter')).toHaveText('Step 1 / 12');
   expect(await fits(page)).toBe(true);
 
   await page.keyboard.press('ArrowRight');
   await expect(page).toHaveURL(/#lecture\/3\/2$/);
-  await expect(player.getByRole('heading', { level: 3 })).toHaveText('Local de Moivre–Laplace theorem');
+  await expect(player.getByRole('heading', { level: 3 })).toHaveText('Each term vanishes, the sum stays 1');
   await player.getByRole('button', { name: 'Next step' }).click();
   await expect(page).toHaveURL(/#lecture\/3\/3$/);
   await page.keyboard.press('End');
-  await expect(page).toHaveURL(/#lecture\/3\/4$/);
+  await expect(page).toHaveURL(/#lecture\/3\/12$/);
   await expect(player.getByRole('button', { name: 'Next step' })).toBeDisabled();
   await page.keyboard.press('ArrowLeft');
-  await expect(page.getByTestId('step-counter')).toHaveText('Step 3 / 4');
+  await expect(page.getByTestId('step-counter')).toHaveText('Step 11 / 12');
 
   // The hash alone reopens the step; an out-of-range step lands on the last one.
   await page.goto('/#lecture/3/2');
-  await expect(page.getByTestId('step-counter')).toHaveText('Step 2 / 4');
+  await expect(page.getByTestId('step-counter')).toHaveText('Step 2 / 12');
   await page.goto('/#lecture/3/99');
-  await expect(page).toHaveURL(/#lecture\/3\/4$/);
+  await expect(page).toHaveURL(/#lecture\/3\/12$/);
   await page.goto('/#lecture/3/abc');
   await expect(page).toHaveURL(/#lecture\/3\/1$/);
   await page.goto('/#lecture/3');
@@ -82,10 +82,10 @@ test('"Open experiment" opens the station with the step\'s seed and parameters; 
 });
 
 test('a kernel station opened from a lecture keeps the seed, and a rerun keeps the way back', async ({ page }) => {
-  await page.goto('/#lecture/1/2');
+  await page.goto('/#lecture/1/9');
   await page.getByRole('link', { name: /Open the Urn station/ }).click();
-  await expect(page).toHaveURL(/#station\/urn\?seed=101&lecture=1&step=2$/);
-  await expect(page.getByTestId('station-dock').getByRole('link', { name: 'Back to lecture 1, step 2' })).toBeVisible();
+  await expect(page).toHaveURL(/#station\/urn\?seed=101&.*lecture=1&step=9$/);
+  await expect(page.getByTestId('station-dock').getByRole('link', { name: 'Back to lecture 1, step 9' })).toBeVisible();
 
   // A rerun with a new seed rewrites the hash and keeps the reference to the step.
   await page.goto('/#station/contract-fixture?seed=7&n=2000&lecture=2&step=1');
@@ -97,11 +97,11 @@ test('a kernel station opened from a lecture keeps the seed, and a rerun keeps t
 });
 
 test('presenter mode enlarges type, reduces the scene chrome and keeps the counter and keys visible', async ({ page }) => {
-  await page.goto('/#lecture/1/4');
+  await page.goto('/#lecture/1/17');
   const idea = page.locator('.lecture-idea');
   const normal = await idea.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
   await page.keyboard.press('p');
-  await expect(page).toHaveURL(/#lecture\/1\/4\?present=1$/);
+  await expect(page).toHaveURL(/#lecture\/1\/17\?present=1$/);
   await expect(page.locator('html')).toHaveAttribute('data-present', '');
   const large = await idea.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
   expect(large).toBeGreaterThanOrEqual(20);
@@ -115,16 +115,16 @@ test('presenter mode enlarges type, reduces the scene chrome and keeps the count
 
   // Steps keep presenter mode, and so does a trip to a station and back.
   await page.keyboard.press('ArrowRight');
-  await expect(page).toHaveURL(/#lecture\/1\/5\?present=1$/);
+  await expect(page).toHaveURL(/#lecture\/1\/18\?present=1$/);
   await page.getByRole('link', { name: /Throw the three chord schemes/ }).click();
-  await expect(page).toHaveURL(/lecture=1&step=5&present=1$/);
+  await expect(page).toHaveURL(/lecture=1&step=18&present=1$/);
   await page.keyboard.press('Escape');
-  await expect(page).toHaveURL(/#lecture\/1\/5\?present=1$/);
+  await expect(page).toHaveURL(/#lecture\/1\/18\?present=1$/);
   // The address changes a frame before the lecture dock mounts; wait for it before the next key.
-  await expect(page.getByTestId('step-counter')).toHaveText(/Step 5 \//);
+  await expect(page.getByTestId('step-counter')).toHaveText(/Step 18 \//);
 
   await page.keyboard.press('p');
-  await expect(page).toHaveURL(/#lecture\/1\/5$/);
+  await expect(page).toHaveURL(/#lecture\/1\/18$/);
   await expect(page.locator('html')).not.toHaveAttribute('data-present', '');
   await expect(page.getByRole('navigation', { name: 'Lecture orbits' })).toBeVisible();
 });
@@ -132,20 +132,20 @@ test('presenter mode enlarges type, reduces the scene chrome and keeps the count
 test('a portrait file renders in the fixed slot; an empty or missing file shows a labelled placeholder', async ({ page }) => {
   const art = ' .---.\n( o o )\n |   |\n';
   await page.route('**/portraits/bayes.txt', (r) => r.fulfill({ status: 200, contentType: 'text/plain', body: art }));
-  await page.goto('/#lecture/2/3');
+  await page.goto('/#lecture/2/6');
   const bayes = page.locator('.portrait[data-slug="bayes"]');
   await expect(bayes.getByRole('img', { name: 'ASCII portrait of Thomas Bayes' })).toHaveText(art.trimEnd());
   await expect(bayes).toContainText('1701–1761');
 
   // The shipped slot files are empty: every one shows the placeholder with name, years and contribution.
-  await page.goto('/#lecture/3/2');
+  await page.goto('/#lecture/3/6');
   const moivre = page.locator('.portrait[data-slug="de-moivre"]');
   await expect(moivre).toHaveAttribute('data-state', 'placeholder');
   await expect(moivre).toContainText('Abraham de Moivre');
   await expect(moivre).toContainText('1667–1754');
   await expect(moivre).toContainText('Normal approximation to the binomial law.');
   const slot = await moivre.locator('.portrait-art').boundingBox();
-  await page.goto('/#lecture/2/3');
+  await page.goto('/#lecture/2/6');
   const filled = await page.locator('.portrait[data-slug="bayes"] .portrait-art').boundingBox();
   expect(Math.round(filled.width)).toBe(Math.round(slot.width));
   expect(Math.round(filled.height)).toBe(Math.round(slot.height));
@@ -154,10 +154,10 @@ test('a portrait file renders in the fixed slot; an empty or missing file shows 
   await page.unroute('**/portraits/bayes.txt');
   await page.route('**/portraits/bayes.txt', (r) => r.fulfill({ status: 404, body: 'Not found' }));
   await page.route('**/portraits/laplace.txt', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><html><body></body></html>' }));
-  await page.goto('/?fresh=1#lecture/2/3'); // a full load: the portrait cache lives in the page
+  await page.goto('/?fresh=1#lecture/2/6'); // a full load: the portrait cache lives in the page
   await expect(page.locator('.portrait[data-slug="bayes"]')).toHaveAttribute('data-state', 'placeholder');
   await expect(page.locator('.portrait[data-slug="bayes"]')).toContainText('Thomas Bayes');
-  await page.goto('/#lecture/3/3');
+  await page.goto('/#lecture/3/7');
   await expect(page.locator('.portrait[data-slug="laplace"]')).toHaveAttribute('data-state', 'placeholder');
 });
 
@@ -178,7 +178,7 @@ test('#98: a portrait types itself in, and art larger than the slot is scaled do
   const wide = Array.from({ length: 30 }, (_, i) => String(i % 10).repeat(70)).join('\n');
   await page.route('**/portraits/bayes.txt', (r) => r.fulfill({ status: 200, contentType: 'text/plain', body: wide }));
   await page.emulateMedia({ reducedMotion: 'no-preference' }); // the file's beforeEach reduces motion
-  await page.goto('/#lecture/2/3');
+  await page.goto('/#lecture/2/6');
   const art = page.locator('.portrait[data-slug="bayes"] pre.portrait-art');
   // It types in over a few frames, then settles on the art itself.
   await expect(art).toHaveAttribute('data-typing', 'true');
@@ -195,7 +195,7 @@ test('#98: a portrait types itself in, and art larger than the slot is scaled do
 
   // Reduced motion: the art is there at once.
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/?again=1#lecture/2/3');
+  await page.goto('/?again=1#lecture/2/6');
   await expect(page.locator('.portrait[data-slug="bayes"] pre.portrait-art')).toHaveText(wide);
   await expect(page.locator('.portrait[data-slug="bayes"] pre.portrait-art')).not.toHaveAttribute('data-typing', 'true');
 });

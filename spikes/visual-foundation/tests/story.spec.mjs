@@ -400,5 +400,5 @@ test('L5 random variable: outcomes carry values, the staircase sums the stems le
 test('old step-by-step lectures keep their player', async ({ page }) => {
   await page.goto('/#lecture/3/1');
   await expect(page.getByTestId('lecture-dock')).not.toHaveClass(/scene-dock--story/);
-  await expect(page.getByTestId('step-counter')).toHaveText('Step 1 / 4');
+  await expect(page.getByTestId('step-counter')).toHaveText('Step 1 / 12');
 });

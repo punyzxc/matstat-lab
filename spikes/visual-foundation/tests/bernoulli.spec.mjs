@@ -35,8 +35,8 @@ test('Bernoulli: the frequency view gives 13 530 trials with the exact quantile,
 
 test('Bernoulli opens with the lecture numbers from lectures 3 and 9', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/#lecture/3/3');
-  await page.getByRole('link', { name: /Open experiment Bernoulli/ }).first().click();
+  await page.goto('/#lecture/3/8');
+  await page.getByRole('link', { name: /Open example 2b/ }).first().click();
   await expect(page).toHaveURL(/#station\/bernoulli\?seed=5000&/);
   await expect(page.getByTestId('station-dock').getByRole('group', { name: 'Live formula' })).toContainText('0.5375');
 });
