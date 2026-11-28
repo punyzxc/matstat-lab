@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { t } from './i18n';
+import { touchDragDirection } from './touch-drag';
 
 export type Frame = {
   width: number;
@@ -66,7 +67,7 @@ export function PlateCanvas({
       visible = true,
       slowFrames = 0;
     let interval = small ? 45 : 32;
-    let pointer: { id: number; start: number; yaw: number; x: number; t: number } | null = null;
+    let pointer: { id: number; start: number; startY: number; yaw: number; x: number; t: number; active: boolean } | null = null;
     // A released drag keeps a little spin that eases out, so a nudge feels physical.
     let spin = 0;
     function draw() {
@@ -88,7 +89,7 @@ export function PlateCanvas({
           const delta = now - last;
           const step = Math.min(delta / 1000, cap ? cap / 1000 + 0.02 : 0.12);
           frame.time += step;
-          if (spin && !pointer) {
+          if (spin && !pointer?.active) {
             frame.yaw += spin * step;
             spin *= Math.exp(-step * 2.6);
             if (Math.abs(spin) < 0.01) spin = 0;
@@ -120,12 +121,26 @@ export function PlateCanvas({
     }
     function down(e: PointerEvent) {
       if (!e.isPrimary || e.button !== 0) return;
-      pointer = { id: e.pointerId, start: e.clientX, yaw: frame.yaw, x: e.clientX, t: e.timeStamp };
-      spin = 0;
-      box.setPointerCapture(e.pointerId);
+      const active = e.pointerType !== 'touch';
+      pointer = { id: e.pointerId, start: e.clientX, startY: e.clientY, yaw: frame.yaw, x: e.clientX, t: e.timeStamp, active };
+      if (active) {
+        spin = 0;
+        box.setPointerCapture(e.pointerId);
+      }
     }
     function move(e: PointerEvent) {
       if (pointer?.id !== e.pointerId) return;
+      if (!pointer.active) {
+        const direction = touchDragDirection(e.clientX - pointer.start, e.clientY - pointer.startY);
+        if (direction === 'pending') return;
+        if (direction === 'vertical') {
+          pointer = null;
+          return;
+        }
+        pointer.active = true;
+        pointer.yaw = frame.yaw;
+        box.setPointerCapture(e.pointerId);
+      }
       frame.yaw = pointer.yaw + (e.clientX - pointer.start) * 0.006;
       const dt = Math.max(8, e.timeStamp - pointer.t);
       spin = Math.max(-2.4, Math.min(2.4, ((e.clientX - pointer.x) * 0.006 * 1000) / dt));
@@ -134,8 +149,10 @@ export function PlateCanvas({
       if (!state.current.playing) draw();
     }
     function up(e: PointerEvent) {
+      if (pointer?.id !== e.pointerId) return;
+      if (e.type === 'lostpointercapture' && e.target !== box) return;
       // A drag that stopped before release leaves no spin.
-      if (!state.current.playing || (pointer && e.timeStamp - pointer.t > 90)) spin = 0;
+      if (pointer.active && (!state.current.playing || e.type === 'pointercancel' || e.timeStamp - pointer.t > 90)) spin = 0;
       pointer = null;
     }
     function key(e: KeyboardEvent) {
@@ -171,6 +188,8 @@ export function PlateCanvas({
     document.addEventListener('visibilitychange', refresh);
     box.addEventListener('pointerdown', down);
     box.addEventListener('pointermove', move);
+    box.addEventListener('pointerup', up);
+    box.addEventListener('pointercancel', up);
     box.addEventListener('lostpointercapture', up);
     box.addEventListener('keydown', key);
     restart.current = refresh;
@@ -183,6 +202,8 @@ export function PlateCanvas({
       document.removeEventListener('visibilitychange', refresh);
       box.removeEventListener('pointerdown', down);
       box.removeEventListener('pointermove', move);
+      box.removeEventListener('pointerup', up);
+      box.removeEventListener('pointercancel', up);
       box.removeEventListener('lostpointercapture', up);
       box.removeEventListener('keydown', key);
       canvas.removeEventListener('webglcontextlost', contextLost);

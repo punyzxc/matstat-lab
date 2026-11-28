@@ -12,6 +12,9 @@
   --hud-top: calc(var(--hud-bar) + var(--hud-title) + 10px);
   position: relative;
 }
+.orbital-lab .orbital-disc .plate-canvas {
+  touch-action: pan-y;
+}
 @media (min-width: 761px) {
   .orbital-lab .lab-bar,
   .orbital-lab > .lab-spread {
@@ -342,6 +345,135 @@ html:not([data-present]) .orbital-lab > .scene-dock--end {
 @media (max-width: 420px) {
   .orbital-lab {
     --hud-bar: 56px;
+  }
+}
+@media (pointer: coarse) {
+  .orbital-lab .lab-session > :is(a, button),
+  .orbital-lab .orbit-switch a,
+  .orbital-lab .scene-dock button,
+  .orbital-lab .scene-dock .button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .orbital-lab .lab-session > :is(a, button),
+  .orbital-lab .orbit-switch a {
+    justify-content: center;
+  }
+  .orbital-lab .orbit-switch a b {
+    margin-right: 0;
+  }
+  .orbital-lab input[type='range'] {
+    appearance: none;
+    height: 44px;
+    background-size: 100% 3px !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+  }
+  .orbital-lab input[type='range']::-webkit-slider-thumb {
+    appearance: none;
+    width: 44px;
+    height: 44px;
+    background: radial-gradient(circle, var(--ink) 0 6px, transparent 7px);
+  }
+  .orbital-lab input[type='range']::-moz-range-thumb {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: radial-gradient(circle, var(--ink) 0 6px, transparent 7px);
+  }
+  .orbital-lab :is(.surface-svg, .board--cube svg) {
+    touch-action: pan-y;
+  }
+}
+@media (pointer: coarse) and (max-width: 1024px) {
+  .orbital-lab .orbit-switch {
+    gap: 0 !important;
+  }
+  .orbital-lab .orbit-switch a {
+    font-size: 0 !important;
+  }
+  .orbital-lab .orbit-switch a b {
+    font-size: 11px;
+  }
+  .orbital-lab .station-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .orbital-lab .station-grid > * {
+    min-width: 0;
+  }
+  .orbital-lab .scene-dock-body {
+    min-width: 0;
+  }
+  .orbital-lab .readouts {
+    table-layout: fixed;
+  }
+  .orbital-lab .readouts :is(th, td) {
+    padding-inline: 4px;
+    overflow-wrap: anywhere;
+  }
+  .orbital-lab .readouts :is(th, td):last-child {
+    width: 52px;
+  }
+  .orbital-lab :is(.readouts, .station-notes) .tex {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    overflow-x: auto;
+    vertical-align: middle;
+  }
+}
+@media (pointer: coarse) and (max-width: 760px) {
+  .orbital-lab .lab-bar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 6px;
+    height: auto;
+  }
+  .orbital-lab .lab-bar .orbit-switch {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(44px, 1fr));
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 44px;
+  }
+  .orbital-lab .lab-bar .orbit-switch a:first-child {
+    display: inline-flex;
+  }
+  .orbital-lab .lab-session {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(44px, 1fr));
+    gap: 2px;
+    margin-left: 0;
+  }
+  .orbital-lab .lab-session .lab-tool {
+    gap: 0;
+    text-align: center;
+    font-size: 11px;
+  }
+  .orbital-lab .lab-session .lab-tool svg {
+    display: none;
+  }
+  .orbital-lab .orbital-field > :is(.orbital-engine, .orbital-nodes) {
+    flex: none;
+  }
+  html:not([data-present]) .orbital-lab > .scene-dock {
+    position: fixed;
+    inset: 0 0 auto;
+    width: 100%;
+    height: var(--dock-visible-height, 100dvh);
+    border: 0;
+  }
+  .orbital-lab .scene-dock-head {
+    flex: none;
+    padding: max(10px, env(safe-area-inset-top)) 12px 10px;
+  }
+  .orbital-lab .scene-dock-body {
+    padding-inline: 12px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    scroll-padding-block: 12px;
+  }
+  .orbital-lab .scene-dock :is(input:not([type='range']), textarea, [contenteditable='true']) {
+    font-size: max(16px, 1em);
   }
 }
 /* The dock title takes focus on open: a quiet underline instead of a box around the heading. */

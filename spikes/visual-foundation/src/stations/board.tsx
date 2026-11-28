@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { touchDragDirection } from '../touch-drag';
 import { t, useLang } from '../i18n';
 import { project } from './surface-math.mjs';
 import { useStationReducedMotion } from '../motion-preference';
@@ -167,7 +168,7 @@ function Cube({ board, drawKey, reduced }: { board: Extract<Data, { kind: 'cube'
   const { darts, hits } = board;
   const [view, setView] = useState({ yaw: -0.7, pitch: 0.42 });
   const [held, setHeld] = useState(false);
-  const drag = useRef<{ id: number; x: number; y: number } | null>(null);
+  const drag = useRef<{ id: number; x: number; y: number; active: boolean } | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   /** #196: the idle turn runs only while the cube is on screen and the tab is visible; otherwise its loop is cancelled. */
   useEffect(() => {
@@ -207,21 +208,39 @@ function Cube({ board, drawKey, reduced }: { board: Extract<Data, { kind: 'cube'
     turn(...m[e.key]);
   };
   const onPointerDown = (e: PointerEvent<SVGSVGElement>) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
-    e.currentTarget.setPointerCapture(e.pointerId);
-    setHeld(true);
+    if (!e.isPrimary || e.button !== 0) return;
+    const active = e.pointerType !== 'touch';
+    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, active };
+    if (active) {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      setHeld(true);
+    }
   };
   const onPointerMove = (e: PointerEvent<SVGSVGElement>) => {
     const d = drag.current;
     if (!d || d.id !== e.pointerId) return;
-    turn((e.clientX - d.x) * 0.01, (e.clientY - d.y) * 0.01);
-    drag.current = { id: d.id, x: e.clientX, y: e.clientY };
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!d.active) {
+      const direction = touchDragDirection(dx, dy);
+      if (direction === 'pending') return;
+      if (direction === 'vertical') {
+        drag.current = null;
+        return;
+      }
+      d.active = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      setHeld(true);
+    }
+    turn(dx * 0.01, e.pointerType === 'touch' ? 0 : dy * 0.01);
+    d.x = e.clientX;
+    d.y = e.clientY;
   };
   const endDrag = (e: PointerEvent<SVGSVGElement>) => {
+    if (e.type === 'lostpointercapture' && e.target !== e.currentTarget) return;
     if (drag.current?.id !== e.pointerId) return;
+    if (drag.current.active) setHeld(false);
     drag.current = null;
-    setHeld(false);
   };
   const P = (x: number, y: number, z: number) => project([2 * x - 1, 2 * y - 1, 2 * z - 1], view, CUBE_VIEW);
   const corners = [0, 1, 2, 3, 4, 5, 6, 7].map((c) => P(c & 1, (c >> 1) & 1, (c >> 2) & 1));
@@ -240,7 +259,8 @@ function Cube({ board, drawKey, reduced }: { board: Extract<Data, { kind: 'cube'
       </figcaption>
       <svg ref={svgRef} viewBox="0 0 340 330" role="img" tabIndex={0} data-yaw={view.yaw.toFixed(3)}
         aria-label={t(`Points in the unit cube, ${inside} of ${darts.length} inside A and lit; drag or use the arrow keys to turn it`, `Точки в единичном кубе, ${inside} из ${darts.length} внутри A и подсвечены; поворачивайте перетаскиванием или стрелками`)}
-        onKeyDown={onKeyDown} onBlur={() => setHeld(false)} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}>
+        onKeyDown={onKeyDown} onBlur={() => setHeld(false)} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
+        onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={endDrag}>
         {CUBE_EDGES.map(([a, b], i) => (
           <line key={i} className="cube-edge" data-back={(corners[a].depth + corners[b].depth) / 2 > mid || undefined}
             x1={corners[a].x} y1={corners[a].y} x2={corners[b].x} y2={corners[b].y} />

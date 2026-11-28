@@ -600,7 +600,7 @@ html[data-present] .story {
 
 @media (max-width: 900px) {
   .story {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(260px, 46%) minmax(0, 1fr) auto;
   }
   .story-stage {
@@ -619,6 +619,62 @@ html[data-present] .story {
   }
   .ci-gauge {
     width: 24%;
+  }
+}
+
+@media (pointer: coarse) {
+  .story-expand,
+  .story-dots a {
+    min-height: 44px;
+  }
+  .story-dots a {
+    min-width: 44px;
+  }
+  .story-dots a::after {
+    inset: 18px;
+  }
+  .story-foot .story-dots {
+    min-width: 0;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 760px) and (pointer: coarse) {
+  .story {
+    grid-template-rows: auto minmax(130px, 1fr) auto;
+  }
+  .story-stage {
+    min-height: min-content;
+  }
+  .story-stage-head {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .story-tools {
+    min-width: 0;
+    justify-content: flex-start;
+  }
+  .story-expand {
+    max-width: 100%;
+  }
+  .story-figure {
+    min-height: 240px;
+  }
+  .story-text {
+    min-width: 0;
+    padding-right: 8px;
+  }
+  .story-text :is(.lecture-formula, .lecture-example, .lecture-notes, .live-formula) {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .story-foot {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .story-foot .story-dots {
+    flex-basis: 100%;
   }
 }
 
