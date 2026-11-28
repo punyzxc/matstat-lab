@@ -98,7 +98,7 @@ function commit(s: Sim, iv: Interval) {
   s.scroll += 1;
 }
 
-function step(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
+function step(s: Sim, o: Live, { ctx, w, h, dt, particleStride }: Frame) {
   if (s.beat !== o.beat) {
     s.beat = o.beat;
     if (o.beat !== 'wall') s.fastSince = null;
@@ -151,7 +151,7 @@ function step(s: Sim, o: Live, { ctx, w, h, dt }: Frame) {
   const visible = Math.ceil((wallBot - wallTop) / rowStep) + 1;
   const from = Math.max(0, s.made.length - visible);
   const hotW = o.hot === 'width' || o.hot === 'gamma' || o.hot === 'n';
-  for (let i = s.made.length - 1; i >= from; i--) {
+  for (let i = s.made.length - 1; i >= from; i -= particleStride) {
     const iv = s.made[i];
     const row = s.made.length - 1 - i;
     const y = wallTop + (row - s.scroll + 1) * rowStep;

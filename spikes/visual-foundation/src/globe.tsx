@@ -131,6 +131,7 @@ function paint(
   seconds: number,
   surface: Surface,
   yaw: number,
+  particleStride: number,
 ) {
   ctx.clearRect(0, 0, w, h);
   const cx = w * 0.5,
@@ -178,7 +179,7 @@ function paint(
   ctx.fillStyle = cached.glow;
   ctx.fillRect(cx - reach, cy - reach, 2 * reach, 2 * reach);
   const scene = { x: cx, y: cy, radius: r, width: w, height: h, time: seconds };
-  drawStars(ctx, scene);
+  drawStars(ctx, scene, particleStride);
   drawSatellites(ctx, scene, false);
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, tau);
@@ -230,7 +231,7 @@ function paint(
     // #195: back-facing points are dropped before the rest of the projection, from flat arrays; the lit squares
     // are collected per tone level and filled as one path per level (8 fills instead of ~7,000 fillRects).
     for (const b of byLevel) b.n = 0;
-    for (let i = 0; i < LAND_N; i++) {
+    for (let i = 0; i < LAND_N; i += particleStride) {
       const px = landX[i], py = landY[i], pz = landZ[i];
       const depth = px * s + pz * c;
       const qz = py * sp + depth * cp;
@@ -301,7 +302,7 @@ export const earthPlate: RendererFactory = (canvas) => {
   return {
     draw(f) {
       ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
-      paint(ctx, f.width, f.height, f.time, f.mesh ? 'mesh' : 'points', f.yaw);
+      paint(ctx, f.width, f.height, f.time, f.mesh ? 'mesh' : 'points', f.yaw, f.particleStride ?? 1);
     },
   };
 };
