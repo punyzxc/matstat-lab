@@ -9,7 +9,7 @@ import audit_math as a
 
 HERE = Path(__file__).parent
 SOURCE_SHA = '8dfee73781e39d6946d76c07866f2a0534a3d988'
-BASE = f'https://github.com/punyzxc/matstat-lab/blob/{SOURCE_SHA}/lectures/'
+BASE = f'https://github.com/GredesCerber/matstat-lab/blob/{SOURCE_SHA}/lectures/'
 values = []
 
 

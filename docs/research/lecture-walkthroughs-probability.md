@@ -1,6 +1,6 @@
 # Step-by-step scripts for lectures 1 to 3
 
-This is the research for `lecture-walkthroughs-probability` ([#51](https://github.com/punyzxc/matstat-lab/issues/51)). Owner: GredesCerber (Claude executor). Date: 2026-11-25.
+This is the research for `lecture-walkthroughs-probability` ([#51](https://github.com/GredesCerber/matstat-lab/issues/51)). Owner: GredesCerber (Claude executor). Date: 2026-11-25.
 
 **Question.** Which step-by-step scripts for lectures 1 to 3 explain each idea and formula and link to the right station presets?
 

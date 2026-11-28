@@ -2,7 +2,7 @@
 
 ![Orbital Laboratory on desktop](assets/ascii-orbits-desktop.png)
 
-[Motion recording](assets/ascii-orbits-motion.webm) · [Mobile](assets/ascii-orbits-mobile.png) · [Reference set and design specification](https://github.com/punyzxc/matstat-lab/pull/8)
+[Motion recording](assets/ascii-orbits-motion.webm) · [Mobile](assets/ascii-orbits-mobile.png) · [Reference set and design specification](https://github.com/GredesCerber/matstat-lab/pull/8)
 
 ## Discovery result
 
@@ -22,4 +22,4 @@ The browser stores a versioned entry per module and records the last opened modu
 
 The TypeScript/Vite build, six numerical tests and twelve browser tests passed locally. The browser cases check monochrome globe pixels, six direct routes, snapshot validation, persistence after reload, last-opened state, pause, live reduced-motion changes and fallback behavior. Rendered layouts were measured from 320 to 1440 pixels. Frame cadence on classroom hardware and physical projection remain field checks.
 
-The design discussion covers the six parallel research tracks in [PR #8](https://github.com/punyzxc/matstat-lab/pull/8). Incorporate the approved composition and storage contract into the reviewed PRD before starting the production build. [Prototype instructions](../../spikes/visual-foundation/README.md)
+The design discussion covers the six parallel research tracks in [PR #8](https://github.com/GredesCerber/matstat-lab/pull/8). Incorporate the approved composition and storage contract into the reviewed PRD before starting the production build. [Prototype instructions](../../spikes/visual-foundation/README.md)

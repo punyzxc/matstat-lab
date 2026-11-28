@@ -18,9 +18,9 @@ maximum, plus the joint law in 3D). `preview.png` in that folder shows what it l
 the catalog entry from step 3.
 
 **Worked examples (merged PRs):**
-- [#106](https://github.com/punyzxc/matstat-lab/pull/106): Hypothesis Testing, a new station inside an existing
+- [#106](https://github.com/GredesCerber/matstat-lab/pull/106): Hypothesis Testing, a new station inside an existing
   kernel, with a 3D power surface and a catalog entry that replaces a legacy station.
-- [#120](https://github.com/punyzxc/matstat-lab/pull/120): Scatter, new typed parameters, a typeset readout and a
+- [#120](https://github.com/GredesCerber/matstat-lab/pull/120): Scatter, new typed parameters, a typeset readout and a
   degenerate 3D case explained in a caption.
 
 ---

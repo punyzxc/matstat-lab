@@ -1,6 +1,6 @@
 # Independent audit of saved histogram and ECDF payloads
 
-**Fact — scope:** [issue #21](https://github.com/punyzxc/matstat-lab/issues/21), assigned to `adekin06`, asks for independent, hand-calculable fixtures, equal-total corruption detection, and a saved JSON/CSV precision and units audit. This is discovery research with a 2-hour budget. This change adds this note and a disposable [`spikes/chart-fixture-audit/`](../../spikes/chart-fixture-audit/) experiment; it changes no product, contract, shared plan or CI file.
+**Fact — scope:** [issue #21](https://github.com/GredesCerber/matstat-lab/issues/21), assigned to `adekin06`, asks for independent, hand-calculable fixtures, equal-total corruption detection, and a saved JSON/CSV precision and units audit. This is discovery research with a 2-hour budget. This change adds this note and a disposable [`spikes/chart-fixture-audit/`](../../spikes/chart-fixture-audit/) experiment; it changes no product, contract, shared plan or CI file.
 
 ## Evidence and independence
 
@@ -100,7 +100,7 @@ node --test spikes/chart-fixture-audit/audit.test.mjs spikes/chart-fixture-audit
 
 **Fact — recorded validation:** on 2026-11-25, the command above plus the existing `spikes/explorer-chart/snapshot.test.mjs` and `spikes/snapshot-comparison-fields/snapshot-v2.test.mjs` passed **45 tests** (26 new, 19 existing), with no failures or skipped tests. Full `crew check` returned `status: warning`, `green: true`, `verified: false`: every configured step was skipped because there is no web/api package or executable acceptance test yet. The independently executed spike checks supply the evidence for this research; no passing product CI or browser test is claimed. Reproduction sources: the four named test files and [crew configuration](../../crew.config.json).
 
-**Fact — team submission policy:** the captain's [answer in #27](https://github.com/punyzxc/matstat-lab/issues/27#issuecomment-7126240401) requires full local `crew check`, the task's own checks, `crew guard --pr <n>` without structural problems and an independent agent review; the owner handles manual merge while GitHub billing prevents Actions startup. This task does not rerun or bypass the blocked Actions, alter CI, or publish a successful status manually.
+**Fact — team submission policy:** the captain's [answer in #27](https://github.com/GredesCerber/matstat-lab/issues/27#issuecomment-7126240401) requires full local `crew check`, the task's own checks, `crew guard --pr <n>` without structural problems and an independent agent review; the owner handles manual merge while GitHub billing prevents Actions startup. This task does not rerun or bypass the blocked Actions, alter CI, or publish a successful status manually.
 
 **Assumption — integration handoff:** preserve these immutable original observations and hand counts when writing production acceptance tests under the approved task. Let the producer output be the actual value under test. Add contract adapters and scale/unit variants only after the owner confirms the schema. Keep #6's broader Worker/scientific-QA strategy and #13's model-reference implementation separate from this chart-data witness.
 

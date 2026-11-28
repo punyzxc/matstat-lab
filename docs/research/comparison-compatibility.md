@@ -2,7 +2,7 @@
 
 Issue #22. Question: which scientific metadata makes two saved experiments comparable before they are plotted on common axes?
 
-Scope: this document owns the comparison policy across modules. Serialization and storage belong to #4, and the classroom scenario belongs to #19. The policy reads fields from the `ExperimentSnapshot` proposed in #4. That snapshot exists only in the unmerged [PR #23](https://github.com/punyzxc/matstat-lab/pull/23) (branch `crew/4-research-3h-versioned-experiment-snapsho`, commit `e97724c`) and in the shared contract draft on `preview/discovery` (`docs/functional-contract-draft.md`, commit `702d6c2`). If #23 changes, revisit the "Required metadata" table.
+Scope: this document owns the comparison policy across modules. Serialization and storage belong to #4, and the classroom scenario belongs to #19. The policy reads fields from the `ExperimentSnapshot` proposed in #4. That snapshot exists only in the unmerged [PR #23](https://github.com/GredesCerber/matstat-lab/pull/23) (branch `crew/4-research-3h-versioned-experiment-snapsho`, commit `e97724c`) and in the shared contract draft on `preview/discovery` (`docs/functional-contract-draft.md`, commit `702d6c2`). If #23 changes, revisit the "Required metadata" table.
 
 A throwaway comparator with fixture pairs is in [`spikes/comparison-compatibility/`](../../spikes/comparison-compatibility/). It is not product code.
 

@@ -1,6 +1,6 @@
 # A fixed error budget for Monte Carlo acceptance
 
-**Fact — scope:** [issue #32](https://github.com/punyzxc/matstat-lab/issues/32), owner `adekin06`, research budget 2 hours, requires an inventory of #6/#14/#15 comparisons, corrected bands at R=2,000 and 20,000, and a first-release seed/schedule list. This note and [`spikes/qa-multiplicity/`](../../spikes/qa-multiplicity/) are discovery evidence only. No production tests, CI, protected configuration or existing thresholds were changed.
+**Fact — scope:** [issue #32](https://github.com/GredesCerber/matstat-lab/issues/32), owner `adekin06`, research budget 2 hours, requires an inventory of #6/#14/#15 comparisons, corrected bands at R=2,000 and 20,000, and a first-release seed/schedule list. This note and [`spikes/qa-multiplicity/`](../../spikes/qa-multiplicity/) are discovery evidence only. No production tests, CI, protected configuration or existing thresholds were changed.
 
 ## AC1: what is currently being compared
 
@@ -104,7 +104,7 @@ node --test spikes/qa-multiplicity/band-integration.test.mjs spikes/inference-me
 node spikes/qa-multiplicity/run-cases.mjs
 ```
 
-**Assumption — integration and approval:** retain all existing mandatory checks. Adopt revised schedules/thresholds only through a new approved task and the authorized harness/infra path. This note addresses the open C3 in the [scientific decision register](scientific-decision-register.md) without editing or claiming agreement in that register. Use the captain's [#27 local-check/review/manual-merge procedure](https://github.com/punyzxc/matstat-lab/issues/27#issuecomment-7126240401) while Actions billing prevents job startup; never manually set successful statuses.
+**Assumption — integration and approval:** retain all existing mandatory checks. Adopt revised schedules/thresholds only through a new approved task and the authorized harness/infra path. This note addresses the open C3 in the [scientific decision register](scientific-decision-register.md) without editing or claiming agreement in that register. Use the captain's [#27 local-check/review/manual-merge procedure](https://github.com/GredesCerber/matstat-lab/issues/27#issuecomment-7126240401) while Actions billing prevents job startup; never manually set successful statuses.
 
 ## Position
 

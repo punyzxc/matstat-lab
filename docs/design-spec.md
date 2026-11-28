@@ -2,7 +2,7 @@
 
 ## Workspace
 
-Distribution Explorer puts parameters alongside a chart on large screens and in one column on small screens. Projector mode increases chart area. Annotate partial runs and preserve scale as the experiment progresses. Encode empirical observations with solid marks and theoretical curves with dashed lines. Preserve axis values and provide accessible numeric alternatives. The shared type system uses Space Grotesk, Instrument Serif italic and IBM Plex Mono. [Current design direction](design-direction.md) · [Prototype and visual review](https://github.com/punyzxc/matstat-lab/pull/9)
+Distribution Explorer puts parameters alongside a chart on large screens and in one column on small screens. Projector mode increases chart area. Annotate partial runs and preserve scale as the experiment progresses. Encode empirical observations with solid marks and theoretical curves with dashed lines. Preserve axis values and provide accessible numeric alternatives. The shared type system uses Space Grotesk, Instrument Serif italic and IBM Plex Mono. [Current design direction](design-direction.md) · [Prototype and visual review](https://github.com/GredesCerber/matstat-lab/pull/9)
 
 ## Orbital home
 

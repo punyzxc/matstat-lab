@@ -1,6 +1,6 @@
 # Independent scientific acceptance and Worker budgets
 
-Issue: [#6](https://github.com/punyzxc/matstat-lab/issues/6). Owner: `adekin06` (`area:e2e`). Research budget: 3 hours. Recorded: 2026-11-23.
+Issue: [#6](https://github.com/GredesCerber/matstat-lab/issues/6). Owner: `adekin06` (`area:e2e`). Research budget: 3 hours. Recorded: 2026-11-23.
 
 ## Scope and evidence status
 
