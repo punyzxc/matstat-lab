@@ -1,0 +1,247 @@
+{
+  "lecture": 7,
+  "title": "Закон больших чисел",
+  "status": "draft",
+  "steps": [
+    {
+      "id": "L07-markov",
+      "title": "Неравенство Маркова",
+      "idea": "Для неотрицательной величины среднее ограничивает вероятность большого значения.",
+      "formula": [
+        "P(Y\\ge a)\\le\\frac{EY}{a},\\quad Y\\ge0,\\ a>0",
+        "P(|X|\\ge\\varepsilon)\\le\\frac{\\mathbb E|X|^k}{\\varepsilon^k},\\quad\\varepsilon>0,\\ k>0,\\ \\mathbb E|X|^k<\\infty"
+      ],
+      "source": {
+        "pages": [
+          1,
+          2
+        ],
+        "items": [
+          "Markov inequality, limit theorem introduction",
+          "General moment form (110), not restricted to laws possessing a density"
+        ]
+      }
+    },
+    {
+      "id": "L07-chebyshev",
+      "title": "Оценка Чебышёва",
+      "idea": "Для конечной положительной дисперсии и k>0 дисперсия ограничивает вероятность отклонения от среднего. При нулевой дисперсии X=EX почти наверное; событие отклонения на положительную epsilon имеет вероятность ноль.",
+      "formula": [
+        "P(|X-EX|\\ge k\\sigma)\\le 1/k^2,\\quad k>0,\\quad 0<\\sigma^2=\\operatorname{Var}X<\\infty",
+        "P(|X-\\mathbb EX|<\\varepsilon)\\ge1-\\operatorname{Var}(X)/\\varepsilon^2,\\quad\\varepsilon>0"
+      ],
+      "source": {
+        "pages": [
+          2,
+          3
+        ],
+        "items": [
+          "Chebyshev inequalities (111) and three sigma universal bound"
+        ]
+      },
+      "auditIds": [
+        "L07-chebyshev"
+      ],
+      "experiment": {
+        "station": "lln",
+        "params": {
+          "view": 1,
+          "law": 0,
+          "k": 3,
+          "N": 2000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Сравните теоретическую границу Чебышёва с показанным хвостом выбранного закона."
+    },
+    {
+      "id": "L07-tails",
+      "title": "Три сигмы и конкретные законы",
+      "idea": "У нормального закона двусторонний хвост вдвое больше одного хвоста; для Пуассона значение зависит от параметра.",
+      "formula": [
+        "P(|Z|\\le3)=0.997300204,\\quad P(|Z|>3)=0.002699796,\\quad P(Z>3)=0.001349898,\\quad P(|X-\\lambda|\\ge3\\sqrt\\lambda)\\le1/9,\\quad\\lambda>0"
+      ],
+      "source": {
+        "pages": [
+          3
+        ],
+        "items": [
+          "normal and Poisson three sigma comparison"
+        ]
+      },
+      "auditIds": [
+        "L07-normal-tail",
+        "L07-poisson-bound"
+      ],
+      "example": "Напечатанное 0.00135 относится к одному хвосту, а не двум. Источник уже пишет для Пуассона ≤1/9 и не задаёт λ; при λ=1 точный хвост лишь диагностический пример: 0.0189881569.",
+      "experiment": {
+        "station": "lln",
+        "params": {
+          "view": 1,
+          "law": 3,
+          "k": 3,
+          "N": 2000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Сравните показанный хвост с универсальной границей; учитывайте выбор закона на станции."
+    },
+    {
+      "id": "L07-cheb-lln",
+      "title": "Теорема Чебышёва",
+      "idea": "Независимость и равномерная ограниченность дисперсий дают сходимость среднего к среднему ожиданий по вероятности.",
+      "formula": [
+        "\\sup_i\\operatorname{Var}(X_i)<\\infty\\Longrightarrow\\bar X_n-\\frac1n\\sum_i EX_i\\xrightarrow{P}0",
+        "\\operatorname{Var}(\\bar X_n)\\le C/n,\\quad P(|\\bar X_n-\\mathbb E\\bar X_n|\\ge\\varepsilon)\\le C/(n\\varepsilon^2)"
+      ],
+      "source": {
+        "pages": [
+          3,
+          4
+        ],
+        "items": [
+          "Chebyshev LLN for independent possibly differently distributed variables and inequality (114)"
+        ]
+      }
+    },
+    {
+      "id": "L07-khinchin",
+      "title": "Теорема Хинчина",
+      "idea": "Для независимых одинаково распределённых величин достаточно конечного математического ожидания; конечная дисперсия не обязательна.",
+      "formula": [
+        "\\bar X_n\\xrightarrow{P}EX_1\\quad\\text{если }E|X_1|<\\infty"
+      ],
+      "source": {
+        "pages": [
+          4,
+          5
+        ],
+        "items": [
+          "Khinchin LLN and finite mean remark"
+        ]
+      }
+    },
+    {
+      "id": "L07-cauchy",
+      "title": "Контрпример Коши",
+      "idea": "Для стандартного закона Коши математическое ожидание не существует, поэтому теорема Хинчина неприменима.",
+      "formula": [
+        "f(x)=\\frac1{\\pi(1+x^2)},\\quad E|X|=\\infty",
+        "F_X(x)=\\tfrac12+\\pi^{-1}\\arctan x"
+      ],
+      "source": {
+        "pages": [
+          4,
+          5
+        ],
+        "items": [
+          "Cauchy distribution example and missing mean"
+        ]
+      },
+      "experiment": {
+        "station": "lln",
+        "params": {
+          "view": 0,
+          "law": 4,
+          "N": 2000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Проследите средние последовательностей Коши: теоретическое среднее отсутствует."
+    },
+    {
+      "id": "L07-bernoulli",
+      "title": "Закон Бернулли",
+      "idea": "Доля успехов независимых испытаний с постоянной вероятностью приближается к этой вероятности по вероятности.",
+      "formula": [
+        "\\frac{S_n}{n}\\xrightarrow{P}p,\\quad S_n\\sim\\operatorname{Bin}(n,p)",
+        "\\mathbb E I_i=p,\\quad \\operatorname{Var}I_i=p(1-p)\\le\\tfrac14"
+      ],
+      "source": {
+        "pages": [
+          5,
+          6
+        ],
+        "items": [
+          "Bernoulli LLN and indicator derivation"
+        ]
+      },
+      "notes": "Неравенство для дисперсии нестрогое: при p=1/2 достигается 1/4. Один путь среднего не обязан приближаться к цели монотонно."
+    },
+    {
+      "id": "L07-poisson-lln",
+      "title": "Переменные вероятности успеха",
+      "idea": "При независимых испытаниях с разными вероятностями частота приближается к среднему этих вероятностей.",
+      "formula": [
+        "\\frac{S_n}{n}-\\frac1n\\sum_{i=1}^np_i\\xrightarrow{P}0"
+      ],
+      "source": {
+        "pages": [
+          6
+        ],
+        "items": [
+          "Poisson LLN for varying Bernoulli probabilities"
+        ]
+      }
+    },
+    {
+      "id": "L07-markov-lln",
+      "title": "Условие Маркова",
+      "idea": "Независимость не нужна, если дисперсия нормированной суммы стремится к нулю.",
+      "formula": [
+        "\\operatorname{Var}(n^{-1}\\sum_{i=1}^nX_i)\\to0\\Longrightarrow n^{-1}\\sum_{i=1}^n(X_i-EX_i)\\xrightarrow{P}0"
+      ],
+      "source": {
+        "pages": [
+          6,
+          7
+        ],
+        "items": [
+          "Markov LLN variance condition formula (115)"
+        ]
+      },
+      "notes": "Ожидания и дисперсии каждого конечного нормированного суммирования предполагаются существующими. Условие на дисперсию является достаточным; фраза источника про влияние отдельных слагаемых не заменяет этого условия."
+    }
+  ],
+  "checks": [
+    {
+      "question": "Какая вероятность нормального отклонения более чем на три сигмы?",
+      "answer": "Двусторонняя вероятность примерно 0,002699796; один хвост около 0,00135."
+    },
+    {
+      "question": "Почему к Коши не применить теорему Хинчина?",
+      "answer": "Его математическое ожидание не существует."
+    }
+  ],
+  "skipped": [
+    {
+      "pages": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "items": [
+        "proofs of Markov and Chebyshev inequalities",
+        "Chebyshev LLN proof (114)",
+        "Bernoulli LLN proof by bounded indicator variance",
+        "Poisson LLN proof"
+      ],
+      "reason": "Доказательства заменены формулировками и применением границ."
+    },
+    {
+      "pages": [
+        1,
+        2
+      ],
+      "items": [
+        "Fixed-horizon/optional-stopping discussion and the claim that every conceivable rare event eventually occurs"
+      ],
+      "reason": "Не используется как универсальная теорема: вероятность события ноль не становится единицей, а свойства остановленного процесса требуют отдельного условия. Эксперименты здесь имеют заранее заданный горизонт."
+    }
+  ]
+}

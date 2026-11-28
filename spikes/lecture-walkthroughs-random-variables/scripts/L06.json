@@ -1,0 +1,852 @@
+{
+  "lecture": 6,
+  "title": "Числовые характеристики, преобразования и случайные векторы",
+  "status": "draft",
+  "steps": [
+    {
+      "id": "L06-mean",
+      "title": "Среднее как центр масс",
+      "idea": "Предскажите, куда сместится центр масс при увеличении вероятности большого значения. Математическое ожидание учитывает и значения, и их вероятности; конечное ожидание требует абсолютной интегрируемости.",
+      "formula": [
+        "\\mathbb E X=\\sum_i x_i p_i=\\int_{\\mathbb R}x\\,dF(x),\\qquad \\mathbb E|X|<\\infty",
+        "\\mathbb E X=\\int_{\\mathbb R}x f_X(x)\\,dx\\quad\\text{при наличии плотности}"
+      ],
+      "source": {
+        "pages": [
+          1,
+          2,
+          3
+        ],
+        "items": [
+          "Figures 13–14: numerical summaries and centre of mass",
+          "(30) discrete expectation; (31) density expectation; absolute-integrability qualification"
+        ]
+      },
+      "experiment": {
+        "station": "balance",
+        "seed": 606,
+        "params": {
+          "x1": -3,
+          "p1": 0.2,
+          "x2": -1,
+          "p2": 0.3,
+          "x3": 1.5,
+          "p3": 0.4,
+          "x4": 4,
+          "p4": 0.1,
+          "n": 2000
+        },
+        "label": "Открыть центр масс"
+      },
+      "expected": "Теоретическая опора находится в 0.1. Затем увеличьте только x4 до 5: при тех же вероятностях опора сдвинется в 0.2; выборочное среднее может отличаться."
+    },
+    {
+      "id": "L06-linearity",
+      "title": "Линейность без независимости",
+      "idea": "Для конечных ожиданий суммы и масштабы можно вынести наружу. Независимость нужна для разложения ожидания произведения, но не для суммы.",
+      "formula": [
+        "\\mathbb E(aX+bY+c)=a\\mathbb E X+b\\mathbb E Y+c",
+        "X\\perp Y\\ \\Longrightarrow\\ \\mathbb E(XY)=\\mathbb E X\\,\\mathbb E Y,\\qquad |\\mathbb E X|\\le\\mathbb E|X|"
+      ],
+      "source": {
+        "pages": [
+          3,
+          4
+        ],
+        "items": [
+          "Unnumbered expectation properties 1–5; independent joint-density factorization"
+        ]
+      }
+    },
+    {
+      "id": "L06-indicator",
+      "title": "Вероятность через индикатор",
+      "idea": "Индикатор равен единице при наступлении события и нулю в остальных случаях. Его среднее — вероятность события; усреднение наблюдаемых индикаторов даёт частоту.",
+      "formula": [
+        "I_A=\\begin{cases}1,&\\omega\\in A\\\\0,&\\omega\\notin A\\end{cases},\\qquad \\mathbb E I_A=P(A)"
+      ],
+      "example": "Если P(A)=0.3, то E I_A=1·0.3+0·0.7=0.3.",
+      "source": {
+        "pages": [
+          4
+        ],
+        "items": [
+          "Worked indicator expectation example, replacing the malformed source algebra by its defining two-atom sum"
+        ]
+      }
+    },
+    {
+      "id": "L06-median-mode",
+      "title": "Мода и медиана отвечают на разные вопросы",
+      "idea": "Мода — точка максимальной массы или плотности. Медиана делит вероятность пополам в нестрогом смысле и не обязана совпадать со средним или быть единственной.",
+      "formula": [
+        "m\\text{ — медиана}\\ \\Longleftrightarrow\\ P(X\\le m)\\ge\\tfrac12,\\ P(X\\ge m)\\ge\\tfrac12",
+        "x_{\\rm mode}\\in\\arg\\max_x p_X(x)\\quad\\text{или}\\quad\\arg\\max_x f_X(x)"
+      ],
+      "example": "У закона P(X=0)=0.9, P(X=10)=0.1 медиана равна 0. Полусумма крайних значений 5 не является медианой: утверждение на стр. 5 не является общим правилом.",
+      "source": {
+        "pages": [
+          4,
+          5
+        ],
+        "items": [
+          "Mode and continuous median definitions; Figure15 equal-area interpretation",
+          "Replace p5 midrange-as-discrete-median claim by probability-quantile definition"
+        ]
+      }
+    },
+    {
+      "id": "L06-moments",
+      "title": "Начальные и центральные моменты",
+      "idea": "Начальные моменты берут степени исходного значения, центральные — отклонения от среднего. Все используемые моменты предполагаются конечными; нечётные моменты не определяются главным значением расходящегося интеграла.",
+      "formula": [
+        "\\nu_k=\\mathbb E X^k,\\qquad \\mu_k=\\mathbb E(X-\\mathbb EX)^k,\\qquad \\mu_1=0",
+        "\\nu_k=\\sum_i x_i^k p_i\\ \\text{или}\\ \\int x^k f_X(x)\\,dx,\\qquad \\mu_k=\\sum_i(x_i-\\mathbb EX)^k p_i\\ \\text{или}\\ \\int(x-\\mathbb EX)^k f_X(x)\\,dx"
+      ],
+      "source": {
+        "pages": [
+          5,
+          6
+        ],
+        "items": [
+          "(32)–(35) moment sums/integrals; centred deviation expectation; lower absolute moments exist if a higher absolute moment exists"
+        ]
+      }
+    },
+    {
+      "id": "L06-variance",
+      "title": "Дисперсия и единицы измерения",
+      "idea": "Дисперсия усредняет квадрат отклонения. Стандартное отклонение возвращает исходные единицы и не складывается так же, как дисперсии.",
+      "formula": [
+        "\\operatorname{Var}X=\\mathbb E(X-\\mathbb EX)^2=\\mathbb E X^2-(\\mathbb E X)^2,\\qquad \\sigma_X=\\sqrt{\\operatorname{Var}X}",
+        "\\operatorname{Var}(aX+b)=a^2\\operatorname{Var}X,\\qquad X\\perp Y\\Rightarrow\\operatorname{Var}(X\\pm Y)=\\operatorname{Var}X+\\operatorname{Var}Y"
+      ],
+      "source": {
+        "pages": [
+          6,
+          7
+        ],
+        "items": [
+          "(36)–(38); variance of a constant; scaling; independent sum/difference; nonadditive standard deviation"
+        ]
+      }
+    },
+    {
+      "id": "L06-shape",
+      "title": "Асимметрия и эксцесс",
+      "idea": "Сравнивайте стандартизованные моменты при положительной дисперсии. Симметрия даёт нулевой третий момент, если он существует; обратное неверно. Эксцесс чувствителен к хвостам, поэтому его нельзя понимать только как высоту вершины.",
+      "formula": [
+        "\\gamma_1=\\frac{\\mu_3}{\\sigma^3},\\qquad \\gamma_2=\\frac{\\mu_4}{\\sigma^4}-3,\\qquad \\sigma>0",
+        "X-\\mu\\overset d=\\mu-X\\ \\Longrightarrow\\ \\mathbb E(X-\\mu)^{2j+1}=0\\quad\\text{при существовании момента}"
+      ],
+      "source": {
+        "pages": [
+          8,
+          9
+        ],
+        "items": [
+          "Unnumbered skewness/excess definitions and odd-moment symmetry; Figures16; qualify peakedness shorthand"
+        ]
+      },
+      "experiment": {
+        "station": "moments",
+        "seed": 606,
+        "params": {
+          "law": 4,
+          "lambda": 2,
+          "n": 5000
+        },
+        "label": "Сравнить моменты экспоненциального закона"
+      },
+      "expected": "При lambda=2 теоретические среднее 0.5, дисперсия 0.25, асимметрия 2, эксцесс 6; эмпирические значения колеблются. Смените только law на 5 и сравните форму."
+    },
+    {
+      "id": "L06-discrete-laws",
+      "title": "Моменты биномиального закона и закона Пуассона",
+      "idea": "Число успехов представляется суммой независимых индикаторов. Для Пуассона среднее и дисперсия совпадают; равенство среднего и дисперсии само по себе не определяет закон.",
+      "formula": [
+        "X\\sim\\operatorname{Bin}(m,p):\\quad \\mathbb EX=mp,\\quad \\operatorname{Var}X=mp(1-p)",
+        "X\\sim\\operatorname{Pois}(\\lambda):\\quad \\mathbb EX=\\operatorname{Var}X=\\lambda"
+      ],
+      "source": {
+        "pages": [
+          9,
+          10,
+          11
+        ],
+        "items": [
+          "Binomial PMF, Bernoulli-indicator construction and moment derivations",
+          "Poisson PMF, index-shift sums and exponential-series normalization; final moments"
+        ]
+      }
+    },
+    {
+      "id": "L06-continuous-laws",
+      "title": "Моменты трёх непрерывных законов",
+      "idea": "Всегда указывайте смысл параметров: lambda здесь интенсивность, а sigma — стандартное отклонение, не дисперсия. Нормальность не следует из одного лишь знания первых моментов.",
+      "formula": [
+        "U(a,b):\\quad \\mathbb EX=\\frac{a+b}{2},\\quad \\operatorname{Var}X=\\frac{(b-a)^2}{12}",
+        "\\operatorname{Exp}(\\lambda):\\quad \\mathbb EX=\\lambda^{-1},\\quad \\operatorname{Var}X=\\lambda^{-2}",
+        "N(a,\\sigma^2):\\quad \\mathbb EX=a,\\quad \\operatorname{Var}X=\\sigma^2,\\quad \\mu_4=3\\sigma^4,\\quad \\gamma_2=0"
+      ],
+      "notes": "В итоговой строке на стр. 12 напечатано mu4=3: это верно лишь при sigma=1. Для общего нормального закона нужен множитель sigma^4.",
+      "source": {
+        "pages": [
+          11,
+          12
+        ],
+        "items": [
+          "Uniform, exponential, normal moments; normal fourth central moment and excess; repair missing scale factor in concluding mu4 line"
+        ]
+      }
+    },
+    {
+      "id": "L06-normal-interval",
+      "title": "Нормальный интервал и обозначение Ф",
+      "idea": "Сначала переведите границы в стандартную шкалу. Здесь Phi всегда означает интеграл плотности от минус бесконечности; интеграл от нуля обозначен отдельно.",
+      "formula": [
+        "P(\\alpha<X<\\beta)=\\Phi\\!\\left(\\frac{\\beta-a}{\\sigma}\\right)-\\Phi\\!\\left(\\frac{\\alpha-a}{\\sigma}\\right)",
+        "P(|X-a|<\\delta)=1-2\\Phi(-\\delta/\\sigma)=2\\Phi_0(\\delta/\\sigma),\\qquad\\Phi_0(z)=\\Phi(z)-\\tfrac12"
+      ],
+      "source": {
+        "pages": [
+          13
+        ],
+        "items": [
+          "(39),(40); interval standardization; alternative zero-origin Phi convention; zero-mean special case"
+        ]
+      }
+    },
+    {
+      "id": "L06-three-sigma",
+      "title": "В правиле трёх сигм два хвоста",
+      "idea": "Правило относится к нормальному закону с указанными центром и масштабом. Оно не делает большие ошибки невозможными и не является универсальным правилом для любого распределения.",
+      "formula": [
+        "P(|Z|<3)=1-2\\Phi(-3)=0.997300203937",
+        "P(|Z|\\ge3)=0.002699796063,\\qquad\\Phi(-3)\\approx0.00135"
+      ],
+      "example": "В лекции записано 1−0.00135=0.9973: пропущен второй хвост. Центральные вероятности для k=1,2,3,4: 0.682689492137; 0.954499736104; 0.997300203937; 0.999936657516. Проценты снаружи: 31.7310507863%; 4.5500263896%; 0.2699796063%; 0.0063342484%; строка процентов и значение для четырёх сигм в лекции неверны.",
+      "source": {
+        "pages": [
+          13,
+          14
+        ],
+        "items": [
+          "Worked three-sigma example; every entry of Table3; replace unsupported random-errors-imply-symmetry inference by explicit normal-model assumption"
+        ]
+      },
+      "auditIds": [
+        "L06-sigma-1",
+        "L06-sigma-2",
+        "L06-sigma-3",
+        "L06-sigma-4"
+      ],
+      "experiment": {
+        "station": "moments",
+        "seed": 606,
+        "params": {
+          "law": 5,
+          "sigma": 1,
+          "n": 5000
+        },
+        "label": "Проверить доли внутри сигм"
+      },
+      "expected": "Теория для rule3 равна 0.997300 после округления ядром; наблюдаемая доля для seed606 зафиксирована в evidence.json. Она не обязана точно равняться теоретической."
+    },
+    {
+      "id": "L06-square",
+      "title": "Квадрат одной величины",
+      "idea": "Образы исходов, дающих одно значение функции, объединяются, а их вероятности складываются. Квадрат одного наблюдения нельзя заменить произведением двух независимо разыгранных наблюдений.",
+      "formula": [
+        "P(X=-1)=P(X=0)=P(X=1)=\\tfrac13\\quad\\Longrightarrow\\quad P(X^2=0)=\\tfrac13,\\ P(X^2=1)=\\tfrac23",
+        "X_1\\perp X_2:\\quad P(X_1X_2=-1,0,1)=(\\tfrac29,\\tfrac59,\\tfrac29)"
+      ],
+      "example": "На стр. 15 вероятности квадрата переставлены. Там же утверждение X²≠X·X неверно: X²=X·X для одной и той же случайной величины; второй закон относится к независимым копиям X1 и X2.",
+      "source": {
+        "pages": [
+          14,
+          15
+        ],
+        "items": [
+          "Discrete square-law worked table and independent-product worked table; both source corrections"
+        ]
+      },
+      "auditIds": [
+        "L06-square-law",
+        "L06-independent-product"
+      ]
+    },
+    {
+      "id": "L06-transform",
+      "title": "Монотонная замена и модуль производной",
+      "idea": "Найдите обратную функцию на носителе и учтите, возрастает или убывает преобразование. Для непрерывного закона при убывании меняется направление неравенства; плотность остаётся неотрицательной.",
+      "formula": [
+        "Y=g(X),\\ h=g^{-1}:\\quad F_Y(y)=\\begin{cases}F_X(h(y)),&g\\text{ возрастает}\\\\1-F_X(h(y)),&g\\text{ убывает}\\end{cases}",
+        "f_Y(y)=f_X(h(y))\\,|h'(y)|\\quad\\text{на преобразованном носителе}"
+      ],
+      "notes": "Формула для CDF убывающей функции здесь дана для X с плотностью. У атомов нужны односторонние пределы. Для немонотонной функции сначала найдите событие {g(X)≤y} или суммируйте плотности всех обратных ветвей. Для формулы плотности используются дифференцируемые монотонная функция и её обратная; равенство плотностей понимается почти всюду.",
+      "source": {
+        "pages": [
+          16,
+          17
+        ],
+        "items": [
+          "Inverse-function definition and inequalities; increasing (42), decreasing (43), joined density (44)"
+        ]
+      }
+    },
+    {
+      "id": "L06-affine",
+      "title": "Линейное преобразование и вырожденный случай",
+      "idea": "Отрицательный коэффициент отражает распределение. При нулевом коэффициенте результат — константа; формула плотности с делением на коэффициент тогда неприменима.",
+      "formula": [
+        "Y=\\alpha X+\\beta,\\quad\\alpha\\ne0:\\quad f_Y(y)=\\frac1{|\\alpha|}f_X\\!\\left(\\frac{y-\\beta}{\\alpha}\\right)",
+        "\\alpha=0:\\quad P(Y=\\beta)=1"
+      ],
+      "source": {
+        "pages": [
+          17,
+          18
+        ],
+        "items": [
+          "Worked affine transform, both alpha signs; absolute Jacobian and alpha=0 domain boundary"
+        ]
+      },
+      "experiment": {
+        "station": "transform",
+        "seed": 606,
+        "params": {
+          "phi": 0,
+          "alpha": -1.5,
+          "b": 1,
+          "sigma": 0.5,
+          "n": 5000
+        },
+        "label": "Отразить и сдвинуть распределение"
+      },
+      "expected": "Для X~N(0,0.25) и Y=−1.5X+1 теоретические среднее 1 и дисперсия 0.5625. Меняйте только alpha и следите за отражением и масштабом."
+    },
+    {
+      "id": "L06-exp-transform",
+      "title": "Экспоненциальное убывающее преобразование",
+      "idea": "Значения exp(−beta X) для положительного X лежат между нулём и единицей. Проверьте весь носитель, а не только внутреннюю формулу.",
+      "formula": [
+        "X\\sim\\operatorname{Exp}(\\lambda),\\quad Y=e^{-\\beta X},\\quad\\lambda,\\beta>0",
+        "F_Y(y)=\\begin{cases}0,&y\\le0\\\\y^{\\lambda/\\beta},&0<y<1\\\\1,&y\\ge1\\end{cases},\\quad f_Y(y)=\\frac\\lambda\\beta y^{\\lambda/\\beta-1}\\ (0<y<1)"
+      ],
+      "source": {
+        "pages": [
+          18
+        ],
+        "items": [
+          "Worked exponential transform, support and endpoints; derivative of the stated CDF"
+        ]
+      },
+      "experiment": {
+        "station": "transform",
+        "seed": 606,
+        "params": {
+          "phi": 2,
+          "lambda": 2,
+          "beta": 1,
+          "n": 5000
+        },
+        "label": "Получить распределение на (0,1)"
+      },
+      "expected": "Теория: F(y)=y², f(y)=2y на (0,1), среднее 2/3, дисперсия 1/18. Нулевая или единичная граница не имеет положительной массы."
+    },
+    {
+      "id": "L06-joint",
+      "title": "Совместный закон и вероятность прямоугольника",
+      "idea": "Для случайного вектора нужны совместные вероятности, а не только отдельные законы координат. В формулах ниже используется соглашение ≤; в лекции записано <, что меняет включение границ при атомах.",
+      "formula": [
+        "F_{X,Y}(x,y)=P(X\\le x,Y\\le y)",
+        "P(a<X\\le b,c<Y\\le d)=F(b,d)-F(a,d)-F(b,c)+F(a,c)",
+        "F(x,y)=\\int_{-\\infty}^x\\int_{-\\infty}^y f(u,v)\\,dv\\,du,\\qquad f=\\frac{\\partial^2 F}{\\partial x\\partial y}\\ \\text{почти всюду}"
+      ],
+      "source": {
+        "pages": [
+          19,
+          20,
+          21
+        ],
+        "items": [
+          "(45),(46); n-dimensional joint CDF limits/coordinate monotonicity/continuity; rectangle and strip inclusion–exclusion; joint mixed derivative",
+          "CDF must also be rectangle-increasing; coordinate monotonicity alone is not sufficient; measurable/Borel events rather than every arbitrary subset"
+        ]
+      }
+    },
+    {
+      "id": "L06-multinomial",
+      "title": "Три категории и полиномиальный закон",
+      "idea": "В каждом независимом испытании частица попадает ровно в одну из трёх групп. Числа в первых двух группах связаны ограничением на их сумму и обычно не независимы.",
+      "formula": [
+        "P(K_1=k_1,K_2=k_2)=\\frac{n!}{k_1!k_2!(n-k_1-k_2)!}p_1^{k_1}p_2^{k_2}(1-p_1-p_2)^{n-k_1-k_2}"
+      ],
+      "notes": "Условия: p1,p2≥0, p1+p2≤1, k1,k2 — неотрицательные целые, k1+k2≤n. Это параметрический пример, фиксированных чисел в оригинале нет.",
+      "source": {
+        "pages": [
+          21
+        ],
+        "items": [
+          "Multinomial worked symbolic example and granular-material three-group interpretation"
+        ]
+      }
+    },
+    {
+      "id": "L06-gaussian-vector",
+      "title": "Двумерная нормальная плотность",
+      "idea": "Корреляция управляет наклоном облака. Обычная двумерная плотность существует только при положительных масштабах и |rho|<1; при |rho|=1 закон сосредоточен на прямой.",
+      "formula": [
+        "f(x,y)=\\frac{\\exp[-Q/(2(1-\\rho^2))]}{2\\pi\\sigma_X\\sigma_Y\\sqrt{1-\\rho^2}}",
+        "Q=u^2-2\\rho uv+v^2,\\qquad u=\\frac{x-\\mu_X}{\\sigma_X},\\quad v=\\frac{y-\\mu_Y}{\\sigma_Y}"
+      ],
+      "source": {
+        "pages": [
+          21,
+          22
+        ],
+        "items": [
+          "Bivariate normal symbolic example, CDF as joint-density integral, ellipse quadratic and correlation parameter"
+        ]
+      },
+      "experiment": {
+        "station": "scatter",
+        "seed": 606,
+        "params": {
+          "mode": 0,
+          "rho": 0.6,
+          "sigma1": 1,
+          "sigma2": 2,
+          "n": 2000
+        },
+        "label": "Открыть нормальное облако"
+      },
+      "expected": "Теоретическая корреляция 0.6; линии линейной регрессии имеют наклоны 1.2 для Y по X и 0.3 для X по Y. Выборочная корреляция не обязана быть ровно 0.6."
+    },
+    {
+      "id": "L06-marginal",
+      "title": "Маргинальные законы",
+      "idea": "Чтобы получить закон одной координаты, усредните совместную плотность по всем значениям второй. По двум маргинальным законам зависимость восстановить нельзя.",
+      "formula": [
+        "F_X(x)=F_{X,Y}(x,+\\infty),\\qquad f_X(x)=\\int_{\\mathbb R}f_{X,Y}(x,y)\\,dy",
+        "f_Y(y)=\\int_{\\mathbb R}f_{X,Y}(x,y)\\,dx"
+      ],
+      "source": {
+        "pages": [
+          22
+        ],
+        "items": [
+          "(47) and unnumbered marginal-density integrals; failure of the inverse problem without dependence information"
+        ]
+      }
+    },
+    {
+      "id": "L06-conditional",
+      "title": "Условная плотность",
+      "idea": "При известной второй координате совместную плотность нормируют её маргинальной плотностью. Деление допустимо там, где знаменатель положителен; событие Y=y при непрерывном законе само имеет вероятность ноль.",
+      "formula": [
+        "f_{X\\mid Y}(x\\mid y)=\\frac{f_{X,Y}(x,y)}{f_Y(y)},\\qquad f_Y(y)>0",
+        "f_{X,Y}(x,y)=f_{X\\mid Y}(x\\mid y)f_Y(y)=f_{Y\\mid X}(y\\mid x)f_X(x)"
+      ],
+      "source": {
+        "pages": [
+          22,
+          23
+        ],
+        "items": [
+          "Conditional CDF via density integral, (48),(49), product rule; qualify zero-probability conditioning"
+        ]
+      }
+    },
+    {
+      "id": "L06-independent",
+      "title": "Проверка независимости по таблице",
+      "idea": "Для независимых координат совместный закон факторизуется. В конечной таблице нужно проверить все клетки; одна совпавшая вероятность сама по себе недостаточна.",
+      "formula": [
+        "X\\perp Y\\ \\Longleftrightarrow\\ F_{X,Y}(x,y)=F_X(x)F_Y(y)\\quad\\text{для всех }x,y",
+        "(p_{ij})=\\begin{pmatrix}1/3&1/3\\\\1/6&1/6\\end{pmatrix},\\qquad p_{ij}=p_{i\\cdot}p_{\\cdot j}"
+      ],
+      "example": "Суммы строк: 2/3 и 1/3; суммы столбцов: 1/2 и 1/2. Все четыре произведения совпадают. Промежуточная матрица на стр. 25 с элементами 1/2,1/2,2/3,1/3 имеет сумму 2 и не является совместным законом.",
+      "source": {
+        "pages": [
+          23,
+          24,
+          25
+        ],
+        "items": [
+          "(50)–(52) event/CDF/density factorization; full worked 2x2 independence table and threshold check; invalid intermediate matrix correction"
+        ]
+      },
+      "auditIds": [
+        "L06-independence",
+        "L06-bad-matrix"
+      ]
+    },
+    {
+      "id": "L06-convolution",
+      "title": "Свёртка независимых слагаемых",
+      "idea": "Возможные разложения суммы на два значения нужно усреднить по закону одного слагаемого. Формула свёртки требует независимости, иначе необходим совместный закон.",
+      "formula": [
+        "F_{X+Y}(z)=\\int_{\\mathbb R}F_X(z-y)\\,dF_Y(y)",
+        "f_{X+Y}(z)=\\int_{\\mathbb R}f_X(z-y)f_Y(y)\\,dy",
+        "X,Y\\ge0:\\quad F_{X+Y}(z)=\\int_0^z F_X(z-y)f_Y(y)\\,dy\\quad(z\\ge0)"
+      ],
+      "source": {
+        "pages": [
+          26,
+          27
+        ],
+        "items": [
+          "(53),(53′),(54); nonnegative and real-line cases; CDF/density convolution definitions",
+          "Commutativity, associativity, linearity of convolution (probability mixtures require nonnegative weights summing to one)"
+        ]
+      }
+    },
+    {
+      "id": "L06-two-uniforms",
+      "title": "Сумма двух равномерных величин",
+      "idea": "Площадь под диагональю единичного квадрата даёт CDF суммы. Её производная — треугольная плотность; за верхним концом носителя CDF равна единице.",
+      "formula": [
+        "F_{U_1+U_2}(t)=\\begin{cases}0,&t<0\\\\t^2/2,&0\\le t\\le1\\\\1-(2-t)^2/2,&1<t\\le2\\\\1,&t>2\\end{cases}",
+        "f_{U_1+U_2}(t)=\\begin{cases}t,&0\\le t\\le1\\\\2-t,&1<t\\le2\\\\0,&\\text{иначе}\\end{cases}"
+      ],
+      "source": {
+        "pages": [
+          27,
+          28,
+          29,
+          30
+        ],
+        "items": [
+          "Uniform input density; geometric derivation via square, (55), repeated convolution derivation and support"
+        ]
+      },
+      "auditIds": [
+        "L06-uniform-density-2"
+      ],
+      "experiment": {
+        "station": "convolution",
+        "seed": 606,
+        "params": {
+          "m": 2,
+          "R": 5000
+        },
+        "label": "Сложить две равномерные величины"
+      },
+      "expected": "Теоретические среднее суммы 1, дисперсия 1/6; плотность в точке 1 равна 1. Гистограмма приближает плотность и не является ею точно."
+    },
+    {
+      "id": "L06-three-uniforms",
+      "title": "Три слагаемых: кусочная парабола",
+      "idea": "Свёртка треугольника с равномерной плотностью даёт три квадратичных участка. Форму можно сравнить с нормальной, но при конечном числе слагаемых законы не совпадают.",
+      "formula": [
+        "f_3(x)=\\begin{cases}x^2/2,&0\\le x\\le1\\\\(-2x^2+6x-3)/2,&1<x\\le2\\\\(3-x)^2/2,&2<x\\le3\\\\0,&\\text{иначе}\\end{cases}"
+      ],
+      "source": {
+        "pages": [
+          30,
+          31
+        ],
+        "items": [
+          "Unnumbered three-uniform convolution branches and Figure23; corrected independent rational-grid reference"
+        ]
+      },
+      "auditIds": [
+        "L06-uniform-density-3"
+      ]
+    },
+    {
+      "id": "L06-four-uniforms",
+      "title": "Четыре слагаемых и ошибка в полиномах",
+      "idea": "Плотность симметрична относительно 2. Прежде чем доверять длинной формуле, проверьте симметричные точки, неотрицательность и нормировку.",
+      "formula": [
+        "f_4(x)=\\frac1{6}\\sum_{k=0}^{4}(-1)^k\\binom4k(x-k)_+^3,\\qquad (t)_+=\\max(t,0)",
+        "f_4(1.5)=f_4(2.5)=\\frac{23}{48}"
+      ],
+      "example": "На стр. 32 в первом среднем участке стоит (x−3)³ вместо (x−1)³; во втором среднем участке знаменатель последнего кубического члена равен 6 вместо 3. Корректные участки: x−1−(x−1)³/3+(2−x)³/6 на [1,2]; 3−x+(x−2)³/6−(3−x)³/3 на [2,3]. Внешние: x³/6 на [0,1], (4−x)³/6 на [3,4], ноль вне [0,4].",
+      "source": {
+        "pages": [
+          31,
+          32
+        ],
+        "items": [
+          "Four-uniform integration setup; every final cubic branch, replacing the two faulty middle branches"
+        ]
+      },
+      "auditIds": [
+        "L06-uniform-density-4"
+      ]
+    },
+    {
+      "id": "L06-failures",
+      "title": "Два отказа прибора",
+      "idea": "Суммируются два независимых срока работы после мгновенного восстановления. Независимость повторных сроков — модельное предположение; запись X+X для одной величины означала бы другую задачу.",
+      "formula": [
+        "P(U_1+U_2<t)=F_2(t),\\qquad (F_2(0.5),F_2(1),F_2(1.5))=(\\tfrac18,\\tfrac12,\\tfrac78)"
+      ],
+      "example": "Таблица 5 в лекции верна. Ошибка находится в общем кусочном CDF на стр. 33: выше 2 он должен быть равен 1, а не 0.",
+      "source": {
+        "pages": [
+          32,
+          33
+        ],
+        "items": [
+          "Full two-failure worked example, Table5 at all three t values; density/CDF integration and support-tail correction"
+        ]
+      },
+      "auditIds": [
+        "L06-two-failures-0_5",
+        "L06-two-failures-1",
+        "L06-two-failures-1_5",
+        "L06-sum-cdf-outside"
+      ]
+    },
+    {
+      "id": "L06-covariance",
+      "title": "Ковариация и дисперсия суммы",
+      "idea": "Совместные моменты показывают, что происходит с двумя координатами одновременно. Ковариационные члены нельзя выкидывать без обоснования.",
+      "formula": [
+        "\\nu_{kr}=\\mathbb E(X^kY^r),\\qquad\\mu_{kr}=\\mathbb E[(X-\\mathbb EX)^k(Y-\\mathbb EY)^r]",
+        "\\operatorname{Cov}(X,Y)=\\mu_{11}=\\mathbb E(XY)-\\mathbb EX\\,\\mathbb EY",
+        "\\operatorname{Var}\\!\\left(\\sum_iX_i\\right)=\\sum_i\\operatorname{Var}X_i+2\\sum_{i<j}\\operatorname{Cov}(X_i,X_j)"
+      ],
+      "source": {
+        "pages": [
+          34,
+          35,
+          36
+        ],
+        "items": [
+          "Mixed raw moments as sums/integrals; (57)–(60); mu20/mu02 variances; covariance(X,X)=variance; pair count binomial(n,2)"
+        ]
+      }
+    },
+    {
+      "id": "L06-lottery",
+      "title": "Лотерея совпавших номеров",
+      "idea": "При равномерной случайной перестановке ожидается одно совпадение независимо от числа игроков. Это среднее число призов, а не гарантия, что одного или двух хватит.",
+      "formula": [
+        "\\mathbb EK=1,\\quad \\operatorname{Var}K=1\\ (n\\ge2);\\qquad n=1:\\ \\operatorname{Var}K=0",
+        "P(I_i=1)=\\tfrac1n,\\quad P(I_i=I_j=1)=\\tfrac1{n(n-1)},\\quad \\operatorname{Cov}(I_i,I_j)=\\tfrac1{n^2(n-1)}\\quad(i\\ne j,n\\ge2)"
+      ],
+      "example": "Стр. 37 предлагает E K+sqrt(Var K)=2 приза. Это эвристический запас, не требование и не гарантия достаточности; возможны и все n совпадений. При n=1 утверждение Var K=1 неверно.",
+      "source": {
+        "pages": [
+          36,
+          37
+        ],
+        "items": [
+          "Complete lottery fixed-point worked example; expectation, variance and covariance calculation; n=1 boundary and prize interpretation"
+        ]
+      },
+      "auditIds": [
+        "L06-lottery"
+      ],
+      "experiment": {
+        "station": "scatter",
+        "seed": 606,
+        "params": {
+          "mode": 2,
+          "players": 6,
+          "reps": 4000
+        },
+        "label": "Разыграть перестановки"
+      },
+      "expected": "При шести игроках теоретические среднее и дисперсия числа совпадений равны 1. Пять или шесть совпадений возможны не одинаково: ровно пять из шести невозможны; среднее всё равно не является верхней границей."
+    },
+    {
+      "id": "L06-disc",
+      "title": "Нулевая ковариация не означает независимость",
+      "idea": "В равномерном круге симметрия обнуляет ковариацию. Но зная горизонтальную координату, мы ограничиваем диапазон вертикальной; значит, координаты зависимы.",
+      "formula": [
+        "f_{X,Y}(x,y)=\\frac{\\mathbf1_{x^2+y^2\\le R^2}}{\\pi R^2},\\quad\\operatorname{Cov}(X,Y)=0",
+        "f_X(x)=\\frac{2\\sqrt{R^2-x^2}}{\\pi R^2}\\ \\ (|x|<R),\\qquad f_X(x)=0\\ \\ (|x|\\ge R)"
+      ],
+      "example": "В лекции на стр. 37 маргинальная плотность ошибочно постоянна 2/(pi R). Нужно интегрировать по хорде длиной 2sqrt(R²−x²), а не по всему диаметру.",
+      "source": {
+        "pages": [
+          37,
+          38
+        ],
+        "items": [
+          "Uniform-disc worked joint density, symmetry expectation/covariance calculation, corrected chord marginal",
+          "Exercise: zero correlation implies independence only for a jointly Gaussian pair, not merely Gaussian marginal laws"
+        ]
+      },
+      "auditIds": [
+        "L06-disc"
+      ],
+      "experiment": {
+        "station": "scatter",
+        "seed": 606,
+        "params": {
+          "mode": 1,
+          "n": 2000
+        },
+        "label": "Проверить зависимость в круге"
+      },
+      "expected": "Теоретическая корреляция нулевая, но облако занимает круг, не декартово произведение двух отрезков. Выборочная корреляция близка к нулю для данного запуска, а не равна ему по определению."
+    },
+    {
+      "id": "L06-correlation",
+      "title": "Стандартизация и границы корреляции",
+      "idea": "Корреляция — безразмерная мера линейной связи при конечных положительных дисперсиях. Нулевая корреляция не исключает нелинейной зависимости.",
+      "formula": [
+        "X^*=\\frac{X-\\mathbb EX}{\\sigma_X},\\quad \\mathbb EX^*=0,\\quad\\operatorname{Var}X^*=1",
+        "\\rho=\\frac{\\operatorname{Cov}(X,Y)}{\\sigma_X\\sigma_Y},\\quad -1\\le\\rho\\le1,\\quad |\\rho|=1\\Longleftrightarrow Y=aX+b\\ \\text{почти наверное}\\ (a\\ne0)"
+      ],
+      "source": {
+        "pages": [
+          38,
+          39
+        ],
+        "items": [
+          "Standardized variables; correlation definition/properties1–4; rho=sign(a); nonzero correlation implies dependence"
+        ]
+      }
+    },
+    {
+      "id": "L06-matrix",
+      "title": "Корреляционная и ковариационная матрицы",
+      "idea": "Эти матрицы связаны, но имеют разные единицы и диагонали. Произвольная симметричная таблица чисел от −1 до 1 ещё не обязана быть возможной корреляционной матрицей.",
+      "formula": [
+        "R_{ij}=\\rho(X_i,X_j),\\quad R_{ii}=1,\\quad R=R^\\top,\\quad R\\succeq0",
+        "\\Sigma_{ij}=\\operatorname{Cov}(X_i,X_j),\\quad \\Sigma_{ii}=\\operatorname{Var}X_i"
+      ],
+      "source": {
+        "pages": [
+          39,
+          40
+        ],
+        "items": [
+          "Correlation matrix and n choose2 off-diagonal pairs; clarify source remark which mixes correlation entries and variance diagonal"
+        ]
+      }
+    },
+    {
+      "id": "L06-conditional-mean",
+      "title": "Условное среднее — функция",
+      "idea": "Среднее Y при фиксированном X=x зависит от x. Вообще это нелинейная функция, и две регрессионные функции не являются взаимно обратными.",
+      "formula": [
+        "m_Y(x)=\\mathbb E(Y\\mid X=x)=\\sum_j y_jP(Y=y_j\\mid X=x)\\quad\\text{или}\\quad\\int y f_{Y\\mid X}(y\\mid x)\\,dy",
+        "m_X(y)=\\mathbb E(X\\mid Y=y)"
+      ],
+      "notes": "В дискретной записи нужны условные вероятности, а не ненормированные совместные p_ij. Обозначения направления регрессии на стр. 41 перепутаны: условное среднее Y при X — регрессия Y на X.",
+      "source": {
+        "pages": [
+          40,
+          41
+        ],
+        "items": [
+          "(61),(62); regression function definitions; polynomial approximation motivation; direction/conditioning qualifications"
+        ]
+      }
+    },
+    {
+      "id": "L06-regression",
+      "title": "Две линейные регрессии",
+      "idea": "Наилучшая линейная аппроксимация минимизирует средний квадрат ошибки; она совпадает с истинным условным средним лишь когда оно линейно, например у совместного нормального закона.",
+      "formula": [
+        "\\widehat y=\\mu_Y+\\rho\\frac{\\sigma_Y}{\\sigma_X}(x-\\mu_X),\\qquad\\widehat x=\\mu_X+\\rho\\frac{\\sigma_X}{\\sigma_Y}(y-\\mu_Y)",
+        "(\\widehat a,\\widehat b)=\\arg\\min_{a,b}\\sum_i(y_i-a x_i-b)^2"
+      ],
+      "notes": "Это (63),(64) и выборочный метод наименьших квадратов. Чем выше степень полинома, тем меньше обучающая ошибка в вложенных классах, но качество предсказания не обязано улучшаться. При rho=0 прямые y=muY и x=muX перпендикулярны; угол зависит от шкал осей и не является безусловной мерой силы зависимости.",
+      "source": {
+        "pages": [
+          41,
+          42,
+          43
+        ],
+        "items": [
+          "Least-squares polynomial criterion; worked symbolic affine regression slope/intercept derivation; (63),(64); exercise equivalence with least squares; Figure25 interpretation"
+        ]
+      }
+    }
+  ],
+  "checks": [
+    {
+      "question": "Почему из E(X+Y)=EX+EY не следует Var(X+Y)=Var X+Var Y?",
+      "answer": "Линейность ожидания не требует независимости. В дисперсии суммы остаётся 2Cov(X,Y); он равен нулю, например, для независимых величин с конечными дисперсиями."
+    },
+    {
+      "question": "Чем X² отличается от X1X2 для двух независимых копий равномерной величины на {−1,0,1}?",
+      "answer": "X² неотрицателен и имеет массы 1/3 и 2/3 в 0 и 1. Независимое произведение также принимает −1 с вероятностью 2/9. При умножении X на себя это всегда X²."
+    },
+    {
+      "question": "Что доказывает почти нулевая корреляция точек равномерного круга?",
+      "answer": "Сама по себе она не доказывает независимость. Теоретическая ковариация равна нулю по симметрии, но допустимый диапазон Y зависит от X."
+    }
+  ],
+  "skipped": [
+    {
+      "pages": [
+        3,
+        4,
+        6,
+        7,
+        8
+      ],
+      "items": [
+        "Line-by-line integral proofs of expectation/variance properties and the odd-moment cancellation"
+      ],
+      "reason": "The corresponding identities and their assumptions are taught in L06-linearity, L06-moments, L06-variance and L06-shape; repeated algebra is optional teacher work rather than additional slides."
+    },
+    {
+      "pages": [
+        10,
+        11,
+        12
+      ],
+      "items": [
+        "Full index-shift derivations of binomial/Poisson moments; integration-by-parts chains for normal second/fourth moments; Maclaurin normalization intermediate sums"
+      ],
+      "reason": "Final laws and assumptions are explicit in L06-discrete-laws and L06-continuous-laws; long algebra is deferred, not represented as an interactive proof."
+    },
+    {
+      "pages": [
+        19
+      ],
+      "items": [
+        "Full n-dimensional measurable-space construction and separate derivations of each joint-CDF limit"
+      ],
+      "reason": "Joint CDF and limiting/marginal conventions are summarized in L06-joint; the programme focuses on two coordinates."
+    },
+    {
+      "pages": [
+        26,
+        27,
+        29,
+        30,
+        31
+      ],
+      "items": [
+        "Riemann-sum proof of (53); every intermediate integration line producing (55), three- and four-uniform branches; separate proofs of convolution algebra"
+      ],
+      "reason": "The actual convolution formulas, all final density branches and their support are covered; detailed symbolic integration is an optional board exercise."
+    },
+    {
+      "pages": [
+        35,
+        36,
+        38,
+        39,
+        42,
+        43
+      ],
+      "items": [
+        "Expanded square proof of (58); covariance cancellation lines; full proof of |rho|≤1 and equality cases; differentiation of least-squares normal equations"
+      ],
+      "reason": "Definitions, formulas (57)–(64), assumptions, lottery and dependence counterexample remain explicit steps; repeated proof algebra is deferred."
+    },
+    {
+      "pages": [
+        40
+      ],
+      "items": [
+        "Spectral analysis or estimation of a general correlation matrix"
+      ],
+      "reason": "The original itself places advanced matrix analysis outside the course; L06-matrix retains the defining matrix and its necessary properties."
+    }
+  ]
+}

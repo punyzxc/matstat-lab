@@ -1,0 +1,204 @@
+{
+  "lecture": 8,
+  "title": "Центральная предельная теорема",
+  "status": "draft",
+  "steps": [
+    {
+      "id": "L08-convergence",
+      "title": "Сходимость распределений",
+      "idea": "Центральная предельная теорема описывает предельный закон стандартизованной суммы, а не сходимость к нормальной случайной величине по вероятности.",
+      "formula": [
+        "P(Z_n\\le x)\\to\\Phi_{\\mathrm{CDF}}(x)",
+        "S_n=\\sum_{i=1}^nX_i,\\quad A_n=\\sum_i\\mathbb EX_i,\\quad B_n^2=\\sum_i\\operatorname{Var}X_i,\\quad Z_n=(S_n-A_n)/B_n",
+        "P(\\alpha<Z_n<\\beta)\\longrightarrow\\Phi(\\beta)-\\Phi(\\alpha),\\quad B_n>0"
+      ],
+      "source": {
+        "pages": [
+          1,
+          2
+        ],
+        "items": [
+          "distribution convergence definition, normal integral"
+        ]
+      }
+    },
+    {
+      "id": "L08-iid",
+      "title": "Теорема Линдеберга — Леви",
+      "idea": "Независимые одинаково распределённые величины с конечной положительной дисперсией дают нормальный предел.",
+      "formula": [
+        "\\frac{\\sum_{i=1}^nX_i-n\\mu}{\\sigma\\sqrt n}\\xrightarrow{d}N(0,1)"
+      ],
+      "source": {
+        "pages": [
+          1,
+          2
+        ],
+        "items": [
+          "Lindeberg Levy theorem and standardization"
+        ]
+      },
+      "notes": "На стр. 1–2 источник указывает независимость и равенство первых двух моментов, но не одинаковость распределений. Для сформулированной здесь классической i.i.d.-версии добавлена одинаковая распределённость; одних равных средних и дисперсий в общем случае недостаточно.",
+      "experiment": {
+        "station": "clt",
+        "params": {
+          "law": 1,
+          "n": 5,
+          "R": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Сравните долю |Z|≤1 и расстояние до стандартного нормального закона."
+    },
+    {
+      "id": "L08-lyapunov",
+      "title": "Условие Ляпунова",
+      "idea": "Для независимых неодинаковых слагаемых проверяют нормированную сумму абсолютных третьих центральных моментов.",
+      "formula": [
+        "\\frac{\\sum_iE|X_i-EX_i|^3}{(\\sum_i\\operatorname{Var}X_i)^{3/2}}\\to0"
+      ],
+      "source": {
+        "pages": [
+          2,
+          3
+        ],
+        "items": [
+          "Lyapunov theorem absolute third moment condition"
+        ]
+      },
+      "notes": "Модуль в третьем моменте существенен; обычный третий центральный момент может взаимно сокращаться. При непрерывном предельном CDF сходимость функций распределения также равномерна по x; это сходимость по распределению, а не по вероятности к случайной величине."
+    },
+    {
+      "id": "L08-bernoulli",
+      "title": "Сумма индикаторов",
+      "idea": "Для независимых испытаний с постоянным p стандартизованное число успехов асимптотически нормально.",
+      "formula": [
+        "\\frac{S_n-np}{\\sqrt{np(1-p)}}\\xrightarrow{d}N(0,1)"
+      ],
+      "source": {
+        "pages": [
+          3
+        ],
+        "items": [
+          "example 1 Bernoulli and de Moivre Laplace"
+        ]
+      },
+      "notes": "Здесь 0<p<1: при p=0 или p=1 дисперсия нулевая и такая стандартизация невозможна. В примере источника npq — дисперсия, стандартное отклонение равно sqrt(npq)."
+    },
+    {
+      "id": "L08-uniform",
+      "title": "Сумма равномерных",
+      "idea": "Перед сравнением с нормальным законом сумму независимых U(0,1) нужно центрировать и масштабировать.",
+      "formula": [
+        "\\frac{\\sum_{i=1}^nU_i-n/2}{\\sqrt{n/12}}\\xrightarrow{d}N(0,1)"
+      ],
+      "source": {
+        "pages": [
+          3
+        ],
+        "items": [
+          "example 2 uniform sum"
+        ]
+      },
+      "experiment": {
+        "station": "clt",
+        "params": {
+          "law": 0,
+          "n": 20,
+          "R": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Сравните расстояние до нормального закона и долю |Z|≤1 для стандартизованной суммы."
+    },
+    {
+      "id": "L08-poisson",
+      "title": "Пуассоновская сумма",
+      "idea": "Сумма независимых Poisson(1) имеет закон Poisson(n); предел вероятности ниже среднего равен половине.",
+      "formula": [
+        "\\sum_{i=1}^nX_i\\sim\\operatorname{Pois}(n),\\quad P(\\sum_iX_i<n)\\to\\tfrac12",
+        "e^{-n}\\sum_{k=0}^{n-1}\\frac{n^k}{k!}\\to\\tfrac12,\\qquad e^{-n}\\sum_{k=0}^{n}\\frac{n^k}{k!}\\to\\tfrac12",
+        "X_i\\text{ независимы},\\ X_i\\sim\\operatorname{Pois}(\\lambda_i)\\ \\Longrightarrow\\ \\sum_iX_i\\sim\\operatorname{Pois}\\!\\left(\\sum_i\\lambda_i\\right)"
+      ],
+      "source": {
+        "pages": [
+          3,
+          4,
+          5
+        ],
+        "items": [
+          "Poisson sum example, lemma and limit",
+          "Poisson additivity with general parameters and strict/inclusive finite-sum bounds"
+        ]
+      },
+      "auditIds": [
+        "L08-poisson-limit"
+      ],
+      "example": "При n=10 строгая вероятность P(S<10)=0.4579297145, а P(S≤10)=0.5830397502; станция показывает включительную сумму. Значение 1/2 — предел, не точный результат при конечном n.",
+      "experiment": {
+        "station": "clt",
+        "params": {
+          "view": 2,
+          "n": 10,
+          "R": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Станция показывает точную включительную сумму P(Poisson(n)≤n), отдельно от строгого события источника.",
+      "notes": "Независимость слагаемых необходима для указанного сложения параметров; источник её не оговаривает."
+    },
+    {
+      "id": "L08-accuracy",
+      "title": "Качество приближения",
+      "idea": "Условие n>10 само по себе не гарантирует точность: она зависит от распределения и рассматриваемого события.",
+      "formula": [
+        "P(Z_n\\le x)\\approx\\Phi_{\\mathrm{CDF}}(x)\\quad(n\\text{ велико})"
+      ],
+      "source": {
+        "pages": [
+          5
+        ],
+        "items": [
+          "heuristic n greater than 10 and conditions of approximation"
+        ]
+      }
+    }
+  ],
+  "checks": [
+    {
+      "question": "Какая сходимость утверждается в ЦПТ?",
+      "answer": "Сходимость по распределению стандартизованной суммы."
+    },
+    {
+      "question": "Почему при n=10 события S<n и S≤n различаются?",
+      "answer": "Включительное событие содержит атом P(S=n)."
+    }
+  ],
+  "skipped": [
+    {
+      "pages": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "items": [
+        "line-by-line Poisson convolution/binomial-theorem proof and finite-sum induction"
+      ],
+      "reason": "Подробные вычисления заменены стандартизацией и формулами выше."
+    },
+    {
+      "pages": [
+        1,
+        5
+      ],
+      "items": [
+        "Broad statements about non-normal limits, infinite divisibility and discrete-to-continuous process limits"
+      ],
+      "reason": "За рамками выбранного нормального ЦПТ-сценария; эти утверждения требуют условий о нормировке и массиве слагаемых и не подменяют классическую теорему."
+    }
+  ]
+}

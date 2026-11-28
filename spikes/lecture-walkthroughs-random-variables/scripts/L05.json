@@ -1,0 +1,230 @@
+{
+  "lecture": 5,
+  "title": "Случайные величины и распределения",
+  "status": "draft",
+  "steps": [
+    {
+      "id": "L05-variable",
+      "title": "Величина и её закон",
+      "idea": "Случайная величина измеримо отображает исходы в числа; закон сообщает вероятности множеств значений.",
+      "formula": [
+        "X:\\Omega\\to\\mathbb R,\\quad P(X\\in B)=P(X^{-1}(B))"
+      ],
+      "source": {
+        "pages": [
+          1,
+          2
+        ],
+        "items": [
+          "random variable formula (21), discrete law table, examples of discrete and continuous variables"
+        ]
+      },
+      "notes": "Диапазон значений в интервале сам по себе не означает существования плотности: бывают смешанные и сингулярные законы."
+    },
+    {
+      "id": "L05-cdf",
+      "title": "Две договорённости о границе",
+      "idea": "Источник использует строгую функцию слева; современная функция включает точку и непрерывна справа.",
+      "formula": [
+        "F_{<}(x)=P(X<x),\\quad F(x)=P(X\\le x)=F_{<}(x)+P(X=x)",
+        "0\\le F(x)\\le1,\\quad x\\le y\\Rightarrow F(x)\\le F(y),\\quad F(-\\infty)=0,\\ F(+\\infty)=1",
+        "P(X=x)=F(x)-F(x-)=F_{<}(x+)-F_{<}(x)"
+      ],
+      "source": {
+        "pages": [
+          2,
+          3,
+          4
+        ],
+        "items": [
+          "strict CDF formula (22), monotonicity, left continuity, limits, interval probabilities"
+        ]
+      },
+      "example": "Для индикатора с P(X=1)=p: F_<(0)=0, F_<(1)=1-p; F(0)=1-p, F(1)=1.",
+      "auditIds": [
+        "L05-indicator-jumps"
+      ],
+      "experiment": {
+        "station": "cdf",
+        "params": {
+          "source": 0,
+          "x": 7,
+          "n": 600
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Станция показывает современную P(X≤x) и скачок P(X=x); вычитание скачка даёт строгую функцию.",
+      "notes": "F непрерывна справа, F_< — слева. Разрывов не более счётного числа, но функция не обязана быть ступенчатой: это верно для дискретных законов, а у абсолютно непрерывных законов она непрерывна."
+    },
+    {
+      "id": "L05-density",
+      "title": "Плотность и интервал",
+      "idea": "Для абсолютно непрерывного закона вероятность интервала — интеграл плотности, а вероятность отдельной точки равна нулю.",
+      "formula": [
+        "F(x)=\\int_{-\\infty}^{x}f(t)\\,dt,\\qquad P(a<X\\le b)=\\int_a^b f(t)\\,dt",
+        "f(x)\\ge0,\\qquad \\int_{\\mathbb R}f(x)\\,dx=1,\\qquad F\\prime(x)=f(x)\\ \\text{почти всюду}",
+        "F_{<}(b)-F_{<}(a)=P(a\\le X<b),\\quad P(x<X\\le x+h)=\\int_x^{x+h}f(t)\\,dt"
+      ],
+      "source": {
+        "pages": [
+          4,
+          5,
+          6
+        ],
+        "items": [
+          "density formulas (23),(24), interval probability and density properties"
+        ]
+      },
+      "notes": "Производная равна плотности почти всюду; непрерывность функции распределения сама по себе не гарантирует плотность. Запись f(x)dx в лекции является дифференциальным обозначением, не точным равенством для любого конечного dx; для малого h при непрерывной f вероятность приближённо равна f(x)h. Плотность имеет обратные к X единицы."
+    },
+    {
+      "id": "L05-binomial",
+      "title": "Биномиальная лестница",
+      "idea": "Число успехов в независимых испытаниях даёт дискретную функцию распределения со скачками в целых точках.",
+      "formula": [
+        "P(X=k)=\\binom nk p^k(1-p)^{n-k},\\quad F_{<}(x)=\\sum_{k<x}P(X=k)"
+      ],
+      "source": {
+        "pages": [
+          6,
+          7
+        ],
+        "items": [
+          "binomial example formula (25) and jump sizes"
+        ]
+      },
+      "experiment": {
+        "station": "distribution",
+        "params": {
+          "law": 3,
+          "m": 10,
+          "p": 0.3,
+          "n": 500
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Сравните выборочные среднее и дисперсию с теоретическими для биномиального закона.",
+      "notes": "Параметры: целое n≥1, 0≤p≤1; сумма идёт по k=0,…,n. При x≤0 строгий CDF равен 0, при x>n — 1. Значение при x=n равно 1−p^n, а современный F(n)=1."
+    },
+    {
+      "id": "L05-poisson",
+      "title": "Закон Пуассона",
+      "idea": "Для счётного распределения Пуассона каждая ступенька имеет собственную массу.",
+      "formula": [
+        "P(X=k)=e^{-\\lambda}\\lambda^k/k!,\\quad F_{<}(x)=\\sum_{k<x}e^{-\\lambda}\\lambda^k/k!"
+      ],
+      "source": {
+        "pages": [
+          7,
+          8
+        ],
+        "items": [
+          "Poisson example formula (26) and jump sizes"
+        ]
+      },
+      "notes": "Параметр lambda>0; суммы по целым k≥0. Нормировка следует из ряда exp(lambda). Строгий CDF равен нулю при x≤0 и стремится к единице при x→+infinity."
+    },
+    {
+      "id": "L05-uniform",
+      "title": "Равномерная плотность",
+      "idea": "На конечном отрезке постоянная плотность нормируется длиной интервала.",
+      "formula": [
+        "f(x)=\\frac{\\mathbf1_{[a,b]}(x)}{b-a},\\quad a<b",
+        "F(x)=\\begin{cases}0,&x\\le a\\\\(x-a)/(b-a),&a<x<b\\\\1,&x\\ge b\\end{cases}"
+      ],
+      "source": {
+        "pages": [
+          8,
+          9
+        ],
+        "items": [
+          "uniform CDF (27) and density (28), endpoint values"
+        ]
+      },
+      "experiment": {
+        "station": "distribution",
+        "params": {
+          "law": 1,
+          "lo": 0,
+          "hi": 1,
+          "n": 500
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Сравните выборочные среднее и дисперсию с теорией равномерного закона."
+    },
+    {
+      "id": "L05-normal",
+      "title": "Нормальная кривая",
+      "idea": "Параметр задаёт центр, а стандартное отклонение — масштаб нормальной плотности.",
+      "formula": [
+        "f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-(x-a)^2/(2\\sigma^2)}",
+        "F(x)=\\Phi((x-a)/\\sigma),\\qquad \\sigma>0"
+      ],
+      "source": {
+        "pages": [
+          9,
+          10
+        ],
+        "items": [
+          "normal density and CDF, normalization and parameter interpretation"
+        ]
+      }
+    },
+    {
+      "id": "L05-exponential",
+      "title": "Время до отказа",
+      "idea": "Функция распределения накапливает вероятность отказа, а функция надёжности показывает вероятность пережить время.",
+      "formula": [
+        "F(t)=1-e^{-\\lambda t},\\quad S(t)=P(X>t)=e^{-\\lambda t},\\quad t\\ge0",
+        "f(t)=\\lambda e^{-\\lambda t}\\ (t\\ge0),\\quad\\lambda>0;\\qquad F(t)=f(t)=0\\ (t<0)"
+      ],
+      "source": {
+        "pages": [
+          10,
+          11
+        ],
+        "items": [
+          "exponential CDF formula (29), reliability and density"
+        ]
+      },
+      "notes": "В источнике CDF названа функцией надёжности; надёжность — дополнение до единицы."
+    }
+  ],
+  "checks": [
+    {
+      "question": "Чему равны две функции в точке скачка индикатора при p=0,3?",
+      "answer": "При x=1: F_<(1)=0,7, а F(1)=1."
+    },
+    {
+      "question": "Следует ли из непрерывной функции распределения существование плотности?",
+      "answer": "Нет: возможны сингулярные непрерывные распределения."
+    }
+  ],
+  "skipped": [
+    {
+      "pages": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "items": [
+        "indicator staircase graph derivation",
+        "proofs of CDF and density properties",
+        "binomial and Poisson CDF normalization derivations",
+        "normal integral normalization derivation",
+        "uniform and exponential graphs"
+      ],
+      "reason": "Вычисления и рисунки заменены определениями и примерами выше."
+    }
+  ]
+}

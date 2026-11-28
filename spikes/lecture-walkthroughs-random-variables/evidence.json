@@ -1,0 +1,1422 @@
+{
+  "study": "lecture-walkthroughs-random-variables-v1",
+  "baseCommit": "cde1c2385b59c7b1e7b6222c129ef8a3fc238681",
+  "sourceCommit": "8dfee73781e39d6946d76c07866f2a0534a3d988",
+  "sourceManifestSha256": "14099e528fe5ccd42befbc5111f27eae4041225d2e27d87f7753ace1a01c553f",
+  "node": "v24.22.3",
+  "engineVersion": "simulation-fixture-v1",
+  "rngVersion": "fixture-mix32-v1",
+  "catalogSha256": "2d3fc5ee0ae765feb2d9b744cab89a6f4b51c840643f82bd017b2452deb7495b",
+  "generatorSha256": "e9869593015cd87a7c6a75f42d7f2220b9ec33f626a3c87187f89de3bbda031c",
+  "scriptSha256": {
+    "L04": "f3f5814c7978032812cd14dce15ed89347cb08ba4554d3a00cb8a29cd22531d2",
+    "L05": "e0c4b5506046e43c322d28f5517eeea1f7eee9064e9542fbfdc8a05ddc9f7d3d",
+    "L06": "60812b86e4758ca1fc002c6ccc7827209de01e5a899e8d48e078364c662f5902",
+    "L07": "5ec2857f34a49b71a45a506c64d0470e1591af94f018c61ebc08b17054cec2b3",
+    "L08": "fef4a5f988cdce40a8d1525849b28a6198de264d02c7a65e5de458997a9757aa",
+    "L09": "17c2447ccffba681bfe0214b132ec0f4e19bc0e2d141d79cb2190a16740fd308"
+  },
+  "kernelSha256": {
+    "lecture-geometric-probability": "1b2f2c3b01da8d3e3c49c00e51c2272655ac01004d62856e490554c9dd42982a",
+    "lecture-random-vectors": "95d653af1965855b098cb9878cc2706a414483f6ba912a6a25e5ffa16a61a22d",
+    "lecture-distribution-explorer": "e867753210dcd82655f8545b5a1a550ca11aa4cb3790ef2d61aa70ac4c6183a3",
+    "lecture-limit-theorems": "8e0dc550cf11f02b0a07fc3de9dd9e5c2227eea8f7f62814efe94034347a06da",
+    "lecture-bernoulli-approximations": "dba3f8f7d4b3f6aade834a68972a0bd0882d3e78a4e92bb6a5b797181765e35f"
+  },
+  "presets": {
+    "L04-bertrand": {
+      "kernel": "lecture-geometric-probability",
+      "experiment": {
+        "station": "darts",
+        "params": {
+          "view": 2,
+          "N": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "view": 2,
+        "dim": 2,
+        "N": 4000,
+        "l": 0.8,
+        "d": 1
+      },
+      "route": "#station/darts?seed=42&view=2&dim=2&N=4000&l=0.8&d=1",
+      "readouts": [
+        {
+          "key": "radius",
+          "label": "Long chords, random point on a radius",
+          "observed": 0.50475,
+          "theory": 0.5,
+          "convention": "± 0.0237 (3 SE); inside"
+        },
+        {
+          "key": "endpoints",
+          "label": "Long chords, random endpoints",
+          "observed": 0.33525,
+          "theory": 0.333333,
+          "convention": "± 0.0224 (3 SE); inside"
+        },
+        {
+          "key": "midpoint",
+          "label": "Long chords, random midpoint in the disc",
+          "observed": 0.25375,
+          "theory": 0.25,
+          "convention": "± 0.0205 (3 SE); inside"
+        }
+      ],
+      "sha256": "1d730a832274cb1d13306be014b59ca0c8c9fa6bf31f4efadd57baebb5d66005"
+    },
+    "L04-pushforward": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "cdf",
+        "params": {
+          "source": 0,
+          "x": 7,
+          "n": 600
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "source": 0,
+        "map": 0,
+        "a": 2,
+        "b": -1,
+        "x": 7,
+        "n": 600
+      },
+      "route": "#station/cdf?seed=42&source=0&map=0&a=2&b=-1&x=7&n=600",
+      "readouts": [
+        {
+          "key": "F",
+          "label": "$F(x) = P(X \\le x)$",
+          "observed": 0.575,
+          "theory": 0.583333,
+          "convention": "observed: the share of experiments with $X \\le x$"
+        },
+        {
+          "key": "jump",
+          "label": "Jump of $F$ at $x$: $P(X = x)$",
+          "observed": 0.168333,
+          "theory": 0.166667,
+          "convention": "zero between the values $x_k$"
+        },
+        {
+          "key": "mean",
+          "label": "Expectation $MX$",
+          "observed": 7.04833,
+          "theory": 7
+        },
+        {
+          "key": "values",
+          "label": "Values of $X$",
+          "observed": 11,
+          "theory": 11,
+          "convention": "from 2 to 12"
+        }
+      ],
+      "sha256": "8d148f648bf60a22160be7db2f9bae543543503de8de30bb2816164347ea154c"
+    },
+    "L05-cdf": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "cdf",
+        "params": {
+          "source": 0,
+          "x": 7,
+          "n": 600
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "source": 0,
+        "map": 0,
+        "a": 2,
+        "b": -1,
+        "x": 7,
+        "n": 600
+      },
+      "route": "#station/cdf?seed=42&source=0&map=0&a=2&b=-1&x=7&n=600",
+      "readouts": [
+        {
+          "key": "F",
+          "label": "$F(x) = P(X \\le x)$",
+          "observed": 0.575,
+          "theory": 0.583333,
+          "convention": "observed: the share of experiments with $X \\le x$"
+        },
+        {
+          "key": "jump",
+          "label": "Jump of $F$ at $x$: $P(X = x)$",
+          "observed": 0.168333,
+          "theory": 0.166667,
+          "convention": "zero between the values $x_k$"
+        },
+        {
+          "key": "mean",
+          "label": "Expectation $MX$",
+          "observed": 7.04833,
+          "theory": 7
+        },
+        {
+          "key": "values",
+          "label": "Values of $X$",
+          "observed": 11,
+          "theory": 11,
+          "convention": "from 2 to 12"
+        }
+      ],
+      "sha256": "8d148f648bf60a22160be7db2f9bae543543503de8de30bb2816164347ea154c"
+    },
+    "L05-binomial": {
+      "kernel": "lecture-distribution-explorer",
+      "experiment": {
+        "station": "distribution",
+        "params": {
+          "law": 3,
+          "m": 10,
+          "p": 0.3,
+          "n": 500
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "law": 3,
+        "a": 0,
+        "sigma": 1,
+        "lo": 0,
+        "hi": 1,
+        "lambda": 1,
+        "m": 10,
+        "p": 0.3,
+        "n": 500,
+        "bins": 0
+      },
+      "route": "#station/distribution?seed=42&law=3&a=0&sigma=1&lo=0&hi=1&lambda=1&m=10&p=0.3&n=500&bins=0",
+      "readouts": [
+        {
+          "key": "mean",
+          "label": "Sample mean $\\bar{x}$ against $MX$",
+          "observed": 2.892,
+          "theory": 3,
+          "convention": "± 0.2592 (4 standard errors)"
+        },
+        {
+          "key": "var",
+          "label": "Sample variance $s^2$ against $DX$",
+          "observed": 2.26887,
+          "theory": 2.1,
+          "convention": "divisor $n - 1$: unbiased"
+        },
+        {
+          "key": "sd",
+          "label": "Standard deviation $s$ against $\\sigma = \\sqrt{DX}$",
+          "observed": 1.50628,
+          "theory": 1.44914
+        },
+        {
+          "key": "ks",
+          "label": "Kolmogorov distance $D_n = \\sup_x |F_n(x) - F(x)|$",
+          "observed": 0.0606917,
+          "theory": "below $0.08718$ in 99.9% of samples",
+          "convention": "for a discrete law the distance is smaller still"
+        },
+        {
+          "key": "range",
+          "label": "Smallest and largest values",
+          "observed": "0 … 8",
+          "theory": null
+        }
+      ],
+      "sha256": "9a00c8daca1c7e501b0986726808aa2e2109b28139dd15e37d696f8c83d4d6bb"
+    },
+    "L05-uniform": {
+      "kernel": "lecture-distribution-explorer",
+      "experiment": {
+        "station": "distribution",
+        "params": {
+          "law": 1,
+          "lo": 0,
+          "hi": 1,
+          "n": 500
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "law": 1,
+        "a": 0,
+        "sigma": 1,
+        "lo": 0,
+        "hi": 1,
+        "lambda": 1,
+        "m": 10,
+        "p": 0.3,
+        "n": 500,
+        "bins": 0
+      },
+      "route": "#station/distribution?seed=42&law=1&a=0&sigma=1&lo=0&hi=1&lambda=1&m=10&p=0.3&n=500&bins=0",
+      "readouts": [
+        {
+          "key": "mean",
+          "label": "Sample mean $\\bar{x}$ against $MX$",
+          "observed": 0.476841,
+          "theory": 0.5,
+          "convention": "± 0.05164 (4 standard errors)"
+        },
+        {
+          "key": "var",
+          "label": "Sample variance $s^2$ against $DX$",
+          "observed": 0.0886323,
+          "theory": 0.0833333,
+          "convention": "divisor $n - 1$: unbiased"
+        },
+        {
+          "key": "sd",
+          "label": "Standard deviation $s$ against $\\sigma = \\sqrt{DX}$",
+          "observed": 0.297712,
+          "theory": 0.288675
+        },
+        {
+          "key": "ks",
+          "label": "Kolmogorov distance $D_n = \\sup_x |F_n(x) - F(x)|$",
+          "observed": 0.0648791,
+          "theory": "below $0.08718$ in 99.9% of samples",
+          "convention": "$\\lambda_{0.999}/\\sqrt{n}$, $n = 500$"
+        },
+        {
+          "key": "range",
+          "label": "Smallest and largest values",
+          "observed": "0.001549 … 0.9992",
+          "theory": null
+        }
+      ],
+      "sha256": "3c81fcfb365bbdf3439c85e2e5f0f94f46388d274b5b62cc04ae75d8d36ce846"
+    },
+    "L06-mean": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "balance",
+        "seed": 606,
+        "params": {
+          "x1": -3,
+          "p1": 0.2,
+          "x2": -1,
+          "p2": 0.3,
+          "x3": 1.5,
+          "p3": 0.4,
+          "x4": 4,
+          "p4": 0.1,
+          "n": 2000
+        },
+        "label": "Открыть центр масс"
+      },
+      "resolvedParams": {
+        "x1": -3,
+        "p1": 0.2,
+        "x2": -1,
+        "p2": 0.3,
+        "x3": 1.5,
+        "p3": 0.4,
+        "x4": 4,
+        "p4": 0.1,
+        "n": 2000
+      },
+      "route": "#station/balance?seed=606&x1=-3&p1=0.2&x2=-1&p2=0.3&x3=1.5&p3=0.4&x4=4&p4=0.1&n=2000",
+      "readouts": [
+        {
+          "key": "mean",
+          "label": "Fulcrum: expectation $M\\xi$",
+          "observed": 0.066,
+          "theory": 0.1,
+          "convention": "observed: the sample mean $\\bar{x}$ of the throws"
+        },
+        {
+          "key": "variance",
+          "label": "Variance $D\\xi$",
+          "observed": 4.50139,
+          "theory": 4.59,
+          "convention": "$s^2$, divisor $n - 1$"
+        },
+        {
+          "key": "torque",
+          "label": "Torque about the fulcrum $\\sum (x_i - M\\xi)\\,p_i$",
+          "observed": 0,
+          "theory": 0,
+          "convention": "zero: the beam balances"
+        },
+        {
+          "key": "total",
+          "label": "Sum of the typed $p_i$",
+          "observed": 1,
+          "theory": 1,
+          "convention": "the probabilities add up to 1"
+        }
+      ],
+      "sha256": "9610c52f950186b440ea91af63c7a1d13898ec86f1c1dc00dd1fcd2a10935572"
+    },
+    "L06-shape": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "moments",
+        "seed": 606,
+        "params": {
+          "law": 4,
+          "lambda": 2,
+          "n": 5000
+        },
+        "label": "Сравнить моменты экспоненциального закона"
+      },
+      "resolvedParams": {
+        "law": 4,
+        "p": 0.3,
+        "m": 10,
+        "lambda": 2,
+        "sigma": 1,
+        "a": 2,
+        "b": 2,
+        "n": 5000
+      },
+      "route": "#station/moments?seed=606&law=4&p=0.3&m=10&lambda=2&sigma=1&a=2&b=2&n=5000",
+      "readouts": [
+        {
+          "key": "mean",
+          "label": "Expectation $M\\xi$",
+          "observed": 0.492883,
+          "theory": 0.5,
+          "convention": "sample mean $\\bar{x}$"
+        },
+        {
+          "key": "variance",
+          "label": "Variance $D\\xi$",
+          "observed": 0.247312,
+          "theory": 0.25,
+          "convention": "$s^2$, divisor $n - 1$"
+        },
+        {
+          "key": "sd",
+          "label": "Standard deviation $\\sigma$",
+          "observed": 0.497305,
+          "theory": 0.5
+        },
+        {
+          "key": "median",
+          "label": "Median",
+          "observed": 0.345217,
+          "theory": 0.346574,
+          "convention": "$F(x) = \\tfrac12$"
+        },
+        {
+          "key": "mode",
+          "label": "Mode",
+          "observed": 0.05,
+          "theory": "0",
+          "convention": "centre of the tallest of 100 histogram bins"
+        },
+        {
+          "key": "skew",
+          "label": "Skewness $Sk = \\mu_3/\\sigma^3$",
+          "observed": 2.02084,
+          "theory": 2,
+          "convention": "$m_3/m_2^{3/2}$, central moments with divisor $n$"
+        },
+        {
+          "key": "exkurt",
+          "label": "Excess kurtosis $Ek = \\mu_4/\\sigma^4 - 3$",
+          "observed": 5.66001,
+          "theory": 6,
+          "convention": "$m_4/m_2^2 - 3$, divisor $n$"
+        },
+        {
+          "key": "rule1",
+          "label": "$P(|\\xi - M\\xi| < 1\\sigma)$",
+          "observed": 0.876,
+          "theory": 0.864665,
+          "convention": "sample share; theory exact"
+        },
+        {
+          "key": "rule2",
+          "label": "$P(|\\xi - M\\xi| < 2\\sigma)$",
+          "observed": 0.949,
+          "theory": 0.950213,
+          "convention": "sample share; theory exact"
+        },
+        {
+          "key": "rule3",
+          "label": "$P(|\\xi - M\\xi| < 3\\sigma)$",
+          "observed": 0.9816,
+          "theory": 0.981684,
+          "convention": "sample share; theory exact"
+        },
+        {
+          "key": "rule4",
+          "label": "$P(|\\xi - M\\xi| < 4\\sigma)$",
+          "observed": 0.9932,
+          "theory": 0.993262,
+          "convention": "sample share; theory exact"
+        }
+      ],
+      "sha256": "7466cb9c91bc22be5b6e01406e7651fa932f692869b3d610ba84262702d3691d"
+    },
+    "L06-three-sigma": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "moments",
+        "seed": 606,
+        "params": {
+          "law": 5,
+          "sigma": 1,
+          "n": 5000
+        },
+        "label": "Проверить доли внутри сигм"
+      },
+      "resolvedParams": {
+        "law": 5,
+        "p": 0.3,
+        "m": 10,
+        "lambda": 2,
+        "sigma": 1,
+        "a": 2,
+        "b": 2,
+        "n": 5000
+      },
+      "route": "#station/moments?seed=606&law=5&p=0.3&m=10&lambda=2&sigma=1&a=2&b=2&n=5000",
+      "readouts": [
+        {
+          "key": "mean",
+          "label": "Expectation $M\\xi$",
+          "observed": -0.0186112,
+          "theory": 0,
+          "convention": "sample mean $\\bar{x}$"
+        },
+        {
+          "key": "variance",
+          "label": "Variance $D\\xi$",
+          "observed": 1.01063,
+          "theory": 1,
+          "convention": "$s^2$, divisor $n - 1$"
+        },
+        {
+          "key": "sd",
+          "label": "Standard deviation $\\sigma$",
+          "observed": 1.0053,
+          "theory": 1
+        },
+        {
+          "key": "median",
+          "label": "Median",
+          "observed": -0.0185343,
+          "theory": 0,
+          "convention": "$F(x) = \\tfrac12$"
+        },
+        {
+          "key": "mode",
+          "label": "Mode",
+          "observed": 0.1,
+          "theory": "0",
+          "convention": "centre of the tallest of 90 histogram bins"
+        },
+        {
+          "key": "skew",
+          "label": "Skewness $Sk = \\mu_3/\\sigma^3$",
+          "observed": 0.0797801,
+          "theory": 0,
+          "convention": "$m_3/m_2^{3/2}$, central moments with divisor $n$"
+        },
+        {
+          "key": "exkurt",
+          "label": "Excess kurtosis $Ek = \\mu_4/\\sigma^4 - 3$",
+          "observed": 0.0516197,
+          "theory": 0,
+          "convention": "$m_4/m_2^2 - 3$, divisor $n$"
+        },
+        {
+          "key": "rule1",
+          "label": "$P(|\\xi - M\\xi| < 1\\sigma)$",
+          "observed": 0.684,
+          "theory": 0.682689,
+          "convention": "sample share; theory exact"
+        },
+        {
+          "key": "rule2",
+          "label": "$P(|\\xi - M\\xi| < 2\\sigma)$",
+          "observed": 0.9498,
+          "theory": 0.9545,
+          "convention": "sample share; theory exact"
+        },
+        {
+          "key": "rule3",
+          "label": "$P(|\\xi - M\\xi| < 3\\sigma)$",
+          "observed": 0.9972,
+          "theory": 0.9973,
+          "convention": "sample share; theory exact"
+        },
+        {
+          "key": "rule4",
+          "label": "$P(|\\xi - M\\xi| < 4\\sigma)$",
+          "observed": 1,
+          "theory": 0.999937,
+          "convention": "sample share; theory exact"
+        }
+      ],
+      "sha256": "47c5a7db6817cdaaae0639c11d0c0d5093b717630516bc0f7b852e8dd357ab65"
+    },
+    "L06-affine": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "transform",
+        "seed": 606,
+        "params": {
+          "phi": 0,
+          "alpha": -1.5,
+          "b": 1,
+          "sigma": 0.5,
+          "n": 5000
+        },
+        "label": "Отразить и сдвинуть распределение"
+      },
+      "resolvedParams": {
+        "phi": 0,
+        "alpha": -1.5,
+        "b": 1,
+        "beta": 1,
+        "lambda": 2,
+        "sigma": 0.5,
+        "n": 5000
+      },
+      "route": "#station/transform?seed=606&phi=0&alpha=-1.5&b=1&beta=1&lambda=2&sigma=0.5&n=5000",
+      "readouts": [
+        {
+          "key": "mean",
+          "label": "$M\\eta$",
+          "observed": 1.00057,
+          "theory": 1,
+          "convention": "sample mean"
+        },
+        {
+          "key": "ks",
+          "label": "Kolmogorov distance $\\sup_y |F_n(y) - F(y)|$",
+          "observed": 0.0111691,
+          "theory": 0.019205,
+          "convention": "theory column: 95 % critical value $1.358/\\sqrt{n}$"
+        },
+        {
+          "key": "bins",
+          "label": "Largest bin deviation, in standard errors",
+          "observed": 2.26896,
+          "theory": "$\\le 4.0$ in 99 % of runs",
+          "convention": "max over $\\le 40$ bins with expected count $\\ge 5$ (Bonferroni); expected mass from $F$"
+        },
+        {
+          "key": "mass",
+          "label": "Share of $\\eta$ inside the shown range",
+          "observed": 1,
+          "theory": 1
+        }
+      ],
+      "sha256": "0f86a71434ec7622d2b929ea79982facf596e1e1979466643a3bfe9c98eb85bf"
+    },
+    "L06-exp-transform": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "transform",
+        "seed": 606,
+        "params": {
+          "phi": 2,
+          "lambda": 2,
+          "beta": 1,
+          "n": 5000
+        },
+        "label": "Получить распределение на (0,1)"
+      },
+      "resolvedParams": {
+        "phi": 2,
+        "alpha": 2,
+        "b": 1,
+        "beta": 1,
+        "lambda": 2,
+        "sigma": 0.5,
+        "n": 5000
+      },
+      "route": "#station/transform?seed=606&phi=2&alpha=2&b=1&beta=1&lambda=2&sigma=0.5&n=5000",
+      "readouts": [
+        {
+          "key": "mean",
+          "label": "$M\\eta$",
+          "observed": 0.664978,
+          "theory": 0.666667,
+          "convention": "sample mean"
+        },
+        {
+          "key": "ks",
+          "label": "Kolmogorov distance $\\sup_y |F_n(y) - F(y)|$",
+          "observed": 0.00652945,
+          "theory": 0.019205,
+          "convention": "theory column: 95 % critical value $1.358/\\sqrt{n}$"
+        },
+        {
+          "key": "bins",
+          "label": "Largest bin deviation, in standard errors",
+          "observed": 2.83145,
+          "theory": "$\\le 4.0$ in 99 % of runs",
+          "convention": "max over $\\le 40$ bins with expected count $\\ge 5$ (Bonferroni); expected mass from $F$"
+        },
+        {
+          "key": "mass",
+          "label": "Share of $\\eta$ inside the shown range",
+          "observed": 1,
+          "theory": 1
+        },
+        {
+          "key": "F05",
+          "label": "$F(0.5) = 0.5^{\\lambda/\\beta}$ (L6 example)",
+          "observed": 0.2486,
+          "theory": 0.25,
+          "convention": "share of $\\eta < 0.5$"
+        }
+      ],
+      "sha256": "1597f8f4a88d669aa29d4612829b832072cfa9c961b52552d4f3a0502fa6b2c5"
+    },
+    "L06-gaussian-vector": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "scatter",
+        "seed": 606,
+        "params": {
+          "mode": 0,
+          "rho": 0.6,
+          "sigma1": 1,
+          "sigma2": 2,
+          "n": 2000
+        },
+        "label": "Открыть нормальное облако"
+      },
+      "resolvedParams": {
+        "mode": 0,
+        "rho": 0.6,
+        "sigma1": 1,
+        "sigma2": 2,
+        "n": 2000,
+        "players": 6,
+        "reps": 4000
+      },
+      "route": "#station/scatter?seed=606&mode=0&rho=0.6&sigma1=1&sigma2=2&n=2000&players=6&reps=4000",
+      "readouts": [
+        {
+          "key": "r",
+          "label": "Correlation: sample $r$ against $\\rho$",
+          "observed": 0.596178,
+          "theory": 0.6,
+          "convention": "99 % band 0.561832 … 0.635619 (Fisher $z$)"
+        },
+        {
+          "key": "line",
+          "label": "Regression line (63): $y = \\rho\\,\\dfrac{\\sigma_Y}{\\sigma_X}\\,x$",
+          "observed": "$y = 1.20918\\,x + 0.00367374$",
+          "theory": "$y = 1.2\\,x$",
+          "convention": "sample: $y = r\\,\\dfrac{s_Y}{s_X}\\,(x - \\bar{x}) + \\bar{y}$"
+        },
+        {
+          "key": "cov",
+          "label": "$\\operatorname{Cov}(\\xi, \\eta) = \\rho\\,\\sigma_X\\sigma_Y$",
+          "observed": 1.19137,
+          "theory": 1.2,
+          "convention": "divisor $n - 1$"
+        },
+        {
+          "key": "slope63",
+          "label": "Slope of (63): $r\\,\\sigma_Y/\\sigma_X$",
+          "observed": 1.20918,
+          "theory": 1.2
+        },
+        {
+          "key": "slope64",
+          "label": "Slope of (64) as $dx/dy$: $r\\,\\sigma_X/\\sigma_Y$",
+          "observed": 0.293942,
+          "theory": 0.3
+        },
+        {
+          "key": "angle",
+          "label": "Acute angle between (63) and (64)",
+          "observed": 23.2107,
+          "theory": 23.1063,
+          "unit": "°"
+        },
+        {
+          "key": "ellipse",
+          "label": "Share inside the $c = 2$ ellipse",
+          "observed": 0.8565,
+          "theory": 0.864665
+        }
+      ],
+      "sha256": "904d3f3a9431d0f69b89e6bd1ef2ae7de8897825811ec1493c8e1d356f49d3f7"
+    },
+    "L06-two-uniforms": {
+      "kernel": "lecture-limit-theorems",
+      "experiment": {
+        "station": "convolution",
+        "seed": 606,
+        "params": {
+          "m": 2,
+          "R": 5000
+        },
+        "label": "Сложить две равномерные величины"
+      },
+      "resolvedParams": {
+        "m": 2,
+        "R": 5000
+      },
+      "route": "#station/convolution?seed=606&m=2&R=5000",
+      "readouts": [
+        {
+          "key": "ks",
+          "label": "Kolmogorov distance, simulated sums vs exact law",
+          "observed": 0.0160188,
+          "theory": "$\\le 0.0276$",
+          "convention": "99.9% band $\\lambda(0.001)/\\sqrt{R} = 1.949/\\sqrt{5000}$; inside the band"
+        },
+        {
+          "key": "mean",
+          "label": "Mean of the sum",
+          "observed": 0.988436,
+          "theory": 1
+        },
+        {
+          "key": "var",
+          "label": "Variance of the sum",
+          "observed": 0.164731,
+          "theory": 0.166667,
+          "convention": "variances of independent terms add: $m/12$"
+        },
+        {
+          "key": "gap",
+          "label": "Largest gap, exact density vs normal $N(m/2,\\, m/12)$",
+          "observed": null,
+          "theory": 0.0759082,
+          "convention": "shrinks as m grows: the central limit theorem at work"
+        }
+      ],
+      "sha256": "856d635f69762cec9a7c604cc0fb7f095213e2c0ecdb68735c7c06904a9b934d"
+    },
+    "L06-lottery": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "scatter",
+        "seed": 606,
+        "params": {
+          "mode": 2,
+          "players": 6,
+          "reps": 4000
+        },
+        "label": "Разыграть перестановки"
+      },
+      "resolvedParams": {
+        "mode": 2,
+        "rho": 0.6,
+        "sigma1": 1,
+        "sigma2": 1,
+        "n": 2000,
+        "players": 6,
+        "reps": 4000
+      },
+      "route": "#station/scatter?seed=606&mode=2&rho=0.6&sigma1=1&sigma2=1&n=2000&players=6&reps=4000",
+      "readouts": [
+        {
+          "key": "mean",
+          "label": "Mean number of prizes $M\\mu$",
+          "observed": 0.99375,
+          "theory": 1,
+          "convention": "band $\\pm 0.0553399$"
+        },
+        {
+          "key": "variance",
+          "label": "Variance $D\\mu$",
+          "observed": 1.02797,
+          "theory": 1,
+          "convention": "$s^2$, divisor $K - 1$; band $\\pm 0.0988594$"
+        },
+        {
+          "key": "p0",
+          "label": "$P(\\text{no prize})$",
+          "observed": 0.3735,
+          "theory": 0.368056,
+          "convention": "$\\to 1/e = 0.367879$"
+        },
+        {
+          "key": "draws",
+          "label": "Lottery draws $K$",
+          "observed": 4000,
+          "theory": null
+        }
+      ],
+      "sha256": "b46eb84ec20b2d2ed77b0f307b5fbb5ad3f121bae2ec846bc0832d7bfbe7afb8"
+    },
+    "L06-disc": {
+      "kernel": "lecture-random-vectors",
+      "experiment": {
+        "station": "scatter",
+        "seed": 606,
+        "params": {
+          "mode": 1,
+          "n": 2000
+        },
+        "label": "Проверить зависимость в круге"
+      },
+      "resolvedParams": {
+        "mode": 1,
+        "rho": 0.6,
+        "sigma1": 1,
+        "sigma2": 1,
+        "n": 2000,
+        "players": 6,
+        "reps": 4000
+      },
+      "route": "#station/scatter?seed=606&mode=1&rho=0.6&sigma1=1&sigma2=1&n=2000&players=6&reps=4000",
+      "readouts": [
+        {
+          "key": "cov",
+          "label": "$\\operatorname{Cov}(\\xi, \\eta)$",
+          "observed": 0.000884992,
+          "theory": 0,
+          "convention": "divisor $n - 1$"
+        },
+        {
+          "key": "r",
+          "label": "Correlation $r(\\xi, \\eta)$",
+          "observed": 0.00349618,
+          "theory": 0,
+          "convention": "99 % band -0.0575768 … 0.0575768"
+        },
+        {
+          "key": "r2",
+          "label": "Correlation of $\\xi^2$ and $\\eta^2$",
+          "observed": -0.360564,
+          "theory": -0.333333,
+          "convention": "nonzero: $\\xi$ and $\\eta$ are dependent"
+        },
+        {
+          "key": "joint",
+          "label": "$P(|\\xi| > 0.75,\\ |\\eta| > 0.75)$",
+          "observed": 0,
+          "theory": 0,
+          "convention": "the corner lies outside the disc"
+        },
+        {
+          "key": "product",
+          "label": "$P(|\\xi| > 0.75) \\cdot P(|\\eta| > 0.75)$",
+          "observed": 0.021888,
+          "theory": 0.0208206,
+          "convention": "what independence would require"
+        }
+      ],
+      "sha256": "f4aff27b484f9b6d2d5e103be9269c26aa86026cec4de29c870caf7122778a7c"
+    },
+    "L07-chebyshev": {
+      "kernel": "lecture-limit-theorems",
+      "experiment": {
+        "station": "lln",
+        "params": {
+          "view": 1,
+          "law": 0,
+          "k": 3,
+          "N": 2000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "law": 0,
+        "N": 2000,
+        "k": 3,
+        "view": 1,
+        "M": 200,
+        "eps": 0.2
+      },
+      "route": "#station/lln?seed=42&law=0&N=2000&k=3&view=1&M=200&eps=0.2",
+      "readouts": [
+        {
+          "key": "exact",
+          "label": "Exact $P(|X - MX| \\ge 3\\sigma)$",
+          "observed": 0.00255,
+          "theory": 0.0026998,
+          "convention": "simulated with $R = 20000$; ± 0.0015 (4 SE)"
+        },
+        {
+          "key": "chebyshev",
+          "label": "Chebyshev bound $1/k^2$",
+          "observed": null,
+          "theory": 0.111111,
+          "convention": "the bound is 41.2 times the real tail"
+        }
+      ],
+      "sha256": "677d7bfca1e232af4b612162c6b345d4b3215cca7a09233ba873c5f620d4cebf"
+    },
+    "L07-tails": {
+      "kernel": "lecture-limit-theorems",
+      "experiment": {
+        "station": "lln",
+        "params": {
+          "view": 1,
+          "law": 3,
+          "k": 3,
+          "N": 2000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "law": 3,
+        "N": 2000,
+        "k": 3,
+        "view": 1,
+        "M": 200,
+        "eps": 0.2
+      },
+      "route": "#station/lln?seed=42&law=3&N=2000&k=3&view=1&M=200&eps=0.2",
+      "readouts": [
+        {
+          "key": "exact",
+          "label": "Exact $P(|X - MX| \\ge 3\\sigma)$",
+          "observed": 0.0202,
+          "theory": 0.0189882,
+          "convention": "simulated with $R = 20000$; ± 0.0039 (4 SE)"
+        },
+        {
+          "key": "chebyshev",
+          "label": "Chebyshev bound $1/k^2$",
+          "observed": null,
+          "theory": 0.111111,
+          "convention": "the bound is 5.9 times the real tail"
+        }
+      ],
+      "sha256": "144b9da31bc9280066a53794de9252ea1dc80406c74fe0c8d71739ef1ce67424"
+    },
+    "L07-cauchy": {
+      "kernel": "lecture-limit-theorems",
+      "experiment": {
+        "station": "lln",
+        "params": {
+          "view": 0,
+          "law": 4,
+          "N": 2000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "law": 4,
+        "N": 2000,
+        "k": 3,
+        "view": 0,
+        "M": 200,
+        "eps": 0.2
+      },
+      "route": "#station/lln?seed=42&law=4&N=2000&k=3&view=0&M=200&eps=0.2",
+      "readouts": [
+        {
+          "key": "final",
+          "label": "Running mean at $n = 2000$, first sequence",
+          "observed": 0.362709,
+          "theory": "does not exist"
+        },
+        {
+          "key": "spread",
+          "label": "Spread of the 5 running means at $n = 2000$",
+          "observed": 3.16039,
+          "theory": "does not shrink"
+        }
+      ],
+      "sha256": "debfebd0e5da9cee449b5ac22b5a92fc42642c421287791462a8d54e9010ce9f"
+    },
+    "L08-iid": {
+      "kernel": "lecture-limit-theorems",
+      "experiment": {
+        "station": "clt",
+        "params": {
+          "law": 1,
+          "n": 5,
+          "R": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "law": 1,
+        "n": 5,
+        "R": 4000,
+        "view": 0,
+        "source": 1,
+        "p": 0.3,
+        "nmax": 30
+      },
+      "route": "#station/clt?seed=42&law=1&n=5&R=4000&view=0&source=1&p=0.3&nmax=30",
+      "readouts": [
+        {
+          "key": "ks",
+          "label": "Kolmogorov distance to $N(0, 1)$, $n = 5$",
+          "observed": 0.0632939,
+          "theory": "noise floor $\\approx 0.0308$",
+          "convention": "still visibly not normal"
+        },
+        {
+          "key": "within1",
+          "label": "Share with $|Z| \\le 1$",
+          "observed": 0.705,
+          "theory": 0.682689
+        },
+        {
+          "key": "poisson-lemma",
+          "label": "$\\sum_{k \\le n} \\frac{n^k}{k!} e^{-n}$ at $n = 5$",
+          "observed": null,
+          "theory": 0.615961,
+          "convention": "exact; tends to $\\tfrac12$ (view 2)"
+        }
+      ],
+      "sha256": "7b04daa24d15b90d3bbc2fef510f190947c13e92d2cad1ccb5e86f587448d944"
+    },
+    "L08-uniform": {
+      "kernel": "lecture-limit-theorems",
+      "experiment": {
+        "station": "clt",
+        "params": {
+          "law": 0,
+          "n": 20,
+          "R": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "law": 0,
+        "n": 20,
+        "R": 4000,
+        "view": 0,
+        "source": 1,
+        "p": 0.3,
+        "nmax": 30
+      },
+      "route": "#station/clt?seed=42&law=0&n=20&R=4000&view=0&source=1&p=0.3&nmax=30",
+      "readouts": [
+        {
+          "key": "ks",
+          "label": "Kolmogorov distance to $N(0, 1)$, $n = 20$",
+          "observed": 0.0132669,
+          "theory": "noise floor $\\approx 0.0308$",
+          "convention": "indistinguishable from normal at this R"
+        },
+        {
+          "key": "within1",
+          "label": "Share with $|Z| \\le 1$",
+          "observed": 0.69825,
+          "theory": 0.682689
+        },
+        {
+          "key": "poisson-lemma",
+          "label": "$\\sum_{k \\le n} \\frac{n^k}{k!} e^{-n}$ at $n = 20$",
+          "observed": null,
+          "theory": 0.559093,
+          "convention": "exact; tends to $\\tfrac12$ (view 2)"
+        }
+      ],
+      "sha256": "ab981bca586a265d82ecec88434732ca63ba5de6a66758d8e79ee296568e72d4"
+    },
+    "L08-poisson": {
+      "kernel": "lecture-limit-theorems",
+      "experiment": {
+        "station": "clt",
+        "params": {
+          "view": 2,
+          "n": 10,
+          "R": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "law": 1,
+        "n": 10,
+        "R": 4000,
+        "view": 2,
+        "source": 1,
+        "p": 0.3,
+        "nmax": 30
+      },
+      "route": "#station/clt?seed=42&law=1&n=10&R=4000&view=2&source=1&p=0.3&nmax=30",
+      "readouts": [
+        {
+          "key": "poisson-lemma",
+          "label": "$\\sum_{k \\le n} \\frac{n^k}{k!} e^{-n}$ at $n = 10$",
+          "observed": null,
+          "theory": 0.58304,
+          "convention": "exact sum; limit $\\tfrac12$"
+        },
+        {
+          "key": "poisson-lemma-1000",
+          "label": "The same sum at $n = 1000$",
+          "observed": null,
+          "theory": 0.508409
+        }
+      ],
+      "sha256": "3b4d032c2bd8f17f79665f568050f561d4a9705f97f4b19b9fbac82e8c02a844"
+    },
+    "L09-charfn": {
+      "kernel": "lecture-limit-theorems",
+      "experiment": {
+        "station": "charfn",
+        "params": {
+          "law": 4,
+          "t": 1,
+          "n": 500,
+          "motion": 1
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "view": 0,
+        "law": 4,
+        "motion": 1,
+        "t": 1,
+        "n": 500,
+        "p": 0.3,
+        "m": 10,
+        "lambda": 2,
+        "a": 0,
+        "s": 1,
+        "law2": 3,
+        "p2": 0.5,
+        "m2": 6,
+        "lambda2": 1,
+        "a2": 0,
+        "s2": 1
+      },
+      "route": "#station/charfn?seed=42&view=0&law=4&motion=1&t=1&n=500&p=0.3&m=10&lambda=2&a=0&s=1&law2=3&p2=0.5&m2=6&lambda2=1&a2=0&s2=1",
+      "readouts": [
+        {
+          "key": "re",
+          "label": "$\\operatorname{Re}\\varphi(t)$ at $t = 1$",
+          "observed": 0.592777,
+          "theory": 0.606531,
+          "convention": "± 0.179 (4 SE); inside"
+        },
+        {
+          "key": "im",
+          "label": "$\\operatorname{Im}\\varphi(t)$ at $t = 1$",
+          "observed": 0.00316593,
+          "theory": 0,
+          "convention": "symmetric law: $\\operatorname{Im}\\varphi \\equiv 0$"
+        },
+        {
+          "key": "abs",
+          "label": "$|\\varphi(t)|$, never above 1",
+          "observed": 0.592785,
+          "theory": 0.606531
+        },
+        {
+          "key": "zero",
+          "label": "$\\varphi(0) = M\\,e^{0} = 1$",
+          "observed": 1,
+          "theory": 1
+        }
+      ],
+      "sha256": "2eb277af3fa2f49c5676cb50594749ef3ec59e9a8decc2b39992b1f326b94cb7"
+    },
+    "L09-defects": {
+      "kernel": "lecture-bernoulli-approximations",
+      "experiment": {
+        "station": "bernoulli",
+        "params": {
+          "view": 0,
+          "n": 50,
+          "p": 0.2,
+          "k": 6,
+          "lo": 6,
+          "hi": 50,
+          "R": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "view": 0,
+        "n": 50,
+        "p": 0.2,
+        "pf": 0.3,
+        "N": 30,
+        "approx": 1,
+        "k": 6,
+        "lo": 6,
+        "hi": 50,
+        "eps": 0.01,
+        "gamma": 0.98,
+        "R": 4000
+      },
+      "route": "#station/bernoulli?seed=42&view=0&n=50&p=0.2&pf=0.3&N=30&approx=1&k=6&lo=6&hi=50&eps=0.01&gamma=0.98&R=4000",
+      "readouts": [
+        {
+          "key": "mode",
+          "label": "Most probable number $k_0$, $np - q \\le k_0 \\le np + p$",
+          "observed": 10,
+          "theory": "10",
+          "convention": "$9.2 \\le k_0 \\le 10.2$"
+        },
+        {
+          "key": "pk",
+          "label": "$P_n(k)$ at $k = 6$",
+          "observed": 0.0515,
+          "theory": 0.055371,
+          "convention": "exact Bernoulli formula; observed share of the series"
+        },
+        {
+          "key": "local",
+          "label": "Local de Moivre–Laplace $\\dfrac{\\varphi(x)}{\\sqrt{npq}}$",
+          "observed": null,
+          "theory": 0.0518884,
+          "convention": "error $0.003483$"
+        },
+        {
+          "key": "poisson",
+          "label": "Poisson $\\dfrac{\\lambda^k e^{-\\lambda}}{k!}$, $\\lambda = np$",
+          "observed": null,
+          "theory": 0.0630555,
+          "convention": "error $0.007684$"
+        },
+        {
+          "key": "range",
+          "label": "$P(6 \\le k \\le 50)$",
+          "observed": 0.9535,
+          "theory": 0.951973,
+          "convention": "exact sum; ± 0.0135 (4 SE); inside"
+        },
+        {
+          "key": "plain",
+          "label": "Integral theorem $\\Phi(x_2) - \\Phi(x_1)$",
+          "observed": null,
+          "theory": 0.92135,
+          "convention": "$\\Phi$: CDF from $-\\infty$; error $0.03062$"
+        },
+        {
+          "key": "corrected",
+          "label": "With the continuity correction $k \\pm \\tfrac12$",
+          "observed": null,
+          "theory": 0.944194,
+          "convention": "$\\Phi$: CDF from $-\\infty$; error $0.007779$"
+        },
+        {
+          "key": "maxLocal",
+          "label": "$\\max_k |P_n(k) - \\text{local normal}|$",
+          "observed": null,
+          "theory": 0.00707399
+        },
+        {
+          "key": "maxPoisson",
+          "label": "$\\max_k |P_n(k) - \\text{Poisson}|$",
+          "observed": null,
+          "theory": 0.014709
+        }
+      ],
+      "sha256": "f4aa9a50d183f6520ea671898172afb8a9af8de48c6ce95dc51cfd0315835d7f"
+    },
+    "L09-first-grade": {
+      "kernel": "lecture-bernoulli-approximations",
+      "experiment": {
+        "station": "bernoulli",
+        "params": {
+          "view": 0,
+          "n": 200,
+          "p": 0.6,
+          "k": 120,
+          "lo": 120,
+          "hi": 150,
+          "R": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "resolvedParams": {
+        "view": 0,
+        "n": 200,
+        "p": 0.6,
+        "pf": 0.3,
+        "N": 30,
+        "approx": 1,
+        "k": 120,
+        "lo": 120,
+        "hi": 150,
+        "eps": 0.01,
+        "gamma": 0.98,
+        "R": 4000
+      },
+      "route": "#station/bernoulli?seed=42&view=0&n=200&p=0.6&pf=0.3&N=30&approx=1&k=120&lo=120&hi=150&eps=0.01&gamma=0.98&R=4000",
+      "readouts": [
+        {
+          "key": "mode",
+          "label": "Most probable number $k_0$, $np - q \\le k_0 \\le np + p$",
+          "observed": 120,
+          "theory": "120",
+          "convention": "$119.6 \\le k_0 \\le 120.6$"
+        },
+        {
+          "key": "pk",
+          "label": "$P_n(k)$ at $k = 120$",
+          "observed": 0.06475,
+          "theory": 0.0575064,
+          "convention": "exact Bernoulli formula; observed share of the series"
+        },
+        {
+          "key": "local",
+          "label": "Local de Moivre–Laplace $\\dfrac{\\varphi(x)}{\\sqrt{npq}}$",
+          "observed": null,
+          "theory": 0.0575824,
+          "convention": "error $7.593 \\cdot 10^{-5}$"
+        },
+        {
+          "key": "poisson",
+          "label": "Poisson $\\dfrac{\\lambda^k e^{-\\lambda}}{k!}$, $\\lambda = np$",
+          "observed": null,
+          "theory": 0.036393,
+          "convention": "error $0.02111$"
+        },
+        {
+          "key": "range",
+          "label": "$P(120 \\le k \\le 150)$",
+          "observed": 0.5435,
+          "theory": 0.530659,
+          "convention": "exact sum; ± 0.0316 (4 SE); inside"
+        },
+        {
+          "key": "plain",
+          "label": "Integral theorem $\\Phi(x_2) - \\Phi(x_1)$",
+          "observed": null,
+          "theory": 0.499993,
+          "convention": "$\\Phi$: CDF from $-\\infty$; error $0.03067$"
+        },
+        {
+          "key": "corrected",
+          "label": "With the continuity correction $k \\pm \\tfrac12$",
+          "observed": null,
+          "theory": 0.528761,
+          "convention": "$\\Phi$: CDF from $-\\infty$; error $0.001898$"
+        },
+        {
+          "key": "maxLocal",
+          "label": "$\\max_k |P_n(k) - \\text{local normal}|$",
+          "observed": null,
+          "theory": 0.000390078
+        },
+        {
+          "key": "maxPoisson",
+          "label": "$\\max_k |P_n(k) - \\text{Poisson}|$",
+          "observed": null,
+          "theory": 0.0211134
+        }
+      ],
+      "sha256": "eea7da2afcd462113c7a7f3b55c06886ffe6941f78106e340ecd9151789a813d"
+    }
+  }
+}

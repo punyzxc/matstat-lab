@@ -1,0 +1,161 @@
+{
+  "lecture": 4,
+  "title": "Геометрическая вероятность и случайная величина",
+  "status": "draft",
+  "steps": [
+    {
+      "id": "L04-geometry",
+      "title": "Мера и вероятность",
+      "idea": "Равномерность по мере превращает вероятность попадания в отношение мер; без этой модели отношение не обязательно верно.",
+      "formula": [
+        "P(A)=\\frac{\\operatorname{mes} A}{\\operatorname{mes} D},\\qquad A\\subseteq D,\\quad 0<\\operatorname{mes}D<\\infty"
+      ],
+      "source": {
+        "pages": [
+          1
+        ],
+        "items": [
+          "geometric probability measure ratio"
+        ]
+      }
+    },
+    {
+      "id": "L04-sine",
+      "title": "Существование корня",
+      "idea": "Подкоренное выражение неотрицательно на половине длины периода.",
+      "formula": [
+        "P(\\tfrac12-\\sin^2 X\\ge0)=\\tfrac12,\\quad X\\sim U[0,2\\pi)"
+      ],
+      "source": {
+        "pages": [
+          1,
+          2
+        ],
+        "items": [
+          "example 1 sine squared and arc lengths"
+        ]
+      },
+      "auditIds": [
+        "L04-sine-square"
+      ]
+    },
+    {
+      "id": "L04-bertrand",
+      "title": "Хорда и способ выбора",
+      "idea": "Случайная хорда не определена, пока не задан способ выбора: разные схемы дают разные ответы.",
+      "formula": [
+        "P_{\\text{radius}}=\\tfrac12,\\quad P_{\\text{endpoints}}=\\tfrac13,\\quad P_{\\text{disc}}=\\tfrac14"
+      ],
+      "source": {
+        "pages": [
+          2,
+          3
+        ],
+        "items": [
+          "example 2 Bertrand radius and endpoint constructions"
+        ]
+      },
+      "auditIds": [
+        "L04-bertrand"
+      ],
+      "example": "Равномерная середина в диске даёт третью схему. Вывод источника о единственном ответе 1/2 неверен: большая вероятность не делает схему единственной.",
+      "experiment": {
+        "station": "darts",
+        "params": {
+          "view": 2,
+          "N": 4000
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Сравните теоретические доли длинных хорд и наблюдаемые частоты трёх схем."
+    },
+    {
+      "id": "L04-sigma",
+      "title": "События и счётные операции",
+      "idea": "Сигма-алгебра содержит дополнения и счётные объединения; из них следуют счётные пересечения.",
+      "formula": [
+        "A\\in\\mathcal F\\Rightarrow A^c\\in\\mathcal F,\\qquad A_i\\in\\mathcal F\\Rightarrow\\bigcup_i A_i\\in\\mathcal F",
+        "\\Omega,\\varnothing\\in\\mathcal F,\\qquad \\bigcap_{i=1}^{\\infty}A_i\\in\\mathcal F"
+      ],
+      "source": {
+        "pages": [
+          3,
+          4
+        ],
+        "items": [
+          "sigma algebra definition and closure properties"
+        ]
+      },
+      "notes": "На стр. 4 утверждение о замкнутости относительно любого числа операций слишком сильное: гарантированы счётные операции. Для конечного пространства алгебра также является сигма-алгеброй."
+    },
+    {
+      "id": "L04-axioms",
+      "title": "Вероятностная мера",
+      "idea": "Вероятность неотрицательна, нормирована и счётно аддитивна для попарно несовместных событий.",
+      "formula": [
+        "P(\\Omega)=1,\\quad P(A)\\ge0,\\quad P(\\bigcup_i A_i)=\\sum_iP(A_i)",
+        "P(\\varnothing)=0,\\qquad P(A^c)=1-P(A)"
+      ],
+      "source": {
+        "pages": [
+          4
+        ],
+        "items": [
+          "Kolmogorov axioms and P empty set"
+        ]
+      },
+      "notes": "Равенство для объединения относится только к попарно непересекающимся событиям. Множество событий — сигма-алгебра, а вероятностное пространство — тройка (Omega,F,P)."
+    },
+    {
+      "id": "L04-pushforward",
+      "title": "Случайная величина как отображение",
+      "idea": "Измеримость позволяет переносить вероятность с исходов на борелевские множества числовой оси.",
+      "formula": [
+        "P_X(B)=P(X^{-1}(B)),\\quad X^{-1}(B)\\in\\mathcal F"
+      ],
+      "source": {
+        "pages": [
+          4,
+          5
+        ],
+        "items": [
+          "measurable map pushforward measure Borel sets random variable"
+        ]
+      },
+      "experiment": {
+        "station": "cdf",
+        "params": {
+          "source": 0,
+          "x": 7,
+          "n": 600
+        },
+        "seed": 42,
+        "label": "Открыть эксперимент"
+      },
+      "expected": "Сравните теоретическое и наблюдаемое значение P(X≤7) для суммы двух костей."
+    }
+  ],
+  "checks": [
+    {
+      "question": "Почему у задачи Бертрана нет единственного ответа?",
+      "answer": "Разные способы случайного выбора хорды задают разные вероятностные меры."
+    },
+    {
+      "question": "Что обеспечивает измеримость случайной величины?",
+      "answer": "Прообраз каждого борелевского множества является событием."
+    }
+  ],
+  "skipped": [
+    {
+      "pages": [
+        4
+      ],
+      "items": [
+        "proof of finite union closure via empty sets",
+        "proof P(empty)=0 via countable additivity"
+      ],
+      "reason": "Технические доказательства опущены ради основных определений."
+    }
+  ]
+}
