@@ -1,4 +1,5 @@
 import { memo, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { touchDragDirection } from '../touch-drag';
 import { useStationReducedMotion } from '../motion-preference';
 import { MathText, SvgMathText, mathToPlain } from '../math';
 import { RotateCcw } from 'lucide-react';
@@ -84,7 +85,7 @@ type CountedSvg = SVGSVGElement & { __paints?: number; __commits?: number };
 function Surface3DView({ surface, keyLabel }: { surface: Surface; keyLabel?: string }) {
   const shown = useTween(surface, mixSurface);
   const view = useRef<View>(DEFAULT_VIEW);
-  const drag = useRef<{ id: number; x: number; y: number } | null>(null);
+  const drag = useRef<{ id: number; x: number; y: number; active: boolean } | null>(null);
   const hintId = useId();
   const { x: xs, y: ys, z, zSample, labels, overlay, wall } = shown;
   const bars = Boolean(shown.bars);
@@ -292,20 +293,35 @@ function Surface3DView({ surface, keyLabel }: { surface: Surface; keyLabel?: str
     setView({ yaw: v.yaw + dyaw, pitch: clamp(v.pitch + dpitch, PITCH_RANGE[0], PITCH_RANGE[1]) });
   };
   const onPointerDown = (e: PointerEvent<SVGSVGElement>) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
-    e.currentTarget.setPointerCapture(e.pointerId);
+    if (!e.isPrimary || e.button !== 0) return;
+    const active = e.pointerType !== 'touch';
+    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, active };
+    if (active) e.currentTarget.setPointerCapture(e.pointerId);
   };
   const onPointerMove = (e: PointerEvent<SVGSVGElement>) => {
     const d = drag.current;
     if (!d || d.id !== e.pointerId) return;
-    rotate((e.clientX - d.x) * 0.008, (e.clientY - d.y) * 0.008);
-    drag.current = { id: d.id, x: e.clientX, y: e.clientY };
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!d.active) {
+      const direction = touchDragDirection(dx, dy);
+      if (direction === 'pending') return;
+      if (direction === 'vertical') {
+        drag.current = null;
+        return;
+      }
+      d.active = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+    rotate(dx * 0.008, e.pointerType === 'touch' ? 0 : dy * 0.008);
+    d.x = e.clientX;
+    d.y = e.clientY;
   };
   const endDrag = (e: PointerEvent<SVGSVGElement>) => {
+    if (e.type === 'lostpointercapture' && e.target !== e.currentTarget) return;
     if (drag.current?.id === e.pointerId) {
+      if (drag.current.active) hold();
       drag.current = null;
-      hold();
     }
   };
   /** The hovered quad or bar sets the cursor (one listener for the whole layer). */
@@ -353,7 +369,8 @@ function Surface3DView({ surface, keyLabel }: { surface: Surface; keyLabel?: str
       </div>
       <svg
         ref={svgRef} className="surface-svg" viewBox={`0 0 ${W} ${H}`} role="img" tabIndex={0} aria-label={aria} aria-describedby={hintId}
-        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag} onKeyDown={onKeyDown}
+        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}
+        onLostPointerCapture={endDrag} onKeyDown={onKeyDown}
       >
         <g ref={layer.box} className="surface-box" aria-hidden="true" />
         <g ref={layer.wall} aria-hidden="true" />

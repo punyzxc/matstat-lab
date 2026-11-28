@@ -1,10 +1,25 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const port = Number(process.env.PORT ?? 4175);
+const mobileSpec = '**/mobile-layout.spec.mjs';
+const touchViewports = [
+  ['phone-360', 360, 800],
+  ['phone-390', 390, 844],
+  ['tablet-portrait', 768, 1024],
+  ['tablet-landscape', 1024, 768],
+];
 
 export default defineConfig({
   testDir: './tests',
   testMatch: '*.spec.mjs',
+  projects: [
+    { name: 'desktop', testIgnore: mobileSpec },
+    ...touchViewports.map(([name, width, height]) => ({
+      name,
+      testMatch: mobileSpec,
+      use: { viewport: { width, height }, isMobile: true, hasTouch: true },
+    })),
+  ],
   use: {
     baseURL: `http://127.0.0.1:${port}`,
     ...devices['Desktop Chrome'],

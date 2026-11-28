@@ -42,6 +42,35 @@ export function SceneDock({
     panel.current?.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true });
   }, []);
   useEffect(() => {
+    const dock = panel.current;
+    const viewport = window.visualViewport;
+    if (!dock || !viewport) return;
+    const phone = window.matchMedia('(max-width: 760px) and (pointer: coarse)');
+    let frame = 0;
+    const fit = () => {
+      cancelAnimationFrame(frame);
+      if (!phone.matches || viewport.scale !== 1) {
+        dock.style.removeProperty('--dock-visible-height');
+        return;
+      }
+      dock.style.setProperty('--dock-visible-height', `${viewport.height}px`);
+      const control = document.activeElement;
+      if (control instanceof HTMLElement && dock.contains(control) && control.matches('input, textarea, [contenteditable="true"]')) {
+        frame = requestAnimationFrame(() => control.scrollIntoView({ block: 'nearest', inline: 'nearest' }));
+      }
+    };
+    viewport.addEventListener('resize', fit);
+    phone.addEventListener('change', fit);
+    dock.addEventListener('focusin', fit);
+    fit();
+    return () => {
+      viewport.removeEventListener('resize', fit);
+      phone.removeEventListener('change', fit);
+      dock.removeEventListener('focusin', fit);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !e.defaultPrevented) {
         e.preventDefault();
